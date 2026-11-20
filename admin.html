@@ -903,6 +903,10 @@
                 <button type="button" id="btn-refresh-licenses" class="sfx-button sfx-button--quiet" style="height: 34px; padding: 0 12px; font-size: 12px; border: 1px solid var(--admin-border);">
                   Refresh
                 </button>
+                <button type="button" id="btn-view-audit-logs" class="sfx-button sfx-button--quiet" style="height: 34px; padding: 0 12px; font-size: 12px; border: 1px solid var(--admin-border); display: inline-flex; align-items: center; gap: 6px;">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  Audit Logs
+                </button>
               </div>
             </div>
             <div style="overflow-x: auto;">
@@ -931,7 +935,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
               <div>
                 <div style="font-weight: 700; font-size: 15px;">Razorpay Orders &amp; Brevo License Email Delivery</div>
-                <div style="font-size: 12px; color: var(--admin-text-muted); margin-top: 2px;">Real-time Brevo transactional email tracking, message IDs, and safe retry controls</div>
+                <div style="font-size: 12px; color: var(--admin-text-muted); margin-top: 2px;">Real-time Brevo transactional email tracking, associated license keys, and safe retry controls</div>
               </div>
               <span style="font-size: 11px; color: var(--admin-accent); background: rgba(10,132,255,0.1); border: 1px solid rgba(10,132,255,0.3); padding: 3px 8px; border-radius: 4px;">Brevo Transactional API v3</span>
             </div>
@@ -940,16 +944,17 @@
                 <thead>
                   <tr>
                     <th>Customer Email</th>
-                    <th>Amount</th>
-                    <th>Order &amp; Payment ID</th>
-                    <th>Payment Status</th>
+                    <th>Payment ID &amp; Order ID</th>
+                    <th>Purchase Date</th>
+                    <th>License Status</th>
+                    <th>Associated License Key</th>
+                    <th>Payment</th>
                     <th>Email Delivery</th>
-                    <th>Last Attempt</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody id="orders-table-tbody">
-                  <tr><td colspan="7" style="text-align: center; color: var(--admin-text-muted); padding: 20px;">Loading payment orders...</td></tr>
+                  <tr><td colspan="8" style="text-align: center; color: var(--admin-text-muted); padding: 20px;">Loading payment orders...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -989,6 +994,38 @@
 
       </div>
     </main>
+  </div>
+
+  <!-- ── LICENSE KEY AUDIT LOGS MODAL ── -->
+  <div class="admin-modal" id="audit-logs-modal">
+    <div class="admin-modal-box" style="max-width: 820px; width: 95%;">
+      <div class="admin-modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <h3 style="margin: 0; font-size: 15px;">License Key Reveal &amp; Reissue Audit Logs</h3>
+        </div>
+        <button class="sfx-modal-close" id="btn-close-audit-logs-modal">&times;</button>
+      </div>
+      <div class="admin-modal-body" style="padding: 16px; max-height: 440px; overflow-y: auto;">
+        <table class="sfx-data-table" style="font-size: 11.5px; width: 100%;">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Admin</th>
+              <th>Action</th>
+              <th>Customer</th>
+              <th>IP Address</th>
+            </tr>
+          </thead>
+          <tbody id="audit-logs-tbody">
+            <tr><td colspan="5" style="text-align: center; color: var(--admin-text-muted); padding: 16px;">Loading audit logs...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="admin-modal-footer" style="display: flex; justify-content: flex-end;">
+        <button type="button" class="sfx-button sfx-button--quiet" id="btn-close-audit-logs-modal-footer">Close</button>
+      </div>
+    </div>
   </div>
 
   <!-- ── 3. ADD / EDIT VIDEO MODAL ── -->
@@ -2019,12 +2056,16 @@
           if (lic.recovered_key) {
             keyDisplayHtml = 
               '<div class="lic-key-container" style="display:inline-flex; align-items:center; gap:6px; background:#000; border:1px solid var(--admin-border); border-radius:4px; padding:3px 8px;">' +
-                '<code class="lic-key-val" data-raw="' + lic.recovered_key + '" style="font-family:monospace; font-size:12px; letter-spacing:0.05em; color:var(--admin-neon);">••••-••••-••••-••••</code>' +
-                '<button type="button" class="btn-toggle-key-reveal sfx-button sfx-button--quiet" style="padding:1px 6px; font-size:11px; border:none; color:var(--admin-accent); cursor:pointer;">Show</button>' +
+                '<code class="lic-key-val" data-lic="' + lic.id + '" data-raw="' + lic.recovered_key + '" style="font-family:monospace; font-size:12px; letter-spacing:0.05em; color:var(--admin-neon);">••••-••••-••••-••••</code>' +
+                '<button type="button" class="btn-toggle-key-reveal sfx-button sfx-button--quiet" data-lic="' + lic.id + '" style="padding:1px 6px; font-size:11px; border:none; color:var(--admin-accent); cursor:pointer;">Show</button>' +
                 '<button type="button" class="btn-copy-lic-key sfx-button sfx-button--quiet" data-key="' + lic.recovered_key + '" style="padding:1px 6px; font-size:11px; border:none; color:var(--admin-text-muted); cursor:pointer;" title="Copy License Key">Copy</button>' +
               '</div>';
           } else {
-            keyDisplayHtml = '<span style="color:var(--admin-text-muted); font-size:11px; font-style:italic;" title="Pre-migration record stored only as SHA-256 hash">SHA-256 Hashed</span>';
+            keyDisplayHtml = 
+              '<div style="display:inline-flex; align-items:center; gap:6px;">' +
+                '<span class="sfx-badge-status revoked" style="color:#ff9f0a; border-color:#ff9f0a; font-size:10px;">SHA-256 Hashed</span>' +
+                '<button type="button" class="btn-reissue-lic sfx-button sfx-button--quiet" data-id="' + lic.id + '" style="padding:2px 7px; font-size:10.5px; border:1px solid var(--admin-accent); color:var(--admin-accent);" title="Reissue a fresh encrypted license key">Reissue</button>' +
+              '</div>';
           }
 
           // Last verified date
@@ -2068,15 +2109,35 @@
         }).join('');
 
         // Wire event listeners on rendered buttons
-        // 1. Reveal/Hide Key Toggle
+        // 1. Reveal/Hide Key Toggle (Audited on server)
         licTbody.querySelectorAll('.btn-toggle-key-reveal').forEach(function (btn) {
-          btn.addEventListener('click', function () {
+          btn.addEventListener('click', async function () {
             var container = this.closest('.lic-key-container');
             var valEl = container.querySelector('.lic-key-val');
             var rawKey = valEl.getAttribute('data-raw');
+            var licId = this.getAttribute('data-lic');
+
             if (this.textContent === 'Show') {
-              valEl.textContent = rawKey;
-              this.textContent = 'Hide';
+              this.textContent = '...';
+              this.disabled = true;
+              try {
+                // Perform audited key reveal on server
+                if (licId && window.SFX_PAYMENT_SERVICE.revealLicenseKey) {
+                  var res = await window.SFX_PAYMENT_SERVICE.revealLicenseKey(activeAuthToken, licId);
+                  if (res && res.license_key) {
+                    rawKey = res.license_key;
+                    valEl.setAttribute('data-raw', rawKey);
+                  }
+                }
+                valEl.textContent = rawKey;
+                this.textContent = 'Hide';
+              } catch (e) {
+                console.warn('Audit reveal note:', e);
+                valEl.textContent = rawKey;
+                this.textContent = 'Hide';
+              } finally {
+                this.disabled = false;
+              }
             } else {
               valEl.textContent = '••••-••••-••••-••••';
               this.textContent = 'Show';
@@ -2095,7 +2156,29 @@
           });
         });
 
-        // 3. Reset Device Activations
+        // 3. Reissue Key Button (For Legacy Hashed Licenses)
+        licTbody.querySelectorAll('.btn-reissue-lic').forEach(function (btn) {
+          btn.addEventListener('click', async function () {
+            var licId = this.getAttribute('data-id');
+            if (confirm('Reissue a fresh, encrypted license key for this customer? (This will update the database, clear previous activations, and log the action).')) {
+              var origText = this.textContent;
+              this.textContent = 'Reissuing…';
+              this.disabled = true;
+              try {
+                var res = await window.SFX_PAYMENT_SERVICE.reissueLicenseKeyAdmin(activeAuthToken, licId, 'Admin reissued legacy key', true);
+                showToast(res.message || 'Key reissued successfully');
+                loadLicensesAndOrders();
+              } catch (err) {
+                alert('Error reissuing license key: ' + err.message);
+              } finally {
+                this.textContent = origText;
+                this.disabled = false;
+              }
+            }
+          });
+        });
+
+        // 4. Reset Device Activations
         licTbody.querySelectorAll('.btn-reset-dev').forEach(function (btn) {
           btn.addEventListener('click', async function () {
             var licId = this.getAttribute('data-id');
@@ -2111,7 +2194,7 @@
           });
         });
 
-        // 4. Revoke License
+        // 5. Revoke License
         licTbody.querySelectorAll('.btn-revoke-lic').forEach(function (btn) {
           btn.addEventListener('click', async function () {
             var licId = this.getAttribute('data-id');
@@ -2128,7 +2211,7 @@
           });
         });
 
-        // 5. Reactivate License
+        // 6. Reactivate License
         licTbody.querySelectorAll('.btn-reactivate-lic').forEach(function (btn) {
           btn.addEventListener('click', async function () {
             var licId = this.getAttribute('data-id');
@@ -2144,7 +2227,7 @@
           });
         });
 
-        // 6. Extend / Edit Expiry
+        // 7. Extend / Edit Expiry
         licTbody.querySelectorAll('.btn-extend-lic').forEach(function (btn) {
           btn.addEventListener('click', async function () {
             var licId = this.getAttribute('data-id');
@@ -2162,9 +2245,8 @@
             }
           });
         });
-      }
 
-        // 7. Resend License Email via Brevo
+        // 8. Resend License Email via Brevo
         licTbody.querySelectorAll('.btn-resend-lic-email').forEach(function (btn) {
           btn.addEventListener('click', async function () {
             var licId = this.getAttribute('data-id');
@@ -2192,15 +2274,47 @@
         if (!ordTbody) return;
 
         if (!orders || !orders.length) {
-          ordTbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--admin-text-muted); padding: 20px;">No payment orders recorded yet.</td></tr>';
+          ordTbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color: var(--admin-text-muted); padding: 20px;">No payment orders recorded yet.</td></tr>';
           return;
         }
 
         ordTbody.innerHTML = orders.map(function (ord) {
-          var date = new Date(ord.created_at).toLocaleString();
+          var date = new Date(ord.created_at).toLocaleDateString();
+          var time = new Date(ord.created_at).toLocaleTimeString();
           var badge = ord.payment_status === 'completed'
             ? '<span class="sfx-badge-status active">Paid</span>'
             : '<span class="sfx-badge-status revoked" style="color:#ff9f0a; border-color:#ff9f0a;">Pending</span>';
+
+          // License status badge
+          var licBadge = '';
+          if (ord.license_status === 'active') {
+            licBadge = '<span class="sfx-badge-status active">Active</span>';
+          } else if (ord.license_status === 'revoked') {
+            licBadge = '<span class="sfx-badge-status revoked">Revoked</span>';
+          } else if (ord.license_status) {
+            licBadge = '<span class="sfx-badge-status revoked" style="color:#ff9f0a; border-color:#ff9f0a;">' + ord.license_status + '</span>';
+          } else {
+            licBadge = '<span style="color:var(--admin-text-muted); font-size:11px;">Unassigned</span>';
+          }
+
+          // License Key with Reveal/Hide and Copy
+          var keyHtml = '';
+          if (ord.recovered_key) {
+            keyHtml = 
+              '<div class="lic-key-container" style="display:inline-flex; align-items:center; gap:6px; background:#000; border:1px solid var(--admin-border); border-radius:4px; padding:3px 8px;">' +
+                '<code class="lic-key-val" data-lic="' + ord.license_id + '" data-raw="' + ord.recovered_key + '" style="font-family:monospace; font-size:12px; letter-spacing:0.05em; color:var(--admin-neon);">••••-••••-••••-••••</code>' +
+                '<button type="button" class="btn-toggle-key-reveal sfx-button sfx-button--quiet" data-lic="' + ord.license_id + '" style="padding:1px 6px; font-size:11px; border:none; color:var(--admin-accent); cursor:pointer;">Show</button>' +
+                '<button type="button" class="btn-copy-lic-key sfx-button sfx-button--quiet" data-key="' + ord.recovered_key + '" style="padding:1px 6px; font-size:11px; border:none; color:var(--admin-text-muted); cursor:pointer;" title="Copy License Key">Copy</button>' +
+              '</div>';
+          } else if (ord.license_id) {
+            keyHtml = 
+              '<div style="display:inline-flex; align-items:center; gap:4px;">' +
+                '<span style="color:#ff9f0a; font-size:10px;">SHA-256 Hashed</span>' +
+                '<button type="button" class="btn-reissue-lic sfx-button sfx-button--quiet" data-id="' + ord.license_id + '" style="padding:1px 6px; font-size:10px; border:1px solid var(--admin-accent); color:var(--admin-accent);">Reissue</button>' +
+              '</div>';
+          } else {
+            keyHtml = '<span style="color:var(--admin-text-muted); font-size:11px;">No license</span>';
+          }
 
           // Email delivery badge & Brevo Message ID
           var emailStatusBadge = '';
@@ -2213,27 +2327,92 @@
             emailStatusBadge = '<span class="sfx-badge-status" style="color:var(--admin-text-muted); border-color:var(--admin-border);">Pending</span>';
           }
 
-          var lastAttempt = ord.email_sent_at 
-            ? new Date(ord.email_sent_at).toLocaleTimeString() 
-            : (ord.created_at ? new Date(ord.created_at).toLocaleTimeString() : '—');
-          var attemptsLabel = '<span style="font-size:10px; color:var(--admin-text-muted);">(' + (ord.email_attempts || 0) + ' tries)</span>';
-
           return '<tr>' +
             '<td><strong>' + ord.customer_email + '</strong>' + (ord.customer_name ? '<br/><span style="font-size:11px; color:var(--admin-text-muted);">' + ord.customer_name + '</span>' : '') + '</td>' +
-            '<td><strong>₹' + ord.amount + '</strong> <span style="font-size:10px; color:var(--admin-text-muted);">' + (ord.currency || 'INR') + '</span></td>' +
-            '<td><code>' + (ord.provider_order_id || '—') + '</code><br/><code style="font-size:10px; color:var(--admin-text-muted);">' + (ord.provider_payment_id || '—') + '</code></td>' +
-            '<td>' + badge + '</td>' +
+            '<td><code>' + (ord.provider_payment_id || '—') + '</code><br/><code style="font-size:10px; color:var(--admin-text-muted);">' + (ord.provider_order_id || '—') + '</code></td>' +
+            '<td><span style="font-size:11.5px;">' + date + '</span><br/><span style="font-size:10px; color:var(--admin-text-muted);">' + time + '</span></td>' +
+            '<td>' + licBadge + '</td>' +
+            '<td>' + keyHtml + '</td>' +
+            '<td><strong>₹' + ord.amount + '</strong> <span style="font-size:10px; color:var(--admin-text-muted);">' + (ord.currency || 'INR') + '</span><br/>' + badge + '</td>' +
             '<td>' + emailStatusBadge + '</td>' +
-            '<td>' + lastAttempt + ' ' + attemptsLabel + '</td>' +
             '<td>' +
               '<button type="button" class="sfx-button sfx-button--quiet btn-resend-order-email" data-order="' + (ord.provider_order_id || ord.id) + '" style="font-size:11px; padding:3px 8px; border:1px solid var(--admin-accent); color:var(--admin-accent);" title="Resend license key via Brevo API">' +
-                'Resend via Brevo' +
+                'Resend' +
               '</button>' +
             '</td>' +
           '</tr>';
         }).join('');
 
-        // Wire Resend Order Email listener
+        // Wire event listeners in Orders Table
+        // 1. Reveal/Hide Key in Orders Table
+        ordTbody.querySelectorAll('.btn-toggle-key-reveal').forEach(function (btn) {
+          btn.addEventListener('click', async function () {
+            var container = this.closest('.lic-key-container');
+            var valEl = container.querySelector('.lic-key-val');
+            var rawKey = valEl.getAttribute('data-raw');
+            var licId = this.getAttribute('data-lic');
+
+            if (this.textContent === 'Show') {
+              this.textContent = '...';
+              this.disabled = true;
+              try {
+                if (licId && window.SFX_PAYMENT_SERVICE.revealLicenseKey) {
+                  var res = await window.SFX_PAYMENT_SERVICE.revealLicenseKey(activeAuthToken, licId);
+                  if (res && res.license_key) {
+                    rawKey = res.license_key;
+                    valEl.setAttribute('data-raw', rawKey);
+                  }
+                }
+                valEl.textContent = rawKey;
+                this.textContent = 'Hide';
+              } catch (e) {
+                console.warn('Audit reveal note:', e);
+                valEl.textContent = rawKey;
+                this.textContent = 'Hide';
+              } finally {
+                this.disabled = false;
+              }
+            } else {
+              valEl.textContent = '••••-••••-••••-••••';
+              this.textContent = 'Show';
+            }
+          });
+        });
+
+        // 2. Copy Key in Orders Table
+        ordTbody.querySelectorAll('.btn-copy-lic-key').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var key = this.getAttribute('data-key');
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(key);
+            }
+            showToast('License key copied to clipboard');
+          });
+        });
+
+        // 3. Reissue Key in Orders Table
+        ordTbody.querySelectorAll('.btn-reissue-lic').forEach(function (btn) {
+          btn.addEventListener('click', async function () {
+            var licId = this.getAttribute('data-id');
+            if (confirm('Reissue a fresh, encrypted license key for this order?')) {
+              var origText = this.textContent;
+              this.textContent = 'Reissuing…';
+              this.disabled = true;
+              try {
+                var res = await window.SFX_PAYMENT_SERVICE.reissueLicenseKeyAdmin(activeAuthToken, licId, 'Admin reissued key from orders table', true);
+                showToast(res.message || 'Key reissued successfully');
+                loadLicensesAndOrders();
+              } catch (err) {
+                alert('Error reissuing key: ' + err.message);
+              } finally {
+                this.textContent = origText;
+                this.disabled = false;
+              }
+            }
+          });
+        });
+
+        // 4. Resend Order Email listener
         ordTbody.querySelectorAll('.btn-resend-order-email').forEach(function (btn) {
           btn.addEventListener('click', async function () {
             var orderRef = this.getAttribute('data-order');
@@ -2241,6 +2420,59 @@
               var origText = this.textContent;
               this.textContent = 'Sending…';
               this.disabled = true;
+              try {
+                var res = await window.SFX_PAYMENT_SERVICE.resendLicenseEmail(activeAuthToken, orderRef);
+                showToast(res.message || 'Email successfully sent via Brevo');
+                loadLicensesAndOrders();
+              } catch (err) {
+                alert('Brevo error: ' + err.message);
+              } finally {
+                this.textContent = origText;
+                this.disabled = false;
+              }
+            }
+          });
+        });
+      }
+
+      // Wire Audit Logs Modal Controls
+      var auditModal = document.getElementById('audit-logs-modal');
+      var btnViewAuditLogs = document.getElementById('btn-view-audit-logs');
+      var btnCloseAuditLogs = document.getElementById('btn-close-audit-logs-modal');
+      var btnCloseAuditLogsFooter = document.getElementById('btn-close-audit-logs-modal-footer');
+      var auditLogsTbody = document.getElementById('audit-logs-tbody');
+
+      if (btnViewAuditLogs) {
+        btnViewAuditLogs.addEventListener('click', async function () {
+          if (!auditModal) return;
+          auditModal.classList.add('is-open');
+          if (auditLogsTbody) auditLogsTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:16px;">Loading audit logs...</td></tr>';
+          try {
+            var logs = await window.SFX_PAYMENT_SERVICE.getAuditLogs(activeAuthToken);
+            if (!logs.length) {
+              auditLogsTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-text-muted); padding:16px;">No audit events recorded yet.</td></tr>';
+              return;
+            }
+            auditLogsTbody.innerHTML = logs.map(function (log) {
+              return '<tr>' +
+                '<td>' + new Date(log.created_at).toLocaleString() + '</td>' +
+                '<td><strong>' + (log.admin_email || 'admin') + '</strong></td>' +
+                '<td><span class="admin-brand-badge" style="font-size:10px;">' + (log.action || '').toUpperCase() + '</span></td>' +
+                '<td>' + (log.customer_email || '—') + (log.license_id ? '<br/><span style="font-size:10px; color:var(--admin-text-muted);">' + log.license_id.slice(0, 8) + '</span>' : '') + '</td>' +
+                '<td><code style="font-size:10px;">' + (log.ip_address || '—') + '</code></td>' +
+              '</tr>';
+            }).join('');
+          } catch (e) {
+            if (auditLogsTbody) auditLogsTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--admin-danger); padding:16px;">Error loading logs: ' + e.message + '</td></tr>';
+          }
+        });
+      }
+
+      function closeAuditModal() {
+        if (auditModal) auditModal.classList.remove('is-open');
+      }
+      if (btnCloseAuditLogs) btnCloseAuditLogs.addEventListener('click', closeAuditModal);
+      if (btnCloseAuditLogsFooter) btnCloseAuditLogsFooter.addEventListener('click', closeAuditModal);
               try {
                 var res = await window.SFX_PAYMENT_SERVICE.resendLicenseEmail(activeAuthToken, orderRef);
                 showToast(res.message || 'Email successfully sent via Brevo');

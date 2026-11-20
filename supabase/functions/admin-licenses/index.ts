@@ -1,6 +1,6 @@
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import { verifyAdminRequest } from '../_shared/auth.ts';
-import { decryptLicenseKey } from '../_shared/crypto.ts';
+import { decryptLicenseKey, encryptLicenseKey, generateLicenseKey, sha256 } from '../_shared/crypto.ts';
 import { sendLicenseEmailBrevo } from '../_shared/brevo.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -23,6 +23,10 @@ Deno.serve(async (req: Request) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
+
+  const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || req.headers.get('cf-connecting-ip') || 'unknown';
+  const userAgent = req.headers.get('user-agent') || 'unknown';
+  const adminEmail = auth.user?.email || 'admin';
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
@@ -58,6 +62,16 @@ Deno.serve(async (req: Request) => {
         p_reason: reason || 'Revoked by admin'
       });
       if (error) throw error;
+
+      await supabase.rpc('sfx_log_license_audit', {
+        p_admin_email: adminEmail,
+        p_action: 'revoke_license',
+        p_license_id: license_id,
+        p_ip_address: clientIp,
+        p_user_agent: userAgent,
+        p_metadata: { reason: reason || 'Revoked by admin' }
+      });
+
       return new Response(JSON.stringify({ ok: true, data }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -77,6 +91,15 @@ Deno.serve(async (req: Request) => {
         p_license_id: license_id
       });
       if (error) throw error;
+
+      await supabase.rpc('sfx_log_license_audit', {
+        p_admin_email: adminEmail,
+        p_action: 'reactivate_license',
+        p_license_id: license_id,
+        p_ip_address: clientIp,
+        p_user_agent: userAgent
+      });
+
       return new Response(JSON.stringify({ ok: true, data }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -96,6 +119,15 @@ Deno.serve(async (req: Request) => {
         p_license_id: license_id
       });
       if (error) throw error;
+
+      await supabase.rpc('sfx_log_license_audit', {
+        p_admin_email: adminEmail,
+        p_action: 'reset_device',
+        p_license_id: license_id,
+        p_ip_address: clientIp,
+        p_user_agent: userAgent
+      });
+
       return new Response(JSON.stringify({ ok: true, data }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -116,18 +148,35 @@ Deno.serve(async (req: Request) => {
         p_new_expires_at: expires_at || null
       });
       if (error) throw error;
+
+      await supabase.rpc('sfx_log_license_audit', {
+        p_admin_email: adminEmail,
+        p_action: 'extend_expiry',
+        p_license_id: license_id,
+        p_ip_address: clientIp,
+        p_user_agent: userAgent,
+        p_metadata: { new_expires_at: expires_at }
+      });
+
       return new Response(JSON.stringify({ ok: true, data }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
-    // ── ACTION: Reveal Single Key ──
+    // ── ACTION: Reveal Single Key (Audited) ──
     if (action === 'reveal_key') {
       const { license_id } = body;
+      if (!license_id) {
+        return new Response(JSON.stringify({ ok: false, message: 'license_id is required' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
       const { data: licRow, error } = await supabase
         .from('licenses')
-        .select('id, encrypted_license_key, license_key_hash')
+        .select('id, encrypted_license_key, license_key_hash, customers(email)')
         .eq('id', license_id)
         .single();
 
@@ -143,6 +192,18 @@ Deno.serve(async (req: Request) => {
         plaintextKey = await decryptLicenseKey(licRow.encrypted_license_key);
       }
 
+      // Record audit log for key reveal
+      const targetCustomerEmail = (licRow.customers as any)?.email || null;
+      await supabase.rpc('sfx_log_license_audit', {
+        p_admin_email: adminEmail,
+        p_action: 'reveal_key',
+        p_license_id: licRow.id,
+        p_customer_email: targetCustomerEmail,
+        p_ip_address: clientIp,
+        p_user_agent: userAgent,
+        p_metadata: { has_encrypted_key: !!licRow.encrypted_license_key }
+      });
+
       return new Response(JSON.stringify({
         ok: true,
         license_id: licRow.id,
@@ -154,7 +215,92 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // ── ACTION: Resend License Email via Brevo (Without Duplicate License Generation) ──
+    // ── ACTION: Reissue License Key (Audited Recovery & Re-keying) ──
+    if (action === 'reissue_key') {
+      const { license_id, reason, send_email } = body;
+      if (!license_id) {
+        return new Response(JSON.stringify({ ok: false, message: 'license_id is required' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      const { data: licRow, error: licErr } = await supabase
+        .from('licenses')
+        .select('id, license_type, customer_id, customers(email)')
+        .eq('id', license_id)
+        .single();
+
+      if (licErr || !licRow) {
+        return new Response(JSON.stringify({ ok: false, message: 'License not found' }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      const custEmail = (licRow.customers as any)?.email;
+
+      // Generate fresh high-entropy key
+      const newKey = generateLicenseKey();
+      const newHash = await sha256(newKey);
+      const newEncryptedKey = await encryptLicenseKey(newKey);
+
+      const { error: reissueErr } = await supabase.rpc('sfx_reissue_license_key', {
+        p_license_id: license_id,
+        p_new_license_key_hash: newHash,
+        p_new_encrypted_license_key: newEncryptedKey,
+        p_reason: reason || 'Admin reissued key'
+      });
+
+      if (reissueErr) throw reissueErr;
+
+      // Record audit log
+      await supabase.rpc('sfx_log_license_audit', {
+        p_admin_email: adminEmail,
+        p_action: 'reissue_key',
+        p_license_id: license_id,
+        p_customer_email: custEmail,
+        p_ip_address: clientIp,
+        p_user_agent: userAgent,
+        p_metadata: { reason: reason || 'Admin reissued key' }
+      });
+
+      // Optionally send email via Brevo
+      if (send_email && custEmail) {
+        sendLicenseEmailBrevo({
+          toEmail: custEmail,
+          licenseKey: newKey,
+          licenseType: licRow.license_type || 'lifetime',
+          isResend: true
+        }).catch(err => console.warn('Brevo email dispatch warning on reissue:', err));
+      }
+
+      return new Response(JSON.stringify({
+        ok: true,
+        license_id: license_id,
+        license_key: newKey,
+        message: 'License key successfully reissued and secured with encryption-at-rest.'
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // ── ACTION: Fetch License Audit Logs ──
+    if (action === 'get_audit_logs') {
+      const { license_id, limit } = body;
+      const { data: logs, error: logsErr } = await supabase.rpc('sfx_get_license_audit_logs', {
+        p_license_id: license_id || null,
+        p_limit: limit || 50
+      });
+      if (logsErr) throw logsErr;
+      return new Response(JSON.stringify({ ok: true, logs }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // ── ACTION: Resend License Email via Brevo ──
     if (action === 'resend_email') {
       const { order_id, license_id } = body;
       let targetOrder: any = null;
@@ -162,7 +308,6 @@ Deno.serve(async (req: Request) => {
       let targetEmail: string = '';
       let plaintextKey: string | null = null;
 
-      // 1. Find Order if order_id or license_id provided
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       if (order_id) {
         if (isUuid.test(order_id)) {
@@ -189,7 +334,6 @@ Deno.serve(async (req: Request) => {
         targetOrder = ord;
       }
 
-      // 2. Find License
       const licId = targetOrder?.license_id || license_id;
       if (licId) {
         const { data: lic } = await supabase
@@ -220,7 +364,6 @@ Deno.serve(async (req: Request) => {
         });
       }
 
-      // 3. Dispatch Email via Brevo
       const emailRes = await sendLicenseEmailBrevo({
         toEmail: targetEmail,
         toName: targetOrder?.customer_name || '',
@@ -233,7 +376,6 @@ Deno.serve(async (req: Request) => {
         isResend: true
       });
 
-      // 4. Update tracking status on payment_orders if order exists
       if (targetOrder?.provider_order_id) {
         await supabase.rpc('sfx_update_order_email_delivery', {
           p_provider_order_id: targetOrder.provider_order_id,
@@ -242,6 +384,16 @@ Deno.serve(async (req: Request) => {
           p_error: emailRes.error || null
         });
       }
+
+      await supabase.rpc('sfx_log_license_audit', {
+        p_admin_email: adminEmail,
+        p_action: 'resend_email',
+        p_license_id: targetLic?.id || null,
+        p_customer_email: targetEmail,
+        p_ip_address: clientIp,
+        p_user_agent: userAgent,
+        p_metadata: { success: emailRes.success, message_id: emailRes.messageId }
+      });
 
       return new Response(JSON.stringify({
         ok: emailRes.success,
@@ -274,13 +426,13 @@ Deno.serve(async (req: Request) => {
       stats = statsRes.data;
     }
 
-    // 2. Fetch search results
+    // 2. Fetch search results (licenses)
     let licenses: any[] = [];
     const listRes = await supabase.rpc('sfx_admin_search_v2', { p_query: query });
     if (!listRes.error && Array.isArray(listRes.data)) {
       licenses = listRes.data;
-      // Decrypt recoverable keys server-side for authorized admins
       for (const lic of licenses) {
+        lic.has_encrypted_key = !!lic.encrypted_license_key;
         if (lic.encrypted_license_key) {
           lic.recovered_key = await decryptLicenseKey(lic.encrypted_license_key);
         } else {
@@ -290,11 +442,20 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // 3. Fetch recent orders with email delivery tracking
+    // 3. Fetch recent orders with associated license keys and email tracking
     let orders: any[] = [];
     const ordRes = await supabase.rpc('sfx_admin_get_orders_v2', { p_limit: 50 });
     if (!ordRes.error && Array.isArray(ordRes.data)) {
       orders = ordRes.data;
+      for (const ord of orders) {
+        ord.has_encrypted_key = !!ord.encrypted_license_key;
+        if (ord.encrypted_license_key) {
+          ord.recovered_key = await decryptLicenseKey(ord.encrypted_license_key);
+        } else {
+          ord.recovered_key = null;
+        }
+        delete ord.encrypted_license_key;
+      }
     }
 
     return new Response(JSON.stringify({
@@ -302,7 +463,7 @@ Deno.serve(async (req: Request) => {
       stats: stats,
       licenses: licenses,
       orders: orders,
-      admin_user: auth.user?.email || 'admin'
+      admin_user: adminEmail
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

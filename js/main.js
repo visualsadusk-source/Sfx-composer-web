@@ -766,24 +766,51 @@
               workstationStatus = '<span style="color: var(--sfx-accent);">Available for Activation (0/' + maxDevs + ' Slots Bound)</span>';
             }
 
-            // Key Display
+            var purchaseDateStr = lic.purchase_date || lic.created_at 
+              ? new Date(lic.purchase_date || lic.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+              : 'Verified Purchase';
+
+            var paymentStatusStr = lic.payment_status === 'completed'
+              ? '<span style="color: var(--sfx-positive); font-weight: 600;">Paid (₹' + (lic.payment_amount || 199) + ')</span>'
+              : (lic.payment_status ? '<span style="color: var(--sfx-caution);">' + lic.payment_status + '</span>' : '<span style="color: var(--sfx-positive);">Verified Purchase</span>');
+
+            var expiryStr = lic.expires_at 
+              ? new Date(lic.expires_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) 
+              : 'Lifetime Access (Never Expires)';
+
+            // Key Box with Reveal/Hide & Copy Buttons
             var keyBoxHtml = '';
             if (lic.license_key) {
               keyBoxHtml = 
                 '<div style="background: #000; border: 1px solid var(--sfx-accent); border-radius: 8px; padding: 14px; margin: 12px 0;">' +
                   '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">' +
-                    '<span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sfx-accent); font-weight: 700;">Your Official License Key</span>' +
-                    '<span style="font-size: 11px; color: var(--sfx-text-muted);">Never share this key</span>' +
+                    '<span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sfx-accent); font-weight: 700;">Official License Key</span>' +
+                    '<span style="font-size: 11px; color: var(--sfx-text-muted);">AES-256-GCM Decrypted</span>' +
                   '</div>' +
-                  '<div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">' +
-                    '<code style="font-family: var(--sfx-font-mono); font-size: 18px; font-weight: 800; color: #ffffff; letter-spacing: 0.08em; user-select: all;">' + lic.license_key + '</code>' +
-                    '<button type="button" class="btn-copy-portal-key sfx-button sfx-button--quiet" data-key="' + lic.license_key + '" style="height: 30px; font-size: 11px; padding: 0 12px; border: 1px solid var(--sfx-border); color: #fff;">' +
-                      'Copy Key' +
-                    '</button>' +
+                  '<div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">' +
+                    '<code class="portal-lic-key-val" data-raw="' + lic.license_key + '" style="font-family: var(--sfx-font-mono); font-size: 17px; font-weight: 800; color: #ffffff; letter-spacing: 0.08em; user-select: all;">••••-••••-••••-••••</code>' +
+                    '<div style="display: flex; gap: 6px;">' +
+                      '<button type="button" class="btn-toggle-portal-key sfx-button sfx-button--quiet" style="height: 30px; font-size: 11px; padding: 0 12px; border: 1px solid var(--sfx-border); color: var(--sfx-accent);">' +
+                        'Reveal' +
+                      '</button>' +
+                      '<button type="button" class="btn-copy-portal-key sfx-button sfx-button--quiet" data-key="' + lic.license_key + '" style="height: 30px; font-size: 11px; padding: 0 12px; border: 1px solid var(--sfx-border); color: #fff;">' +
+                        'Copy' +
+                      '</button>' +
+                    '</div>' +
                   '</div>' +
                 '</div>';
             } else {
-              keyBoxHtml = '<div style="font-size: 12px; color: var(--sfx-text-muted); padding: 8px 0;">License key verified. Enter registered email in plugin to activate.</div>';
+              // Legacy Hashed License Notice & Reissue Button
+              keyBoxHtml = 
+                '<div style="background: rgba(255, 159, 10, 0.08); border: 1px solid rgba(255, 159, 10, 0.3); border-radius: 8px; padding: 14px; margin: 12px 0;">' +
+                  '<div style="color: #ff9f0a; font-weight: 700; font-size: 12.5px; margin-bottom: 4px;">Legacy Hash Security Notice</div>' +
+                  '<p style="font-size: 11.5px; color: var(--sfx-text-muted); line-height: 1.5; margin: 0 0 10px 0;">' +
+                    'This license was recorded under our previous one-way cryptographic SHA-256 hash architecture and cannot be mathematically recovered from the hash alone. Click below to securely generate and bind a fresh encrypted key to your account.' +
+                  '</p>' +
+                  '<button type="button" class="btn-customer-reissue-key sfx-site-btn-primary" data-id="' + lic.id + '" style="height: 30px; font-size: 11.5px; padding: 0 14px;">' +
+                    'Reissue License Key' +
+                  '</button>' +
+                '</div>';
             }
 
             return '<div class="sfx-dashboard-card" style="margin-bottom: 12px;">' +
@@ -795,6 +822,13 @@
                 statusBadge +
               '</div>' +
               keyBoxHtml +
+              '<!-- License Metadata Grid -->' +
+              '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 10px 0; background: rgba(0,0,0,0.25); border: 1px solid var(--sfx-border); border-radius: 6px; padding: 10px 12px; font-size: 11.5px;">' +
+                '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Purchase Date</span><strong>' + purchaseDateStr + '</strong></div>' +
+                '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Payment Status</span>' + paymentStatusStr + '</div>' +
+                '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">License Expiry</span><span style="color: #fff;">' + expiryStr + '</span></div>' +
+                (lic.provider_payment_id ? '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Payment ID</span><code style="font-size: 10.5px; color: var(--sfx-accent);">' + lic.provider_payment_id + '</code></div>' : '') +
+              '</div>' +
               '<div style="background: rgba(0,0,0,0.4); border: 1px solid var(--sfx-border); padding: 10px 14px; border-radius: 6px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
                 '<div>' +
                   '<span style="color: var(--sfx-text-muted); font-size: 11px;">Workstation Status: </span>' +
@@ -806,6 +840,23 @@
               '</div>' +
             '</div>';
           }).join('');
+
+          // Reveal/Hide Key event listener
+          licensesContainer.querySelectorAll('.btn-toggle-portal-key').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var parent = this.closest('.sfx-dashboard-card');
+              var valEl = parent.querySelector('.portal-lic-key-val');
+              if (!valEl) return;
+              var rawKey = valEl.getAttribute('data-raw');
+              if (this.textContent === 'Reveal') {
+                valEl.textContent = rawKey;
+                this.textContent = 'Hide';
+              } else {
+                valEl.textContent = '••••-••••-••••-••••';
+                this.textContent = 'Reveal';
+              }
+            });
+          });
 
           // Copy key event listener
           licensesContainer.querySelectorAll('.btn-copy-portal-key').forEach(function (btn) {
@@ -822,6 +873,27 @@
                 that.textContent = originalText;
                 that.style.color = '#fff';
               }, 2000);
+            });
+          });
+
+          // Customer Reissue Key event listener
+          licensesContainer.querySelectorAll('.btn-customer-reissue-key').forEach(function (btn) {
+            btn.addEventListener('click', async function () {
+              var licId = this.getAttribute('data-id');
+              if (confirm('Reissue a new license key for your account? Your previous key will be replaced and secured.')) {
+                var origText = this.textContent;
+                this.textContent = 'Reissuing…';
+                this.disabled = true;
+                try {
+                  var res = await window.SFX_PAYMENT_SERVICE.reissueLicenseKeyCustomer(authArg, licId);
+                  alert(res.message || 'License key successfully reissued!');
+                  await loadVerifiedPortalData(authArg, emailHint);
+                } catch (err) {
+                  alert('Error reissuing license key: ' + err.message);
+                  this.textContent = origText;
+                  this.disabled = false;
+                }
+              }
             });
           });
 

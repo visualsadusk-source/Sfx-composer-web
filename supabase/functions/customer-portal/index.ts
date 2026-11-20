@@ -1,5 +1,5 @@
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
-import { decryptLicenseKey } from '../_shared/crypto.ts';
+import { decryptLicenseKey, encryptLicenseKey, generateLicenseKey, sha256 } from '../_shared/crypto.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 Deno.serve(async (req: Request) => {
@@ -22,6 +22,7 @@ Deno.serve(async (req: Request) => {
   try {
     let authEmail: string | null = null;
     const authHeader = req.headers.get('Authorization') || '';
+    const body = await req.json().catch(() => ({}));
 
     // 1. Check for Supabase Auth JWT Bearer Token
     if (authHeader.startsWith('Bearer ')) {
@@ -35,9 +36,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // 2. Alternatively check for verified purchase proof in body
-    const body = await req.json().catch(() => ({}));
     if (!authEmail && body.email && body.order_id && body.payment_id) {
-      // Verify directly against payment_orders
       const { data: orderRow } = await supabase
         .from('payment_orders')
         .select('customer_email, payment_status')
@@ -62,7 +61,83 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // 3. Fetch portal data via RPC
+    // 3. Strict Customer Ownership Check
+    // If a specific email is requested in the body, it MUST match the authenticated email
+    if (body.email && body.email.trim().toLowerCase() !== authEmail) {
+      return new Response(JSON.stringify({
+        ok: false,
+        code: 'FORBIDDEN',
+        message: 'Access denied: You cannot view or modify licenses belonging to another customer.'
+      }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const action = body.action || 'get_portal';
+
+    // ── ACTION: Reissue License Key (For Recovery of Legacy Hashed Licenses or Customer Re-keying) ──
+    if (action === 'reissue_key') {
+      const { license_id } = body;
+      if (!license_id) {
+        return new Response(JSON.stringify({ ok: false, message: 'license_id is required' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Verify that this license strictly belongs to the authenticated customer
+      const { data: licRow, error: licErr } = await supabase
+        .from('licenses')
+        .select('id, customer_id, customers!inner(email)')
+        .eq('id', license_id)
+        .single();
+
+      if (licErr || !licRow) {
+        return new Response(JSON.stringify({ ok: false, message: 'License not found' }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      const licCustEmail = (licRow.customers as any)?.email?.trim().toLowerCase();
+      if (licCustEmail !== authEmail) {
+        return new Response(JSON.stringify({
+          ok: false,
+          code: 'FORBIDDEN',
+          message: 'Access denied: You can only reissue licenses that belong to your account.'
+        }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Generate a fresh, high-entropy license key
+      const newKey = generateLicenseKey();
+      const newHash = await sha256(newKey);
+      const newEncryptedKey = await encryptLicenseKey(newKey);
+
+      const { data: reissueRes, error: reissueErr } = await supabase.rpc('sfx_reissue_license_key', {
+        p_license_id: license_id,
+        p_new_license_key_hash: newHash,
+        p_new_encrypted_license_key: newEncryptedKey,
+        p_reason: 'Customer initiated recovery & reissue'
+      });
+
+      if (reissueErr) throw reissueErr;
+
+      return new Response(JSON.stringify({
+        ok: true,
+        license_id: license_id,
+        license_key: newKey,
+        message: 'License key successfully reissued and secured with encryption-at-rest.'
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // ── DEFAULT ACTION: Get Customer Portal Data ──
     const { data: portalData, error: portalError } = await supabase.rpc('sfx_get_customer_portal_v2', {
       p_email: authEmail
     });
@@ -71,9 +146,10 @@ Deno.serve(async (req: Request) => {
       throw portalError;
     }
 
-    // 4. Decrypt license keys for the verified customer
+    // Decrypt license keys for the verified customer
     if (portalData && Array.isArray(portalData.licenses)) {
       for (const lic of portalData.licenses) {
+        lic.has_encrypted_key = !!lic.encrypted_license_key;
         if (lic.encrypted_license_key) {
           lic.license_key = await decryptLicenseKey(lic.encrypted_license_key);
         } else {

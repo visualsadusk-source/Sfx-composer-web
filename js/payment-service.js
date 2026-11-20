@@ -340,6 +340,72 @@
       return data;
     },
 
+    reissueLicenseKeyAdmin: async function (authToken, licenseId, reason, sendEmail) {
+      var res = await fetch(CONFIG.FUNCTIONS_URL + '/admin-licenses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + authToken
+        },
+        body: JSON.stringify({
+          action: 'reissue_key',
+          license_id: licenseId,
+          reason: reason || 'Admin reissued key',
+          send_email: sendEmail !== false
+        })
+      });
+      var data = await res.json().catch(function () { return { ok: false }; });
+      if (!res.ok || !data.ok) throw new Error(data.message || 'Failed to reissue license key');
+      return data;
+    },
+
+    reissueLicenseKeyCustomer: async function (authArg, licenseId) {
+      var headers = {
+        'Content-Type': 'application/json',
+        'apikey': CONFIG.SUPABASE_ANON_KEY
+      };
+      var body = {
+        action: 'reissue_key',
+        license_id: licenseId
+      };
+
+      if (typeof authArg === 'string') {
+        headers['Authorization'] = 'Bearer ' + authArg;
+      } else if (authArg && typeof authArg === 'object') {
+        if (authArg.token) headers['Authorization'] = 'Bearer ' + authArg.token;
+        if (authArg.email) body.email = authArg.email;
+        if (authArg.order_id) body.order_id = authArg.order_id;
+        if (authArg.payment_id) body.payment_id = authArg.payment_id;
+      }
+
+      var res = await fetch(CONFIG.FUNCTIONS_URL + '/customer-portal', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body)
+      });
+      var data = await res.json().catch(function () { return { ok: false }; });
+      if (!res.ok || !data.ok) throw new Error(data.message || 'Failed to reissue license key');
+      return data;
+    },
+
+    getAuditLogs: async function (authToken, licenseId, limit) {
+      var res = await fetch(CONFIG.FUNCTIONS_URL + '/admin-licenses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + authToken
+        },
+        body: JSON.stringify({
+          action: 'get_audit_logs',
+          license_id: licenseId || null,
+          limit: limit || 50
+        })
+      });
+      var data = await res.json().catch(function () { return { ok: false }; });
+      if (!res.ok || !data.ok) throw new Error(data.message || 'Failed to fetch audit logs');
+      return data.logs || [];
+    },
+
     resendLicenseEmail: async function (authToken, orderIdOrLicenseId) {
       var res = await fetch(CONFIG.FUNCTIONS_URL + '/admin-licenses', {
         method: 'POST',
