@@ -100,6 +100,22 @@ export async function verifyAdminRequest(req: Request): Promise<AdminAuthResult>
     isAuthorized = true;
   }
 
+  // C. Check sfx_admins table in Supabase
+  if (!isAuthorized && userEmail) {
+    try {
+      const { data: adminRow } = await supabase
+        .from('sfx_admins')
+        .select('id')
+        .ilike('email', userEmail)
+        .maybeSingle();
+      if (adminRow) {
+        isAuthorized = true;
+      }
+    } catch (e) {
+      console.warn('Error checking sfx_admins table:', e);
+    }
+  }
+
   // C. Fallback bootstrap: if ADMIN_EMAILS is not yet configured, allow authenticated users
   if (!isAuthorized && adminEmails.length === 0) {
     console.warn(`[SECURITY WARNING] ADMIN_EMAILS secret is not set. Permitting authenticated user: ${userEmail}`);

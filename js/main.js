@@ -171,49 +171,33 @@
   }
 
   // ── 3. VIDEO TUTORIAL GALLERY & MODAL ──
-  function setupVideoGallery() {
+  async function setupVideoGallery() {
     var modal = document.getElementById('tutorial-video-modal');
     var modalTitle = document.getElementById('tvm-title');
     var modalDesc = document.getElementById('tvm-desc');
     var modalClose = document.getElementById('tvm-close');
     var modalBackdrop = document.getElementById('tvm-backdrop');
-    var cards = document.querySelectorAll('.tutorial-card');
+    var playerWrapper = document.getElementById('tvm-player-wrapper');
+    var gridContainer = document.getElementById('tutorials-grid-container');
 
-    var tutorialData = {
-      'overview': {
-        title: 'SFX Composer — Product Overview & Workflow Tour',
-        desc: 'Explore the full sound-design workflow: from local search and auditioning to one-click timeline track insertion in Adobe Premiere Pro and After Effects.'
-      },
-      'install': {
-        title: 'Installation Guide & CEP Debug Mode Setup',
-        desc: 'Step-by-step walkthrough for Windows: running the Install batch file, enabling CEP extension player mode, and verifying panel launch in Premiere Pro & AE.'
-      },
-      'essential': {
-        title: 'Essential Sound Studio Masterclass',
-        desc: 'Learn how to sculpt Music, SFX, Dialogue, and Ambience with real-time high-pass, low-pass, bass shelves, peaking EQ, and automatic -1 dBFS peak normalization.'
-      },
-      'audio-tools': {
-        title: 'Audio Tools Deep Dive: Trim, Fade & WAV Export',
-        desc: 'Master the visual waveform editor, drag trim markers, configure smoothstep fade envelopes, and export pristine processed 24-bit WAV samples right to your desktop.'
-      },
-      'ai-sfx': {
-        title: 'AI SFX: Intelligent Sound Discovery Workflows',
-        desc: 'Harness contextual AI assistance to describe scenes, find ideal transition elements, and discover complementary impact layers for fast turnaround edits.'
-      },
-      'premiere': {
-        title: 'Adobe Premiere Pro: Timeline Selection & Clip Injection',
-        desc: 'Watch how active sequence audio selections are detected with getSelection(), instantly auditioned, and returned to your active sequence tracks.'
-      },
-      'after-effects': {
-        title: 'After Effects Integration: Audio Layer & Keyframe Sync',
-        desc: 'Seamlessly align audio risers and whooshes with After Effects motion graphics keyframes, text reveals, and visual transition cues.'
+    var secKicker = document.getElementById('tutorials-sec-kicker');
+    var secTitle = document.getElementById('tutorials-sec-title');
+    var secDesc = document.getElementById('tutorials-sec-desc');
+
+    function openVideoModal(video) {
+      if (!video) return;
+      if (modalTitle) modalTitle.textContent = video.title || 'SFX Composer Tutorial';
+      if (modalDesc) modalDesc.textContent = video.description || '';
+
+      if (playerWrapper) {
+        var ytId = video.youtube_id || (window.SFX_CONTENT_SERVICE ? window.SFX_CONTENT_SERVICE.extractYouTubeId(video.youtube_url) : '');
+        if (ytId) {
+          playerWrapper.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(ytId) + '?autoplay=1&rel=0" style="width: 100%; height: 100%; border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+        } else {
+          playerWrapper.innerHTML = '<div style="color: var(--sfx-text-muted); font-size: 13px;">Video link unavailable.</div>';
+        }
       }
-    };
 
-    function openVideoModal(id) {
-      var data = tutorialData[id] || tutorialData['overview'];
-      if (modalTitle) modalTitle.textContent = data.title;
-      if (modalDesc) modalDesc.textContent = data.desc;
       if (modal) modal.classList.add('is-open');
       document.body.style.overflow = 'hidden';
     }
@@ -221,14 +205,10 @@
     function closeVideoModal() {
       if (modal) modal.classList.remove('is-open');
       document.body.style.overflow = '';
+      if (playerWrapper) {
+        playerWrapper.innerHTML = '';
+      }
     }
-
-    cards.forEach(function (card) {
-      card.addEventListener('click', function () {
-        var id = this.getAttribute('data-tutorial-id');
-        openVideoModal(id);
-      });
-    });
 
     if (modalClose) modalClose.addEventListener('click', closeVideoModal);
     if (modalBackdrop) modalBackdrop.addEventListener('click', closeVideoModal);
@@ -238,6 +218,54 @@
         closeVideoModal();
       }
     });
+
+    // Dynamically load videos & section headings from Supabase
+    if (window.SFX_CONTENT_SERVICE) {
+      try {
+        var secData = await window.SFX_CONTENT_SERVICE.getSectionContent('tutorials');
+        if (secData) {
+          if (secKicker && secData.kicker) secKicker.textContent = secData.kicker;
+          if (secTitle && secData.title) secTitle.textContent = secData.title;
+          if (secDesc && secData.description) secDesc.textContent = secData.description;
+        }
+      } catch (e) {}
+
+      try {
+        var videos = await window.SFX_CONTENT_SERVICE.getPublishedVideos('tutorials');
+        if (gridContainer && videos && videos.length > 0) {
+          gridContainer.innerHTML = '';
+          videos.forEach(function (video) {
+            var card = document.createElement('div');
+            card.className = 'tutorial-card';
+            card.style.cursor = 'pointer';
+
+            var thumb = video.custom_thumbnail_url || video.thumbnail_url || ('https://img.youtube.com/vi/' + video.youtube_id + '/hqdefault.jpg');
+            var durationTag = video.duration ? '<span class="tutorial-tag" style="background: rgba(0,0,0,0.85); color: #fff;">' + video.duration + '</span>' : '';
+            var categoryTag = video.category ? '<span style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sfx-accent); font-weight: 700; display: block; margin-bottom: 4px;">' + video.category + '</span>' : '';
+
+            card.innerHTML = 
+              '<div class="tutorial-thumb" style="background-image: url(\'' + thumb + '\'); background-size: cover; background-position: center; position: relative;">' +
+                '<div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 100%);"></div>' +
+                '<div class="tutorial-play-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>' +
+                durationTag +
+              '</div>' +
+              '<div class="tutorial-info">' +
+                categoryTag +
+                '<h4 class="tutorial-title">' + (video.title || '') + '</h4>' +
+                '<p class="tutorial-desc">' + (video.description || '') + '</p>' +
+              '</div>';
+
+            card.addEventListener('click', function () {
+              openVideoModal(video);
+            });
+
+            gridContainer.appendChild(card);
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load dynamic tutorials:', err);
+      }
+    }
   }
 
   // ── 4. PRICING SECTION & RAZORPAY CHECKOUT ──
@@ -645,8 +673,8 @@
 
     if (openBtn) {
       openBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        openAdminModal();
+        // Navigate directly to dedicated Admin Dashboard
+        window.location.href = 'admin.html';
       });
     }
 

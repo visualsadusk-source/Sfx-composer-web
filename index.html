@@ -97,7 +97,7 @@
         </a>
       </li>
       <li>
-        <a href="#admin-portal" class="sfx-site-nav-link" id="open-admin-portal-btn">
+        <a href="admin.html" class="sfx-site-nav-link" id="open-admin-portal-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
           Admin Portal
         </a>
@@ -691,56 +691,17 @@
     <!-- ── 4. YOUTUBE TUTORIAL SECTION ── -->
     <section class="sfx-site-section" id="tutorials">
       <div class="sfx-site-sec-head">
-        <span class="sfx-site-kicker">Video Tutorials</span>
-        <h2 class="sfx-site-title">Master SFX Composer In Minutes</h2>
-        <p class="sfx-site-desc">
+        <span class="sfx-site-kicker" id="tutorials-sec-kicker">Video Tutorials</span>
+        <h2 class="sfx-site-title" id="tutorials-sec-title">Master SFX Composer In Minutes</h2>
+        <p class="sfx-site-desc" id="tutorials-sec-desc">
           Step-by-step guides for installing, configuring, and mastering audio design inside Premiere Pro and After Effects.
         </p>
       </div>
 
-      <div class="tutorials-grid">
-        <div class="tutorial-card" data-tutorial-id="overview">
-          <div class="tutorial-thumb">
-            <div class="tutorial-play-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
-            <span class="tutorial-tag">COMING SOON</span>
-          </div>
-          <div class="tutorial-info">
-            <h4 class="tutorial-title">Product Overview &amp; Workflow Tour</h4>
-            <p class="tutorial-desc">Learn the end-to-end sound design pipeline inside Premiere Pro.</p>
-          </div>
-        </div>
-
-        <div class="tutorial-card" data-tutorial-id="install">
-          <div class="tutorial-thumb">
-            <div class="tutorial-play-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
-            <span class="tutorial-tag">COMING SOON</span>
-          </div>
-          <div class="tutorial-info">
-            <h4 class="tutorial-title">Installation Guide (Windows Batch &amp; CEP)</h4>
-            <p class="tutorial-desc">One-click installation and unlocking player debug mode for CEP extensions.</p>
-          </div>
-        </div>
-
-        <div class="tutorial-card" data-tutorial-id="essential">
-          <div class="tutorial-thumb">
-            <div class="tutorial-play-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
-            <span class="tutorial-tag">COMING SOON</span>
-          </div>
-          <div class="tutorial-info">
-            <h4 class="tutorial-title">Essential Sound Studio Masterclass</h4>
-            <p class="tutorial-desc">Sculpting Dialogue, Music, Ambience &amp; SFX using live BiquadFilters.</p>
-          </div>
-        </div>
-
-        <div class="tutorial-card" data-tutorial-id="audio-tools">
-          <div class="tutorial-thumb">
-            <div class="tutorial-play-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
-            <span class="tutorial-tag">COMING SOON</span>
-          </div>
-          <div class="tutorial-info">
-            <h4 class="tutorial-title">Audio Tools: Trim, Fade &amp; WAV Export</h4>
-            <p class="tutorial-desc">How to preview transients, apply smoothstep fades, and export clean WAVs.</p>
-          </div>
+      <div class="tutorials-grid" id="tutorials-grid-container">
+        <!-- Rendered dynamically from Supabase sfx_videos -->
+        <div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: var(--sfx-text-muted);">
+          Loading video tutorials...
         </div>
       </div>
     </section>
@@ -1158,18 +1119,14 @@
   <!-- ── TUTORIAL VIDEO PREVIEW MODAL ── -->
   <div class="sfx-modal" id="tutorial-video-modal" role="dialog" aria-modal="true">
     <div class="sfx-modal-backdrop" id="tvm-backdrop"></div>
-    <div class="sfx-modal-dialog" style="max-width: 640px;">
+    <div class="sfx-modal-dialog" style="max-width: 720px; width: 92%;">
       <div class="sfx-modal-header">
         <h3 class="sfx-modal-title" id="tvm-title" style="font-size: 14px;">Tutorial Video</h3>
         <button class="sfx-modal-close" id="tvm-close">&times;</button>
       </div>
       <div class="sfx-modal-body" style="padding: 16px;">
-        <div style="background: #050706; border-radius: 6px; border: 1px solid var(--sfx-border); aspect-ratio: 16 / 9; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 12px;">
-          <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(10, 132, 255, 0.2); border: 2px solid var(--sfx-accent); display: flex; align-items: center; justify-content: center; color: var(--sfx-accent); margin-bottom: 10px;">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-          </div>
-          <span style="font-size: 13px; font-weight: 600;">YouTube Video Placeholder</span>
-          <span style="font-size: 11px; color: var(--sfx-accent); margin-top: 2px;">Coming Soon • Official Video Embed</span>
+        <div id="tvm-player-wrapper" style="background: #000; border-radius: 6px; border: 1px solid var(--sfx-border); aspect-ratio: 16 / 9; overflow: hidden; margin-bottom: 12px; display: flex; align-items: center; justify-content: center;">
+          <!-- YouTube Iframe Embed Injected Here -->
         </div>
         <p id="tvm-desc" style="font-size: 13px; color: var(--sfx-text-muted); line-height: 1.5;"></p>
       </div>
@@ -1185,6 +1142,7 @@
   <script src="js/browser-demo-adapter.js"></script>
   <script src="js/plugin-controller.js"></script>
   <script src="js/payment-service.js"></script>
+  <script src="js/content-service.js"></script>
   <script src="js/main.js"></script>
 
 </body>
