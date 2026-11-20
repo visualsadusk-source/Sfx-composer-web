@@ -10,8 +10,7 @@ CREATE TABLE IF NOT EXISTS public.sfx_admins (
 -- Seed existing known administrators
 INSERT INTO public.sfx_admins (email)
 VALUES 
-  ('visualsadusk@gmail.com'),
-  ('sfxcomposertest@gmail.com')
+  ('visualsadusk@gmail.com')
 ON CONFLICT (email) DO NOTHING;
 
 -- 2. Security Definer Helper Function: is_admin()
