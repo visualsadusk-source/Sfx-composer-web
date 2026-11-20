@@ -338,6 +338,23 @@
       var data = await res.json().catch(function () { return { ok: false }; });
       if (!res.ok || !data.ok) throw new Error(data.message || 'Failed to reveal license key');
       return data;
+    },
+
+    resendLicenseEmail: async function (authToken, orderIdOrLicenseId) {
+      var res = await fetch(CONFIG.FUNCTIONS_URL + '/admin-licenses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + authToken
+        },
+        body: JSON.stringify({
+          action: 'resend_email',
+          order_id: orderIdOrLicenseId
+        })
+      });
+      var data = await res.json().catch(function () { return { ok: false, message: 'Invalid response from email service' }; });
+      if (!res.ok || !data.ok) throw new Error(data.message || 'Failed to resend license email');
+      return data;
     }
   };
 

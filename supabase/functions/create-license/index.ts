@@ -1,84 +1,8 @@
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import { verifyAdminRequest } from '../_shared/auth.ts';
 import { generateLicenseKey, sha256, encryptLicenseKey } from '../_shared/crypto.ts';
+import { sendLicenseEmailBrevo } from '../_shared/brevo.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-async function sendLicenseEmail(
-  email: string,
-  licenseKey: string,
-  resendApiKey: string
-): Promise<{ sent: boolean; id?: string; error?: string }> {
-  try {
-    const htmlBody = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Your SFX Composer License</title>
-        <style>
-          body { background: #0c0c0e; color: #e8e8ec; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 40px 20px; margin: 0; }
-          .container { max-width: 520px; margin: 0 auto; background: #141418; border: 1px solid #27272f; border-radius: 12px; padding: 32px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
-          .logo { color: #0a84ff; font-size: 20px; font-weight: 700; margin-bottom: 24px; letter-spacing: -0.02em; }
-          h1 { font-size: 22px; font-weight: 600; color: #ffffff; margin: 0 0 12px; }
-          p { font-size: 14px; line-height: 1.6; color: #a0a0ab; margin: 0 0 20px; }
-          .key-box { background: #08080a; border: 1px solid #0a84ff; border-radius: 8px; padding: 18px; text-align: center; margin: 28px 0; }
-          .key-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #0a84ff; font-weight: 600; margin-bottom: 8px; }
-          .key-value { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 20px; font-weight: 700; color: #ffffff; letter-spacing: 0.1em; user-select: all; }
-          .footer { margin-top: 36px; padding-top: 20px; border-top: 1px solid #22222a; font-size: 12px; color: #62626e; text-align: center; }
-          .footer a { color: #0a84ff; text-decoration: none; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="logo">SFX COMPOSER</div>
-          <h1>Your SFX Composer License Key</h1>
-          <p>Thank you for using SFX Composer! Here is your official license key for <strong>SFX Composer Pro</strong>.</p>
-          <p>This license can be activated on <strong>1 Adobe Premiere Pro / After Effects workstation</strong>.</p>
-          
-          <div class="key-box">
-            <div class="key-title">Your License Key</div>
-            <div class="key-value">${licenseKey}</div>
-          </div>
-
-          <p><strong>Activation Instructions:</strong></p>
-          <ol style="font-size: 13px; color: #c0c0cb; line-height: 1.7; padding-left: 20px;">
-            <li>Launch Premiere Pro and open the SFX Composer panel.</li>
-            <li>On the activation screen, enter your registered email: <code>${email}</code>.</li>
-            <li>Enter your license key above and click <strong>Activate License</strong>.</li>
-          </ol>
-
-          <div class="footer">
-            Need support? Email us at <a href="mailto:support@sfxcomposer.com">support@sfxcomposer.com</a>.
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
-
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        from: 'SFX Composer <licenses@sfxcomposer.com>',
-        to: [email],
-        subject: 'Your SFX Composer License Key',
-        html: htmlBody
-      })
-    });
-
-    if (!res.ok) {
-      const err = await res.text();
-      return { sent: false, error: err };
-    }
-    const data = await res.json();
-    return { sent: true, id: data.id };
-  } catch (e: any) {
-    return { sent: false, error: e.message };
-  }
-}
 
 Deno.serve(async (req: Request) => {
   const corsResponse = handleCors(req);
@@ -123,6 +47,7 @@ Deno.serve(async (req: Request) => {
     const body = await req.json();
     const {
       email,
+      name = '',
       expires_at = null,
       max_devices = 1,
       send_email = true,
@@ -171,15 +96,30 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // Optional email dispatch via Resend
-    let emailStatus = { sent: false, info: 'Email dispatch disabled or RESEND_API_KEY secret not configured.' };
-    const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    if (send_email && resendApiKey) {
-      const delivery = await sendLicenseEmail(cleanEmail, rawKey, resendApiKey);
-      if (delivery.sent) {
-        emailStatus = { sent: true, info: `Email successfully delivered via Resend (ID: ${delivery.id})` };
+    // Optional email dispatch via Brevo
+    let emailStatus = { sent: false, status: 'skipped', info: 'Email dispatch disabled by request' };
+    if (send_email) {
+      const delivery = await sendLicenseEmailBrevo({
+        toEmail: cleanEmail,
+        toName: name || '',
+        licenseKey: rawKey,
+        licenseType: license_type || 'lifetime',
+        isResend: false
+      });
+
+      if (delivery.success) {
+        emailStatus = {
+          sent: true,
+          status: 'sent',
+          messageId: delivery.messageId,
+          info: `Email successfully delivered via Brevo (Message ID: ${delivery.messageId})`
+        };
       } else {
-        emailStatus = { sent: false, info: `Email delivery failed: ${delivery.error}` };
+        emailStatus = {
+          sent: false,
+          status: 'failed',
+          info: `Brevo dispatch failed: ${delivery.error}`
+        };
       }
     }
 

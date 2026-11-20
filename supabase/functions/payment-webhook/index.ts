@@ -1,5 +1,6 @@
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import { generateLicenseKey, sha256, encryptLicenseKey } from '../_shared/crypto.ts';
+import { sendLicenseEmailBrevo } from '../_shared/brevo.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 async function verifyWebhookSignature(rawBody: string, signature: string, secret: string): Promise<boolean> {
@@ -23,44 +24,6 @@ async function verifyWebhookSignature(rawBody: string, signature: string, secret
   }
 }
 
-async function sendLicenseEmail(email: string, licenseKey: string, resendApiKey: string): Promise<boolean> {
-  try {
-    const htmlBody = `
-      <!DOCTYPE html>
-      <html>
-      <body style="background:#080a09; color:#e8e8ec; font-family:sans-serif; padding:40px;">
-        <div style="max-width:540px; margin:0 auto; background:#121214; border:1px solid #232326; border-radius:10px; padding:30px;">
-          <h2 style="color:#0a84ff; margin-top:0;">SFX COMPOSER PRO</h2>
-          <h3>Payment Captured &amp; Verified</h3>
-          <p>Thank you for purchasing SFX Composer Pro (₹199 Lifetime License).</p>
-          <div style="background:#000; border:1px solid #0a84ff; padding:15px; border-radius:8px; text-align:center; margin:20px 0;">
-            <div style="font-size:12px; color:#0a84ff; margin-bottom:5px;">LIFETIME LICENSE KEY</div>
-            <div style="font-size:20px; font-weight:bold; color:#fff; letter-spacing:2px;">${licenseKey}</div>
-          </div>
-          <p>To activate, open Premiere Pro or After Effects &gt; Window &gt; Extensions &gt; SFX Composer, enter your email and license key.</p>
-        </div>
-      </body>
-      </html>
-    `;
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        from: 'SFX Composer <licenses@sfxcomposer.com>',
-        to: [email],
-        subject: 'Your SFX Composer Pro License Key (Captured Payment)',
-        html: htmlBody
-      })
-    });
-    return res.ok;
-  } catch (e) {
-    return false;
-  }
-}
-
 Deno.serve(async (req: Request) => {
   const corsResponse = handleCors(req);
   if (corsResponse) return corsResponse;
@@ -75,7 +38,7 @@ Deno.serve(async (req: Request) => {
   try {
     const rawBody = await req.text();
     const signature = req.headers.get('x-razorpay-signature') || '';
-    const webhookSecret = Deno.env.get('RAZORPAY_WEBHOOK_SECRET') || '';
+    const webhookSecret = (Deno.env.get('RAZORPAY_WEBHOOK_SECRET') || '').trim();
 
     if (!webhookSecret) {
       console.error('RAZORPAY_WEBHOOK_SECRET is not configured in Supabase secrets');
@@ -103,6 +66,18 @@ Deno.serve(async (req: Request) => {
       const orderId = paymentEntity.order_id || payload.payload?.order?.entity?.id;
       const paymentId = paymentEntity.id;
       const email = paymentEntity.email || paymentEntity.notes?.customer_email;
+      const customerName = paymentEntity.notes?.customer_name || '';
+
+      // Verify payment amount = 19900 paise and currency = INR
+      const paymentAmount = paymentEntity.amount;
+      const paymentCurrency = paymentEntity.currency;
+      if (paymentAmount !== undefined && (paymentAmount !== 19900 || paymentCurrency !== 'INR')) {
+        console.warn(`Webhook amount/currency mismatch: ${paymentAmount} ${paymentCurrency}`);
+        return new Response(JSON.stringify({ status: 'ignored', reason: 'Amount/currency mismatch' }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
 
       if (orderId && email) {
         const cleanEmail = email.trim().toLowerCase();
@@ -127,10 +102,26 @@ Deno.serve(async (req: Request) => {
         if (compError) {
           console.error('Error in webhook complete order:', compError);
         } else if (!compData.already_processed) {
-          const resendApiKey = Deno.env.get('RESEND_API_KEY');
-          if (resendApiKey) {
-            await sendLicenseEmail(cleanEmail, rawKey, resendApiKey);
-          }
+          // Send automatic license email via Brevo
+          const emailRes = await sendLicenseEmailBrevo({
+            toEmail: cleanEmail,
+            toName: customerName,
+            licenseKey: rawKey,
+            licenseType: 'lifetime',
+            orderId: orderId,
+            paymentId: paymentId,
+            amount: 199,
+            currency: 'INR',
+            isResend: false
+          });
+
+          // Update order status with Brevo message ID
+          await supabase.rpc('sfx_update_order_email_delivery', {
+            p_provider_order_id: orderId,
+            p_status: emailRes.success ? 'sent' : 'failed',
+            p_message_id: emailRes.messageId || null,
+            p_error: emailRes.error || null
+          });
         }
       }
     }

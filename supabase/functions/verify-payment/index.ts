@@ -1,5 +1,6 @@
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import { generateLicenseKey, sha256, encryptLicenseKey } from '../_shared/crypto.ts';
+import { sendLicenseEmailBrevo } from '../_shared/brevo.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 async function verifyHmacSha256(data: string, signature: string, secret: string): Promise<boolean> {
@@ -23,95 +24,6 @@ async function verifyHmacSha256(data: string, signature: string, secret: string)
   }
 }
 
-async function sendLicenseEmail(
-  email: string,
-  licenseKey: string,
-  resendApiKey: string
-): Promise<{ sent: boolean; id?: string; error?: string }> {
-  try {
-    const htmlBody = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Your SFX Composer Pro License</title>
-        <style>
-          body { background: #080a09; color: #e8e8ec; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 40px 20px; margin: 0; }
-          .container { max-width: 560px; margin: 0 auto; background: #121214; border: 1px solid #232326; border-radius: 12px; padding: 36px; box-shadow: 0 12px 40px rgba(0,0,0,0.6); }
-          .logo { color: #0a84ff; font-size: 20px; font-weight: 800; letter-spacing: 0.05em; margin-bottom: 24px; }
-          .headline { font-size: 24px; font-weight: 700; color: #ffffff; margin: 0 0 12px; letter-spacing: -0.02em; }
-          .subtext { font-size: 14px; line-height: 1.6; color: #a0a0ab; margin: 0 0 24px; }
-          .key-card { background: #000000; border: 1px solid #0a84ff; border-radius: 8px; padding: 20px; text-align: center; margin: 28px 0; }
-          .key-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #0a84ff; font-weight: 700; margin-bottom: 8px; }
-          .key-code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 22px; font-weight: 800; color: #ffffff; letter-spacing: 0.12em; user-select: all; }
-          .badge { display: inline-block; background: rgba(10,132,255,0.15); border: 1px solid rgba(10,132,255,0.3); color: #70b4ff; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; margin-left: 8px; }
-          .btn { display: inline-block; background: #0a84ff; color: #ffffff; font-weight: 600; font-size: 14px; text-decoration: none; padding: 12px 24px; border-radius: 6px; margin: 16px 0; }
-          .steps-box { background: #1a1a1d; border: 1px solid #2a2a2e; border-radius: 8px; padding: 16px 20px; margin: 24px 0; }
-          .steps-title { font-size: 13px; font-weight: 600; color: #ffffff; margin-bottom: 10px; }
-          .steps-list { margin: 0; padding-left: 20px; font-size: 13px; color: #b0b0bb; line-height: 1.7; }
-          .footer { margin-top: 36px; padding-top: 20px; border-top: 1px solid #222226; font-size: 12px; color: #62626e; text-align: center; }
-          .footer a { color: #0a84ff; text-decoration: none; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="logo">SFX COMPOSER</div>
-          <div class="headline">Thank you for your purchase!</div>
-          <p class="subtext">
-            Your purchase of <strong>SFX Composer Pro + SFX Starter Pack (₹199 Lifetime License)</strong> has been successfully processed and verified.
-          </p>
-          
-          <div class="key-card">
-            <div class="key-label">Your Official Lifetime License Key</div>
-            <div class="key-code">${licenseKey}</div>
-          </div>
-
-          <div class="steps-box">
-            <div class="steps-title">Installation &amp; Activation Steps:</div>
-            <ol class="steps-list">
-              <li>Download the plugin package from your account portal or link below.</li>
-              <li>Install via ZXP / Anastasiy's Extension Manager (or copy to your CEP extensions directory).</li>
-              <li>Launch Adobe Premiere Pro or After Effects.</li>
-              <li>Open <strong>Window &gt; Extensions &gt; SFX Composer</strong>.</li>
-              <li>Enter your registered email: <code>${email}</code> and license key above.</li>
-              <li>Click <strong>Activate License</strong> to unlock full lifetime access.</li>
-            </ol>
-          </div>
-
-          <div class="footer">
-            Need assistance? Reach our engineering team directly at <a href="mailto:support@sfxcomposer.com">support@sfxcomposer.com</a>.<br/>
-            &copy; 2026 SFX Composer. All rights reserved.
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
-
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        from: 'SFX Composer <licenses@sfxcomposer.com>',
-        to: [email],
-        subject: 'Your SFX Composer Pro License Key (₹199 Lifetime)',
-        html: htmlBody
-      })
-    });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      return { sent: false, error: errText };
-    }
-    const data = await res.json();
-    return { sent: true, id: data.id };
-  } catch (e: any) {
-    return { sent: false, error: e.message };
-  }
-}
-
 Deno.serve(async (req: Request) => {
   const corsResponse = handleCors(req);
   if (corsResponse) return corsResponse;
@@ -129,7 +41,8 @@ Deno.serve(async (req: Request) => {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
-      email
+      email,
+      name
     } = body;
 
     if (!razorpay_order_id || !razorpay_payment_id || !email) {
@@ -143,7 +56,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const cleanEmail = email.trim().toLowerCase();
-    const rzpSecret = Deno.env.get('RAZORPAY_KEY_SECRET') || '';
+    const rzpSecret = (Deno.env.get('RAZORPAY_KEY_SECRET') || '').trim();
 
     if (!rzpSecret) {
       return new Response(JSON.stringify({
@@ -156,7 +69,7 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // Cryptographic signature verification using HMAC-SHA256
+    // 1. Cryptographic HMAC-SHA256 signature verification
     const payload = `${razorpay_order_id}|${razorpay_payment_id}`;
     const isValid = await verifyHmacSha256(payload, razorpay_signature || '', rzpSecret);
     if (!isValid) {
@@ -174,12 +87,63 @@ Deno.serve(async (req: Request) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Generate unique license key & cryptographic SHA-256 hash & AES-256-GCM ciphertext
+    // 2. Amount and Currency Verification against database payment_orders
+    const { data: existingOrder } = await supabase
+      .from('payment_orders')
+      .select('*')
+      .eq('provider_order_id', razorpay_order_id)
+      .maybeSingle();
+
+    if (existingOrder) {
+      // Must equal 199 (INR) or 19900 paise
+      const expectedAmount = 199;
+      if (Number(existingOrder.amount) !== expectedAmount || existingOrder.currency !== 'INR') {
+        return new Response(JSON.stringify({
+          ok: false,
+          code: 'INVALID_AMOUNT_OR_CURRENCY',
+          message: `Order amount/currency mismatch: expected ₹199 INR, got ${existingOrder.currency} ${existingOrder.amount}`
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
+    // 3. Optional Razorpay API payment capture check if credentials present
+    const rzpKeyId = (Deno.env.get('RAZORPAY_KEY_ID') || '').trim();
+    if (rzpKeyId && rzpSecret) {
+      try {
+        const basicAuth = btoa(`${rzpKeyId}:${rzpSecret}`);
+        const rzpPayRes = await fetch(`https://api.razorpay.com/v1/payments/${razorpay_payment_id}`, {
+          headers: { 'Authorization': `Basic ${basicAuth}` }
+        });
+        if (rzpPayRes.ok) {
+          const rzpPayData = await rzpPayRes.json();
+          if (rzpPayData.status !== 'captured' && rzpPayData.status !== 'authorized') {
+            console.warn(`Razorpay payment status is ${rzpPayData.status}, not captured.`);
+          }
+          if (rzpPayData.amount !== 19900 || rzpPayData.currency !== 'INR') {
+            return new Response(JSON.stringify({
+              ok: false,
+              code: 'AMOUNT_MISMATCH',
+              message: `Razorpay payment amount mismatch: expected 19900 paise INR, received ${rzpPayData.amount} ${rzpPayData.currency}`
+            }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
+        }
+      } catch (e) {
+        console.warn('Razorpay API verification network note:', e);
+      }
+    }
+
+    // 4. Generate unique license key & cryptographic SHA-256 hash & AES-256-GCM ciphertext
     const rawLicenseKey = generateLicenseKey();
     const keyHash = await sha256(rawLicenseKey);
     const encryptedKey = await encryptLicenseKey(rawLicenseKey);
 
-    // Complete order idempotently in Supabase
+    // 5. Complete order idempotently in Supabase
     const { data: orderData, error: orderError } = await supabase.rpc('sfx_complete_payment_order', {
       p_provider_order_id: razorpay_order_id,
       p_provider_payment_id: razorpay_payment_id,
@@ -198,14 +162,65 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // Deliver email via Resend if configured
-    let emailStatus = { sent: false, info: 'Resend API key not configured in Supabase secrets' };
-    const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    if (resendApiKey) {
-      const emailRes = await sendLicenseEmail(cleanEmail, rawLicenseKey, resendApiKey);
+    // If customer name provided, store on payment_orders
+    if (name) {
+      await supabase
+        .from('payment_orders')
+        .update({ customer_name: name.trim() })
+        .eq('provider_order_id', razorpay_order_id);
+    }
+
+    // 6. Automatic License Email via Brevo API
+    let emailStatus = {
+      sent: false,
+      status: 'pending',
+      info: 'Email dispatch initiated'
+    };
+
+    // If not already processed, send Brevo email
+    if (!orderData.already_processed) {
+      const emailResult = await sendLicenseEmailBrevo({
+        toEmail: cleanEmail,
+        toName: name || '',
+        licenseKey: rawLicenseKey,
+        licenseType: 'lifetime',
+        orderId: razorpay_order_id,
+        paymentId: razorpay_payment_id,
+        amount: 199,
+        currency: 'INR',
+        isResend: false
+      });
+
+      // Update email tracking in database
+      const dbStatus = emailResult.success ? 'sent' : 'failed';
+      await supabase.rpc('sfx_update_order_email_delivery', {
+        p_provider_order_id: razorpay_order_id,
+        p_status: dbStatus,
+        p_message_id: emailResult.messageId || null,
+        p_error: emailResult.error || null
+      });
+
       emailStatus = {
-        sent: emailRes.sent,
-        info: emailRes.sent ? `Delivered successfully (ID: ${emailRes.id})` : `Failed: ${emailRes.error}`
+        sent: emailResult.success,
+        status: dbStatus,
+        messageId: emailResult.messageId || null,
+        info: emailResult.success 
+          ? `Dispatched via Brevo (Message ID: ${emailResult.messageId})`
+          : `Brevo dispatch failed: ${emailResult.error}`
+      };
+    } else {
+      // Re-read existing email status from order
+      const { data: ordRow } = await supabase
+        .from('payment_orders')
+        .select('email_delivery_status, email_message_id, email_sent_at')
+        .eq('provider_order_id', razorpay_order_id)
+        .maybeSingle();
+
+      emailStatus = {
+        sent: ordRow?.email_delivery_status === 'sent',
+        status: ordRow?.email_delivery_status || 'sent',
+        messageId: ordRow?.email_message_id || null,
+        info: 'Order previously verified; email record preserved.'
       };
     }
 

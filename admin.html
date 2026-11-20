@@ -929,8 +929,11 @@
           <!-- Orders Log -->
           <div class="admin-card" style="background: var(--admin-card-bg); border: 1px solid var(--admin-border); border-radius: 8px; padding: 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
-              <div style="font-weight: 700; font-size: 15px;">Razorpay Payment Orders Log</div>
-              <span style="font-size: 12px; color: var(--admin-text-muted);">Verified against Razorpay HMAC-SHA256 Signatures</span>
+              <div>
+                <div style="font-weight: 700; font-size: 15px;">Razorpay Orders &amp; Brevo License Email Delivery</div>
+                <div style="font-size: 12px; color: var(--admin-text-muted); margin-top: 2px;">Real-time Brevo transactional email tracking, message IDs, and safe retry controls</div>
+              </div>
+              <span style="font-size: 11px; color: var(--admin-accent); background: rgba(10,132,255,0.1); border: 1px solid rgba(10,132,255,0.3); padding: 3px 8px; border-radius: 4px;">Brevo Transactional API v3</span>
             </div>
             <div style="overflow-x: auto;">
               <table class="sfx-data-table">
@@ -938,11 +941,11 @@
                   <tr>
                     <th>Customer Email</th>
                     <th>Amount</th>
-                    <th>Provider</th>
-                    <th>Order ID</th>
-                    <th>Payment ID</th>
-                    <th>Status</th>
-                    <th>Date</th>
+                    <th>Order &amp; Payment ID</th>
+                    <th>Payment Status</th>
+                    <th>Email Delivery</th>
+                    <th>Last Attempt</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody id="orders-table-tbody">
@@ -2049,6 +2052,7 @@
           }
 
           actionsHtml += '<button class="sfx-button sfx-button--quiet btn-extend-lic" data-id="' + lic.id + '" data-exp="' + (lic.expires_at || '') + '" style="font-size: 11px; padding: 2px 7px; border: 1px solid var(--admin-border);" title="Change validity or extend expiry">Expiry</button>';
+          actionsHtml += '<button class="sfx-button sfx-button--quiet btn-resend-lic-email" data-id="' + lic.id + '" style="font-size: 11px; padding: 2px 7px; border: 1px solid var(--admin-accent); color: var(--admin-accent);" title="Send/Resend license key email via Brevo">Email</button>';
           actionsHtml += '</div>';
 
           return '<tr>' +
@@ -2160,6 +2164,29 @@
         });
       }
 
+        // 7. Resend License Email via Brevo
+        licTbody.querySelectorAll('.btn-resend-lic-email').forEach(function (btn) {
+          btn.addEventListener('click', async function () {
+            var licId = this.getAttribute('data-id');
+            if (confirm('Dispatch license email to this customer via Brevo? (Will not generate a new license)')) {
+              var origText = this.textContent;
+              this.textContent = 'Sending…';
+              this.disabled = true;
+              try {
+                var res = await window.SFX_PAYMENT_SERVICE.resendLicenseEmail(activeAuthToken, licId);
+                showToast(res.message || 'Email sent via Brevo');
+                loadLicensesAndOrders();
+              } catch (err) {
+                alert('Brevo error: ' + err.message);
+              } finally {
+                this.textContent = origText;
+                this.disabled = false;
+              }
+            }
+          });
+        });
+      }
+
       function renderOrdersTable(orders) {
         var ordTbody = document.getElementById('orders-table-tbody');
         if (!ordTbody) return;
@@ -2175,16 +2202,58 @@
             ? '<span class="sfx-badge-status active">Paid</span>'
             : '<span class="sfx-badge-status revoked" style="color:#ff9f0a; border-color:#ff9f0a;">Pending</span>';
 
+          // Email delivery badge & Brevo Message ID
+          var emailStatusBadge = '';
+          if (ord.email_delivery_status === 'sent') {
+            var msgIdDisplay = ord.email_message_id ? '<br/><code style="font-size:10px; color:var(--admin-neon);" title="Brevo Message ID: ' + ord.email_message_id + '">' + ord.email_message_id.slice(0, 16) + '…</code>' : '';
+            emailStatusBadge = '<span class="sfx-badge-status active">Sent</span>' + msgIdDisplay;
+          } else if (ord.email_delivery_status === 'failed') {
+            emailStatusBadge = '<span class="sfx-badge-status revoked" title="' + (ord.email_error || 'Delivery failed') + '">Failed</span>';
+          } else {
+            emailStatusBadge = '<span class="sfx-badge-status" style="color:var(--admin-text-muted); border-color:var(--admin-border);">Pending</span>';
+          }
+
+          var lastAttempt = ord.email_sent_at 
+            ? new Date(ord.email_sent_at).toLocaleTimeString() 
+            : (ord.created_at ? new Date(ord.created_at).toLocaleTimeString() : '—');
+          var attemptsLabel = '<span style="font-size:10px; color:var(--admin-text-muted);">(' + (ord.email_attempts || 0) + ' tries)</span>';
+
           return '<tr>' +
-            '<td><strong>' + ord.customer_email + '</strong></td>' +
-            '<td>₹' + ord.amount + '</td>' +
-            '<td>' + (ord.payment_provider || 'razorpay') + '</td>' +
-            '<td><code>' + (ord.provider_order_id || '—') + '</code></td>' +
-            '<td><code>' + (ord.provider_payment_id || '—') + '</code></td>' +
+            '<td><strong>' + ord.customer_email + '</strong>' + (ord.customer_name ? '<br/><span style="font-size:11px; color:var(--admin-text-muted);">' + ord.customer_name + '</span>' : '') + '</td>' +
+            '<td><strong>₹' + ord.amount + '</strong> <span style="font-size:10px; color:var(--admin-text-muted);">' + (ord.currency || 'INR') + '</span></td>' +
+            '<td><code>' + (ord.provider_order_id || '—') + '</code><br/><code style="font-size:10px; color:var(--admin-text-muted);">' + (ord.provider_payment_id || '—') + '</code></td>' +
             '<td>' + badge + '</td>' +
-            '<td>' + date + '</td>' +
+            '<td>' + emailStatusBadge + '</td>' +
+            '<td>' + lastAttempt + ' ' + attemptsLabel + '</td>' +
+            '<td>' +
+              '<button type="button" class="sfx-button sfx-button--quiet btn-resend-order-email" data-order="' + (ord.provider_order_id || ord.id) + '" style="font-size:11px; padding:3px 8px; border:1px solid var(--admin-accent); color:var(--admin-accent);" title="Resend license key via Brevo API">' +
+                'Resend via Brevo' +
+              '</button>' +
+            '</td>' +
           '</tr>';
         }).join('');
+
+        // Wire Resend Order Email listener
+        ordTbody.querySelectorAll('.btn-resend-order-email').forEach(function (btn) {
+          btn.addEventListener('click', async function () {
+            var orderRef = this.getAttribute('data-order');
+            if (confirm('Resend license key email via Brevo for order: ' + orderRef + '? (Reuses existing license without creating a duplicate)')) {
+              var origText = this.textContent;
+              this.textContent = 'Sending…';
+              this.disabled = true;
+              try {
+                var res = await window.SFX_PAYMENT_SERVICE.resendLicenseEmail(activeAuthToken, orderRef);
+                showToast(res.message || 'Email successfully sent via Brevo');
+                loadLicensesAndOrders();
+              } catch (err) {
+                alert('Brevo error: ' + err.message);
+              } finally {
+                this.textContent = origText;
+                this.disabled = false;
+              }
+            }
+          });
+        });
       }
 
       // Filter and search listeners

@@ -451,17 +451,9 @@
     if (goToDashboardBtn) {
       goToDashboardBtn.addEventListener('click', function () {
         closeCheckout();
-        var cdm = document.getElementById('customer-dashboard-modal');
-        if (cdm) {
-          cdm.classList.add('is-open');
-          var email = successEmailDisp ? successEmailDisp.textContent : '';
-          if (email) {
-            var lookupInput = document.getElementById('cdm-lookup-email');
-            if (lookupInput) {
-              lookupInput.value = email;
-              document.getElementById('cdm-lookup-btn')?.click();
-            }
-          }
+        var openDashboardLink = document.getElementById('open-customer-dashboard-btn');
+        if (openDashboardLink) {
+          openDashboardLink.click();
         }
       });
     }
