@@ -1,0 +1,72 @@
+/*
+  SFX Composer — header menu styles. Everything under .sfx-has-header-menu only
+  applies once the menu is really in the top bar; otherwise the original
+  floating buttons keep working exactly as before.
+*/
+#sfx-header-menu {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 10px;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.sfx-hm__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--sfx-border, rgba(255, 255, 255, 0.15));
+  border-radius: 999px;
+  background: transparent;
+  color: var(--sfx-text, #fff);
+  font: 600 11px/1 var(--sfx-font, -apple-system, 'Segoe UI', system-ui, sans-serif);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.sfx-hm__btn:hover:not(:disabled) {
+  background: var(--sfx-surface-hover, rgba(255, 255, 255, 0.07));
+}
+.sfx-hm__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.sfx-hm__btn[aria-pressed='true'] {
+  background: var(--sfx-accent, #7b5bff);
+  border-color: transparent;
+  color: var(--sfx-text-on-accent, #fff);
+}
+.sfx-hm__btn svg {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+}
+/* Narrow panel: icons only. */
+@media (max-width: 600px) {
+  .sfx-hm__btn span {
+    display: none;
+  }
+  .sfx-hm__btn {
+    padding: 0 8px;
+  }
+}
+
+/* The old floating buttons are replaced by the menu. */
+html.sfx-has-header-menu #sfx-ai-assistant__toggle,
+html.sfx-has-header-menu #sfx-browser-open {
+  display: none;
+}
+
+/* AI panel uses top: var(--sfx-hm-bottom) like #sfx-browser — do not constrain as a popover */
+html.sfx-has-header-menu #sfx-ai-assistant {
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+/* The Browser view starts under the top bar so the menu stays reachable. */
+html.sfx-has-header-menu #sfx-browser {
+  top: var(--sfx-hm-bottom, 0px);
+}

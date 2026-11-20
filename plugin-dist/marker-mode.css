@@ -1,0 +1,280 @@
+/*
+  SFX Composer — Marker Mode styles. Scoped under #sfx-marker-mode.
+*/
+
+#sfx-marker-mode {
+  position: fixed;
+  left: 8px;
+  bottom: 44px; /* sits just above the AI SFX button */
+  z-index: 999997;
+  font-family: var(--sfx-font, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif);
+}
+
+#sfx-marker-mode__toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border-radius: 999px;
+  border: 1px solid var(--sfx-border-strong, rgba(255, 255, 255, 0.25));
+  background: var(--sfx-surface-raised, rgba(24, 24, 28, 0.92));
+  color: var(--sfx-text, #fff);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+#sfx-marker-mode__toggle:hover {
+  background: var(--sfx-surface-hover, rgba(38, 38, 44, 0.95));
+}
+#sfx-marker-mode__toggle svg {
+  width: 14px;
+  height: 14px;
+  color: var(--sfx-accent, #7b5bff);
+}
+
+#sfx-marker-mode__panel {
+  position: absolute;
+  left: 0;
+  bottom: 34px;
+  width: 380px;
+  max-width: calc(100vw - 16px);
+  max-height: 470px;
+  overflow-y: auto;
+  background: var(--sfx-surface-raised, #141418);
+  border: 1px solid var(--sfx-border, rgba(255, 255, 255, 0.15));
+  border-radius: var(--sfx-radius-large, 10px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  display: none;
+  box-sizing: border-box;
+}
+#sfx-marker-mode__panel.is-open {
+  display: block;
+}
+
+.sfx-mm__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.sfx-mm__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sfx-text, #fff);
+}
+.sfx-mm__title svg {
+  width: 14px;
+  height: 14px;
+  color: var(--sfx-accent, #7b5bff);
+}
+.sfx-mm__icon-btn {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--sfx-text-muted, #999);
+  cursor: pointer;
+  border-radius: var(--sfx-radius, 4px);
+}
+.sfx-mm__icon-btn:hover {
+  background: var(--sfx-surface-hover, rgba(255, 255, 255, 0.08));
+  color: var(--sfx-text, #fff);
+}
+.sfx-mm__icon-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.sfx-mm__hint {
+  font-size: 10px;
+  color: var(--sfx-text-muted, #999);
+  line-height: 1.45;
+  margin-bottom: 8px;
+}
+
+.sfx-mm__actions {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.sfx-mm__btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 28px;
+  border: 1px solid var(--sfx-border-strong, rgba(255, 255, 255, 0.2));
+  border-radius: var(--sfx-radius, 6px);
+  background: transparent;
+  color: var(--sfx-text, #fff);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.sfx-mm__btn:hover:not(:disabled) {
+  background: var(--sfx-surface-hover, rgba(255, 255, 255, 0.07));
+}
+.sfx-mm__btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.sfx-mm__btn svg {
+  width: 13px;
+  height: 13px;
+}
+.sfx-mm__btn--primary {
+  border-color: transparent;
+  background: var(--sfx-accent, #7b5bff);
+  color: var(--sfx-text-on-accent, #fff);
+}
+.sfx-mm__btn--primary:hover:not(:disabled) {
+  background: var(--sfx-accent-hover, #8f75ff);
+}
+.sfx-mm__btn--wide {
+  width: 100%;
+  flex: none;
+  margin-bottom: 6px;
+}
+
+.sfx-mm__settings {
+  border: 1px solid var(--sfx-border, rgba(255, 255, 255, 0.12));
+  border-radius: var(--sfx-radius, 6px);
+  padding: 8px;
+  margin-bottom: 8px;
+  background: var(--sfx-surface, rgba(255, 255, 255, 0.03));
+}
+.sfx-mm__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.sfx-mm__row label {
+  font-size: 10px;
+  color: var(--sfx-text-muted, #999);
+  flex: 1;
+}
+.sfx-mm__row select {
+  background: var(--sfx-surface-sunken, rgba(0, 0, 0, 0.3));
+  color: var(--sfx-text, #fff);
+  border: 1px solid var(--sfx-border, rgba(255, 255, 255, 0.15));
+  border-radius: var(--sfx-radius, 4px);
+  font-size: 10px;
+  padding: 3px 5px;
+  min-width: 110px;
+}
+.sfx-mm__check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--sfx-text, #fff);
+  cursor: pointer;
+  margin-bottom: 4px;
+}
+
+.sfx-mm__table-wrap {
+  max-height: 210px;
+  overflow: auto;
+  border: 1px solid var(--sfx-border, rgba(255, 255, 255, 0.12));
+  border-radius: var(--sfx-radius, 6px);
+  margin-bottom: 6px;
+}
+.sfx-mm__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+  color: var(--sfx-text, #fff);
+}
+.sfx-mm__table th {
+  position: sticky;
+  top: 0;
+  text-align: left;
+  font-weight: 700;
+  color: var(--sfx-text-muted, #999);
+  background: var(--sfx-surface-sunken, #101014);
+  padding: 4px 6px;
+}
+.sfx-mm__table td {
+  padding: 4px 6px;
+  border-top: 1px solid var(--sfx-border, rgba(255, 255, 255, 0.08));
+  vertical-align: top;
+  word-break: break-word;
+}
+.sfx-mm__table tr.is-warn td.sfx-mm__status,
+.sfx-mm__table tr.is-error td.sfx-mm__status {
+  color: var(--sfx-critical, #ff5c5c);
+}
+.sfx-mm__table tr.is-skip td {
+  opacity: 0.55;
+}
+.sfx-mm__table tr.is-placed td.sfx-mm__status {
+  color: var(--sfx-positive, #39d98a);
+}
+.sfx-mm__table tr.is-ready td.sfx-mm__status {
+  color: var(--sfx-text-muted, #999);
+}
+
+.sfx-mm__report {
+  border: 1px solid var(--sfx-border, rgba(255, 255, 255, 0.12));
+  border-radius: var(--sfx-radius, 6px);
+  padding: 7px 8px;
+  margin-bottom: 6px;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--sfx-text-muted, #999);
+  max-height: 120px;
+  overflow-y: auto;
+}
+.sfx-mm__report-main {
+  font-weight: 700;
+  color: var(--sfx-text, #fff);
+}
+.sfx-mm__report.is-ok .sfx-mm__report-main {
+  color: var(--sfx-positive, #39d98a);
+}
+.sfx-mm__report.is-warn .sfx-mm__report-main {
+  color: var(--sfx-caution, #ffd23f);
+}
+.sfx-mm__report.is-error .sfx-mm__report-main {
+  color: var(--sfx-critical, #ff5c5c);
+}
+
+.sfx-mm__debug {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.sfx-mm__link-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--sfx-accent, #7b5bff);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+.sfx-mm__link-btn svg {
+  width: 11px;
+  height: 11px;
+}
+.sfx-mm__debug-note {
+  font-size: 9px;
+  color: var(--sfx-text-muted, #999);
+  word-break: break-all;
+}

@@ -1,0 +1,237 @@
+/*
+  SFX Composer — Local AI Setup card styles.
+  Independent of ai-assistant.css; scoped entirely under #sfx-local-ai-setup.
+*/
+
+#sfx-local-ai-setup {
+  border: 1px solid var(--sfx-border, rgba(255, 255, 255, 0.12));
+  border-radius: var(--sfx-radius-large, 10px);
+  background: var(--sfx-surface, rgba(255, 255, 255, 0.03));
+  padding: 10px;
+  margin-bottom: 8px;
+  font-family: var(--sfx-font, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif);
+}
+
+.sfx-lai__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sfx-text, #fff);
+  margin-bottom: 6px;
+}
+.sfx-lai__header svg {
+  width: 14px;
+  height: 14px;
+  color: var(--sfx-accent, #7b5bff);
+}
+
+.sfx-lai__badge {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  color: var(--sfx-text-on-accent, #06210f);
+  background: var(--sfx-positive, #39d98a);
+}
+
+.sfx-lai__body {
+  font-size: 11px;
+  color: var(--sfx-text-muted, #999);
+  line-height: 1.5;
+}
+
+.sfx-lai__primary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 28px;
+  border: none;
+  border-radius: var(--sfx-radius, 6px);
+  background: var(--sfx-accent, #7b5bff);
+  color: var(--sfx-text-on-accent, #fff);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.sfx-lai__primary-btn:hover {
+  background: var(--sfx-accent-hover, #8f75ff);
+}
+.sfx-lai__primary-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.sfx-lai__primary-btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+.sfx-lai__secondary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 26px;
+  border: 1px solid var(--sfx-border-strong, rgba(255, 255, 255, 0.2));
+  border-radius: var(--sfx-radius, 6px);
+  background: transparent;
+  color: var(--sfx-text, #fff);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 6px;
+}
+.sfx-lai__secondary-btn:hover {
+  background: var(--sfx-surface-hover, rgba(255, 255, 255, 0.06));
+}
+.sfx-lai__secondary-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.sfx-lai__steps {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sfx-lai__step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--sfx-text-muted, #999);
+}
+.sfx-lai__step.is-done {
+  color: var(--sfx-positive, #39d98a);
+}
+.sfx-lai__step.is-active {
+  color: var(--sfx-text, #fff);
+}
+.sfx-lai__step svg {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+}
+.sfx-lai__spinner {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--sfx-border, rgba(255, 255, 255, 0.2));
+  border-top-color: var(--sfx-accent, #7b5bff);
+  animation: sfx-lai-spin 0.7s linear infinite;
+  flex: 0 0 auto;
+}
+@keyframes sfx-lai-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sfx-lai__progress-track {
+  margin-top: 8px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--sfx-surface-sunken, rgba(0, 0, 0, 0.3));
+  overflow: hidden;
+}
+.sfx-lai__progress-fill {
+  height: 100%;
+  background: var(--sfx-accent, #7b5bff);
+  transition: width 0.2s ease;
+}
+.sfx-lai__progress-label {
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--sfx-text-muted, #999);
+  text-align: right;
+}
+
+.sfx-lai__status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--sfx-text-muted, #999);
+  padding: 3px 0;
+}
+.sfx-lai__status-row strong {
+  color: var(--sfx-text, #fff);
+  font-weight: 600;
+}
+.sfx-lai__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+}
+.sfx-lai__dot.is-ready {
+  background: var(--sfx-positive, #39d98a);
+}
+.sfx-lai__dot.is-error {
+  background: var(--sfx-critical, #ff5c5c);
+}
+
+.sfx-lai__error {
+  color: var(--sfx-critical, #ff5c5c);
+  font-size: 11px;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 4px;
+}
+.sfx-lai__error svg {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.sfx-lai__terms {
+  font-size: 10px;
+  color: var(--sfx-text-muted, #999);
+  line-height: 1.5;
+  background: var(--sfx-surface-sunken, rgba(0, 0, 0, 0.25));
+  border: 1px solid var(--sfx-border, rgba(255, 255, 255, 0.1));
+  border-radius: var(--sfx-radius, 6px);
+  padding: 8px;
+  margin-top: 6px;
+  max-height: 110px;
+  overflow-y: auto;
+}
+.sfx-lai__terms-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--sfx-text, #fff);
+  margin-top: 6px;
+  cursor: pointer;
+}
+.sfx-lai__terms-check input {
+  margin-top: 1px;
+}
+
+.sfx-lai__link-btn {
+  background: none;
+  border: none;
+  color: var(--sfx-accent, #7b5bff);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.sfx-lai__settings-toggle {
+  margin-top: 6px;
+  text-align: center;
+}

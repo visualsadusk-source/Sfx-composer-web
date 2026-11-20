@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SFX Composer — Admin License &amp; Sales Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      background: #09090c;
+      color: #f0f0f4;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      padding: 32px 20px;
+      min-height: 100vh;
+    }
+    .admin-container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #212127;
+      margin-bottom: 24px;
+    }
+    .admin-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .admin-title-wrap h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+    .admin-badge {
+      background: #0a84ff;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+    }
+    .connection-bar {
+      background: #121216;
+      border: 1px solid #212127;
+      border-radius: 8px;
+      padding: 14px 18px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .connection-bar input {
+      background: #060608;
+      border: 1px solid #212127;
+      border-radius: 6px;
+      color: #fff;
+      padding: 8px 12px;
+      font-size: 12px;
+      outline: none;
+      flex: 1;
+      font-family: monospace;
+    }
+    .connection-bar input:focus {
+      border-color: #0a84ff;
+    }
+    .admin-card {
+      background: #121216;
+      border: 1px solid #212127;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .admin-card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <div class="admin-header">
+      <div class="admin-title-wrap">
+        <a href="/" style="color: #0a84ff; font-size: 13px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 4px; margin-right: 12px;">
+          &larr; Back to Website
+        </a>
+        <h1>SFX Composer Operations</h1>
+        <span class="admin-badge">ADMIN CONSOLE</span>
+      </div>
+      <div>
+        <button id="btn-refresh" class="sfx-site-btn-secondary" style="padding: 6px 14px; font-size: 12px;">
+          Refresh Data
+        </button>
+      </div>
+    </div>
+
+    <!-- Connection Bar -->
+    <div class="connection-bar">
+      <span style="font-size: 12px; color: #8c8c98; font-weight: 600; white-space: nowrap;">Service Role Key:</span>
+      <input type="password" id="admin-service-key" placeholder="Enter Supabase Service Role Key (kept strictly in session memory)" />
+      <button id="btn-connect" class="sfx-site-btn-primary" style="padding: 8px 18px; font-size: 12px; white-space: nowrap;">
+        Connect &amp; Authenticate
+      </button>
+    </div>
+
+    <div id="admin-dashboard-view" style="display: none;">
+      <!-- Stats Grid -->
+      <div class="sfx-stat-grid" style="grid-template-columns: repeat(5, 1fr);">
+        <div class="sfx-stat-card">
+          <div class="label">Total Paid Sales</div>
+          <div class="val accent" id="val-sales">0</div>
+        </div>
+        <div class="sfx-stat-card">
+          <div class="label">Gross Revenue</div>
+          <div class="val positive" id="val-rev">₹0</div>
+        </div>
+        <div class="sfx-stat-card">
+          <div class="label">Total Issued Licenses</div>
+          <div class="val" id="val-total">0</div>
+        </div>
+        <div class="sfx-stat-card">
+          <div class="label">Active Workstations</div>
+          <div class="val" id="val-active">0</div>
+        </div>
+        <div class="sfx-stat-card">
+          <div class="label">Revoked Licenses</div>
+          <div class="val" style="color: #ff453a;" id="val-revoked">0</div>
+        </div>
+      </div>
+
+      <!-- Quick Issue Complimentary License -->
+      <div class="admin-card">
+        <div class="admin-card-title">
+          <span>Issue Complimentary License</span>
+          <span style="font-size: 11px; color: #0a84ff; font-weight: 400;">Server-Side Cryptographic Generation</span>
+        </div>
+        <form id="form-issue" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+          <input type="email" id="issue-email" class="sfx-input" placeholder="customer@studio.com" style="flex: 1; min-width: 240px; height: 36px; padding: 0 12px; font-size: 12px;" required />
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #8c8c98; cursor: pointer;">
+            <input type="checkbox" id="issue-send-email" checked /> Email Key via Resend
+          </label>
+          <button type="submit" class="sfx-site-btn-primary" style="height: 36px; padding: 0 18px; font-size: 12.5px;">
+            Issue Lifetime License
+          </button>
+        </form>
+        <div id="issue-result" style="display: none; margin-top: 14px; padding: 12px; background: #000; border: 1px solid #0a84ff; border-radius: 6px; font-size: 12px;"></div>
+      </div>
+
+      <!-- Licenses List -->
+      <div class="admin-card">
+        <div class="admin-card-title">
+          <span>Customer Licenses</span>
+          <input type="text" id="license-search" class="sfx-input" placeholder="Search by customer email..." style="width: 260px; height: 32px; padding: 0 10px; font-size: 12px;" />
+        </div>
+        <div style="overflow-x: auto;">
+          <table class="sfx-data-table">
+            <thead>
+              <tr>
+                <th>Customer Email</th>
+                <th>Status</th>
+                <th>Workstations</th>
+                <th>Created Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="licenses-tbody">
+              <tr><td colspan="5" style="text-align: center; color: #8c8c98;">Loading licenses...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Orders List -->
+      <div class="admin-card">
+        <div class="admin-card-title">
+          <span>Payment Orders Log</span>
+        </div>
+        <div style="overflow-x: auto;">
+          <table class="sfx-data-table">
+            <thead>
+              <tr>
+                <th>Customer Email</th>
+                <th>Amount</th>
+                <th>Provider</th>
+                <th>Order ID</th>
+                <th>Payment ID</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="orders-tbody">
+              <tr><td colspan="7" style="text-align: center; color: #8c8c98;">Loading orders...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/payment-service.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      var keyInput = document.getElementById('admin-service-key');
+      var connectBtn = document.getElementById('btn-connect');
+      var refreshBtn = document.getElementById('btn-refresh');
+      var view = document.getElementById('admin-dashboard-view');
+      var currentKey = sessionStorage.getItem('sfx_admin_key') || '';
+
+      if (currentKey) {
+        keyInput.value = currentKey;
+        loadAdminData(currentKey);
+      }
+
+      connectBtn.addEventListener('click', function () {
+        var key = keyInput.value.trim();
+        if (!key) return alert('Please enter Supabase Service Role Key');
+        sessionStorage.setItem('sfx_admin_key', key);
+        loadAdminData(key);
+      });
+
+      refreshBtn.addEventListener('click', function () {
+        var key = sessionStorage.getItem('sfx_admin_key') || keyInput.value.trim();
+        if (key) loadAdminData(key);
+      });
+
+      async function loadAdminData(key) {
+        try {
+          var stats = await window.SFX_PAYMENT_SERVICE.getAdminStats(key);
+          document.getElementById('val-sales').textContent = stats.total_sales || 0;
+          document.getElementById('val-rev').textContent = '₹' + (stats.total_revenue || 0);
+          document.getElementById('val-total').textContent = stats.total_licenses || 0;
+          document.getElementById('val-active').textContent = stats.active_licenses || 0;
+          document.getElementById('val-revoked').textContent = stats.revoked_licenses || 0;
+
+          await loadLicenses(key);
+          await loadOrders(key);
+          view.style.display = 'block';
+        } catch (err) {
+          alert('Failed to connect: ' + err.message);
+        }
+      }
+
+      async function loadLicenses(key, query) {
+        var tbody = document.getElementById('licenses-tbody');
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: #8c8c98;">Loading...</td></tr>';
+        var list = await window.SFX_PAYMENT_SERVICE.searchAdminLicenses(key, query || '');
+        if (!list || !list.length) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: #8c8c98;">No licenses found.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = list.map(function (lic) {
+          var date = new Date(lic.created_at).toLocaleDateString();
+          var devCount = (lic.active_devices || []).length;
+          var devLabel = devCount + ' / ' + (lic.max_devices || 1);
+          var statusBadge = lic.status === 'active' ? '<span class="sfx-badge-status active">Active</span>' : '<span class="sfx-badge-status revoked">Revoked</span>';
+
+          return '<tr>' +
+            '<td><strong>' + lic.email + '</strong></td>' +
+            '<td>' + statusBadge + '</td>' +
+            '<td>' + devLabel + '</td>' +
+            '<td>' + date + '</td>' +
+            '<td>' +
+              '<button class="sfx-button sfx-button--quiet btn-reset-dev" data-id="' + lic.id + '" style="font-size: 11px; padding: 2px 8px; margin-right: 6px; border: 1px solid #212127;">Reset Devices</button>' +
+              (lic.status === 'active' ? '<button class="sfx-button sfx-button--quiet btn-revoke-lic" data-id="' + lic.id + '" style="font-size: 11px; padding: 2px 8px; border: 1px solid #ff453a; color: #ff453a;">Revoke</button>' : '<span style="color:#8c8c98; font-size:11px;">Revoked</span>') +
+            '</td>' +
+          '</tr>';
+        }).join('');
+
+        tbody.querySelectorAll('.btn-reset-dev').forEach(function (btn) {
+          btn.addEventListener('click', async function () {
+            var licId = this.getAttribute('data-id');
+            var k = sessionStorage.getItem('sfx_admin_key');
+            if (confirm('Reset device activations for this license?')) {
+              await window.SFX_PAYMENT_SERVICE.resetDevice(k, licId);
+              loadAdminData(k);
+            }
+          });
+        });
+
+        tbody.querySelectorAll('.btn-revoke-lic').forEach(function (btn) {
+          btn.addEventListener('click', async function () {
+            var licId = this.getAttribute('data-id');
+            var k = sessionStorage.getItem('sfx_admin_key');
+            var reason = prompt('Reason for revocation (e.g. Refunded, Fraud):', 'Refunded');
+            if (reason) {
+              await window.SFX_PAYMENT_SERVICE.revokeLicense(k, licId, reason);
+              loadAdminData(k);
+            }
+          });
+        });
+      }
+
+      async function loadOrders(key) {
+        var tbody = document.getElementById('orders-tbody');
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: #8c8c98;">Loading...</td></tr>';
+        var orders = await window.SFX_PAYMENT_SERVICE.getAdminOrders(key, 50);
+        if (!orders || !orders.length) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: #8c8c98;">No orders recorded.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = orders.map(function (ord) {
+          var date = new Date(ord.created_at).toLocaleDateString() + ' ' + new Date(ord.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          var stClass = ord.payment_status === 'completed' ? 'active' : 'pending';
+          return '<tr>' +
+            '<td><strong>' + ord.customer_email + '</strong></td>' +
+            '<td>' + (ord.currency === 'INR' ? '₹' : '$') + ord.amount + '</td>' +
+            '<td>' + ord.payment_provider + '</td>' +
+            '<td><code style="font-size: 11px;">' + (ord.provider_order_id || '') + '</code></td>' +
+            '<td><code style="font-size: 11px;">' + (ord.provider_payment_id || '—') + '</code></td>' +
+            '<td><span class="sfx-badge-status ' + stClass + '">' + ord.payment_status + '</span></td>' +
+            '<td>' + date + '</td>' +
+          '</tr>';
+        }).join('');
+      }
+
+      document.getElementById('license-search').addEventListener('input', function () {
+        var k = sessionStorage.getItem('sfx_admin_key');
+        if (k) loadLicenses(k, this.value.trim());
+      });
+
+      document.getElementById('form-issue').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var email = document.getElementById('issue-email').value.trim();
+        var sendEmail = document.getElementById('issue-send-email').checked;
+        var resBox = document.getElementById('issue-result');
+        var k = sessionStorage.getItem('sfx_admin_key');
+
+        resBox.style.display = 'block';
+        resBox.textContent = 'Generating cryptographic license...';
+
+        try {
+          var data = await window.SFX_PAYMENT_SERVICE.issueComplimentaryLicense(k, email, 'pro', 'lifetime', sendEmail);
+          if (data.ok) {
+            resBox.innerHTML = '<strong style="color: #30d158;">License Issued Successfully!</strong><br/>' +
+              'Customer: ' + data.email + '<br/>' +
+              'License Key: <code style="color: #0a84ff; font-weight: bold; font-size: 14px;">' + data.license_key + '</code><br/>' +
+              'Email status: ' + (data.email_delivery?.info || 'Disabled');
+            loadAdminData(k);
+          } else {
+            resBox.innerHTML = '<span style="color: #ff453a;">Failed: ' + (data.message || 'Unknown error') + '</span>';
+          }
+        } catch (err) {
+          resBox.innerHTML = '<span style="color: #ff453a;">Error: ' + err.message + '</span>';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
