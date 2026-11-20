@@ -187,6 +187,9 @@
           <div class="sfx-host-env-pill">
             ● Premiere Pro CC 2024 • Sequence: Epic_Teaser_Cut_v04
           </div>
+          <button type="button" class="sfx-button sfx-button--primary sfx-demo-buy-btn sfx-buy-trigger" style="height: 24px; padding: 0 10px; font-size: 11px; margin-left: 8px; font-weight: 600; text-decoration: none;">
+            Purchase Full Version (₹199)
+          </button>
         </div>
 
         <!-- PLUGIN SHELL (EXACT CODEBASE REUSE) -->
@@ -231,7 +234,7 @@
                   <option value="A3">Track A3</option>
                   <option value="A4">Track A4</option>
                 </select>
-                <span class="sfx-badge sfx-badge--trial" style="border-color: var(--sfx-accent); color: var(--sfx-accent);">Unlocked Pro</span>
+                <button type="button" class="sfx-badge sfx-badge--trial sfx-buy-trigger" style="border-color: var(--sfx-accent); color: var(--sfx-accent); background: rgba(10, 132, 255, 0.1); cursor: pointer; text-decoration: none;" title="Click to purchase license">Demo Mode • Unlock Pro (₹199)</button>
               </div>
             </div>
 
@@ -979,21 +982,6 @@
           </button>
         </form>
 
-        <!-- Test Mode Simulation Card -->
-        <div id="checkout-test-card" style="display: none; background: #16181f; border: 1px dashed var(--sfx-accent); border-radius: 8px; padding: 14px; margin-top: 14px;">
-          <div style="font-weight: 700; font-size: 12.5px; color: var(--sfx-accent); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
-            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--sfx-accent);"></span>
-            Razorpay Test Verification Simulation
-          </div>
-          <div style="font-size: 11.5px; color: var(--sfx-text-muted); margin-bottom: 12px;">
-            Order ID: <code id="test-order-id-display" style="color: #fff;"></code><br/>
-            Backend order registered in Supabase. Click below to simulate Razorpay payment capture and test cryptographic server-side license issuance.
-          </div>
-          <button type="button" class="sfx-site-btn-primary" id="btn-simulate-test-pay" style="width: 100%; padding: 10px; font-size: 13px;">
-            Complete ₹199 Test Payment &amp; Verify Signature
-          </button>
-        </div>
-
         <!-- Step 2: Verified Success Screen -->
         <div id="checkout-success" style="display: none; text-align: left; padding: 4px 0;">
           <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
@@ -1194,6 +1182,7 @@
   <!-- Scripts -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="js/audio-engine.js"></script>
+  <script src="js/browser-demo-adapter.js"></script>
   <script src="js/plugin-controller.js"></script>
   <script src="js/payment-service.js"></script>
   <script src="js/main.js"></script>

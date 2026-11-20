@@ -26,22 +26,27 @@ async function sha256(text: string): Promise<string> {
 }
 
 async function verifyWebhookSignature(rawBody: string, signature: string, secret: string): Promise<boolean> {
-  const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-  const signatureBytes = await crypto.subtle.sign('HMAC', key, encoder.encode(rawBody));
-  const hexSignature = Array.from(new Uint8Array(signatureBytes))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-  return hexSignature.toLowerCase() === signature.trim().toLowerCase();
+  try {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const signatureBytes = await crypto.subtle.sign('HMAC', key, encoder.encode(rawBody));
+    const hexSignature = Array.from(new Uint8Array(signatureBytes))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    return hexSignature.toLowerCase() === signature.trim().toLowerCase();
+  } catch (err) {
+    console.error('Webhook signature error:', err);
+    return false;
+  }
 }
 
-async function sendLicenseEmail(email: string, licenseKey: string, resendApiKey: string): Promise<any> {
+async function sendLicenseEmail(email: string, licenseKey: string, resendApiKey: string): Promise<boolean> {
   try {
     const htmlBody = `
       <!DOCTYPE html>
@@ -95,22 +100,26 @@ Deno.serve(async (req: Request) => {
     const signature = req.headers.get('x-razorpay-signature') || '';
     const webhookSecret = Deno.env.get('RAZORPAY_WEBHOOK_SECRET') || '';
 
-    if (webhookSecret) {
-      const isValid = await verifyWebhookSignature(rawBody, signature, webhookSecret);
-      if (!isValid) {
-        console.error('Invalid webhook signature');
-        return new Response(JSON.stringify({ ok: false, message: 'Invalid webhook signature' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-    } else {
-      console.warn('RAZORPAY_WEBHOOK_SECRET not set in Supabase secrets.');
+    if (!webhookSecret) {
+      console.error('RAZORPAY_WEBHOOK_SECRET is not configured in Supabase secrets');
+      return new Response(JSON.stringify({ ok: false, message: 'Webhook secret not configured' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const isValid = await verifyWebhookSignature(rawBody, signature, webhookSecret);
+    if (!isValid) {
+      console.error('Invalid Razorpay webhook signature');
+      return new Response(JSON.stringify({ ok: false, message: 'Invalid webhook signature' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     const payload = JSON.parse(rawBody);
     const event = payload.event;
-    console.log('Received Razorpay webhook event:', event);
+    console.log('Verified Razorpay webhook event:', event);
 
     if (event === 'payment.captured' || event === 'order.paid') {
       const paymentEntity = payload.payload?.payment?.entity || {};
@@ -130,7 +139,7 @@ Deno.serve(async (req: Request) => {
         const { data: compData, error: compError } = await supabase.rpc('sfx_complete_payment_order', {
           p_provider_order_id: orderId,
           p_provider_payment_id: paymentId,
-          p_signature: signature || 'webhook_verified',
+          p_signature: signature,
           p_license_key_hash: keyHash,
           p_expires_at: null,
           p_max_devices: 1
@@ -152,7 +161,7 @@ Deno.serve(async (req: Request) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   } catch (err: any) {
-    console.error('Webhook processing error:', err);
+    console.error('Unhandled webhook error:', err);
     return new Response(JSON.stringify({ ok: false, message: err.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

@@ -26,19 +26,24 @@ async function sha256(text: string): Promise<string> {
 }
 
 async function verifyHmacSha256(data: string, signature: string, secret: string): Promise<boolean> {
-  const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-  const signatureBytes = await crypto.subtle.sign('HMAC', key, encoder.encode(data));
-  const hexSignature = Array.from(new Uint8Array(signatureBytes))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-  return hexSignature.toLowerCase() === signature.trim().toLowerCase();
+  try {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const signatureBytes = await crypto.subtle.sign('HMAC', key, encoder.encode(data));
+    const hexSignature = Array.from(new Uint8Array(signatureBytes))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    return hexSignature.toLowerCase() === signature.trim().toLowerCase();
+  } catch (err) {
+    console.error('HMAC verification error:', err);
+    return false;
+  }
 }
 
 async function sendLicenseEmail(
@@ -157,7 +162,7 @@ Deno.serve(async (req: Request) => {
     if (!razorpay_order_id || !razorpay_payment_id || !email) {
       return new Response(JSON.stringify({
         ok: false,
-        message: 'Missing required payment verification parameters (order_id, payment_id, email).'
+        message: 'Missing required parameters (razorpay_order_id, razorpay_payment_id, email).'
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -167,30 +172,36 @@ Deno.serve(async (req: Request) => {
     const cleanEmail = email.trim().toLowerCase();
     const rzpSecret = Deno.env.get('RAZORPAY_KEY_SECRET') || '';
 
-    // Verify cryptographic signature if secret is present
-    if (rzpSecret) {
-      const payload = `${razorpay_order_id}|${razorpay_payment_id}`;
-      const isValid = await verifyHmacSha256(payload, razorpay_signature || '', rzpSecret);
-      if (!isValid) {
-        return new Response(JSON.stringify({
-          ok: false,
-          code: 'INVALID_SIGNATURE',
-          message: 'Razorpay payment signature verification failed. Untrusted payment.'
-        }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-    } else {
-      // In test mode without secret set, only accept if test order ID or signature provided
-      console.warn('RAZORPAY_KEY_SECRET not set in Supabase secrets. Operating in test verification mode.');
+    if (!rzpSecret) {
+      return new Response(JSON.stringify({
+        ok: false,
+        code: 'MISSING_SECRET',
+        message: 'RAZORPAY_KEY_SECRET is not configured in Supabase secrets.'
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Cryptographic signature verification using HMAC-SHA256
+    const payload = `${razorpay_order_id}|${razorpay_payment_id}`;
+    const isValid = await verifyHmacSha256(payload, razorpay_signature || '', rzpSecret);
+    if (!isValid) {
+      return new Response(JSON.stringify({
+        ok: false,
+        code: 'INVALID_SIGNATURE',
+        message: 'Razorpay payment signature verification failed. Untrusted payment.'
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Generate unique license key & cryptographic hash
+    // Generate unique license key & cryptographic SHA-256 hash
     const rawLicenseKey = generateLicenseKey();
     const keyHash = await sha256(rawLicenseKey);
 
@@ -198,7 +209,7 @@ Deno.serve(async (req: Request) => {
     const { data: orderData, error: orderError } = await supabase.rpc('sfx_complete_payment_order', {
       p_provider_order_id: razorpay_order_id,
       p_provider_payment_id: razorpay_payment_id,
-      p_signature: razorpay_signature || 'test_verified_signature',
+      p_signature: razorpay_signature,
       p_license_key_hash: keyHash,
       p_expires_at: null, // Lifetime license
       p_max_devices: 1

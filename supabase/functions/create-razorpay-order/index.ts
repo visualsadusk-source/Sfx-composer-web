@@ -27,57 +27,61 @@ Deno.serve(async (req: Request) => {
     const rzpKeyId = Deno.env.get('RAZORPAY_KEY_ID') || '';
     const rzpKeySecret = Deno.env.get('RAZORPAY_KEY_SECRET') || '';
 
+    if (!rzpKeyId || !rzpKeySecret) {
+      return new Response(JSON.stringify({
+        ok: false,
+        code: 'MISSING_RAZORPAY_CONFIG',
+        message: 'Razorpay credentials (RAZORPAY_KEY_ID & RAZORPAY_KEY_SECRET) are not configured in Supabase secrets.'
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    let razorpayOrderId = '';
-    let isTestMock = false;
+    // Create authentic order via official Razorpay Orders API
+    const authHeader = 'Basic ' + btoa(`${rzpKeyId}:${rzpKeySecret}`);
+    const rzpResponse = await fetch('https://api.razorpay.com/v1/orders', {
+      method: 'POST',
+      headers: {
+        'Authorization': authHeader,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        amount: amount,
+        currency: currency,
+        receipt: `rcpt_${Date.now().toString(36)}`,
+        notes: {
+          customer_email: cleanEmail,
+          product: 'SFX Composer Pro Lifetime License',
+          price_inr: '199'
+        }
+      })
+    });
 
-    if (rzpKeyId && rzpKeySecret) {
-      // Create order via Razorpay API
-      const authHeader = 'Basic ' + btoa(`${rzpKeyId}:${rzpKeySecret}`);
-      const rzpResponse = await fetch('https://api.razorpay.com/v1/orders', {
-        method: 'POST',
-        headers: {
-          'Authorization': authHeader,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          amount: amount,
-          currency: currency,
-          receipt: `rcpt_${Date.now().toString(36)}`,
-          notes: {
-            customer_email: cleanEmail,
-            product: 'SFX Composer Pro + SFX Pack',
-            price_inr: '199'
-          }
-        })
+    if (!rzpResponse.ok) {
+      const errText = await rzpResponse.text();
+      console.error('Razorpay Orders API error:', errText);
+      return new Response(JSON.stringify({
+        ok: false,
+        message: 'Failed to create order on Razorpay API',
+        details: errText
+      }), {
+        status: 502,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
-
-      if (!rzpResponse.ok) {
-        const errText = await rzpResponse.text();
-        console.error('Razorpay API error:', errText);
-        return new Response(JSON.stringify({ ok: false, message: 'Failed to create Razorpay order', details: errText }), {
-          status: 502,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      const rzpData = await rzpResponse.json();
-      razorpayOrderId = rzpData.id;
-    } else {
-      // Test mode fallback when Razorpay keys are not yet configured in Supabase secrets
-      isTestMock = true;
-      const randSuffix = Math.random().toString(36).substring(2, 10).toUpperCase();
-      razorpayOrderId = `order_test_${Date.now()}_${randSuffix}`;
-      console.warn('RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET not set. Created test-mode order ID:', razorpayOrderId);
     }
+
+    const rzpData = await rzpResponse.json();
+    const razorpayOrderId = rzpData.id;
 
     // Record pending order in Supabase
     const { data: recordData, error: recordError } = await supabase.rpc('sfx_record_payment_order', {
       p_customer_email: cleanEmail,
-      p_payment_provider: isTestMock ? 'razorpay_test' : 'razorpay',
+      p_payment_provider: 'razorpay',
       p_provider_order_id: razorpayOrderId,
       p_amount: amount / 100, // stored as 199.00
       p_currency: currency
@@ -94,17 +98,15 @@ Deno.serve(async (req: Request) => {
     return new Response(JSON.stringify({
       ok: true,
       order_id: razorpayOrderId,
-      amount: amount,
-      currency: currency,
-      key_id: rzpKeyId || 'rzp_test_placeholder',
-      test_mode: isTestMock,
-      warning: isTestMock ? 'RAZORPAY_KEY_ID not configured in Supabase secrets. Running in test verification mode.' : undefined
+      amount: rzpData.amount || amount,
+      currency: rzpData.currency || currency,
+      key_id: rzpKeyId
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   } catch (err: any) {
-    console.error('Unhandled error:', err);
+    console.error('Unhandled error in create-razorpay-order:', err);
     return new Response(JSON.stringify({ ok: false, message: err.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

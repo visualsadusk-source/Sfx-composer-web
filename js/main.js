@@ -250,9 +250,6 @@
     var emailInput = document.getElementById('checkout-email');
     var submitBtn = document.getElementById('checkout-submit-btn');
     var errorMsg = document.getElementById('checkout-error-msg');
-    var testCard = document.getElementById('checkout-test-card');
-    var testOrderIdDisplay = document.getElementById('test-order-id-display');
-    var btnSimulateTest = document.getElementById('btn-simulate-test-pay');
     var successView = document.getElementById('checkout-success');
     var issuedKeyVal = document.getElementById('issued-license-key-val');
     var copyKeyBtn = document.getElementById('btn-copy-license-key');
@@ -261,14 +258,11 @@
     var successEmailStatusDisp = document.getElementById('success-email-status-display');
     var goToDashboardBtn = document.getElementById('btn-go-to-dashboard');
 
-    var currentCreatedOrder = null;
-
     function openCheckout() {
       if (modal) {
         modal.classList.add('is-open');
         document.body.style.overflow = 'hidden';
         if (checkoutForm) checkoutForm.style.display = 'flex';
-        if (testCard) testCard.style.display = 'none';
         if (successView) successView.style.display = 'none';
         if (errorMsg) errorMsg.style.display = 'none';
         if (submitBtn) {
@@ -295,93 +289,97 @@
     if (modalClose) modalClose.addEventListener('click', closeCheckout);
     if (modalBackdrop) modalBackdrop.addEventListener('click', closeCheckout);
 
-    // Form submit: Call Supabase create-razorpay-order
+    // Form submit: Call Supabase create-razorpay-order and launch Razorpay Standard Checkout
     if (checkoutForm) {
       checkoutForm.addEventListener('submit', async function (e) {
         e.preventDefault();
         var email = emailInput.value.trim().toLowerCase();
-        if (!email) return;
+        if (!email || !email.includes('@')) {
+          if (errorMsg) {
+            errorMsg.textContent = 'Please enter a valid email address.';
+            errorMsg.style.display = 'block';
+          }
+          return;
+        }
 
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Requesting Order from Supabase…';
+        submitBtn.textContent = 'Creating secure Razorpay order…';
         if (errorMsg) errorMsg.style.display = 'none';
 
         try {
           var orderData = await window.SFX_PAYMENT_SERVICE.createOrder(email);
-          currentCreatedOrder = orderData;
-          currentCreatedOrder.email = email;
 
-          // If valid live Razorpay key is present and Razorpay script loaded
-          if (!orderData.test_mode && typeof window.Razorpay === 'function' && orderData.key_id && !orderData.key_id.includes('placeholder')) {
-            submitBtn.textContent = 'Opening Razorpay Checkout…';
+          if (typeof window.Razorpay !== 'function') {
+            throw new Error('Razorpay Checkout SDK failed to load. Please check your internet connection.');
+          }
 
-            var options = {
-              key: orderData.key_id,
-              amount: orderData.amount,
-              currency: orderData.currency,
-              name: 'SFX Composer',
-              description: 'SFX Composer Pro + SFX Starter Pack',
-              image: 'assets/brand/mark-128.png',
-              order_id: orderData.order_id,
-              prefill: {
-                email: email
-              },
-              theme: {
-                color: '#0a84ff'
-              },
-              handler: async function (response) {
+          if (!orderData.key_id || orderData.key_id === 'rzp_test_placeholder') {
+            throw new Error(orderData.message || 'Razorpay Key ID is not configured on the backend. Please configure RAZORPAY_KEY_ID in Supabase secrets.');
+          }
+
+          submitBtn.textContent = 'Opening Razorpay Checkout…';
+
+          var options = {
+            key: orderData.key_id,
+            amount: orderData.amount,
+            currency: orderData.currency || 'INR',
+            name: 'SFX Composer',
+            description: 'SFX Composer Pro Lifetime License',
+            image: 'assets/brand/mark-128.png',
+            order_id: orderData.order_id,
+            prefill: {
+              email: email
+            },
+            theme: {
+              color: '#0a84ff'
+            },
+            handler: async function (response) {
+              submitBtn.textContent = 'Verifying cryptographic signature…';
+              try {
                 await verifyAndDisplayPayment({
                   razorpay_order_id: response.razorpay_order_id || orderData.order_id,
                   razorpay_payment_id: response.razorpay_payment_id,
                   razorpay_signature: response.razorpay_signature,
                   email: email
                 });
-              },
-              modal: {
-                ondismiss: function () {
-                  submitBtn.disabled = false;
-                  submitBtn.innerHTML = 'Pay ₹199 via Razorpay';
+              } catch (verErr) {
+                if (errorMsg) {
+                  errorMsg.textContent = 'Verification Failed: ' + verErr.message;
+                  errorMsg.style.display = 'block';
+                }
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> Pay ₹199 via Razorpay';
+              }
+            },
+            modal: {
+              ondismiss: function () {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> Pay ₹199 via Razorpay';
+                if (errorMsg) {
+                  errorMsg.textContent = 'Payment cancelled or dismissed. You can retry whenever you are ready.';
+                  errorMsg.style.display = 'block';
                 }
               }
-            };
+            }
+          };
 
-            var rzp = new window.Razorpay(options);
-            rzp.open();
-          } else {
-            // Test Mode: show test simulation card
-            checkoutForm.style.display = 'none';
-            testCard.style.display = 'block';
-            testOrderIdDisplay.textContent = orderData.order_id;
-          }
+          var rzp = new window.Razorpay(options);
+          rzp.on('payment.failed', function (resp) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> Pay ₹199 via Razorpay';
+            if (errorMsg) {
+              errorMsg.textContent = 'Payment Failed: ' + (resp.error.description || resp.error.reason || 'Transaction could not be completed.');
+              errorMsg.style.display = 'block';
+            }
+          });
+          rzp.open();
         } catch (err) {
           if (errorMsg) {
             errorMsg.textContent = 'Checkout Error: ' + err.message;
             errorMsg.style.display = 'block';
           }
           submitBtn.disabled = false;
-          submitBtn.innerHTML = 'Pay ₹199 via Razorpay';
-        }
-      });
-    }
-
-    // Test payment simulation button
-    if (btnSimulateTest) {
-      btnSimulateTest.addEventListener('click', async function () {
-        if (!currentCreatedOrder) return;
-        btnSimulateTest.disabled = true;
-        btnSimulateTest.textContent = 'Verifying Server Signature & Issuing License…';
-
-        try {
-          await verifyAndDisplayPayment({
-            razorpay_order_id: currentCreatedOrder.order_id,
-            razorpay_payment_id: 'pay_test_' + Date.now().toString(36).toUpperCase(),
-            razorpay_signature: 'test_verified_signature',
-            email: currentCreatedOrder.email
-          });
-        } catch (err) {
-          alert('Verification failed: ' + err.message);
-          btnSimulateTest.disabled = false;
-          btnSimulateTest.textContent = 'Complete ₹199 Test Payment & Verify Signature';
+          submitBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> Pay ₹199 via Razorpay';
         }
       });
     }
@@ -391,7 +389,6 @@
       var result = await window.SFX_PAYMENT_SERVICE.verifyPayment(payload);
 
       if (checkoutForm) checkoutForm.style.display = 'none';
-      if (testCard) testCard.style.display = 'none';
       if (successView) successView.style.display = 'block';
 
       if (issuedKeyVal) issuedKeyVal.textContent = result.license_key;
