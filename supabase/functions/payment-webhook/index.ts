@@ -1,29 +1,6 @@
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
+import { generateLicenseKey, sha256, encryptLicenseKey } from '../_shared/crypto.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-function generateLicenseKey(): string {
-  const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-  const randomBytes = new Uint8Array(16);
-  crypto.getRandomValues(randomBytes);
-  
-  const chunks: string[] = ['SFX'];
-  for (let c = 0; c < 4; c++) {
-    let chunk = '';
-    for (let i = 0; i < 4; i++) {
-      const idx = randomBytes[c * 4 + i] % chars.length;
-      chunk += chars[idx];
-    }
-    chunks.push(chunk);
-  }
-  return chunks.join('-');
-}
-
-async function sha256(text: string): Promise<string> {
-  const buffer = new TextEncoder().encode(text.trim().toUpperCase());
-  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
 
 async function verifyWebhookSignature(rawBody: string, signature: string, secret: string): Promise<boolean> {
   try {
@@ -131,6 +108,7 @@ Deno.serve(async (req: Request) => {
         const cleanEmail = email.trim().toLowerCase();
         const rawKey = generateLicenseKey();
         const keyHash = await sha256(rawKey);
+        const encryptedKey = await encryptLicenseKey(rawKey);
 
         const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
         const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
@@ -142,7 +120,8 @@ Deno.serve(async (req: Request) => {
           p_signature: signature,
           p_license_key_hash: keyHash,
           p_expires_at: null,
-          p_max_devices: 1
+          p_max_devices: 1,
+          p_encrypted_license_key: encryptedKey
         });
 
         if (compError) {

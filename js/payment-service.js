@@ -86,21 +86,28 @@
       return data;
     },
 
-    // ── 3. Customer Portal: Fetch Orders & Licenses ──
-    getCustomerPortal: async function (email) {
-      var cleanEmail = String(email || '').trim().toLowerCase();
-      if (!cleanEmail || !cleanEmail.includes('@')) {
-        throw new Error('Valid email required');
+    // ── 3. Customer Portal: Fetch Orders & Decrypted Licenses (Secured) ──
+    getCustomerPortal: async function (authArg) {
+      var headers = {
+        'Content-Type': 'application/json',
+        'apikey': CONFIG.SUPABASE_ANON_KEY
+      };
+      var body = {};
+
+      if (typeof authArg === 'string') {
+        // Auth token string
+        headers['Authorization'] = 'Bearer ' + authArg;
+      } else if (authArg && typeof authArg === 'object') {
+        if (authArg.token) {
+          headers['Authorization'] = 'Bearer ' + authArg.token;
+        }
+        body = authArg;
       }
 
-      var res = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/rpc/sfx_get_customer_portal_v2', {
+      var res = await fetch(CONFIG.FUNCTIONS_URL + '/customer-portal', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': CONFIG.SUPABASE_ANON_KEY,
-          'Authorization': 'Bearer ' + CONFIG.SUPABASE_ANON_KEY
-        },
-        body: JSON.stringify({ p_email: cleanEmail })
+        headers: headers,
+        body: JSON.stringify(body)
       });
 
       var data = await res.json().catch(function () {
@@ -114,92 +121,223 @@
       return data;
     },
 
-    // ── 4. Admin API RPC Helpers (requires serviceKey in admin session) ──
-    getAdminStats: async function (serviceKey) {
-      var res = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/rpc/sfx_admin_get_stats_v2', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': serviceKey,
-          'Authorization': 'Bearer ' + serviceKey
-        },
-        body: '{}'
-      });
-      return await res.json();
-    },
+    // ── 4. Admin API: Create / Issue License ──
+    createLicense: async function (authToken, params) {
+      var payload = {};
+      if (typeof params === 'string') {
+        payload.email = params;
+        payload.send_email = true;
+        payload.max_devices = 1;
+      } else if (params && typeof params === 'object') {
+        payload.email = params.email;
+        payload.send_email = params.send_email !== undefined ? params.send_email : true;
+        payload.max_devices = params.max_devices || 1;
+        payload.expires_at = params.expires_at || null;
+        payload.license_type = params.license_type || 'lifetime';
+      }
 
-    getAdminOrders: async function (serviceKey, limit) {
-      var res = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/rpc/sfx_admin_get_orders_v2', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': serviceKey,
-          'Authorization': 'Bearer ' + serviceKey
-        },
-        body: JSON.stringify({ p_limit: limit || 50 })
-      });
-      return await res.json();
-    },
+      var cleanEmail = String(payload.email || '').trim().toLowerCase();
+      if (!cleanEmail || !cleanEmail.includes('@')) {
+        throw new Error('A valid customer email is required.');
+      }
+      payload.email = cleanEmail;
 
-    searchAdminLicenses: async function (serviceKey, query) {
-      var res = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/rpc/sfx_admin_search_v2', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': serviceKey,
-          'Authorization': 'Bearer ' + serviceKey
-        },
-        body: JSON.stringify({ p_query: query || '' })
-      });
-      return await res.json();
-    },
-
-    revokeLicense: async function (serviceKey, licenseId, reason) {
-      var res = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/rpc/sfx_revoke_license_v2', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': serviceKey,
-          'Authorization': 'Bearer ' + serviceKey
-        },
-        body: JSON.stringify({
-          p_license_id: licenseId,
-          p_reason: reason || 'Revoked by admin'
-        })
-      });
-      return await res.json();
-    },
-
-    resetDevice: async function (serviceKey, licenseId) {
-      var res = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/rpc/sfx_reset_device_v2', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': serviceKey,
-          'Authorization': 'Bearer ' + serviceKey
-        },
-        body: JSON.stringify({
-          p_license_id: licenseId
-        })
-      });
-      return await res.json();
-    },
-
-    issueComplimentaryLicense: async function (serviceKey, email, type, expiryArg, sendEmail) {
-      var cleanEmail = String(email || '').trim().toLowerCase();
       var res = await fetch(CONFIG.FUNCTIONS_URL + '/create-license', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + serviceKey
+          'Authorization': 'Bearer ' + authToken
+        },
+        body: JSON.stringify(payload)
+      });
+
+      var data = await res.json().catch(function () {
+        return { ok: false, message: 'Failed to communicate with licensing service' };
+      });
+
+      if (!res.ok || !data.ok) {
+        throw new Error(data.message || 'Failed to create license');
+      }
+
+      return data;
+    },
+
+    // Alias for backward compatibility
+    issueComplimentaryLicense: async function (authToken, email, type, expiryArg, sendEmail) {
+      return await this.createLicense(authToken, {
+        email: email,
+        license_type: type || 'lifetime',
+        expires_at: expiryArg || null,
+        send_email: !!sendEmail
+      });
+    },
+
+    // ── 5. Admin API: Load Licenses, Stats, and Orders ──
+    getAdminLicensesData: async function (authToken, query) {
+      var res = await fetch(CONFIG.FUNCTIONS_URL + '/admin-licenses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + authToken
+        },
+        body: JSON.stringify({ action: 'list', query: query || '' })
+      });
+
+      var data = await res.json().catch(function () {
+        return { ok: false, message: 'Failed to load admin data' };
+      });
+
+      if (!res.ok || !data.ok) {
+        throw new Error(data.message || 'Failed to load admin data');
+      }
+
+      return data;
+    },
+
+    // Backward compatibility helper
+    getAdminStats: async function (authToken) {
+      try {
+        var data = await this.getAdminLicensesData(authToken, '');
+        return data.stats || {};
+      } catch (e) {
+        // Fallback to direct RPC
+        var res = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/rpc/sfx_admin_get_stats_v2', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': authToken,
+            'Authorization': 'Bearer ' + authToken
+          },
+          body: '{}'
+        });
+        return await res.json();
+      }
+    },
+
+    // Backward compatibility helper
+    getAdminOrders: async function (authToken, limit) {
+      try {
+        var data = await this.getAdminLicensesData(authToken, '');
+        return data.orders || [];
+      } catch (e) {
+        var res = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/rpc/sfx_admin_get_orders_v2', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': authToken,
+            'Authorization': 'Bearer ' + authToken
+          },
+          body: JSON.stringify({ p_limit: limit || 50 })
+        });
+        return await res.json();
+      }
+    },
+
+    // Backward compatibility helper
+    searchAdminLicenses: async function (authToken, query) {
+      try {
+        var data = await this.getAdminLicensesData(authToken, query || '');
+        return data.licenses || [];
+      } catch (e) {
+        var res = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/rpc/sfx_admin_search_v2', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': authToken,
+            'Authorization': 'Bearer ' + authToken
+          },
+          body: JSON.stringify({ p_query: query || '' })
+        });
+        return await res.json();
+      }
+    },
+
+    // ── 6. Admin License Actions (Edge Function based) ──
+    revokeLicense: async function (authToken, licenseId, reason) {
+      var res = await fetch(CONFIG.FUNCTIONS_URL + '/admin-licenses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + authToken
         },
         body: JSON.stringify({
-          email: cleanEmail,
-          max_devices: 1,
-          send_email: !!sendEmail
+          action: 'revoke',
+          license_id: licenseId,
+          reason: reason || 'Revoked by admin'
         })
       });
-      return await res.json();
+      var data = await res.json().catch(function () { return { ok: false }; });
+      if (!res.ok || !data.ok) throw new Error(data.message || 'Failed to revoke license');
+      return data;
+    },
+
+    reactivateLicense: async function (authToken, licenseId) {
+      var res = await fetch(CONFIG.FUNCTIONS_URL + '/admin-licenses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + authToken
+        },
+        body: JSON.stringify({
+          action: 'reactivate',
+          license_id: licenseId
+        })
+      });
+      var data = await res.json().catch(function () { return { ok: false }; });
+      if (!res.ok || !data.ok) throw new Error(data.message || 'Failed to reactivate license');
+      return data;
+    },
+
+    resetDevice: async function (authToken, licenseId) {
+      var res = await fetch(CONFIG.FUNCTIONS_URL + '/admin-licenses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + authToken
+        },
+        body: JSON.stringify({
+          action: 'reset_device',
+          license_id: licenseId
+        })
+      });
+      var data = await res.json().catch(function () { return { ok: false }; });
+      if (!res.ok || !data.ok) throw new Error(data.message || 'Failed to reset device activations');
+      return data;
+    },
+
+    extendExpiry: async function (authToken, licenseId, newExpiresAt) {
+      var res = await fetch(CONFIG.FUNCTIONS_URL + '/admin-licenses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + authToken
+        },
+        body: JSON.stringify({
+          action: 'extend_expiry',
+          license_id: licenseId,
+          expires_at: newExpiresAt || null
+        })
+      });
+      var data = await res.json().catch(function () { return { ok: false }; });
+      if (!res.ok || !data.ok) throw new Error(data.message || 'Failed to extend license expiry');
+      return data;
+    },
+
+    revealLicenseKey: async function (authToken, licenseId) {
+      var res = await fetch(CONFIG.FUNCTIONS_URL + '/admin-licenses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + authToken
+        },
+        body: JSON.stringify({
+          action: 'reveal_key',
+          license_id: licenseId
+        })
+      });
+      var data = await res.json().catch(function () { return { ok: false }; });
+      if (!res.ok || !data.ok) throw new Error(data.message || 'Failed to reveal license key');
+      return data;
     }
   };
 

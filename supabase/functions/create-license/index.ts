@@ -1,30 +1,7 @@
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import { verifyAdminRequest } from '../_shared/auth.ts';
+import { generateLicenseKey, sha256, encryptLicenseKey } from '../_shared/crypto.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-function generateLicenseKey(): string {
-  const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'; // Base32 avoiding ambiguous 0, O, 1, I
-  const randomBytes = new Uint8Array(16);
-  crypto.getRandomValues(randomBytes);
-  
-  const chunks: string[] = ['SFX'];
-  for (let c = 0; c < 4; c++) {
-    let chunk = '';
-    for (let i = 0; i < 4; i++) {
-      const idx = randomBytes[c * 4 + i] % chars.length;
-      chunk += chars[idx];
-    }
-    chunks.push(chunk);
-  }
-  return chunks.join('-');
-}
-
-async function sha256(text: string): Promise<string> {
-  const buffer = new TextEncoder().encode(text.trim().toUpperCase());
-  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
 
 async function sendLicenseEmail(
   email: string,
@@ -144,7 +121,13 @@ Deno.serve(async (req: Request) => {
 
   try {
     const body = await req.json();
-    const { email, expires_at = null, max_devices = 1, send_email = true } = body;
+    const {
+      email,
+      expires_at = null,
+      max_devices = 1,
+      send_email = true,
+      license_type = 'lifetime'
+    } = body;
 
     if (!email || typeof email !== 'string' || !email.includes('@')) {
       return new Response(JSON.stringify({
@@ -160,18 +143,21 @@ Deno.serve(async (req: Request) => {
     const cleanEmail = email.trim().toLowerCase();
     const rawKey = generateLicenseKey();
     const keyHash = await sha256(rawKey);
+    const encryptedKey = await encryptLicenseKey(rawKey);
 
     // Initialize Supabase admin client with server-side service key
     const supabase = createClient(supabaseUrl, serviceKey, {
       auth: { persistSession: false }
     });
 
-    // Execute atomic stored procedure sfx_create_license_v2
+    // Execute atomic stored procedure sfx_create_license_v2 with encrypted key
     const { data, error } = await supabase.rpc('sfx_create_license_v2', {
       p_email: cleanEmail,
       p_license_key_hash: keyHash,
       p_expires_at: expires_at,
-      p_max_devices: max_devices || 1
+      p_max_devices: max_devices || 1,
+      p_encrypted_license_key: encryptedKey,
+      p_license_type: license_type || 'lifetime'
     });
 
     if (error) {
@@ -197,12 +183,13 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // Return the plaintext key ONLY ONCE in this response
+    // Return the plaintext key
     return new Response(JSON.stringify({
       ok: true,
       license_key: rawKey,
       email: cleanEmail,
       expires_at: expires_at,
+      license_type: license_type || 'lifetime',
       max_devices: max_devices || 1,
       license_id: data.license_id,
       customer_id: data.customer_id,

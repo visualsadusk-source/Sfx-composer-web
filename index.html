@@ -810,47 +810,94 @@
       <div class="sfx-modal-header">
         <h3 class="sfx-modal-title">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-          Customer Dashboard &amp; License Manager
+          Customer Dashboard &amp; My Licenses
         </h3>
         <button class="sfx-modal-close" id="cdm-close">&times;</button>
       </div>
       <div class="sfx-modal-body" style="display: flex; flex-direction: column; gap: 16px;">
-        <!-- Email Lookup Bar -->
-        <div style="background: var(--sfx-surface-raised); border: 1px solid var(--sfx-border); border-radius: 8px; padding: 12px; display: flex; gap: 10px; align-items: center;">
-          <input type="email" id="cdm-lookup-email" class="sfx-input" placeholder="Enter your registered purchase email" style="flex: 1; height: 36px; padding: 0 12px; font-size: 12.5px;" />
-          <button type="button" id="cdm-lookup-btn" class="sfx-site-btn-primary" style="height: 36px; padding: 0 16px; font-size: 12.5px;">
-            Lookup Account
-          </button>
+        
+        <!-- VIEW 1: SECURE EMAIL VERIFICATION (OTP / MAGIC LINK) -->
+        <div id="cdm-auth-view" style="display: block;">
+          <div style="background: var(--sfx-surface-raised); border: 1px solid var(--sfx-border); border-radius: 8px; padding: 20px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+              <div style="width: 28px; height: 28px; border-radius: 6px; background: rgba(10,132,255,0.15); border: 1px solid rgba(10,132,255,0.3); display: flex; align-items: center; justify-content: center; color: var(--sfx-accent);">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </div>
+              <h4 style="font-size: 15px; font-weight: 700; color: #fff; margin: 0;">Access Your Licenses &amp; Downloads</h4>
+            </div>
+            <p style="font-size: 12.5px; color: var(--sfx-text-muted); line-height: 1.5; margin: 0 0 16px 0;">
+              To protect your license keys from unauthorized access, please verify ownership of your registered purchase email address.
+            </p>
+
+            <!-- Recent Purchase Quick Access Banner (If verified session found) -->
+            <div id="cdm-recent-session-banner" style="display: none; background: rgba(0, 255, 102, 0.08); border: 1px solid rgba(0, 255, 102, 0.25); border-radius: 6px; padding: 12px; margin-bottom: 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div>
+                  <span style="color: var(--sfx-positive); font-weight: 700; font-size: 12px;">✓ Verified Purchase on this device:</span>
+                  <strong id="cdm-recent-session-email" style="color: #fff; font-size: 12px; margin-left: 4px;"></strong>
+                </div>
+                <button type="button" id="cdm-btn-instant-unlock" class="sfx-site-btn-primary" style="height: 28px; padding: 0 12px; font-size: 11px;">
+                  Open My Dashboard
+                </button>
+              </div>
+            </div>
+
+            <!-- Email Form (Step 1) -->
+            <form id="cdm-form-request-otp" style="display: flex; flex-direction: column; gap: 10px;">
+              <label style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sfx-text-muted); font-weight: 600;">Registered Email Address</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="email" id="cdm-email-input" class="sfx-input" placeholder="editor@studio.com" style="flex: 1; height: 38px; padding: 0 12px; font-size: 13px;" required />
+                <button type="submit" id="cdm-btn-send-otp" class="sfx-site-btn-primary" style="height: 38px; padding: 0 18px; font-size: 12.5px; font-weight: 700; white-space: nowrap;">
+                  Send Code
+                </button>
+              </div>
+            </form>
+
+            <!-- OTP Code Form (Step 2 - Revealed when code requested) -->
+            <div id="cdm-otp-step" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--sfx-border);">
+              <label style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sfx-accent); font-weight: 700; display: block; margin-bottom: 6px;">Enter 6-Digit Email Code</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="cdm-otp-input" class="sfx-input" placeholder="123456" maxlength="6" style="flex: 1; height: 38px; padding: 0 12px; font-size: 16px; font-family: monospace; letter-spacing: 0.2em; text-align: center;" />
+                <button type="button" id="cdm-btn-verify-otp" class="sfx-site-btn-primary" style="height: 38px; padding: 0 18px; font-size: 12.5px; font-weight: 700; white-space: nowrap;">
+                  Verify &amp; Access
+                </button>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                <button type="button" id="cdm-btn-resend-otp" class="sfx-button sfx-button--quiet" style="font-size: 11px; color: var(--sfx-text-muted); border: none; padding: 0; cursor: pointer;">
+                  Didn't receive code? Resend
+                </button>
+                <button type="button" id="cdm-btn-change-email" class="sfx-button sfx-button--quiet" style="font-size: 11px; color: var(--sfx-text-muted); border: none; padding: 0; cursor: pointer;">
+                  Change Email
+                </button>
+              </div>
+            </div>
+
+            <div id="cdm-auth-status" style="display: none; margin-top: 12px; padding: 10px 12px; border-radius: 6px; font-size: 12px;"></div>
+          </div>
         </div>
 
-        <div id="cdm-status-msg" style="display: none; padding: 8px 12px; border-radius: 6px; font-size: 12px;"></div>
-
-        <!-- License & Purchase Content Container -->
-        <div id="cdm-content-container">
-          <!-- Active License Card -->
-          <div class="sfx-dashboard-card" style="margin-bottom: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <div style="font-weight: 700; font-size: 14px; color: #fff;">SFX Composer Pro v2.4</div>
-                <div style="font-size: 11.5px; color: var(--sfx-text-muted);" id="cdm-display-owner">Licensed Customer: Please enter your email above</div>
-              </div>
-              <span class="sfx-badge-status active" id="cdm-display-status">Active Lifetime</span>
+        <!-- VIEW 2: VERIFIED DASHBOARD & MY LICENSES -->
+        <div id="cdm-dashboard-view" style="display: none; flex-direction: column; gap: 14px;">
+          <!-- Account Status Header -->
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--sfx-surface-raised); border: 1px solid var(--sfx-border); border-radius: 6px;">
+            <div>
+              <span style="font-size: 11px; color: var(--sfx-text-muted);">Verified Customer: </span>
+              <strong id="cdm-auth-email-display" style="color: #fff; font-size: 13px;"></strong>
             </div>
-
-            <div style="background: #000; border: 1px solid var(--sfx-border); padding: 10px 14px; border-radius: 6px; font-size: 12px; display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <span style="color: var(--sfx-text-muted); font-size: 11px;">Workstation Status: </span>
-                <strong id="cdm-display-device" style="color: #fff;">Ready for Activation (1 Device Limit)</strong>
-              </div>
-              <button type="button" id="cdm-btn-reset-device" class="sfx-button sfx-button--quiet" style="height: 24px; font-size: 10.5px; border: 1px solid var(--sfx-border);">
-                Transfer Workstation
-              </button>
-            </div>
+            <button type="button" id="cdm-btn-signout" class="sfx-button sfx-button--quiet" style="height: 26px; padding: 0 10px; font-size: 11px; border: 1px solid var(--sfx-border);">
+              Switch Email / Sign Out
+            </button>
           </div>
 
-          <!-- Downloads Card -->
-          <div class="sfx-dashboard-card" style="margin-bottom: 12px;">
-            <div style="font-size: 13px; font-weight: 700; color: #fff;">Download Installer &amp; Extension Packages</div>
+          <!-- Dynamic Licenses Container -->
+          <div id="cdm-licenses-container">
+            <!-- Rendered by JS -->
+          </div>
+
+          <!-- Direct Downloads Card -->
+          <div class="sfx-dashboard-card">
+            <div style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px;">Download Plugin Packages</div>
+            <div style="font-size: 11.5px; color: var(--sfx-text-muted); margin-bottom: 12px;">Compatible with Premiere Pro &amp; After Effects CC 2021 – 2026 (Windows &amp; macOS Apple Silicon / Intel)</div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
               <a href="/downloads/sfx-composer-pro-v2.4.0.zxp" download class="sfx-button sfx-button--quiet" style="height: 38px; border: 1px solid var(--sfx-border); justify-content: center; font-size: 12px; color: #fff; background: #121418;">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -864,22 +911,21 @@
           </div>
 
           <!-- Purchase History Table -->
-          <div class="sfx-dashboard-card" style="margin-bottom: 12px;">
-            <div style="font-size: 13px; font-weight: 700; color: #fff;">Verified Payment History</div>
-            <div style="max-height: 160px; overflow-y: auto;">
+          <div class="sfx-dashboard-card">
+            <div style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 10px;">Verified Payment Orders</div>
+            <div style="max-height: 140px; overflow-y: auto;">
               <table class="sfx-data-table">
                 <thead>
                   <tr>
                     <th>Order ID</th>
+                    <th>Payment ID</th>
                     <th>Amount</th>
                     <th>Status</th>
                     <th>Date</th>
                   </tr>
                 </thead>
                 <tbody id="cdm-orders-tbody">
-                  <tr>
-                    <td colspan="4" style="text-align: center; color: var(--sfx-text-muted);">Enter email above to view verified records.</td>
-                  </tr>
+                  <tr><td colspan="5" style="text-align: center; color: var(--sfx-text-muted);">Loading payment orders...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -887,13 +933,14 @@
 
           <!-- Quick Setup Guide -->
           <div style="background: #09090c; border: 1px solid var(--sfx-border); border-radius: 6px; padding: 12px; font-size: 11.5px; color: var(--sfx-text-muted); line-height: 1.6;">
-            <strong style="color: #fff; display: block; margin-bottom: 4px;">Activation in Premiere Pro / After Effects:</strong>
-            1. Install with Anastasiy's Extension Manager or ZXP Installer.<br/>
-            2. In Premiere Pro / AE: <strong>Window &gt; Extensions &gt; SFX Composer</strong>.<br/>
-            3. On panel launch, enter your registered email and the unique lifetime license key delivered upon purchase.<br/>
-            4. Click Activate License — your workstation token is cached locally for offline editing.
+            <strong style="color: #fff; display: block; margin-bottom: 4px;">Activation in Adobe Premiere Pro / After Effects:</strong>
+            1. Install package using ZXP Installer or Anastasiy's Extension Manager.<br/>
+            2. Open Premiere Pro or After Effects &gt; <strong>Window &gt; Extensions &gt; SFX Composer</strong>.<br/>
+            3. On first launch, enter your registered email and your license key from above, then click <strong>Activate License</strong>.<br/>
+            4. Once activated, your machine is bound and you can compose sound effects offline without restrictions.
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -1016,6 +1063,7 @@
 
   <!-- Scripts -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/audio-engine.js"></script>
   <script src="js/browser-demo-adapter.js"></script>
   <script src="js/plugin-controller.js"></script>

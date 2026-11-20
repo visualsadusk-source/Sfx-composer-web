@@ -473,39 +473,108 @@
     });
   }
 
-  // ── 5. CUSTOMER DASHBOARD & LICENSE MANAGER ──
+  // ── 5. CUSTOMER DASHBOARD & LICENSE MANAGER (SECURE VERIFICATION) ──
   function setupCustomerDashboard() {
     var modal = document.getElementById('customer-dashboard-modal');
     var modalClose = document.getElementById('cdm-close');
     var modalBackdrop = document.getElementById('cdm-backdrop');
     var openBtn = document.getElementById('open-customer-dashboard-btn');
-    var lookupEmail = document.getElementById('cdm-lookup-email');
-    var lookupBtn = document.getElementById('cdm-lookup-btn');
-    var statusMsg = document.getElementById('cdm-status-msg');
-    var displayOwner = document.getElementById('cdm-display-owner');
-    var displayStatus = document.getElementById('cdm-display-status');
-    var displayDevice = document.getElementById('cdm-display-device');
-    var btnResetDevice = document.getElementById('cdm-btn-reset-device');
+
+    // Auth View Elements
+    var authView = document.getElementById('cdm-auth-view');
+    var dashboardView = document.getElementById('cdm-dashboard-view');
+    var recentSessionBanner = document.getElementById('cdm-recent-session-banner');
+    var recentSessionEmail = document.getElementById('cdm-recent-session-email');
+    var btnInstantUnlock = document.getElementById('cdm-btn-instant-unlock');
+    var formRequestOtp = document.getElementById('cdm-form-request-otp');
+    var emailInput = document.getElementById('cdm-email-input');
+    var btnSendOtp = document.getElementById('cdm-btn-send-otp');
+    var otpStep = document.getElementById('cdm-otp-step');
+    var otpInput = document.getElementById('cdm-otp-input');
+    var btnVerifyOtp = document.getElementById('cdm-btn-verify-otp');
+    var btnResendOtp = document.getElementById('cdm-btn-resend-otp');
+    var btnChangeEmail = document.getElementById('cdm-btn-change-email');
+    var authStatus = document.getElementById('cdm-auth-status');
+
+    // Dashboard View Elements
+    var authEmailDisplay = document.getElementById('cdm-auth-email-display');
+    var btnSignout = document.getElementById('cdm-btn-signout');
+    var licensesContainer = document.getElementById('cdm-licenses-container');
     var ordersTbody = document.getElementById('cdm-orders-tbody');
 
-    var currentLoadedCustomer = null;
+    var currentAuthEmail = '';
+    var activeCustomerSession = null;
 
-    function openDashboard() {
+    // Initialize client-side Supabase for customer auth
+    var supabaseClient = null;
+    try {
+      if (window.supabase && window.SFX_PAYMENT_SERVICE) {
+        var cfg = window.SFX_PAYMENT_SERVICE.getConfig();
+        supabaseClient = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+      }
+    } catch (e) {
+      console.warn('Customer portal Supabase client init warning:', e);
+    }
+
+    function setAuthStatus(msg, isSuccess) {
+      if (!authStatus) return;
+      if (!msg) {
+        authStatus.style.display = 'none';
+        return;
+      }
+      authStatus.style.display = 'block';
+      authStatus.textContent = msg;
+      authStatus.style.background = isSuccess ? 'rgba(48, 209, 88, 0.15)' : 'rgba(255, 69, 58, 0.15)';
+      authStatus.style.color = isSuccess ? 'var(--sfx-positive)' : 'var(--sfx-critical)';
+      authStatus.style.border = isSuccess ? '1px solid rgba(48, 209, 88, 0.3)' : '1px solid rgba(255, 69, 58, 0.3)';
+    }
+
+    async function checkCurrentSession() {
+      // 1. Check Supabase Auth session first
+      if (supabaseClient) {
+        try {
+          var { data: sessData } = await supabaseClient.auth.getSession();
+          if (sessData && sessData.session && sessData.session.user) {
+            await loadVerifiedPortalData(sessData.session.access_token, sessData.session.user.email);
+            return true;
+          }
+        } catch (e) {}
+      }
+
+      // 2. Check local checkout session proof (if customer just completed purchase)
+      try {
+        var rawSess = localStorage.getItem('sfx_customer_session');
+        if (rawSess) {
+          var cached = JSON.parse(rawSess);
+          if (cached && cached.email && (cached.order_id || cached.license_key)) {
+            activeCustomerSession = cached;
+            if (recentSessionBanner && recentSessionEmail) {
+              recentSessionEmail.textContent = cached.email;
+              recentSessionBanner.style.display = 'block';
+            }
+          }
+        }
+      } catch (e) {}
+
+      showAuthView();
+      return false;
+    }
+
+    function showAuthView() {
+      if (authView) authView.style.display = 'block';
+      if (dashboardView) dashboardView.style.display = 'none';
+    }
+
+    function showDashboardView() {
+      if (authView) authView.style.display = 'none';
+      if (dashboardView) dashboardView.style.display = 'flex';
+    }
+
+    async function openDashboard() {
       if (modal) {
         modal.classList.add('is-open');
         document.body.style.overflow = 'hidden';
-
-        // Auto load from cache if available
-        try {
-          var raw = localStorage.getItem('sfx_customer_session');
-          if (raw) {
-            var sess = JSON.parse(raw);
-            if (sess.email && lookupEmail && !lookupEmail.value) {
-              lookupEmail.value = sess.email;
-              loadCustomerData(sess.email);
-            }
-          }
-        } catch (e) {}
+        await checkCurrentSession();
       }
     }
 
@@ -526,99 +595,277 @@
     if (modalClose) modalClose.addEventListener('click', closeDashboard);
     if (modalBackdrop) modalBackdrop.addEventListener('click', closeDashboard);
 
-    if (lookupBtn) {
-      lookupBtn.addEventListener('click', function () {
-        var email = lookupEmail.value.trim().toLowerCase();
-        if (!email) return;
-        loadCustomerData(email);
+    // Instant unlock via recent purchase session
+    if (btnInstantUnlock) {
+      btnInstantUnlock.addEventListener('click', async function () {
+        if (!activeCustomerSession) return;
+        this.disabled = true;
+        this.textContent = 'Verifying…';
+        try {
+          await loadVerifiedPortalData(activeCustomerSession, activeCustomerSession.email);
+        } catch (err) {
+          setAuthStatus('Could not verify recent session: ' + err.message, false);
+        } finally {
+          this.disabled = false;
+          this.textContent = 'Open My Dashboard';
+        }
       });
     }
 
-    async function loadCustomerData(email) {
-      lookupBtn.disabled = true;
-      lookupBtn.textContent = 'Loading…';
-      if (statusMsg) statusMsg.style.display = 'none';
+    // Step 1: Request OTP email
+    if (formRequestOtp) {
+      formRequestOtp.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var email = (emailInput?.value || '').trim().toLowerCase();
+        if (!email) return;
 
-      try {
-        var portal = await window.SFX_PAYMENT_SERVICE.getCustomerPortal(email);
-        currentLoadedCustomer = portal;
+        currentAuthEmail = email;
+        btnSendOtp.disabled = true;
+        btnSendOtp.textContent = 'Sending Code…';
+        setAuthStatus('', true);
 
-        if (!portal.found) {
-          if (statusMsg) {
-            statusMsg.textContent = 'No purchase records found for ' + email + '. Complete checkout to get access.';
-            statusMsg.style.display = 'block';
-            statusMsg.style.background = 'rgba(255, 214, 10, 0.15)';
-            statusMsg.style.color = 'var(--sfx-caution)';
+        try {
+          if (!supabaseClient) {
+            throw new Error('Supabase client unavailable');
           }
-          if (displayOwner) displayOwner.textContent = 'Unregistered: ' + email;
-          if (ordersTbody) {
-            ordersTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--sfx-text-muted);">No orders found.</td></tr>';
+
+          var { error } = await supabaseClient.auth.signInWithOtp({
+            email: email,
+            options: {
+              shouldCreateUser: true
+            }
+          });
+
+          if (error) throw error;
+
+          if (otpStep) otpStep.style.display = 'block';
+          setAuthStatus('Verification code sent to ' + email + '. Check your inbox or spam.', true);
+          if (otpInput) {
+            otpInput.value = '';
+            otpInput.focus();
           }
-          lookupBtn.disabled = false;
-          lookupBtn.textContent = 'Lookup Account';
+        } catch (err) {
+          setAuthStatus('Could not send verification code: ' + err.message, false);
+        } finally {
+          btnSendOtp.disabled = false;
+          btnSendOtp.textContent = 'Send Code';
+        }
+      });
+    }
+
+    // Step 2: Verify OTP
+    if (btnVerifyOtp) {
+      btnVerifyOtp.addEventListener('click', async function () {
+        var email = currentAuthEmail || (emailInput?.value || '').trim().toLowerCase();
+        var code = (otpInput?.value || '').trim();
+
+        if (!email) {
+          setAuthStatus('Please enter your email first.', false);
+          return;
+        }
+        if (!code || code.length < 6) {
+          setAuthStatus('Please enter the full 6-digit code from your email.', false);
           return;
         }
 
-        if (displayOwner) displayOwner.textContent = 'Licensed to: ' + portal.email;
+        btnVerifyOtp.disabled = true;
+        btnVerifyOtp.textContent = 'Verifying…';
+        setAuthStatus('', true);
 
-        // Render Licenses
-        var lic = portal.licenses && portal.licenses[0];
-        if (lic) {
-          if (displayStatus) {
-            displayStatus.textContent = lic.status === 'active' ? 'Active Lifetime' : 'Revoked';
-            displayStatus.className = 'sfx-badge-status ' + (lic.status === 'active' ? 'active' : 'revoked');
-          }
-          var activeDevs = lic.active_devices || [];
-          if (displayDevice) {
-            if (activeDevs.length > 0) {
-              displayDevice.textContent = 'Activated on: ' + (activeDevs[0].device_name || 'Workstation');
-            } else {
-              displayDevice.textContent = 'Available for activation (1 Workstation Slot)';
-            }
-          }
-        }
+        try {
+          if (!supabaseClient) throw new Error('Supabase client unavailable');
 
-        // Render Orders Table
-        if (ordersTbody) {
-          var orders = portal.orders || [];
-          if (orders.length === 0) {
-            ordersTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--sfx-text-muted);">No orders found.</td></tr>';
+          var { data, error } = await supabaseClient.auth.verifyOtp({
+            email: email,
+            token: code,
+            type: 'email'
+          });
+
+          if (error) throw error;
+
+          if (data && data.session) {
+            await loadVerifiedPortalData(data.session.access_token, email);
           } else {
-            ordersTbody.innerHTML = orders.map(function (ord) {
-              var date = new Date(ord.created_at).toLocaleDateString();
-              return '<tr>' +
-                '<td><code style="font-size:11px;">' + (ord.provider_order_id || ord.id.substring(0, 8)) + '</code></td>' +
-                '<td>₹' + ord.amount + '</td>' +
-                '<td><span class="sfx-badge-status active">' + ord.payment_status + '</span></td>' +
-                '<td>' + date + '</td>' +
-              '</tr>';
-            }).join('');
+            throw new Error('Verification failed. Invalid code.');
           }
+        } catch (err) {
+          setAuthStatus('Verification error: ' + err.message, false);
+        } finally {
+          btnVerifyOtp.disabled = false;
+          btnVerifyOtp.textContent = 'Verify & Access';
         }
-
-        if (statusMsg) {
-          statusMsg.textContent = 'Account verified: Lifetime Pro license active.';
-          statusMsg.style.display = 'block';
-          statusMsg.style.background = 'rgba(48, 209, 88, 0.15)';
-          statusMsg.style.color = 'var(--sfx-positive)';
-        }
-      } catch (err) {
-        if (statusMsg) {
-          statusMsg.textContent = 'Error: ' + err.message;
-          statusMsg.style.display = 'block';
-          statusMsg.style.background = 'rgba(255, 69, 58, 0.15)';
-          statusMsg.style.color = 'var(--sfx-critical)';
-        }
-      } finally {
-        lookupBtn.disabled = false;
-        lookupBtn.textContent = 'Lookup Account';
-      }
+      });
     }
 
-    if (btnResetDevice) {
-      btnResetDevice.addEventListener('click', function () {
-        alert('Workstation reset requested. When launching SFX Composer on your new machine, enter your registered email and license key to bind the new workstation.');
+    // Resend OTP
+    if (btnResendOtp) {
+      btnResendOtp.addEventListener('click', function () {
+        if (formRequestOtp) formRequestOtp.dispatchEvent(new Event('submit'));
       });
+    }
+
+    // Change email
+    if (btnChangeEmail) {
+      btnChangeEmail.addEventListener('click', function () {
+        if (otpStep) otpStep.style.display = 'none';
+        if (emailInput) emailInput.focus();
+        setAuthStatus('', true);
+      });
+    }
+
+    // Sign out / switch account
+    if (btnSignout) {
+      btnSignout.addEventListener('click', async function () {
+        if (supabaseClient) {
+          await supabaseClient.auth.signOut().catch(function () {});
+        }
+        localStorage.removeItem('sfx_customer_session');
+        activeCustomerSession = null;
+        currentAuthEmail = '';
+        if (recentSessionBanner) recentSessionBanner.style.display = 'none';
+        if (otpStep) otpStep.style.display = 'none';
+        if (emailInput) emailInput.value = '';
+        if (otpInput) otpInput.value = '';
+        setAuthStatus('', true);
+        showAuthView();
+      });
+    }
+
+    // Fetch and render verified portal data
+    async function loadVerifiedPortalData(authArg, emailHint) {
+      var portal = await window.SFX_PAYMENT_SERVICE.getCustomerPortal(authArg);
+      var email = portal.email || emailHint || 'Customer';
+
+      if (authEmailDisplay) {
+        authEmailDisplay.textContent = email;
+      }
+
+      // Render Licenses List
+      if (licensesContainer) {
+        var licenses = portal.licenses || [];
+        if (!licenses.length) {
+          licensesContainer.innerHTML = 
+            '<div class="sfx-dashboard-card" style="text-align: center; padding: 24px;">' +
+              '<div style="font-size: 14px; color: var(--sfx-caution); font-weight: 700; margin-bottom: 6px;">No Active Licenses Found</div>' +
+              '<div style="font-size: 12px; color: var(--sfx-text-muted); margin-bottom: 14px;">We could not find an issued license for ' + email + '. Complete a purchase for ₹199 to instantly unlock SFX Composer.</div>' +
+              '<a href="#buy-now" class="sfx-site-btn-primary" style="padding: 8px 18px; font-size: 12px; display: inline-block;">Purchase Lifetime License (₹199)</a>' +
+            '</div>';
+        } else {
+          licensesContainer.innerHTML = licenses.map(function (lic) {
+            var activeDevs = lic.active_devices || [];
+            var devCount = activeDevs.length;
+            var maxDevs = lic.max_devices || 1;
+            var isExpired = lic.expires_at && new Date(lic.expires_at) < new Date();
+
+            var statusBadge = '';
+            if (lic.status === 'revoked') {
+              statusBadge = '<span class="sfx-badge-status revoked">Revoked</span>';
+            } else if (isExpired) {
+              statusBadge = '<span class="sfx-badge-status revoked">Expired</span>';
+            } else {
+              statusBadge = '<span class="sfx-badge-status active">Active Lifetime</span>';
+            }
+
+            var workstationStatus = '';
+            if (devCount > 0) {
+              var devNames = activeDevs.map(function (d) { return d.device_name || 'Workstation'; }).join(', ');
+              workstationStatus = '<span style="color: var(--sfx-positive); font-weight: 600;">Bound to: ' + devNames + '</span> (' + devCount + '/' + maxDevs + ' Slots)';
+            } else {
+              workstationStatus = '<span style="color: var(--sfx-accent);">Available for Activation (0/' + maxDevs + ' Slots Bound)</span>';
+            }
+
+            // Key Display
+            var keyBoxHtml = '';
+            if (lic.license_key) {
+              keyBoxHtml = 
+                '<div style="background: #000; border: 1px solid var(--sfx-accent); border-radius: 8px; padding: 14px; margin: 12px 0;">' +
+                  '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">' +
+                    '<span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sfx-accent); font-weight: 700;">Your Official License Key</span>' +
+                    '<span style="font-size: 11px; color: var(--sfx-text-muted);">Never share this key</span>' +
+                  '</div>' +
+                  '<div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">' +
+                    '<code style="font-family: var(--sfx-font-mono); font-size: 18px; font-weight: 800; color: #ffffff; letter-spacing: 0.08em; user-select: all;">' + lic.license_key + '</code>' +
+                    '<button type="button" class="btn-copy-portal-key sfx-button sfx-button--quiet" data-key="' + lic.license_key + '" style="height: 30px; font-size: 11px; padding: 0 12px; border: 1px solid var(--sfx-border); color: #fff;">' +
+                      'Copy Key' +
+                    '</button>' +
+                  '</div>' +
+                '</div>';
+            } else {
+              keyBoxHtml = '<div style="font-size: 12px; color: var(--sfx-text-muted); padding: 8px 0;">License key verified. Enter registered email in plugin to activate.</div>';
+            }
+
+            return '<div class="sfx-dashboard-card" style="margin-bottom: 12px;">' +
+              '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
+                '<div>' +
+                  '<div style="font-weight: 700; font-size: 15px; color: #fff;">SFX Composer Pro v2.4 (Universal)</div>' +
+                  '<div style="font-size: 11.5px; color: var(--sfx-text-muted);">Licensed for Premiere Pro &amp; After Effects</div>' +
+                '</div>' +
+                statusBadge +
+              '</div>' +
+              keyBoxHtml +
+              '<div style="background: rgba(0,0,0,0.4); border: 1px solid var(--sfx-border); padding: 10px 14px; border-radius: 6px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
+                '<div>' +
+                  '<span style="color: var(--sfx-text-muted); font-size: 11px;">Workstation Status: </span>' +
+                  workstationStatus +
+                '</div>' +
+                '<button type="button" class="btn-portal-reset-device sfx-button sfx-button--quiet" data-id="' + lic.id + '" style="height: 24px; font-size: 10.5px; border: 1px solid var(--sfx-border);">' +
+                  'Transfer Workstation' +
+                '</button>' +
+              '</div>' +
+            '</div>';
+          }).join('');
+
+          // Copy key event listener
+          licensesContainer.querySelectorAll('.btn-copy-portal-key').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var key = this.getAttribute('data-key');
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(key);
+              }
+              var originalText = this.textContent;
+              this.textContent = 'Copied!';
+              this.style.color = 'var(--sfx-positive)';
+              var that = this;
+              setTimeout(function () {
+                that.textContent = originalText;
+                that.style.color = '#fff';
+              }, 2000);
+            });
+          });
+
+          // Transfer workstation listener
+          licensesContainer.querySelectorAll('.btn-portal-reset-device').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              alert('To transfer your workstation license: Simply open SFX Composer on your new workstation in Premiere Pro or After Effects, enter your registered email (' + email + ') and license key. The server will automatically rebind your activation slot.');
+            });
+          });
+        }
+      }
+
+      // Render Orders
+      if (ordersTbody) {
+        var orders = portal.orders || [];
+        if (!orders.length) {
+          ordersTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--sfx-text-muted); padding: 14px;">No purchase orders found.</td></tr>';
+        } else {
+          ordersTbody.innerHTML = orders.map(function (ord) {
+            var date = new Date(ord.created_at).toLocaleDateString();
+            var badge = ord.payment_status === 'completed'
+              ? '<span class="sfx-badge-status active">Paid</span>'
+              : '<span class="sfx-badge-status revoked" style="color:#ff9f0a; border-color:#ff9f0a;">Pending</span>';
+
+            return '<tr>' +
+              '<td><code style="font-size:11px;">' + (ord.provider_order_id || '—') + '</code></td>' +
+              '<td><code style="font-size:11px;">' + (ord.provider_payment_id || '—') + '</code></td>' +
+              '<td>₹' + ord.amount + '</td>' +
+              '<td>' + badge + '</td>' +
+              '<td>' + date + '</td>' +
+            '</tr>';
+          }).join('');
+        }
+      }
+
+      showDashboardView();
     }
 
     window.addEventListener('keydown', function (e) {

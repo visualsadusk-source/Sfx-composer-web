@@ -858,38 +858,69 @@
         <section id="view-licenses" class="admin-view">
           <!-- Issue Complimentary Form -->
           <div class="admin-card" style="background: var(--admin-card-bg); border: 1px solid var(--admin-border); border-radius: 8px; padding: 20px; margin-bottom: 24px;">
-            <div style="font-weight: 700; font-size: 14px; margin-bottom: 12px; display: flex; justify-content: space-between;">
-              <span>Issue Complimentary Lifetime License</span>
-              <span style="font-size: 11px; color: var(--admin-accent);">Server-Side Cryptographic Hash</span>
+            <div style="font-weight: 700; font-size: 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--admin-accent)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <span>Issue License (Admin Generated)</span>
+              </div>
+              <span style="font-size: 11px; color: var(--admin-neon); background: rgba(0,255,102,0.1); border: 1px solid rgba(0,255,102,0.25); padding: 2px 8px; border-radius: 4px;">AES-256-GCM Encrypted &amp; SHA-256 Hashed</span>
             </div>
             <form id="form-admin-issue-lic" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
-              <input type="email" id="lic-issue-email" class="form-control" placeholder="editor@studio.com" style="flex: 1; min-width: 240px; height: 36px;" required />
-              <button type="submit" class="sfx-site-btn-primary" style="height: 36px; padding: 0 18px; font-size: 12.5px; font-weight: 700;">
+              <input type="email" id="lic-issue-email" class="form-control" placeholder="customer@example.com" style="flex: 2; min-width: 220px; height: 38px;" required />
+              <select id="lic-issue-type" class="form-control" style="flex: 1; min-width: 150px; height: 38px;">
+                <option value="lifetime">Lifetime Pro (Standard)</option>
+                <option value="1_year">1 Year Access</option>
+                <option value="6_months">6 Months Access</option>
+                <option value="trial">30-Day Evaluation</option>
+              </select>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--admin-text-muted); cursor: pointer; user-select: none;">
+                <input type="checkbox" id="lic-issue-send-email" checked style="accent-color: var(--admin-accent);" />
+                <span>Send Email</span>
+              </label>
+              <button type="submit" id="btn-issue-lic-submit" class="sfx-site-btn-primary" style="height: 38px; padding: 0 20px; font-size: 12.5px; font-weight: 700; white-space: nowrap;">
                 Issue License
               </button>
             </form>
-            <div id="lic-issue-result" style="display: none; margin-top: 12px; padding: 12px; background: #000; border: 1px solid var(--admin-accent); border-radius: 6px; font-size: 12.5px;"></div>
+            <div id="lic-issue-result" style="display: none; margin-top: 14px; padding: 14px; background: #080a0c; border: 1px solid var(--admin-border); border-radius: 6px; font-size: 13px;"></div>
           </div>
 
           <!-- Customer Licenses List -->
           <div class="admin-card" style="background: var(--admin-card-bg); border: 1px solid var(--admin-border); border-radius: 8px; padding: 20px; margin-bottom: 24px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
-              <span style="font-weight: 700; font-size: 14px;">Customer Licenses &amp; Workstations</span>
-              <input type="text" id="lic-search-input" class="form-control" placeholder="Search customer email..." style="width: 240px; height: 32px; font-size: 12px;" />
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <span style="font-weight: 700; font-size: 15px;">Customer Licenses &amp; Activations</span>
+                <div style="font-size: 12px; color: var(--admin-text-muted); margin-top: 2px;">Search, filter, reveal license keys, reset workstations, or adjust validity</div>
+              </div>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                <select id="lic-filter-status" class="form-control" style="width: 140px; height: 34px; font-size: 12px;">
+                  <option value="all">All Licenses</option>
+                  <option value="active">Active Only</option>
+                  <option value="revoked">Revoked</option>
+                  <option value="unactivated">Unactivated</option>
+                  <option value="expired">Expired</option>
+                </select>
+                <input type="text" id="lic-search-input" class="form-control" placeholder="Search email, key, or payment ID..." style="width: 260px; height: 34px; font-size: 12px;" />
+                <button type="button" id="btn-refresh-licenses" class="sfx-button sfx-button--quiet" style="height: 34px; padding: 0 12px; font-size: 12px; border: 1px solid var(--admin-border);">
+                  Refresh
+                </button>
+              </div>
             </div>
             <div style="overflow-x: auto;">
-              <table class="sfx-data-table">
+              <table class="sfx-data-table" id="table-admin-licenses">
                 <thead>
                   <tr>
                     <th>Customer Email</th>
-                    <th>Status</th>
-                    <th>Devices</th>
-                    <th>Issued Date</th>
+                    <th>License Key</th>
+                    <th>Type &amp; Status</th>
+                    <th>Workstations</th>
+                    <th>Last Verified</th>
+                    <th>Payment</th>
+                    <th>Issued / Expiry</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody id="lic-table-tbody">
-                  <tr><td colspan="5" style="text-align: center; color: var(--admin-text-muted);">Loading licenses...</td></tr>
+                  <tr><td colspan="8" style="text-align: center; color: var(--admin-text-muted); padding: 24px;">Loading licenses...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -897,7 +928,10 @@
 
           <!-- Orders Log -->
           <div class="admin-card" style="background: var(--admin-card-bg); border: 1px solid var(--admin-border); border-radius: 8px; padding: 20px;">
-            <div style="font-weight: 700; font-size: 14px; margin-bottom: 14px;">Payment Orders Log</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+              <div style="font-weight: 700; font-size: 15px;">Razorpay Payment Orders Log</div>
+              <span style="font-size: 12px; color: var(--admin-text-muted);">Verified against Razorpay HMAC-SHA256 Signatures</span>
+            </div>
             <div style="overflow-x: auto;">
               <table class="sfx-data-table">
                 <thead>
@@ -912,7 +946,7 @@
                   </tr>
                 </thead>
                 <tbody id="orders-table-tbody">
-                  <tr><td colspan="7" style="text-align: center; color: var(--admin-text-muted);">Loading payment orders...</td></tr>
+                  <tr><td colspan="7" style="text-align: center; color: var(--admin-text-muted); padding: 20px;">Loading payment orders...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1887,108 +1921,334 @@
       }
 
       // ── 8. LICENSES & ORDERS CONTROLLER ──
-      async function loadLicensesAndOrders(query) {
+      var cachedAdminLicenses = [];
+      var cachedAdminOrders = [];
+
+      async function loadLicensesAndOrders(searchQuery) {
+        var licTbody = document.getElementById('lic-table-tbody');
+        var ordTbody = document.getElementById('orders-table-tbody');
+        if (!licTbody) return;
+
         try {
-          var stats = await window.SFX_PAYMENT_SERVICE.getAdminStats(activeAuthToken);
-          document.getElementById('stat-active-lic').textContent = stats.active_licenses || 0;
-          document.getElementById('stat-revenue').textContent = '₹' + (stats.total_revenue || 0);
+          // Fetch unified data from Edge Function / admin-licenses
+          var data = await window.SFX_PAYMENT_SERVICE.getAdminLicensesData(activeAuthToken, searchQuery || '');
+          var stats = data.stats || {};
+          cachedAdminLicenses = data.licenses || [];
+          cachedAdminOrders = data.orders || [];
 
-          var list = await window.SFX_PAYMENT_SERVICE.searchAdminLicenses(activeAuthToken, query || '');
-          var licTbody = document.getElementById('lic-table-tbody');
-
-          if (!list || !list.length) {
-            licTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--admin-text-muted);">No licenses found.</td></tr>';
-          } else {
-            licTbody.innerHTML = list.map(function (lic) {
-              var date = new Date(lic.created_at).toLocaleDateString();
-              var devCount = (lic.active_devices || []).length;
-              var devLabel = devCount + ' / ' + (lic.max_devices || 1);
-              var badge = lic.status === 'active' ? '<span class="sfx-badge-status active">Active</span>' : '<span class="sfx-badge-status revoked">Revoked</span>';
-
-              return '<tr>' +
-                '<td><strong>' + lic.email + '</strong></td>' +
-                '<td>' + badge + '</td>' +
-                '<td>' + devLabel + '</td>' +
-                '<td>' + date + '</td>' +
-                '<td>' +
-                  '<button class="sfx-button sfx-button--quiet btn-reset-dev" data-id="' + lic.id + '" style="font-size: 11px; padding: 2px 7px; margin-right: 6px; border: 1px solid var(--admin-border);">Reset Device</button>' +
-                  (lic.status === 'active' ? '<button class="sfx-button sfx-button--quiet btn-revoke-lic" data-id="' + lic.id + '" style="font-size: 11px; padding: 2px 7px; border: 1px solid var(--admin-danger); color: var(--admin-danger);">Revoke</button>' : '<span style="color:var(--admin-text-muted); font-size:11px;">Revoked</span>') +
-                '</td>' +
-              '</tr>';
-            }).join('');
-
-            licTbody.querySelectorAll('.btn-reset-dev').forEach(function (btn) {
-              btn.addEventListener('click', async function () {
-                var licId = this.getAttribute('data-id');
-                if (confirm('Reset device activations for this customer?')) {
-                  await window.SFX_PAYMENT_SERVICE.resetDevice(activeAuthToken, licId);
-                  showToast('Device activations reset');
-                  loadLicensesAndOrders();
-                }
-              });
-            });
-
-            licTbody.querySelectorAll('.btn-revoke-lic').forEach(function (btn) {
-              btn.addEventListener('click', async function () {
-                var licId = this.getAttribute('data-id');
-                var reason = prompt('Reason for license revocation (e.g. Refunded, Fraud):', 'Refunded');
-                if (reason) {
-                  await window.SFX_PAYMENT_SERVICE.revokeLicense(activeAuthToken, licId, reason);
-                  showToast('License revoked');
-                  loadLicensesAndOrders();
-                }
-              });
-            });
+          // Update overview stats counters
+          if (document.getElementById('stat-active-lic')) {
+            document.getElementById('stat-active-lic').textContent = stats.active_licenses || 0;
+          }
+          if (document.getElementById('stat-revenue')) {
+            document.getElementById('stat-revenue').textContent = '₹' + (stats.total_revenue || 0);
           }
 
-          var orders = await window.SFX_PAYMENT_SERVICE.getAdminOrders(activeAuthToken, 50);
-          var ordTbody = document.getElementById('orders-table-tbody');
-          if (!orders || !orders.length) {
-            ordTbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--admin-text-muted);">No orders found.</td></tr>';
-          } else {
-            ordTbody.innerHTML = orders.map(function (ord) {
-              var date = new Date(ord.created_at).toLocaleString();
-              var badge = ord.payment_status === 'completed' ? '<span class="sfx-badge-status active">Paid</span>' : '<span class="sfx-badge-status revoked" style="color:#ff9f0a; border-color:#ff9f0a;">Pending</span>';
-              return '<tr>' +
-                '<td>' + ord.customer_email + '</td>' +
-                '<td>₹' + ord.amount + '</td>' +
-                '<td>' + (ord.payment_provider || 'razorpay') + '</td>' +
-                '<td><code>' + (ord.provider_order_id || '—') + '</code></td>' +
-                '<td><code>' + (ord.provider_payment_id || '—') + '</code></td>' +
-                '<td>' + badge + '</td>' +
-                '<td>' + date + '</td>' +
-              '</tr>';
-            }).join('');
-          }
+          renderFilteredLicenses();
+          renderOrdersTable(cachedAdminOrders);
         } catch (e) {
           console.error('Error loading licenses/orders:', e);
+          licTbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color: var(--admin-danger); padding: 18px;">Error loading licenses: ' + e.message + '</td></tr>';
         }
       }
 
-      document.getElementById('lic-search-input').addEventListener('input', function () {
-        loadLicensesAndOrders(this.value.trim());
+      function renderFilteredLicenses() {
+        var licTbody = document.getElementById('lic-table-tbody');
+        if (!licTbody) return;
+
+        var filterStatus = (document.getElementById('lic-filter-status')?.value || 'all').toLowerCase();
+        var searchVal = (document.getElementById('lic-search-input')?.value || '').trim().toLowerCase();
+        var now = new Date();
+
+        var filtered = cachedAdminLicenses.filter(function (lic) {
+          // Status filter
+          if (filterStatus === 'active' && lic.status !== 'active') return false;
+          if (filterStatus === 'revoked' && lic.status !== 'revoked') return false;
+          if (filterStatus === 'unactivated') {
+            if ((lic.active_devices || []).length > 0) return false;
+          }
+          if (filterStatus === 'expired') {
+            if (!lic.expires_at || new Date(lic.expires_at) > now) return false;
+          }
+
+          // Search query filter (email, key, id, payment)
+          if (searchVal) {
+            var emailMatch = (lic.email || '').toLowerCase().includes(searchVal);
+            var keyMatch = (lic.recovered_key || '').toLowerCase().includes(searchVal);
+            var idMatch = (lic.id || '').toLowerCase().includes(searchVal);
+            var payMatch = (lic.provider_payment_id || '').toLowerCase().includes(searchVal);
+            var ordMatch = (lic.provider_order_id || '').toLowerCase().includes(searchVal);
+            if (!emailMatch && !keyMatch && !idMatch && !payMatch && !ordMatch) return false;
+          }
+
+          return true;
+        });
+
+        if (!filtered.length) {
+          licTbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color: var(--admin-text-muted); padding: 24px;">No licenses matching current search/filter.</td></tr>';
+          return;
+        }
+
+        licTbody.innerHTML = filtered.map(function (lic) {
+          var date = new Date(lic.created_at).toLocaleDateString();
+          var devCount = (lic.active_devices || []).length;
+          var devLabel = devCount + ' / ' + (lic.max_devices || 1);
+          var devTooltip = (lic.active_devices || []).map(function (d) {
+            return (d.device_name || 'Workstation') + ' (' + (d.device_id || '').slice(0, 8) + ')';
+          }).join(', ') || 'No activations';
+
+          // Status & Type Badges
+          var isExpired = lic.expires_at && new Date(lic.expires_at) < now;
+          var statusBadge = '';
+          if (lic.status === 'revoked') {
+            statusBadge = '<span class="sfx-badge-status revoked" title="' + (lic.revoked_reason || 'Revoked') + '">Revoked</span>';
+          } else if (isExpired) {
+            statusBadge = '<span class="sfx-badge-status revoked" style="color:#ff9f0a; border-color:#ff9f0a;">Expired</span>';
+          } else {
+            statusBadge = '<span class="sfx-badge-status active">Active</span>';
+          }
+
+          var typeLabel = (lic.license_type || 'Lifetime').toUpperCase();
+          var typeBadge = '<span class="admin-brand-badge" style="font-size:10px; padding:2px 6px;">' + typeLabel + '</span>';
+
+          // License Key Display & Reveal/Copy
+          var keyDisplayHtml = '';
+          if (lic.recovered_key) {
+            keyDisplayHtml = 
+              '<div class="lic-key-container" style="display:inline-flex; align-items:center; gap:6px; background:#000; border:1px solid var(--admin-border); border-radius:4px; padding:3px 8px;">' +
+                '<code class="lic-key-val" data-raw="' + lic.recovered_key + '" style="font-family:monospace; font-size:12px; letter-spacing:0.05em; color:var(--admin-neon);">••••-••••-••••-••••</code>' +
+                '<button type="button" class="btn-toggle-key-reveal sfx-button sfx-button--quiet" style="padding:1px 6px; font-size:11px; border:none; color:var(--admin-accent); cursor:pointer;">Show</button>' +
+                '<button type="button" class="btn-copy-lic-key sfx-button sfx-button--quiet" data-key="' + lic.recovered_key + '" style="padding:1px 6px; font-size:11px; border:none; color:var(--admin-text-muted); cursor:pointer;" title="Copy License Key">Copy</button>' +
+              '</div>';
+          } else {
+            keyDisplayHtml = '<span style="color:var(--admin-text-muted); font-size:11px; font-style:italic;" title="Pre-migration record stored only as SHA-256 hash">SHA-256 Hashed</span>';
+          }
+
+          // Last verified date
+          var lastVerLabel = lic.last_verified_at ? new Date(lic.last_verified_at).toLocaleDateString() : '<span style="color:var(--admin-text-muted);">Never</span>';
+
+          // Payment Info
+          var paymentHtml = '';
+          if (lic.provider_payment_id) {
+            paymentHtml = '<div style="font-size:11px;"><strong>₹' + (lic.payment_amount || 199) + '</strong> <span style="color:var(--admin-neon);">(' + (lic.payment_status || 'paid') + ')</span><br/><code style="color:var(--admin-text-muted); font-size:10px;">' + lic.provider_payment_id + '</code></div>';
+          } else {
+            paymentHtml = '<span style="color:var(--admin-text-muted); font-size:11px;">Complimentary</span>';
+          }
+
+          // Expiry
+          var expiryLabel = lic.expires_at ? new Date(lic.expires_at).toLocaleDateString() : '<span style="color:var(--admin-accent); font-size:11.5px; font-weight:600;">Lifetime</span>';
+
+          // Action Buttons
+          var actionsHtml = '<div style="display:flex; gap:4px; flex-wrap:wrap;">';
+          actionsHtml += '<button class="sfx-button sfx-button--quiet btn-reset-dev" data-id="' + lic.id + '" style="font-size: 11px; padding: 2px 7px; border: 1px solid var(--admin-border);" title="Clear device activation slots">Reset Dev</button>';
+          
+          if (lic.status === 'active') {
+            actionsHtml += '<button class="sfx-button sfx-button--quiet btn-revoke-lic" data-id="' + lic.id + '" style="font-size: 11px; padding: 2px 7px; border: 1px solid var(--admin-danger); color: var(--admin-danger);" title="Revoke this license">Revoke</button>';
+          } else {
+            actionsHtml += '<button class="sfx-button sfx-button--quiet btn-reactivate-lic" data-id="' + lic.id + '" style="font-size: 11px; padding: 2px 7px; border: 1px solid var(--admin-neon); color: var(--admin-neon);" title="Reactivate this license">Reactivate</button>';
+          }
+
+          actionsHtml += '<button class="sfx-button sfx-button--quiet btn-extend-lic" data-id="' + lic.id + '" data-exp="' + (lic.expires_at || '') + '" style="font-size: 11px; padding: 2px 7px; border: 1px solid var(--admin-border);" title="Change validity or extend expiry">Expiry</button>';
+          actionsHtml += '</div>';
+
+          return '<tr>' +
+            '<td><strong>' + lic.email + '</strong><br/><span style="font-size:10px; color:var(--admin-text-muted);">' + lic.id.slice(0, 8) + '</span></td>' +
+            '<td>' + keyDisplayHtml + '</td>' +
+            '<td>' + statusBadge + '<div style="margin-top:3px;">' + typeBadge + '</div></td>' +
+            '<td><span title="' + devTooltip + '" style="cursor:help; border-bottom:1px dotted var(--admin-text-muted);">' + devLabel + '</span></td>' +
+            '<td>' + lastVerLabel + '</td>' +
+            '<td>' + paymentHtml + '</td>' +
+            '<td><span style="font-size:11px; color:var(--admin-text-muted);">Issued:</span> ' + date + '<br/><span style="font-size:11px; color:var(--admin-text-muted);">Exp:</span> ' + expiryLabel + '</td>' +
+            '<td>' + actionsHtml + '</td>' +
+          '</tr>';
+        }).join('');
+
+        // Wire event listeners on rendered buttons
+        // 1. Reveal/Hide Key Toggle
+        licTbody.querySelectorAll('.btn-toggle-key-reveal').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var container = this.closest('.lic-key-container');
+            var valEl = container.querySelector('.lic-key-val');
+            var rawKey = valEl.getAttribute('data-raw');
+            if (this.textContent === 'Show') {
+              valEl.textContent = rawKey;
+              this.textContent = 'Hide';
+            } else {
+              valEl.textContent = '••••-••••-••••-••••';
+              this.textContent = 'Show';
+            }
+          });
+        });
+
+        // 2. Copy Key Button
+        licTbody.querySelectorAll('.btn-copy-lic-key').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var key = this.getAttribute('data-key');
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(key);
+            }
+            showToast('License key copied to clipboard');
+          });
+        });
+
+        // 3. Reset Device Activations
+        licTbody.querySelectorAll('.btn-reset-dev').forEach(function (btn) {
+          btn.addEventListener('click', async function () {
+            var licId = this.getAttribute('data-id');
+            if (confirm('Reset device workstation activations for this license? The customer will be able to activate on a new machine.')) {
+              try {
+                await window.SFX_PAYMENT_SERVICE.resetDevice(activeAuthToken, licId);
+                showToast('Device activations reset successfully');
+                loadLicensesAndOrders();
+              } catch (err) {
+                alert('Error resetting device: ' + err.message);
+              }
+            }
+          });
+        });
+
+        // 4. Revoke License
+        licTbody.querySelectorAll('.btn-revoke-lic').forEach(function (btn) {
+          btn.addEventListener('click', async function () {
+            var licId = this.getAttribute('data-id');
+            var reason = prompt('Reason for license revocation (e.g. Refunded, Fraud, Terms Violation):', 'Refunded');
+            if (reason) {
+              try {
+                await window.SFX_PAYMENT_SERVICE.revokeLicense(activeAuthToken, licId, reason);
+                showToast('License revoked');
+                loadLicensesAndOrders();
+              } catch (err) {
+                alert('Error revoking license: ' + err.message);
+              }
+            }
+          });
+        });
+
+        // 5. Reactivate License
+        licTbody.querySelectorAll('.btn-reactivate-lic').forEach(function (btn) {
+          btn.addEventListener('click', async function () {
+            var licId = this.getAttribute('data-id');
+            if (confirm('Reactivate this revoked license?')) {
+              try {
+                await window.SFX_PAYMENT_SERVICE.reactivateLicense(activeAuthToken, licId);
+                showToast('License reactivated');
+                loadLicensesAndOrders();
+              } catch (err) {
+                alert('Error reactivating license: ' + err.message);
+              }
+            }
+          });
+        });
+
+        // 6. Extend / Edit Expiry
+        licTbody.querySelectorAll('.btn-extend-lic').forEach(function (btn) {
+          btn.addEventListener('click', async function () {
+            var licId = this.getAttribute('data-id');
+            var curExp = this.getAttribute('data-exp');
+            var choice = prompt('Enter new expiry date (YYYY-MM-DD) or leave empty for LIFETIME:', curExp ? curExp.split('T')[0] : '');
+            if (choice !== null) {
+              var newExpiresAt = choice.trim() ? new Date(choice.trim()).toISOString() : null;
+              try {
+                await window.SFX_PAYMENT_SERVICE.extendExpiry(activeAuthToken, licId, newExpiresAt);
+                showToast('License expiry updated');
+                loadLicensesAndOrders();
+              } catch (err) {
+                alert('Error updating expiry: ' + err.message);
+              }
+            }
+          });
+        });
+      }
+
+      function renderOrdersTable(orders) {
+        var ordTbody = document.getElementById('orders-table-tbody');
+        if (!ordTbody) return;
+
+        if (!orders || !orders.length) {
+          ordTbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--admin-text-muted); padding: 20px;">No payment orders recorded yet.</td></tr>';
+          return;
+        }
+
+        ordTbody.innerHTML = orders.map(function (ord) {
+          var date = new Date(ord.created_at).toLocaleString();
+          var badge = ord.payment_status === 'completed'
+            ? '<span class="sfx-badge-status active">Paid</span>'
+            : '<span class="sfx-badge-status revoked" style="color:#ff9f0a; border-color:#ff9f0a;">Pending</span>';
+
+          return '<tr>' +
+            '<td><strong>' + ord.customer_email + '</strong></td>' +
+            '<td>₹' + ord.amount + '</td>' +
+            '<td>' + (ord.payment_provider || 'razorpay') + '</td>' +
+            '<td><code>' + (ord.provider_order_id || '—') + '</code></td>' +
+            '<td><code>' + (ord.provider_payment_id || '—') + '</code></td>' +
+            '<td>' + badge + '</td>' +
+            '<td>' + date + '</td>' +
+          '</tr>';
+        }).join('');
+      }
+
+      // Filter and search listeners
+      document.getElementById('lic-filter-status')?.addEventListener('change', renderFilteredLicenses);
+      document.getElementById('lic-search-input')?.addEventListener('input', function () {
+        renderFilteredLicenses();
+      });
+      document.getElementById('btn-refresh-licenses')?.addEventListener('click', function () {
+        loadLicensesAndOrders();
       });
 
       // Issue License Form
-      document.getElementById('form-admin-issue-lic').addEventListener('submit', async function (e) {
+      document.getElementById('form-admin-issue-lic')?.addEventListener('submit', async function (e) {
         e.preventDefault();
-        var email = document.getElementById('lic-issue-email').value.trim();
+        var emailInput = document.getElementById('lic-issue-email');
+        var typeSelect = document.getElementById('lic-issue-type');
+        var sendEmailCb = document.getElementById('lic-issue-send-email');
         var resBox = document.getElementById('lic-issue-result');
+        var submitBtn = document.getElementById('btn-issue-lic-submit');
+
+        var email = (emailInput?.value || '').trim();
+        var licenseType = typeSelect?.value || 'lifetime';
+        var sendEmail = sendEmailCb ? sendEmailCb.checked : true;
+
         if (!email) return;
 
         resBox.style.display = 'block';
-        resBox.textContent = 'Generating lifetime license…';
+        resBox.innerHTML = '<span style="color: var(--admin-accent);">Issuing license &amp; encrypting server-side…</span>';
+        if (submitBtn) submitBtn.disabled = true;
 
         try {
           var res = await window.SFX_PAYMENT_SERVICE.createLicense(activeAuthToken, {
             email: email,
-            send_email: true,
+            license_type: licenseType,
+            send_email: sendEmail,
             max_devices: 1
           });
-          resBox.innerHTML = '<strong style="color: var(--admin-neon);">License Issued:</strong> <code>' + res.license_key + '</code> for <strong>' + res.email + '</strong>';
-          loadLicensesAndOrders();
+
+          resBox.innerHTML = 
+            '<div style="border-left: 3px solid var(--admin-neon); padding-left: 12px;">' +
+              '<div style="color: var(--admin-neon); font-weight: 700; margin-bottom: 4px;">✓ License Generated Successfully</div>' +
+              '<div style="display: flex; align-items: center; gap: 8px; margin: 8px 0;">' +
+                '<code style="font-family: monospace; font-size: 15px; font-weight: 700; color: #fff; background: #000; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--admin-accent);">' + res.license_key + '</code>' +
+                '<button type="button" class="sfx-button sfx-button--quiet" id="btn-copy-issued-key" style="border: 1px solid var(--admin-border); font-size: 11.5px; padding: 4px 10px;">Copy Key</button>' +
+              '</div>' +
+              '<div style="font-size: 12px; color: var(--admin-text-muted);">' +
+                'Issued to <strong>' + res.email + '</strong> • Type: ' + (res.license_type || 'lifetime').toUpperCase() + 
+                ' • Status: ' + (res.email_delivery?.info || 'Ready') +
+              '</div>' +
+            '</div>';
+
+          document.getElementById('btn-copy-issued-key')?.addEventListener('click', function () {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(res.license_key);
+            }
+            showToast('Issued license key copied to clipboard');
+          });
+
+          emailInput.value = '';
+          await loadLicensesAndOrders();
         } catch (err) {
-          resBox.innerHTML = '<span style="color: var(--admin-danger);">Failed: ' + err.message + '</span>';
+          resBox.innerHTML = '<span style="color: var(--admin-danger); font-weight: 600;">Failed: ' + err.message + '</span>';
+        } finally {
+          if (submitBtn) submitBtn.disabled = false;
         }
       });
 
