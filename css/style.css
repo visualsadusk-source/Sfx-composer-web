@@ -1,48 +1,49 @@
 /* ==========================================================================
-   SFX COMPOSER — OFFICIAL BRAND IDENTITY & WEBSITE DESIGN SYSTEM
-   Midnight Navy Surface (#060813 / #070e24) • Signature Brand Blue (#1d68ff)
-   Derived directly from the official SFX Composer brand identity master.
+   SFX COMPOSER — REFINED VISUAL DESIGN SYSTEM
+   Primary Identity: Deep Black (#050505) • Accent: Official Signature Blue Gradient
+   Audio Waveform: Vibrant Green (#35EA86) • Clean Typography: Crisp White (#FFFFFF)
    ========================================================================== */
 
 :root {
-  /* Brand Atmospheric Space Surfaces */
-  --sfx-bg-deep: #060813;
-  --sfx-surface: #070e24;
-  --sfx-surface-raised: #0d1730;
-  --sfx-surface-sunken: #04060c;
-  --sfx-surface-hover: #132244;
-  --sfx-surface-selected: #182b54;
-  --sfx-surface-glass: rgba(13, 23, 48, 0.72);
-  
-  /* Brand Fine Borders & Specular Highlights */
-  --sfx-border: rgba(255, 255, 255, 0.08);
-  --sfx-border-strong: rgba(255, 255, 255, 0.16);
-  --sfx-border-specular: rgba(90, 140, 220, 0.28);
-  --sfx-border-glow: rgba(29, 104, 255, 0.4);
+  /* 1. Primary Black Brand Identity (#050505 / near-black) */
+  --sfx-bg-deep: #050505;
+  --sfx-surface: #050505;
+  --sfx-surface-raised: #0d0d10;
+  --sfx-surface-sunken: #000000;
+  --sfx-surface-hover: #141418;
+  --sfx-surface-selected: #1a1a22;
+  --sfx-surface-glass: rgba(13, 13, 16, 0.85);
 
-  /* Typography Contrast */
-  --sfx-text: #ffffff;
-  --sfx-text-muted: #94a3b8;
+  /* Subtle Dark Charcoal & Fine Borders */
+  --sfx-border: #1a1a20;
+  --sfx-border-strong: #2a2a34;
+  --sfx-border-specular: rgba(255, 255, 255, 0.12);
+
+  /* High-Contrast Restrained Typography */
+  --sfx-text: #f5f5f7;
+  --sfx-text-muted: #9c9ca4;
   --sfx-text-dim: #64748b;
   --sfx-text-on-accent: #ffffff;
-  
-  /* Official SFX Composer Blue Gradient System */
+
+  /* 2. Official Signature Blue Gradient (extracted from brand identity reference) */
+  --sfx-gradient-signature: linear-gradient(135deg, #3b82f6 0%, #1d68ff 50%, #0d2254 100%);
+  --sfx-gradient-signature-text: linear-gradient(135deg, #60a5fa 0%, #2563eb 50%, #1d4ed8 100%);
+  --sfx-gradient-signature-subtle: linear-gradient(135deg, rgba(59, 130, 246, 0.18) 0%, rgba(29, 104, 255, 0.10) 50%, rgba(13, 34, 84, 0.22) 100%);
+  --sfx-gradient-signature-border: linear-gradient(135deg, rgba(96, 165, 250, 0.5) 0%, rgba(29, 104, 255, 0.28) 50%, rgba(13, 34, 84, 0.45) 100%);
   --sfx-accent: #1d68ff;
   --sfx-accent-hover: #3b82f6;
   --sfx-accent-active: #1550c6;
   --sfx-accent-glow: rgba(29, 104, 255, 0.32);
   --sfx-accent-subtle: rgba(29, 104, 255, 0.12);
-  --sfx-beam-light: #5478a5;
-  --sfx-beam-core: #1f3876;
-  
-  --sfx-positive: #10b981;
+
+  /* 3. Audio Waveform (Strictly Green) */
+  --sfx-waveform: #35EA86;
+  --sfx-waveform-played: #35EA86;
+  --sfx-positive: #35EA86;
   --sfx-caution: #f59e0b;
   --sfx-critical: #ef4444;
-  
-  --sfx-waveform: #64748b;
-  --sfx-waveform-played: #38bdf8;
   --sfx-favourite: #f59e0b;
-  
+
   --sfx-space1: 4px;
   --sfx-space2: 8px;
   --sfx-space3: 12px;
@@ -50,13 +51,13 @@
   --sfx-space5: 28px;
   --sfx-radius: 8px;
   --sfx-radius-large: 14px;
-  
+
   --sfx-font-size: 13px;
   --sfx-font-size-small: 11px;
   --sfx-font-size-large: 16px;
   --sfx-row-height: 34px;
   --sfx-control-height: 30px;
-  
+
   --sfx-font: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
   --sfx-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
@@ -77,7 +78,7 @@ html {
   overflow-y: scroll !important;
   scroll-behavior: smooth;
   color-scheme: dark;
-  background-color: var(--sfx-bg-deep);
+  background-color: #050505 !important;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -89,12 +90,8 @@ body {
   overflow-x: hidden !important;
   overflow-y: visible !important;
   position: relative;
-  background-color: var(--sfx-bg-deep);
-  background-image: 
-    radial-gradient(1200px 800px at 20% 0%, rgba(31, 56, 118, 0.35) 0%, rgba(13, 23, 48, 0.18) 45%, transparent 75%),
-    radial-gradient(800px 600px at 85% 15%, rgba(18, 35, 89, 0.22) 0%, transparent 60%),
-    linear-gradient(180deg, #070e24 0%, #060813 100%);
-  background-attachment: fixed;
+  background-color: #050505 !important;
+  background-image: none !important;
   color: var(--sfx-text);
   font-family: var(--sfx-font);
   font-size: var(--sfx-font-size);
@@ -159,8 +156,8 @@ img, svg {
   left: 0;
   bottom: 0;
   width: var(--sidebar-w);
-  background: var(--sfx-surface-raised);
-  border-right: 1px solid var(--sfx-border);
+  background: #09090b;
+  border-right: 1px solid #18181c;
   display: flex;
   flex-direction: column;
   z-index: 1000;
@@ -256,8 +253,9 @@ img, svg {
 
 .sfx-site-nav-link.is-active {
   color: #ffffff;
-  background: #1a2736;
-  border: 1px solid rgba(10, 132, 255, 0.35);
+  background: linear-gradient(135deg, rgba(29, 104, 255, 0.22) 0%, rgba(13, 34, 84, 0.32) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.45);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(29, 104, 255, 0.12);
   font-weight: 600;
 }
 
@@ -279,14 +277,17 @@ img, svg {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: var(--sfx-accent);
+  background: linear-gradient(135deg, #3b82f6 0%, #1d68ff 50%, #1240a6 100%);
+  background-size: 200% 200%;
   color: #ffffff;
   font-weight: 600;
   font-size: 13px;
   padding: 9px 14px;
   border-radius: var(--sfx-radius);
-  transition: background 0.12s ease;
-  box-shadow: 0 0 16px var(--sfx-accent-glow);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 4px 16px rgba(29, 104, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  animation: sfxGradientShift 12s ease infinite;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .sfx-site-btn-primary:hover {
@@ -357,13 +358,14 @@ img, svg {
   align-items: center;
   gap: 8px;
   padding: 4px 12px;
-  background: #141f2e;
-  border: 1px solid rgba(10, 132, 255, 0.3);
+  background: linear-gradient(135deg, rgba(29, 104, 255, 0.15) 0%, rgba(13, 34, 84, 0.28) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.35);
   border-radius: 999px;
   font-size: 11.5px;
   font-weight: 600;
-  color: #7ec8ff;
+  color: #93c5fd;
   margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .sfx-site-hero-headline {
@@ -377,7 +379,12 @@ img, svg {
 }
 
 .sfx-site-hero-headline .blue-highlight {
-  color: var(--sfx-accent);
+  background: linear-gradient(135deg, #60a5fa 0%, #2563eb 50%, #1d4ed8 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  animation: sfxGradientShift 14s ease infinite;
 }
 
 .sfx-site-hero-sub {
@@ -613,21 +620,21 @@ img, svg {
   transform: translateX(-50%);
   width: 92%;
   height: 85%;
-  background: radial-gradient(ellipse at center, rgba(0, 162, 255, 0.24) 0%, rgba(10, 132, 255, 0.12) 42%, rgba(0, 0, 0, 0) 75%);
+  background: radial-gradient(ellipse at center, rgba(29, 104, 255, 0.24) 0%, rgba(13, 34, 84, 0.14) 42%, rgba(5, 5, 5, 0) 75%);
   filter: blur(55px);
   pointer-events: none;
   z-index: 1;
+  animation: sfxGlowBreathe 10s ease-in-out infinite;
 }
 
 /* Premium SaaS Device / Product Frame */
 .sfx-main-hero-frame {
   position: relative;
   z-index: 2;
-  background: #06090e;
-  background: radial-gradient(ellipse 90% 70% at 50% 0%, rgba(0, 162, 255, 0.14) 0%, rgba(6, 9, 14, 0.99) 75%);
-  border: 1px solid rgba(0, 162, 255, 0.28);
+  background: #08080a;
+  border: 1px solid rgba(59, 130, 246, 0.32);
   border-radius: 14px;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.78), 0 0 50px rgba(0, 162, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.85), 0 0 35px rgba(29, 104, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -3710,5 +3717,42 @@ img, svg {
   .sfx-dest-cards-grid-3 {
     grid-template-columns: 1fr;
     gap: 20px;
+  }
+}
+
+
+/* ── Premium Continuous Subtle Gradient Animations ── */
+@keyframes sfxGradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes sfxGlowBreathe {
+  0% {
+    opacity: 0.55;
+    transform: translateX(-50%) scale(0.98);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translateX(-50%) scale(1.02);
+  }
+  100% {
+    opacity: 0.55;
+    transform: translateX(-50%) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
