@@ -30,8 +30,14 @@ const server = http.createServer((req, res) => {
 
   fs.stat(filePath, (err, stats) => {
     if (err || !stats.isFile()) {
-      res.writeHead(404, { 'Content-Type': 'text/plain' });
-      return res.end('404 Not Found');
+      // Clean URLs fallback (e.g. /admin -> /admin.html)
+      const htmlPath = filePath + '.html';
+      if (fs.existsSync(htmlPath) && fs.statSync(htmlPath).isFile()) {
+        filePath = htmlPath;
+      } else {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        return res.end('404 Not Found');
+      }
     }
 
     const ext = path.extname(filePath).toLowerCase();

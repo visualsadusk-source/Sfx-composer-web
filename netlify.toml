@@ -1,6 +1,11 @@
 [build]
   publish = "."
 
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200
+
 [[headers]]
   for = "/downloads/*"
   [headers.values]

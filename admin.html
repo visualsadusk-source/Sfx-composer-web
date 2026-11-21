@@ -1256,7 +1256,15 @@
             password: password
           });
 
-          if (error) throw error;
+          if (error) {
+            if (error.message && error.message.toLowerCase().includes('invalid login credentials')) {
+              throw new Error('Invalid email or password. Please verify your administrator credentials.');
+            }
+            if (error.message && error.message.toLowerCase().includes('email not confirmed')) {
+              throw new Error('Administrator email is not confirmed. Please check your inbox.');
+            }
+            throw error;
+          }
           if (!data || !data.session) throw new Error('No session returned from authentication service.');
 
           // Verify admin role
@@ -1269,11 +1277,14 @@
 
           currentSession = data.session;
           activeAuthToken = token;
+          var adminEmail = data.session.user?.email || authCheck.email || email;
+          localStorage.setItem('sfx_admin_token', token);
+          localStorage.setItem('sfx_admin_user_email', adminEmail);
           sessionStorage.setItem('sfx_admin_token', token);
-          sessionStorage.setItem('sfx_admin_user_email', email);
-          launchDashboard(email);
+          sessionStorage.setItem('sfx_admin_user_email', adminEmail);
+          launchDashboard(adminEmail);
         } catch (err) {
-          authErrorMsg.textContent = err.message;
+          authErrorMsg.textContent = err.message || 'Authentication failed.';
           authErrorMsg.style.display = 'block';
           btn.disabled = false;
           btn.textContent = 'Sign In to Admin Dashboard';
@@ -1297,12 +1308,15 @@
             throw new Error(authCheck.message || 'Invalid or unauthorized Admin Token.');
           }
 
+          var email = authCheck.email || 'admin@sfxcomposer.com';
           activeAuthToken = token;
+          localStorage.setItem('sfx_admin_token', token);
+          localStorage.setItem('sfx_admin_user_email', email);
           sessionStorage.setItem('sfx_admin_token', token);
-          sessionStorage.setItem('sfx_admin_user_email', authCheck.email || 'admin@sfxcomposer.com');
-          launchDashboard(authCheck.email || 'admin@sfxcomposer.com');
+          sessionStorage.setItem('sfx_admin_user_email', email);
+          launchDashboard(email);
         } catch (err) {
-          authKeyErrorMsg.textContent = err.message;
+          authKeyErrorMsg.textContent = err.message || 'Authentication failed.';
           authKeyErrorMsg.style.display = 'block';
           btn.disabled = false;
           btn.textContent = 'Authenticate with Admin Key';
@@ -1332,14 +1346,31 @@
         dashboardLayout.style.display = 'flex';
         adminUserDisplay.textContent = email;
         secCurrentEmail.textContent = email;
-        loadAllData();
+        loadAllData().catch(function (err) {
+          console.error('Error loading dashboard data:', err);
+        });
       }
 
       function logout() {
-        supabase.auth.signOut();
+        supabase.auth.signOut().catch(function () {});
         sessionStorage.removeItem('sfx_admin_token');
         sessionStorage.removeItem('sfx_admin_user_email');
-        window.location.reload();
+        localStorage.removeItem('sfx_admin_token');
+        localStorage.removeItem('sfx_admin_user_email');
+        activeAuthToken = '';
+        currentSession = null;
+        dashboardLayout.style.display = 'none';
+        authScreen.style.display = 'flex';
+        authEmailInput.value = '';
+        authPasswordInput.value = '';
+        authTokenInput.value = '';
+        authErrorMsg.style.display = 'none';
+        authKeyErrorMsg.style.display = 'none';
+        var btn = document.getElementById('btn-auth-submit');
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Sign In to Admin Dashboard';
+        }
       }
 
       document.getElementById('btn-admin-logout').addEventListener('click', logout);
@@ -1347,27 +1378,46 @@
 
       // Check existing session on load
       (async function checkExistingAuth() {
-        var savedToken = sessionStorage.getItem('sfx_admin_token');
-        var savedEmail = sessionStorage.getItem('sfx_admin_user_email');
-        if (savedToken) {
-          var check = await verifyAdminSession(savedToken);
-          if (check.authorized) {
-            activeAuthToken = savedToken;
-            launchDashboard(savedEmail || check.email || 'admin@sfxcomposer.com');
-            return;
+        try {
+          // Clear query params if previously submitted via default GET
+          if (window.location.search && (window.location.search.includes('auth-email') || window.location.search.includes('auth-password'))) {
+            window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
           }
-        }
 
-        var { data } = await supabase.auth.getSession();
-        if (data && data.session) {
-          var t = data.session.access_token;
-          var chk = await verifyAdminSession(t);
-          if (chk.authorized) {
-            currentSession = data.session;
-            activeAuthToken = t;
-            sessionStorage.setItem('sfx_admin_token', t);
-            launchDashboard(data.session.user.email);
+          // 1. Check Supabase Auth session first (with automatic token refresh)
+          var { data: sessData, error: sessErr } = await supabase.auth.getSession();
+          if (!sessErr && sessData && sessData.session) {
+            var token = sessData.session.access_token;
+            var chk = await verifyAdminSession(token);
+            if (chk.authorized) {
+              currentSession = sessData.session;
+              activeAuthToken = token;
+              var email = sessData.session.user?.email || chk.email || 'admin@sfxcomposer.com';
+              localStorage.setItem('sfx_admin_token', token);
+              localStorage.setItem('sfx_admin_user_email', email);
+              sessionStorage.setItem('sfx_admin_token', token);
+              sessionStorage.setItem('sfx_admin_user_email', email);
+              launchDashboard(email);
+              return;
+            }
           }
+
+          // 2. Fallback to stored token (e.g. Service Key or Session Token)
+          var savedToken = sessionStorage.getItem('sfx_admin_token') || localStorage.getItem('sfx_admin_token');
+          var savedEmail = sessionStorage.getItem('sfx_admin_user_email') || localStorage.getItem('sfx_admin_user_email');
+          if (savedToken) {
+            var check = await verifyAdminSession(savedToken);
+            if (check.authorized) {
+              activeAuthToken = savedToken;
+              launchDashboard(savedEmail || check.email || 'admin@sfxcomposer.com');
+              return;
+            } else {
+              sessionStorage.removeItem('sfx_admin_token');
+              localStorage.removeItem('sfx_admin_token');
+            }
+          }
+        } catch (e) {
+          console.warn('Session check warning:', e);
         }
       })();
 
@@ -2473,20 +2523,6 @@
       }
       if (btnCloseAuditLogs) btnCloseAuditLogs.addEventListener('click', closeAuditModal);
       if (btnCloseAuditLogsFooter) btnCloseAuditLogsFooter.addEventListener('click', closeAuditModal);
-              try {
-                var res = await window.SFX_PAYMENT_SERVICE.resendLicenseEmail(activeAuthToken, orderRef);
-                showToast(res.message || 'Email successfully sent via Brevo');
-                loadLicensesAndOrders();
-              } catch (err) {
-                alert('Brevo error: ' + err.message);
-              } finally {
-                this.textContent = origText;
-                this.disabled = false;
-              }
-            }
-          });
-        });
-      }
 
       // Filter and search listeners
       document.getElementById('lic-filter-status')?.addEventListener('change', renderFilteredLicenses);
