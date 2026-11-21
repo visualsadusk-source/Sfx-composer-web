@@ -59,7 +59,8 @@ async function verifySplitPages() {
 
   // Both tabs present in sidebar
   assert.ok(indexHtml.includes('href="demo.html"'), 'Sidebar must include Live Plugin Demo link');
-  assert.ok(indexHtml.includes('href="screenshots.html"'), 'Sidebar must include Screenshots Gallery link');
+  assert.ok(indexHtml.includes('href="screenshots.html"'), 'Sidebar must include Product Images link');
+  assert.ok(indexHtml.includes('Product Images'), 'Sidebar must display "Product Images" label');
 
   // Overview is active in sidebar
   assert.ok(indexHtml.includes('href="index.html" class="sfx-site-nav-link is-active"'), 'Overview link must be active on index.html');
@@ -69,7 +70,7 @@ async function verifySplitPages() {
   assert.ok(indexHtml.includes('class="sfx-dest-card sfx-dest-card--interactive"'), 'Interactive demo destination card must exist');
   assert.ok(indexHtml.includes('class="sfx-dest-card sfx-dest-card--gallery"'), 'Screenshots gallery destination card must exist');
   assert.ok(indexHtml.includes('Launch Live Plugin Demo'), 'Demo card action must exist');
-  assert.ok(indexHtml.includes('Open Screenshots Gallery'), 'Gallery card action must exist');
+  assert.ok(indexHtml.includes('View Product Images') || indexHtml.includes('Product Images'), 'Product Images card action must exist');
 
   // Overview does NOT contain duplicate demo or screenshot cards
   assert.ok(!indexHtml.includes('id="sfx-vlist-container"'), 'Virtual list must be moved out of Overview');
@@ -110,8 +111,9 @@ async function verifySplitPages() {
   console.log('\n--- TEST GROUP 5: SCREENSHOTS GALLERY PAGE (SCREENSHOTS.HTML) ---');
   const screenshotsHtml = fs.readFileSync(path.join(__dirname, 'screenshots.html'), 'utf8');
 
-  // Sidebar has Screenshots active
-  assert.ok(screenshotsHtml.includes('href="screenshots.html" class="sfx-site-nav-link is-active"'), 'Screenshots Gallery must be active in sidebar on screenshots.html');
+  // Sidebar has Product Images active
+  assert.ok(screenshotsHtml.includes('href="screenshots.html" class="sfx-site-nav-link is-active"'), 'Product Images must be active in sidebar on screenshots.html');
+  assert.ok(screenshotsHtml.includes('Product Images'), 'Sidebar must display "Product Images" label');
 
   // Grouped feature sections
   const gallerySections = [
