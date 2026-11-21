@@ -90,10 +90,10 @@ async function verifyCinematicHero() {
 
   // 6. Existing Screenshot Separation & Lightbox Indices
   console.log('\n--- TEST GROUP 6: EXISTING SCREENSHOT SEPARATION ---');
-  for (let i = 0; i <= 9; i++) {
+  for (let i = 0; i <= 8; i++) {
     assert.ok(html.includes(`data-lightbox-idx="${i}"`), `Screenshot card with data-lightbox-idx="${i}" must be preserved`);
   }
-  pass('All 10 existing screenshot cards remain separate with preserved lightbox indices');
+  pass('All 9 existing screenshot cards remain separate with preserved lightbox indices');
 
   console.log('\n================================================================');
   console.log(` ALL ${passed}/${total} CINEMATIC HERO VERIFICATION TESTS PASSED!`);

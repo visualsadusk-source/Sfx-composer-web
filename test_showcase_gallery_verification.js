@@ -16,7 +16,7 @@ async function verifyShowcaseGallery() {
     console.log(`✓ PASS [${total}]: ${msg}`);
   }
 
-  // ── TEST 1: ALL 10 UPLOADED SCREENSHOTS EXIST & MATCH EXACT SIZES ──
+  // ── TEST 1: SCREENSHOT ASSETS EXIST & MATCH EXACT SIZES ──
   console.log('--- TEST GROUP 1: EXACT SCREENSHOT ASSETS ---');
   const screenshots = [
     { name: 'sfx-overview-main.png', expectedSize: 244858, section: 'Overview' },
@@ -25,7 +25,6 @@ async function verifyShowcaseGallery() {
     { name: 'sfx-browser-import.png', expectedSize: 135757, section: 'Sound Browser (Import)' },
     { name: 'sfx-ai-assistant.png', expectedSize: 289306, section: 'AI SFX Assistant' },
     { name: 'sfx-bgm-flow-transitions.png', expectedSize: 165898, section: 'BGM Flow' },
-    { name: 'sfx-analytics-dashboard.png', expectedSize: 238212, section: 'Analytics' },
     { name: 'sfx-scene-ai-timeline.png', expectedSize: 157027, section: 'Scene AI' },
     { name: 'sfx-audio-tools-essential-sound.png', expectedSize: 291263, section: 'Audio Tools' },
     { name: 'sfx-settings-workspace.png', expectedSize: 146527, section: 'Settings' }
@@ -53,17 +52,16 @@ async function verifyShowcaseGallery() {
   assert.ok(!html.includes('id="btn-view-tour"'), 'Tour toggle button #btn-view-tour must be completely removed');
   pass('Horizontal numbered strip and duplicate carousel are completely removed');
 
-  // ── TEST 3: ALL 8 DEDICATED FEATURE SECTIONS IN OVERVIEW PRESERVED ──
-  console.log('\n--- TEST GROUP 3: ALL 8 FEATURE SECTIONS PRESERVED IN OVERVIEW ---');
+  // ── TEST 3: ALL 7 DEDICATED FEATURE SECTIONS IN OVERVIEW PRESERVED (ANALYTICS REMOVED) ──
+  console.log('\n--- TEST GROUP 3: ALL 7 FEATURE SECTIONS PRESERVED IN OVERVIEW ---');
   const sections = [
     { id: 'gallery-overview', kicker: 'SECTION 01 — OVERVIEW', title: 'Meet SFX Composer', img: 'sfx-overview-main.png' },
     { id: 'gallery-browser', kicker: 'SECTION 02 — SOUND BROWSER', title: 'Explore Your Sound Library', img: 'sfx-browser-pixabay.png' },
     { id: 'gallery-ai', kicker: 'SECTION 03 — AI SFX ASSISTANT', title: 'Your AI-Powered Sound Assistant', img: 'sfx-ai-assistant.png' },
     { id: 'gallery-bgm', kicker: 'SECTION 04 — BGM FLOW', title: 'Intelligent Background Music Control', img: 'sfx-bgm-flow-transitions.png' },
-    { id: 'gallery-analytics', kicker: 'SECTION 05 — ANALYTICS', title: 'Understand Your Audio Workflow', img: 'sfx-analytics-dashboard.png' },
-    { id: 'gallery-scene-ai', kicker: 'SECTION 06 — SCENE AI', title: 'Intelligent AI Timeline Control', img: 'sfx-scene-ai-timeline.png' },
-    { id: 'gallery-audio-tools', kicker: 'SECTION 07 — AUDIO TOOLS', title: 'Essential Sound Studio', img: 'sfx-audio-tools-essential-sound.png' },
-    { id: 'gallery-settings', kicker: 'SECTION 08 — SETTINGS', title: 'Customize Your Workspace', img: 'sfx-settings-workspace.png' }
+    { id: 'gallery-scene-ai', kicker: 'SECTION 05 — SCENE AI', title: 'Intelligent AI Timeline Control', img: 'sfx-scene-ai-timeline.png' },
+    { id: 'gallery-audio-tools', kicker: 'SECTION 06 — AUDIO TOOLS', title: 'Essential Sound Studio', img: 'sfx-audio-tools-essential-sound.png' },
+    { id: 'gallery-settings', kicker: 'SECTION 07 — SETTINGS', title: 'Customize Your Workspace', img: 'sfx-settings-workspace.png' }
   ];
 
   for (const s of sections) {
@@ -74,24 +72,14 @@ async function verifyShowcaseGallery() {
     pass(`Section verified: ${s.kicker} (${s.title})`);
   }
 
-  // ── TEST 4: STRICT SEPARATION OF ANALYTICS & SCENE AI ──
-  console.log('\n--- TEST GROUP 4: STRICT SEPARATION OF ANALYTICS & SCENE AI ---');
-  const analyticsSecStart = html.indexOf('id="gallery-analytics"');
-  const analyticsSecEnd = html.indexOf('</section>', analyticsSecStart);
-  const analyticsContent = html.substring(analyticsSecStart, analyticsSecEnd);
-
-  assert.ok(!analyticsContent.includes('Scene AI'), 'Analytics section must NOT mention Scene AI');
-  assert.ok(!analyticsContent.includes('sfx-scene-ai-timeline.png'), 'Analytics section must NOT contain Scene AI image');
-  assert.ok(analyticsContent.includes('sfx-analytics-dashboard.png'), 'Analytics section must contain sfx-analytics-dashboard.png');
-
-  const sceneAiSecStart = html.indexOf('id="gallery-scene-ai"');
-  const sceneAiSecEnd = html.indexOf('</section>', sceneAiSecStart);
-  const sceneAiContent = html.substring(sceneAiSecStart, sceneAiSecEnd);
-
-  assert.ok(!sceneAiContent.includes('Total Sounds Played'), 'Scene AI section must NOT contain Analytics metrics');
-  assert.ok(!sceneAiContent.includes('sfx-analytics-dashboard.png'), 'Scene AI section must NOT contain Analytics image');
-  assert.ok(sceneAiContent.includes('sfx-scene-ai-timeline.png'), 'Scene AI section must contain sfx-scene-ai-timeline.png');
-  pass('Analytics and Scene AI are strictly independent and separated');
+  // ── TEST 4: VERIFY COMPLETE REMOVAL OF SECTION 05 — ANALYTICS ──
+  console.log('\n--- TEST GROUP 4: VERIFY CLEAN REMOVAL OF SECTION 05 — ANALYTICS ---');
+  assert.ok(!html.includes('id="gallery-analytics"'), 'Section #gallery-analytics must be completely removed');
+  assert.ok(!html.includes('Understand Your Audio Workflow'), 'Heading "Understand Your Audio Workflow" must be completely removed');
+  assert.ok(!html.includes('100% Private On-Device Tracking'), 'Analytics feature badges must be completely removed');
+  assert.ok(!html.includes('Advanced Usage Analytics Dashboard'), 'Analytics caption and dashboard title must be completely removed');
+  assert.ok(!html.includes('7 of 11'), 'Analytics counter "7 of 11" must be completely removed');
+  pass('Section 05 — Analytics is cleanly and completely removed with no traces left behind');
 
   // ── TEST 5: SIDEBAR NAVIGATION INTACT ──
   console.log('\n--- TEST GROUP 5: SIDEBAR NAVIGATION INTACT ---');

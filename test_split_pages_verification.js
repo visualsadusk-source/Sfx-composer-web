@@ -115,13 +115,12 @@ async function verifySplitPages() {
   assert.ok(screenshotsHtml.includes('href="screenshots.html" class="sfx-site-nav-link is-active"'), 'Product Images must be active in sidebar on screenshots.html');
   assert.ok(screenshotsHtml.includes('Product Images'), 'Sidebar must display "Product Images" label');
 
-  // Grouped feature sections
+  // Grouped feature sections (Analytics removed)
   const gallerySections = [
     'gallery-overview',
     'gallery-browser',
     'gallery-ai',
     'gallery-bgm',
-    'gallery-analytics',
     'gallery-scene-ai',
     'gallery-audio-tools',
     'gallery-settings'
@@ -129,12 +128,7 @@ async function verifySplitPages() {
   for (const sId of gallerySections) {
     assert.ok(screenshotsHtml.includes(`id="${sId}"`), `Section #${sId} must exist on screenshots.html`);
   }
-
-  // Strict separation of Analytics & Scene AI
-  const anStart = screenshotsHtml.indexOf('id="gallery-analytics"');
-  const anEnd = screenshotsHtml.indexOf('</section>', anStart);
-  const anContent = screenshotsHtml.substring(anStart, anEnd);
-  assert.ok(!anContent.includes('Scene AI'), 'Analytics section must not mention Scene AI');
+  assert.ok(!screenshotsHtml.includes('id="gallery-analytics"'), 'Section #gallery-analytics must be cleanly removed');
 
   const scStart = screenshotsHtml.indexOf('id="gallery-scene-ai"');
   const scEnd = screenshotsHtml.indexOf('</section>', scStart);
