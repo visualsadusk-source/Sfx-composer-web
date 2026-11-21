@@ -15,6 +15,7 @@
     setupCustomerDashboard();
     setupFaqAccordion();
     setupSmoothScrollButtons();
+    setupFolderExplorer();
   });
 
   // ── 1. FIXED LEFT VERTICAL NAVIGATION & MOBILE DRAWER ──
@@ -289,6 +290,10 @@
       if (modal) {
         modal.classList.add('is-open');
         document.body.style.overflow = 'hidden';
+        var tierName = document.getElementById('checkout-tier-name');
+        if (tierName) {
+          tierName.textContent = 'SFX Composer Ultimate Bundle';
+        }
         if (checkoutForm) checkoutForm.style.display = 'flex';
         if (successView) successView.style.display = 'none';
         if (errorMsg) errorMsg.style.display = 'none';
@@ -351,7 +356,7 @@
             amount: orderData.amount,
             currency: orderData.currency || 'INR',
             name: 'SFX Composer',
-            description: 'SFX Composer Pro Lifetime License',
+            description: 'SFX Composer Ultimate Bundle (Plugin + 7GB SFX Library)',
             image: 'assets/brand/mark-128.png',
             order_id: orderData.order_id,
             prefill: {
@@ -429,6 +434,15 @@
           successEmailStatusDisp.textContent = result.email_delivery?.info || 'Delivery queued';
           successEmailStatusDisp.style.color = 'var(--sfx-caution)';
         }
+      }
+
+      // Deliver 7GB SFX Library Google Drive Link securely post-verification
+      var successDriveBtn = document.getElementById('success-sfx-library-btn');
+      if (successDriveBtn) {
+        var libraryUrl = (result.downloads && result.downloads.sfx_library_url)
+          ? result.downloads.sfx_library_url
+          : 'https://drive.google.com/file/d/1rF1f3KEKSpri1KoZqP8SCv-Q0-NYxvGD/view?usp=sharing';
+        successDriveBtn.href = libraryUrl;
       }
     }
 
@@ -976,6 +990,70 @@
           targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       });
+    });
+  }
+
+  // ── 7. SFX LIBRARY 20-FOLDER EXPLORER ──
+  function setupFolderExplorer() {
+    var searchInput = document.getElementById('folder-search-input');
+    var countBadge = document.getElementById('folder-count-badge');
+    var filterBtns = document.querySelectorAll('.sfx-folder-filter-btn');
+    var folderCards = document.querySelectorAll('.sfx-folder-card');
+
+    if (!folderCards.length) return;
+
+    var currentCategory = 'all';
+    var currentQuery = '';
+
+    function filterFolders() {
+      var visibleCount = 0;
+      var q = currentQuery.trim().toLowerCase();
+
+      folderCards.forEach(function (card) {
+        var cat = card.getAttribute('data-category') || '';
+        var name = (card.getAttribute('data-name') || '').toLowerCase();
+        var text = card.textContent.toLowerCase();
+
+        var matchesCategory = (currentCategory === 'all' || cat === currentCategory);
+        var matchesQuery = (!q || name.indexOf(q) !== -1 || text.indexOf(q) !== -1);
+
+        if (matchesCategory && matchesQuery) {
+          card.style.display = 'block';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      if (countBadge) {
+        countBadge.textContent = 'Showing ' + visibleCount + ' of 20 categories';
+      }
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        currentQuery = this.value;
+        filterFolders();
+      });
+    }
+
+    filterBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        filterBtns.forEach(function (b) { b.classList.remove('is-active'); });
+        this.classList.add('is-active');
+        currentCategory = this.getAttribute('data-filter') || 'all';
+        filterFolders();
+      });
+    });
+
+    // Expand/Collapse folder card on click
+    folderCards.forEach(function (card) {
+      var head = card.querySelector('.sfx-folder-card-head');
+      if (head) {
+        head.addEventListener('click', function () {
+          card.classList.toggle('is-expanded');
+        });
+      }
     });
   }
 })();

@@ -2553,3 +2553,453 @@ img, svg {
 .sfx-dest-card:hover .sfx-dest-action {
   gap: 12px;
 }
+
+/* ==========================================================================
+   SFX COMPOSER ULTIMATE BUNDLE & 7GB SFX LIBRARY STYLING
+   ========================================================================== */
+
+.sfx-bundle-container {
+  background: radial-gradient(circle at 50% 0%, rgba(10, 132, 255, 0.12) 0%, rgba(13, 16, 23, 0.98) 70%);
+  border: 1px solid rgba(10, 132, 255, 0.35);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7), 0 0 24px rgba(10, 132, 255, 0.15);
+  border-radius: 16px;
+  padding: 36px 32px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.sfx-bundle-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(10, 132, 255, 0.2), rgba(168, 85, 247, 0.2));
+  border: 1px solid rgba(10, 132, 255, 0.5);
+  color: #7ec8ff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
+.sfx-bundle-header {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto 32px auto;
+}
+
+.sfx-bundle-header h2 {
+  font-size: 32px;
+  font-weight: 850;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px 0;
+}
+
+.sfx-bundle-header p {
+  font-size: 14.5px;
+  color: #94a3b8;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Two Separate Product Cards Visually Combined */
+.sfx-bundle-split-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  position: relative;
+  margin-bottom: 32px;
+}
+
+@media (max-width: 860px) {
+  .sfx-bundle-split-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+.sfx-bundle-item-card {
+  background: #090c12;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.sfx-bundle-item-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(10, 132, 255, 0.4);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
+.sfx-bundle-item-badge {
+  padding: 10px 16px;
+  background: #10141d;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sfx-bundle-item-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #00a2ff;
+}
+
+.sfx-bundle-item-preview {
+  height: 210px;
+  background: #05070a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sfx-bundle-item-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.sfx-bundle-item-body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.sfx-bundle-item-h3 {
+  font-size: 19px;
+  font-weight: 750;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+}
+
+.sfx-bundle-item-desc {
+  font-size: 12.5px;
+  color: #94a3b8;
+  line-height: 1.55;
+  margin: 0 0 16px 0;
+}
+
+.sfx-bundle-item-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.sfx-bundle-item-features li {
+  font-size: 12.5px;
+  color: #cbd5e1;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.sfx-bundle-item-features li svg {
+  color: #00a2ff;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Bundle Connector Badge in Middle */
+.sfx-bundle-plus-connector {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #0a84ff;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 900;
+  box-shadow: 0 0 20px rgba(10, 132, 255, 0.7);
+  z-index: 10;
+  border: 3px solid #080b11;
+}
+
+@media (max-width: 860px) {
+  .sfx-bundle-plus-connector {
+    display: none;
+  }
+}
+
+/* Pricing Footer Bar */
+.sfx-bundle-pricing-footer {
+  background: #07090e;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.sfx-bundle-price-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sfx-price-original {
+  font-size: 20px;
+  color: #64748b;
+  text-decoration: line-through;
+  font-weight: 500;
+}
+
+.sfx-price-current {
+  font-size: 46px;
+  font-weight: 900;
+  color: #00a2ff;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.sfx-price-period {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.sfx-bundle-savings-pill {
+  background: rgba(48, 209, 88, 0.15);
+  border: 1px solid #30d158;
+  color: #30d158;
+  font-size: 11px;
+  font-weight: 750;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+/* Interactive Folder Explorer for SFX Library */
+.sfx-folder-explorer-sec {
+  margin: 30px 0 60px 0;
+}
+
+.sfx-folder-search-wrap {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.sfx-folder-search-input {
+  flex: 1;
+  min-width: 240px;
+  height: 42px;
+  background: #0d1017;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0 16px;
+  color: #fff;
+  font-size: 13.5px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sfx-folder-search-input:focus {
+  border-color: #00a2ff;
+  box-shadow: 0 0 12px rgba(0, 162, 255, 0.25);
+  outline: none;
+}
+
+.sfx-folder-filters-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 24px;
+}
+
+.sfx-folder-filter-btn {
+  background: #10141d;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.sfx-folder-filter-btn:hover {
+  background: #182030;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.sfx-folder-filter-btn.is-active {
+  background: #00a2ff;
+  color: #fff;
+  border-color: #00a2ff;
+}
+
+.sfx-folder-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.sfx-folder-card {
+  background: #0a0d14;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sfx-folder-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 162, 255, 0.45);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.sfx-folder-card.is-expanded {
+  border-color: #00a2ff;
+  background: #0c101a;
+  box-shadow: 0 10px 30px rgba(0, 162, 255, 0.15);
+}
+
+.sfx-folder-card-head {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sfx-folder-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sfx-folder-icon-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: rgba(0, 162, 255, 0.12);
+  color: #00a2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sfx-folder-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sfx-folder-cat-tag {
+  font-size: 10.5px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.sfx-folder-toggle-indicator {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  transition: transform 0.25s ease, background 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.sfx-folder-card.is-expanded .sfx-folder-toggle-indicator {
+  transform: rotate(180deg);
+  background: #00a2ff;
+  color: #fff;
+}
+
+.sfx-folder-card-body {
+  display: none;
+  padding: 0 16px 16px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+.sfx-folder-card.is-expanded .sfx-folder-card-body {
+  display: block;
+}
+
+.sfx-folder-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+  background: #07090e;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.sfx-folder-meta-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.sfx-folder-meta-val {
+  font-size: 11.5px;
+  color: #e2e8f0;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* 3-Column Destination Cards Layout */
+.sfx-dest-cards-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin: 0 0 40px 0;
+}
+
+@media (max-width: 1024px) {
+  .sfx-dest-cards-grid-3 {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}

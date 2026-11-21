@@ -159,6 +159,14 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    if (portalData) {
+      portalData.downloads = {
+        zxp_url: '/downloads/sfx-composer-pro-v2.4.0.zxp',
+        zip_url: '/downloads/sfx-composer-pro-v2.4.0.zip',
+        sfx_library_url: (Deno.env.get('SFX_LIBRARY_DRIVE_URL') || 'https://drive.google.com/file/d/1rF1f3KEKSpri1KoZqP8SCv-Q0-NYxvGD/view?usp=sharing').trim()
+      };
+    }
+
     return new Response(JSON.stringify(portalData), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
