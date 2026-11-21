@@ -24,8 +24,8 @@ Deno.serve(async (req: Request) => {
     }
 
     const cleanEmail = email.trim().toLowerCase();
-    const rzpKeyId = Deno.env.get('RAZORPAY_KEY_ID') || '';
-    const rzpKeySecret = Deno.env.get('RAZORPAY_KEY_SECRET') || '';
+    const rzpKeyId = (Deno.env.get('RAZORPAY_KEY_ID') || '').trim();
+    const rzpKeySecret = (Deno.env.get('RAZORPAY_KEY_SECRET') || '').trim();
 
     if (!rzpKeyId || !rzpKeySecret) {
       return new Response(JSON.stringify({
@@ -51,12 +51,12 @@ Deno.serve(async (req: Request) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        amount: amount,
-        currency: currency,
+        amount: 19900, // strictly ₹199 (19900 paise)
+        currency: 'INR',
         receipt: `rcpt_${Date.now().toString(36)}`,
         notes: {
           customer_email: cleanEmail,
-          product: 'SFX Composer Pro Lifetime License',
+          product: 'SFX Composer Ultimate Bundle (Plugin + 7GB SFX Library)',
           price_inr: '199'
         }
       })
@@ -79,27 +79,27 @@ Deno.serve(async (req: Request) => {
     const razorpayOrderId = rzpData.id;
 
     // Record pending order in Supabase
-    const { data: recordData, error: recordError } = await supabase.rpc('sfx_record_payment_order', {
-      p_customer_email: cleanEmail,
-      p_payment_provider: 'razorpay',
-      p_provider_order_id: razorpayOrderId,
-      p_amount: amount / 100, // stored as 199.00
-      p_currency: currency
-    });
-
-    if (recordError) {
-      console.error('Database error recording order:', recordError);
-      return new Response(JSON.stringify({ ok: false, message: recordError.message }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    try {
+      const { data: recordData, error: recordError } = await supabase.rpc('sfx_record_payment_order', {
+        p_customer_email: cleanEmail,
+        p_payment_provider: 'razorpay',
+        p_provider_order_id: razorpayOrderId,
+        p_amount: 199.00,
+        p_currency: 'INR'
       });
+
+      if (recordError) {
+        console.warn('Database note recording order (proceeding with checkout):', recordError.message);
+      }
+    } catch (dbErr) {
+      console.warn('Database execution note (proceeding):', dbErr);
     }
 
     return new Response(JSON.stringify({
       ok: true,
       order_id: razorpayOrderId,
-      amount: rzpData.amount || amount,
-      currency: rzpData.currency || currency,
+      amount: rzpData.amount || 19900,
+      currency: rzpData.currency || 'INR',
       key_id: rzpKeyId
     }), {
       status: 200,

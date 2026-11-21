@@ -1,0 +1,19 @@
+{
+  "name": "sfx-composer-website",
+  "version": "2.4.0",
+  "description": "SFX Composer Website & Razorpay Payment Integration",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test_razorpay_live_integration.js"
+  },
+  "keywords": [
+    "sfx-composer",
+    "premiere-pro",
+    "after-effects",
+    "razorpay",
+    "audio-tools"
+  ],
+  "author": "SFX Composer",
+  "license": "Commercial"
+}

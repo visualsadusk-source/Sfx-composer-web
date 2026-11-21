@@ -789,6 +789,14 @@
               <div class="label">Gross Sales Revenue</div>
               <div class="val neon" id="stat-revenue">₹0</div>
             </div>
+            <div class="admin-stat-card">
+              <div class="label">Successful Payments</div>
+              <div class="val neon" id="stat-successful-payments">0</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="label">Failed Payments</div>
+              <div class="val" style="color: var(--admin-danger);" id="stat-failed-payments">0</div>
+            </div>
           </div>
 
           <!-- Quick Action Banner -->
@@ -2032,6 +2040,20 @@
           }
           if (document.getElementById('stat-revenue')) {
             document.getElementById('stat-revenue').textContent = '₹' + (stats.total_revenue || 0);
+          }
+
+          var successfulOrders = cachedAdminOrders.filter(function (o) {
+            return o.payment_status === 'completed' || o.payment_status === 'paid';
+          });
+          var failedOrders = cachedAdminOrders.filter(function (o) {
+            return o.payment_status === 'failed';
+          });
+
+          if (document.getElementById('stat-successful-payments')) {
+            document.getElementById('stat-successful-payments').textContent = stats.successful_payments !== undefined ? stats.successful_payments : successfulOrders.length;
+          }
+          if (document.getElementById('stat-failed-payments')) {
+            document.getElementById('stat-failed-payments').textContent = stats.failed_payments !== undefined ? stats.failed_payments : failedOrders.length;
           }
 
           renderFilteredLicenses();

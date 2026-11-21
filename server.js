@@ -22,10 +22,21 @@ if (fs.existsSync(envPath)) {
   });
 }
 
-// Ensure SFX_LIBRARY_DRIVE_URL is configured
+// Ensure defaults
 if (!process.env.SFX_LIBRARY_DRIVE_URL) {
   process.env.SFX_LIBRARY_DRIVE_URL = 'https://drive.google.com/file/d/1rF1f3KEKSpri1KoZqP8SCv-Q0-NYxvGD/view?usp=sharing';
 }
+if (!process.env.PRICE_INR) {
+  process.env.PRICE_INR = '199';
+}
+
+// Serverless API handlers
+const apiHandlers = {
+  '/api/create-order': require('./api/create-order'),
+  '/api/verify-payment': require('./api/verify-payment'),
+  '/api/payment-webhook': require('./api/payment-webhook'),
+  '/api/health': require('./api/health')
+};
 
 const PORT = process.env.PORT || 3000;
 const MIME_TYPES = {
@@ -43,8 +54,47 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
-  let reqPath = decodeURI(req.url.split('?')[0]);
-  let filePath = path.join(__dirname, reqPath === '/' ? 'index.html' : reqPath);
+  const [reqPath] = req.url.split('?');
+  const cleanPath = decodeURI(reqPath);
+
+  // 1. Route API requests to Serverless handlers
+  if (cleanPath.startsWith('/api/')) {
+    const handler = apiHandlers[cleanPath] || apiHandlers[cleanPath.replace(/\/$/, '')];
+    if (handler) {
+      let bodyData = '';
+      req.on('data', chunk => bodyData += chunk);
+      req.on('end', async () => {
+        try {
+          if (bodyData && req.headers['content-type']?.includes('application/json')) {
+            req.body = JSON.parse(bodyData);
+          } else {
+            req.body = bodyData;
+          }
+        } catch (e) {
+          req.body = bodyData;
+        }
+
+        try {
+          await handler(req, res);
+        } catch (handlerErr) {
+          console.error(`API Error on ${cleanPath}:`, handlerErr);
+          if (!res.headersSent) {
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ ok: false, message: handlerErr.message }));
+          }
+        }
+      });
+      return;
+    } else {
+      res.statusCode = 404;
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify({ ok: false, message: 'API Route Not Found' }));
+    }
+  }
+
+  // 2. Static File Serving & Clean URLs
+  let filePath = path.join(__dirname, cleanPath === '/' ? 'index.html' : cleanPath);
 
   // Security: prevent directory traversal outside root
   if (!filePath.startsWith(__dirname)) {
@@ -54,7 +104,7 @@ const server = http.createServer((req, res) => {
 
   fs.stat(filePath, (err, stats) => {
     if (err || !stats.isFile()) {
-      // Clean URLs fallback (e.g. /admin -> /admin.html)
+      // Clean URLs fallback (e.g. /admin -> /admin.html, /demo -> /demo.html)
       const htmlPath = filePath + '.html';
       if (fs.existsSync(htmlPath) && fs.statSync(htmlPath).isFile()) {
         filePath = htmlPath;
@@ -79,10 +129,8 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
   const url = `http://localhost:${PORT}`;
   console.log(`\n======================================================`);
-  console.log(`  SFX Composer Website running at: ${url}`);
-  console.log(`  Press Ctrl + C to stop the server`);
+  console.log(`  SFX Composer Server running at: ${url}`);
+  console.log(`  Razorpay Live Key: ${process.env.RAZORPAY_KEY_ID || 'Not set'}`);
+  console.log(`  API Endpoints Active: /api/create-order, /api/verify-payment, /api/health`);
   console.log(`======================================================\n`);
-
-  // Automatically open browser on Windows
-  exec(`start ${url}`);
 });

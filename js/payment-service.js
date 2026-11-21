@@ -1,6 +1,6 @@
 /**
- * SFX Composer — Secure Supabase & Razorpay Payment & Licensing Service
- * Connects frontend directly to Supabase Edge Functions on project wyjazmiihwjlrkggeeez.
+ * SFX Composer — Secure Razorpay & Supabase Payment & Licensing Service
+ * Connects frontend to secure serverless backend (Vercel / Node API or Supabase Edge Functions).
  * No service-role keys or backend payment secrets are ever exposed in frontend code.
  */
 (function (window) {
@@ -20,70 +20,123 @@
       return CONFIG;
     },
 
-    // ── 1. Create Order via Supabase Edge Function ──
+    // Determine the optimal API endpoint (Vercel Serverless / Local Node / Supabase Edge Functions)
+    getEndpoints: function (action) {
+      var endpoints = [];
+
+      // 1. Explicit Custom Backend URL (e.g. window.SFX_API_URL = 'https://api.sfxcomposer.in' or Vercel URL)
+      if (window.SFX_API_URL) {
+        var base = String(window.SFX_API_URL).replace(/\/$/, '');
+        endpoints.push(base + '/' + (action === 'create-order' ? 'create-order' : 'verify-payment'));
+      }
+
+      // 2. Same-origin Serverless API (when hosted on Vercel, Node.js server, or localhost)
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname.includes('github.io')) {
+        endpoints.push(action === 'create-order' ? '/api/create-order' : '/api/verify-payment');
+      }
+
+      // 3. Supabase Edge Functions
+      var sbAction = action === 'create-order' ? 'create-razorpay-order' : 'verify-payment';
+      endpoints.push(CONFIG.FUNCTIONS_URL + '/' + sbAction);
+
+      return endpoints;
+    },
+
+    // ── 1. Create Razorpay Order via Secure Backend ──
     createOrder: async function (email) {
       var cleanEmail = String(email || '').trim().toLowerCase();
       if (!cleanEmail || !cleanEmail.includes('@')) {
         throw new Error('Please provide a valid email address.');
       }
 
-      var res = await fetch(CONFIG.FUNCTIONS_URL + '/create-razorpay-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': CONFIG.SUPABASE_ANON_KEY,
-          'Authorization': 'Bearer ' + CONFIG.SUPABASE_ANON_KEY
-        },
-        body: JSON.stringify({
-          email: cleanEmail,
-          amount: CONFIG.PRICE_PAISE,
-          currency: CONFIG.CURRENCY
-        })
-      });
+      var endpoints = this.getEndpoints('create-order');
+      var lastError = null;
 
-      var data = await res.json().catch(function () {
-        return { ok: false, message: 'Invalid response from payment server' };
-      });
+      for (var i = 0; i < endpoints.length; i++) {
+        var url = endpoints[i];
+        try {
+          var res = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': CONFIG.SUPABASE_ANON_KEY,
+              'Authorization': 'Bearer ' + CONFIG.SUPABASE_ANON_KEY
+            },
+            body: JSON.stringify({
+              email: cleanEmail,
+              amount: CONFIG.PRICE_PAISE,
+              currency: CONFIG.CURRENCY
+            })
+          });
 
-      if (!res.ok || !data.ok) {
-        throw new Error(data.message || 'Failed to create order');
+          var data = await res.json().catch(function () {
+            return { ok: false, message: 'Invalid response from payment server' };
+          });
+
+          if (res.ok && data.ok) {
+            return data;
+          } else if (res.status === 404 && i < endpoints.length - 1) {
+            // Try fallback endpoint
+            continue;
+          } else {
+            throw new Error(data.message || 'Failed to create order');
+          }
+        } catch (err) {
+          lastError = err;
+          if (i < endpoints.length - 1) continue;
+        }
       }
 
-      return data;
+      throw lastError || new Error('Could not connect to payment backend');
     },
 
-    // ── 2. Verify Payment & Generate License via Backend ──
+    // ── 2. Verify Payment & Generate License via Backend (HMAC SHA-256) ──
     verifyPayment: async function (verificationPayload) {
-      var res = await fetch(CONFIG.FUNCTIONS_URL + '/verify-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': CONFIG.SUPABASE_ANON_KEY,
-          'Authorization': 'Bearer ' + CONFIG.SUPABASE_ANON_KEY
-        },
-        body: JSON.stringify(verificationPayload)
-      });
+      var endpoints = this.getEndpoints('verify-payment');
+      var lastError = null;
 
-      var data = await res.json().catch(function () {
-        return { ok: false, message: 'Invalid verification response from server' };
-      });
+      for (var i = 0; i < endpoints.length; i++) {
+        var url = endpoints[i];
+        try {
+          var res = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': CONFIG.SUPABASE_ANON_KEY,
+              'Authorization': 'Bearer ' + CONFIG.SUPABASE_ANON_KEY
+            },
+            body: JSON.stringify(verificationPayload)
+          });
 
-      if (!res.ok || !data.ok) {
-        throw new Error(data.message || 'Payment verification failed');
+          var data = await res.json().catch(function () {
+            return { ok: false, message: 'Invalid verification response from server' };
+          });
+
+          if (res.ok && data.ok) {
+            // Cache session locally for Customer Dashboard
+            try {
+              localStorage.setItem('sfx_customer_session', JSON.stringify({
+                email: data.email,
+                license_key: data.license_key,
+                order_id: data.order_id,
+                payment_id: data.payment_id,
+                verified_at: new Date().toISOString()
+              }));
+            } catch (e) {}
+
+            return data;
+          } else if (res.status === 404 && i < endpoints.length - 1) {
+            continue;
+          } else {
+            throw new Error(data.message || 'Payment verification failed');
+          }
+        } catch (err) {
+          lastError = err;
+          if (i < endpoints.length - 1) continue;
+        }
       }
 
-      // Cache session locally for Customer Dashboard
-      try {
-        localStorage.setItem('sfx_customer_session', JSON.stringify({
-          email: data.email,
-          license_key: data.license_key,
-          order_id: data.order_id,
-          payment_id: data.payment_id,
-          verified_at: new Date().toISOString()
-        }));
-      } catch (e) {}
-
-      return data;
+      throw lastError || new Error('Payment verification connection failed');
     },
 
     // ── 3. Customer Portal: Fetch Orders & Decrypted Licenses (Secured) ──
@@ -95,7 +148,6 @@
       var body = {};
 
       if (typeof authArg === 'string') {
-        // Auth token string
         headers['Authorization'] = 'Bearer ' + authArg;
       } else if (authArg && typeof authArg === 'object') {
         if (authArg.token) {
@@ -162,7 +214,6 @@
       return data;
     },
 
-    // Alias for backward compatibility
     issueComplimentaryLicense: async function (authToken, email, type, expiryArg, sendEmail) {
       return await this.createLicense(authToken, {
         email: email,
@@ -194,13 +245,11 @@
       return data;
     },
 
-    // Backward compatibility helper
     getAdminStats: async function (authToken) {
       try {
         var data = await this.getAdminLicensesData(authToken, '');
         return data.stats || {};
       } catch (e) {
-        // Fallback to direct RPC
         var res = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/rpc/sfx_admin_get_stats_v2', {
           method: 'POST',
           headers: {
@@ -214,7 +263,6 @@
       }
     },
 
-    // Backward compatibility helper
     getAdminOrders: async function (authToken, limit) {
       try {
         var data = await this.getAdminLicensesData(authToken, '');
@@ -233,7 +281,6 @@
       }
     },
 
-    // Backward compatibility helper
     searchAdminLicenses: async function (authToken, query) {
       try {
         var data = await this.getAdminLicensesData(authToken, query || '');
@@ -252,7 +299,7 @@
       }
     },
 
-    // ── 6. Admin License Actions (Edge Function based) ──
+    // ── 6. Admin License Actions ──
     revokeLicense: async function (authToken, licenseId, reason) {
       var res = await fetch(CONFIG.FUNCTIONS_URL + '/admin-licenses', {
         method: 'POST',
