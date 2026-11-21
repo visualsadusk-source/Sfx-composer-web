@@ -102,27 +102,13 @@ async function runDemoVerification() {
   assert.ok(html.includes('After Effects CC 2024'), 'After Effects environment support verified');
   pass('Module 9: After Effects comp and layer targeting integration verified');
 
-  // ── TEST GROUP 3: STUDIO SCREENSHOT TOUR GALLERY ──
-  console.log('\n--- TEST GROUP 3: STUDIO SCREENSHOT TOUR GALLERY ---');
-  assert.ok(html.includes('id="sfx-tour-container"'), 'Screenshot tour gallery container must exist');
-  assert.ok(html.includes('id="btn-view-live"'), 'Live view toggle button must exist');
-  assert.ok(html.includes('id="btn-view-tour"'), 'Tour view toggle button must exist');
-
-  const tourSlides = [
-    'tour-slide-library',
-    'tour-slide-browser',
-    'tour-slide-downloads',
-    'tour-slide-ai',
-    'tour-slide-bgm',
-    'tour-slide-analytics',
-    'tour-slide-scene',
-    'tour-slide-audio',
-    'tour-slide-settings'
-  ];
-  for (const slideId of tourSlides) {
-    assert.ok(html.includes(`id="${slideId}"`), `Tour slide ${slideId} must exist in HTML`);
-  }
-  pass('All 9 tour gallery slides with high-res screenshots verified');
+  // ── TEST GROUP 3: OVERVIEW SHOWCASE & DUPLICATE TOUR REMOVAL ──
+  console.log('\n--- TEST GROUP 3: OVERVIEW SHOWCASE & DUPLICATE TOUR REMOVAL ---');
+  assert.ok(!html.includes('id="sfx-tour-container"'), 'Duplicate screenshot tour carousel must be removed');
+  assert.ok(!html.includes('id="btn-view-tour"'), 'Tour toggle button must be removed');
+  assert.ok(html.includes('id="gallery-overview"'), 'Overview showcase section must exist');
+  assert.ok(html.includes('id="sfx-lightbox-modal"'), 'Fullscreen screenshot lightbox viewer must exist');
+  pass('Duplicate tour carousel removed while Overview screenshot showcase and lightbox remain fully functional');
 
   // ── TEST GROUP 4: VERSION ACCURACY & WEBSITE INTEGRITY ──
   console.log('\n--- TEST GROUP 4: VERSION ACCURACY & BRANDING INTEGRITY ---');

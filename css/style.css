@@ -1455,91 +1455,8 @@ img, svg {
 .sfx-showcase-wrapper {
   width: 100%;
   max-width: 1240px;
-  margin: 0 auto 40px auto;
+  margin: 0 auto 24px auto;
   padding: 0 16px;
-}
-
-/* Sticky Gallery Navigation Bar */
-.sfx-gallery-subnav-sticky {
-  position: sticky;
-  top: 56px;
-  z-index: 95;
-  background: rgba(10, 12, 16, 0.94);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 6px 12px;
-  margin: 0 0 36px 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
-}
-
-.sfx-gallery-nav-scroll {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-.sfx-gallery-nav-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-.sfx-gallery-nav-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 11px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #9c9ca4;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: all 0.15s ease;
-  border: 1px solid transparent;
-}
-.sfx-gallery-nav-link:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.05);
-}
-.sfx-gallery-nav-link.is-active {
-  color: #00a2ff;
-  background: rgba(0, 162, 255, 0.12);
-  border-color: rgba(0, 162, 255, 0.3);
-  font-weight: 600;
-}
-.sfx-gallery-nav-num {
-  font-size: 10px;
-  font-weight: 700;
-  opacity: 0.65;
-}
-
-/* Hands-on Interactive Mode Toggle */
-.sfx-gallery-interactive-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  background: #11141a;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  color: #cbd5e1;
-  font-size: 11.5px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-}
-.sfx-gallery-interactive-toggle:hover {
-  background: #181d26;
-  border-color: #00a2ff;
-  color: #00a2ff;
 }
 
 /* Interactive Simulator Drawer */
@@ -1658,10 +1575,7 @@ img, svg {
   .sfx-screenshot-grid-3 {
     grid-template-columns: 1fr;
   }
-  .sfx-gallery-subnav-sticky {
-    top: 52px;
-    padding: 6px 8px;
-  }
+
   .sfx-feature-title {
     font-size: 22px;
   }

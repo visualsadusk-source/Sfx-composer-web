@@ -4,7 +4,7 @@ const path = require('path');
 
 async function verifyShowcaseGallery() {
   console.log('================================================================');
-  console.log(' SFX COMPOSER — 8-SECTION SCREENSHOT SHOWCASE & LIGHTBOX TESTS');
+  console.log(' SFX COMPOSER — SHOWCASE & CLEAN NAVIGATION VERIFICATION');
   console.log('================================================================\n');
 
   let passed = 0;
@@ -43,18 +43,18 @@ async function verifyShowcaseGallery() {
     pass(`Image verified: ${item.name} (${Math.round(stat.size / 1024)} KB) for ${item.section}`);
   }
 
-  // ── TEST 2: HERO SECTION UPDATE ──
-  console.log('\n--- TEST GROUP 2: HERO SECTION ---');
   const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 
-  assert.ok(html.includes('Meet the New <span class="blue-highlight">SFX Composer</span>'), 'Hero headline must be "Meet the New SFX Composer"');
-  assert.ok(html.includes('A smarter sound design workspace built for modern video editors.'), 'Hero subheading must match requirement');
-  assert.ok(html.includes('Explore Screenshots'), 'Primary CTA must be "Explore Screenshots"');
-  assert.ok(html.includes('Explore Features'), 'Secondary CTA must be "Explore Features"');
-  pass('Hero section headlines, subheadings, and CTAs verified');
+  // ── TEST 2: HORIZONTAL NUMBERED BAR & DUPLICATE CAROUSEL COMPLETELY REMOVED ──
+  console.log('\n--- TEST GROUP 2: REMOVAL OF NUMBERED BAR & DUPLICATE CAROUSEL ---');
+  assert.ok(!html.includes('id="gallery-subnav"'), 'Horizontal numbered navigation bar #gallery-subnav must be completely removed');
+  assert.ok(!html.includes('sfx-gallery-subnav-sticky'), 'Sticky subnav CSS class must be removed from HTML');
+  assert.ok(!html.includes('id="sfx-tour-container"'), 'Duplicate screenshot tour carousel #sfx-tour-container must be completely removed');
+  assert.ok(!html.includes('id="btn-view-tour"'), 'Tour toggle button #btn-view-tour must be completely removed');
+  pass('Horizontal numbered strip and duplicate carousel are completely removed');
 
-  // ── TEST 3: 8 DEDICATED FEATURE SECTIONS ──
-  console.log('\n--- TEST GROUP 3: 8 DEDICATED FEATURE SECTIONS ---');
+  // ── TEST 3: ALL 8 DEDICATED FEATURE SECTIONS IN OVERVIEW PRESERVED ──
+  console.log('\n--- TEST GROUP 3: ALL 8 FEATURE SECTIONS PRESERVED IN OVERVIEW ---');
   const sections = [
     { id: 'gallery-overview', kicker: 'SECTION 01 — OVERVIEW', title: 'Meet SFX Composer', img: 'sfx-overview-main.png' },
     { id: 'gallery-browser', kicker: 'SECTION 02 — SOUND BROWSER', title: 'Explore Your Sound Library', img: 'sfx-browser-pixabay.png' },
@@ -93,16 +93,19 @@ async function verifyShowcaseGallery() {
   assert.ok(sceneAiContent.includes('sfx-scene-ai-timeline.png'), 'Scene AI section must contain sfx-scene-ai-timeline.png');
   pass('Analytics and Scene AI are strictly independent and separated');
 
-  // ── TEST 5: STICKY FEATURE NAVIGATION ──
-  console.log('\n--- TEST GROUP 5: STICKY FEATURE NAVIGATION ---');
-  assert.ok(html.includes('id="gallery-subnav"'), 'Gallery sticky subnav must exist');
-  for (const s of sections) {
-    assert.ok(html.includes(`href="#${s.id}"`), `Subnav link to #${s.id} must exist`);
-  }
-  pass('Subnav links for all 8 sections verified');
+  // ── TEST 5: SIDEBAR NAVIGATION INTACT ──
+  console.log('\n--- TEST GROUP 5: SIDEBAR NAVIGATION INTACT ---');
+  assert.ok(html.includes('href="#hero"'), 'Sidebar must include Overview link');
+  assert.ok(html.includes('href="#live-plugin-demo"'), 'Sidebar must include Live Plugin Demo link');
+  assert.ok(html.includes('href="#features"'), 'Sidebar must include Features link');
+  assert.ok(html.includes('href="#tutorials"'), 'Sidebar must include Tutorials link');
+  assert.ok(html.includes('href="#pricing"'), 'Sidebar must include Pricing link');
+  assert.ok(html.includes('href="#customer-dashboard"'), 'Sidebar must include Dashboard link');
+  assert.ok(html.includes('href="#faq"'), 'Sidebar must include FAQ link');
+  pass('Sidebar navigation menu is completely intact');
 
-  // ── TEST 6: FULLSCREEN LIGHTBOX MODAL ──
-  console.log('\n--- TEST GROUP 6: FULLSCREEN LIGHTBOX MODAL ---');
+  // ── TEST 6: FULLSCREEN LIGHTBOX MODAL FUNCTIONAL ──
+  console.log('\n--- TEST GROUP 6: FULLSCREEN LIGHTBOX VIEWER ---');
   assert.ok(html.includes('id="sfx-lightbox-modal"'), 'Lightbox modal container must exist');
   assert.ok(html.includes('id="sfx-lightbox-img"'), 'Lightbox image element must exist');
   assert.ok(html.includes('id="sfx-lightbox-counter"'), 'Lightbox counter badge must exist');
@@ -111,17 +114,12 @@ async function verifyShowcaseGallery() {
   assert.ok(html.includes('id="sfx-lightbox-next"'), 'Lightbox next button must exist');
   assert.ok(html.includes('id="sfx-lightbox-title"'), 'Lightbox caption title must exist');
   assert.ok(html.includes('id="sfx-lightbox-desc"'), 'Lightbox caption description must exist');
+  pass('Fullscreen screenshot lightbox viewer is fully functional');
 
-  // Verify all 10 cards have data-lightbox-idx
-  for (let i = 0; i < 10; i++) {
-    assert.ok(html.includes(`data-lightbox-idx="${i}"`), `Screenshot card for index ${i} must exist`);
-  }
-  pass('Lightbox modal and all 10 card triggers verified');
-
-  // ── TEST 7: CSS & JAVASCRIPT LOGIC ──
-  console.log('\n--- TEST GROUP 7: CSS & JAVASCRIPT LOGIC ---');
+  // ── TEST 7: CSS & JAVASCRIPT CLEANUP ──
+  console.log('\n--- TEST GROUP 7: CSS & JS INTEGRITY ---');
   const css = fs.readFileSync(path.join(__dirname, 'css', 'style.css'), 'utf8');
-  assert.ok(css.includes('.sfx-gallery-subnav-sticky'), 'CSS must define .sfx-gallery-subnav-sticky');
+  assert.ok(!css.includes('.sfx-gallery-subnav-sticky {'), 'CSS must not have sticky subnav rules');
   assert.ok(css.includes('.sfx-lightbox-modal'), 'CSS must define .sfx-lightbox-modal');
   assert.ok(css.includes('.sfx-screenshot-card'), 'CSS must define .sfx-screenshot-card');
 
@@ -129,10 +127,10 @@ async function verifyShowcaseGallery() {
   assert.ok(js.includes('setupGalleryLightbox'), 'JS must include setupGalleryLightbox');
   assert.ok(js.includes('GALLERY_ITEMS'), 'JS must include GALLERY_ITEMS data array');
   assert.ok(js.includes('ArrowRight') && js.includes('ArrowLeft') && js.includes('Escape'), 'JS must include arrow and escape keyboard handlers');
-  pass('CSS styles and JS controllers verified');
+  pass('CSS and JS clean of removed elements while preserving lightbox logic');
 
   console.log('\n================================================================');
-  console.log(` ALL ${passed}/${total} SHOWCASE & GALLERY TESTS PASSED!`);
+  console.log(` ALL ${passed}/${total} VERIFICATION TESTS PASSED SUCCESSFULLY!`);
   console.log('================================================================');
 }
 

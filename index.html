@@ -141,18 +141,17 @@
 
       <!-- Action Buttons -->
       <div class="sfx-site-hero-actions">
-        <a href="#gallery-overview" class="sfx-site-btn-primary" style="font-size: 14.5px; padding: 12px 24px; text-decoration: none;">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-          Explore Screenshots
-        </a>
-        <a href="#features" class="sfx-site-btn-secondary" style="font-size: 14.5px; padding: 12px 20px; text-decoration: none;">
+        <button class="sfx-site-btn-primary sfx-buy-trigger" style="font-size: 14.5px; padding: 12px 24px;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg>
+          Get SFX Composer — ₹199
+        </button>
+        <button class="sfx-site-btn-secondary" data-scroll-to="live-plugin-demo" style="font-size: 14.5px; padding: 12px 20px;">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          Explore Plugin Demo
+        </button>
+        <a href="#features" class="sfx-site-btn-secondary" style="font-size: 14.5px; padding: 12px 20px; text-decoration: none;">
           Explore Features
         </a>
-        <button class="sfx-site-btn-secondary sfx-buy-trigger" style="font-size: 14.5px; padding: 12px 20px; border-color: rgba(0, 162, 255, 0.4); color: #00a2ff;">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg>
-          Get License — ₹199
-        </button>
       </div>
 
       <div style="font-size: 12.5px; color: var(--sfx-text-muted); background: var(--sfx-surface-raised); border: 1px solid var(--sfx-border); padding: 5px 14px; border-radius: 999px;">
@@ -178,23 +177,6 @@
       <div class="sfx-showcase-wrapper" id="gallery-showcase">
 
         <!-- Sticky Feature Navigation Bar -->
-        <nav class="sfx-gallery-subnav-sticky" id="gallery-subnav" aria-label="Feature Gallery Navigation">
-          <div class="sfx-gallery-nav-scroll">
-            <a href="#gallery-overview" class="sfx-gallery-nav-link is-active"><span class="sfx-gallery-nav-num">01</span> Overview</a>
-            <a href="#gallery-browser" class="sfx-gallery-nav-link"><span class="sfx-gallery-nav-num">02</span> Sound Browser</a>
-            <a href="#gallery-ai" class="sfx-gallery-nav-link"><span class="sfx-gallery-nav-num">03</span> AI SFX</a>
-            <a href="#gallery-bgm" class="sfx-gallery-nav-link"><span class="sfx-gallery-nav-num">04</span> BGM Flow</a>
-            <a href="#gallery-analytics" class="sfx-gallery-nav-link"><span class="sfx-gallery-nav-num">05</span> Analytics</a>
-            <a href="#gallery-scene-ai" class="sfx-gallery-nav-link"><span class="sfx-gallery-nav-num">06</span> Scene AI</a>
-            <a href="#gallery-audio-tools" class="sfx-gallery-nav-link"><span class="sfx-gallery-nav-num">07</span> Audio Tools</a>
-            <a href="#gallery-settings" class="sfx-gallery-nav-link"><span class="sfx-gallery-nav-num">08</span> Settings</a>
-          </div>
-          <button type="button" class="sfx-gallery-interactive-toggle" id="btn-toggle-live-simulator" title="Toggle hands-on interactive application simulator">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            <span id="simulator-toggle-text">Interactive Live App</span>
-          </button>
-        </nav>
-
         <!-- ── SECTION 01 — OVERVIEW ── -->
         <section class="sfx-feature-section" id="gallery-overview">
           <div class="sfx-feature-header">
@@ -664,16 +646,7 @@
         </div>
 <div class="sfx-demo-showcase-bar">
         <div class="sfx-demo-top-controls">
-          <div class="sfx-demo-view-toggle">
-            <button type="button" class="sfx-demo-view-btn is-active" id="btn-view-live" title="Interact directly with working application controls">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-              <span>Interactive Live App</span>
-            </button>
-            <button type="button" class="sfx-demo-view-btn" id="btn-view-tour" title="Inspect high-resolution retina application screenshots">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-              <span>Studio Screenshot Tour</span>
-            </button>
-          </div>
+          
 
           <div style="font-size: 11.5px; color: var(--sfx-text-muted); display: flex; align-items: center; gap: 8px;">
             <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--sfx-positive); box-shadow: 0 0 6px rgba(48,209,88,0.6);"></span>
@@ -1621,165 +1594,7 @@
         </div>
       </div>
 
-      <!-- ── VIEW 2: STUDIO SCREENSHOT TOUR GALLERY ── -->
-      <div class="sfx-tour-container" id="sfx-tour-container">
-        <!-- Tour Navigation Bar -->
-        <div class="sfx-tour-navbar" role="tablist">
-          <button type="button" class="sfx-tour-tab is-active" data-tour="library">🎧 SFX Library &amp; Waveform Trim</button>
-          <button type="button" class="sfx-tour-tab" data-tour="browser">🌐 Built-in Browser</button>
-          <button type="button" class="sfx-tour-tab" data-tour="downloads">📁 Downloads &amp; Timeline Placement</button>
-          <button type="button" class="sfx-tour-tab" data-tour="ai">✨ AI SFX Assistant (Ollama)</button>
-          <button type="button" class="sfx-tour-tab" data-tour="bgm">🎵 BGM Flow Transitions</button>
-          <button type="button" class="sfx-tour-tab" data-tour="analytics">📊 Local Usage Analytics</button>
-          <button type="button" class="sfx-tour-tab" data-tour="scene">🎬 Scene AI &amp; Timeline Control</button>
-          <button type="button" class="sfx-tour-tab" data-tour="audio">🎛️ Audio Tools &amp; Essential Sound</button>
-          <button type="button" class="sfx-tour-tab" data-tour="settings">⚙️ Studio Settings &amp; Themes</button>
-        </div>
-
-        <!-- Tour Viewport -->
-        <div class="sfx-tour-viewport">
-          <!-- Slide 1: Library -->
-          <div class="sfx-tour-slide is-active" id="tour-slide-library">
-            <div class="sfx-tour-slide-header">
-              <div>
-                <h3 class="sfx-tour-slide-title">Main SFX Library &amp; Non-Destructive Waveform Trim</h3>
-                <p class="sfx-tour-slide-desc">Ultra-fast SQLite in-memory catalog indexing 17,111+ sounds with sub-5ms search, category hierarchy, draggable In/Out boundary handles, real-time pitch shifting, and direct one-click sequence insertion.</p>
-              </div>
-              <button type="button" class="sfx-button sfx-button--primary sfx-jump-to-live" data-target="library" style="height: 28px; font-size: 11px;">Try in Live App →</button>
-            </div>
-            <div class="sfx-tour-image-box">
-              <img src="assets/images/sfx-library-main.png" alt="SFX Composer Main Sound Library and Trim Tray" class="sfx-tour-image" />
-            </div>
-            <div class="sfx-tour-features-grid">
-              <div class="sfx-tour-feat-item">
-                <strong>Instant Sub-5ms Search</strong>
-                <span>Searches tens of thousands of sound effects in real time across tags, categories and subfolders.</span>
-              </div>
-              <div class="sfx-tour-feat-item">
-                <strong>Non-Destructive Trimming</strong>
-                <span>Set In and Out points right inside the panel without altering your original source audio files on disk.</span>
-              </div>
-              <div class="sfx-tour-feat-item">
-                <strong>Live Sequence Playhead Sync</strong>
-                <span>Inspects active Premiere Pro sequence &amp; After Effects comp to place audio precisely on active audio tracks.</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Slide 2: Browser -->
-          <div class="sfx-tour-slide" id="tour-slide-browser">
-            <div class="sfx-tour-slide-header">
-              <div>
-                <h3 class="sfx-tour-slide-title">Docked In-Panel Royalty-Free Browser</h3>
-                <p class="sfx-tour-slide-desc">Search, audition, and download external sound effects from Pixabay and royalty-free repositories directly inside your editing workspace without ever leaving Premiere Pro or After Effects.</p>
-              </div>
-              <button type="button" class="sfx-button sfx-button--primary sfx-jump-to-live" data-target="browser" style="height: 28px; font-size: 11px;">Try in Live App →</button>
-            </div>
-            <div class="sfx-tour-image-box">
-              <img src="assets/images/builtin-browser-pixabay.png" alt="SFX Composer Built-in Browser" class="sfx-tour-image" />
-            </div>
-          </div>
-
-          <!-- Slide 3: Downloads -->
-          <div class="sfx-tour-slide" id="tour-slide-downloads">
-            <div class="sfx-tour-slide-header">
-              <div>
-                <h3 class="sfx-tour-slide-title">Browser Downloads &amp; Timeline Placement Manager</h3>
-                <p class="sfx-tour-slide-desc">Track active download queues, preview newly acquired assets, convert formats automatically, and inject sounds directly into project bins or onto the active timeline at the playhead.</p>
-              </div>
-              <button type="button" class="sfx-button sfx-button--primary sfx-jump-to-live" data-target="browser" style="height: 28px; font-size: 11px;">Try in Live App →</button>
-            </div>
-            <div class="sfx-tour-image-box">
-              <img src="assets/images/browser-downloads.png" alt="SFX Composer Browser Downloads" class="sfx-tour-image" />
-            </div>
-          </div>
-
-          <!-- Slide 4: AI SFX Assistant -->
-          <div class="sfx-tour-slide" id="tour-slide-ai">
-            <div class="sfx-tour-slide-header">
-              <div>
-                <h3 class="sfx-tour-slide-title">AI SFX Assistant (Local Ollama &amp; Cloud LLM)</h3>
-                <p class="sfx-tour-slide-desc">Describe your scene or emotion to get multi-layered sound design recipes, frequency-balanced suggestions, and one-click preview &amp; place cards that drop sounds into your active edit.</p>
-              </div>
-              <button type="button" class="sfx-button sfx-button--primary sfx-jump-to-live" data-target="ai" style="height: 28px; font-size: 11px;">Try in Live App →</button>
-            </div>
-            <div class="sfx-tour-image-box">
-              <img src="assets/images/ai-sfx-assistant.png" alt="SFX Composer AI Assistant" class="sfx-tour-image" />
-            </div>
-          </div>
-
-          <!-- Slide 5: BGM Flow -->
-          <div class="sfx-tour-slide" id="tour-slide-bgm">
-            <div class="sfx-tour-slide-header">
-              <div>
-                <h3 class="sfx-tour-slide-title">BGM Flow — Background Music Transitions &amp; Beat Sync</h3>
-                <p class="sfx-tour-slide-desc">14 professional transition styles across Music Start, Music End, and Music Change. Features real-time DSP preview, S-curve/exponential envelope sculpting, transient beat detection, and Auto EQ speech carving.</p>
-              </div>
-              <button type="button" class="sfx-button sfx-button--primary sfx-jump-to-live" data-target="bgm" style="height: 28px; font-size: 11px;">Try in Live App →</button>
-            </div>
-            <div class="sfx-tour-image-box">
-              <img src="assets/images/bgm-flow-transitions.png" alt="SFX Composer BGM Flow Transitions" class="sfx-tour-image" />
-            </div>
-          </div>
-
-          <!-- Slide 6: Analytics -->
-          <div class="sfx-tour-slide" id="tour-slide-analytics">
-            <div class="sfx-tour-slide-header">
-              <div>
-                <h3 class="sfx-tour-slide-title">100% Local Privacy-First Usage Analytics</h3>
-                <p class="sfx-tour-slide-desc">Track sound auditions, timeline imports, top categories, and activity over time without telemetry or external tracking. All data is kept 100% local on your workstation.</p>
-              </div>
-              <button type="button" class="sfx-button sfx-button--primary sfx-jump-to-live" data-target="analytics" style="height: 28px; font-size: 11px;">Try in Live App →</button>
-            </div>
-            <div class="sfx-tour-image-box">
-              <img src="assets/images/analytics-dashboard.png" alt="SFX Composer Analytics Dashboard" class="sfx-tour-image" />
-            </div>
-          </div>
-
-          <!-- Slide 7: Scene AI -->
-          <div class="sfx-tour-slide" id="tour-slide-scene">
-            <div class="sfx-tour-slide-header">
-              <div>
-                <h3 class="sfx-tour-slide-title">Scene AI Sequence Cut Designer &amp; AI Timeline Control</h3>
-                <p class="sfx-tour-slide-desc">Analyze visual cut points and camera markers across your sequence. Execute natural language timeline commands like seeking, playback, sound searching, and impact placement.</p>
-              </div>
-              <button type="button" class="sfx-button sfx-button--primary sfx-jump-to-live" data-target="scene" style="height: 28px; font-size: 11px;">Try in Live App →</button>
-            </div>
-            <div class="sfx-tour-image-box">
-              <img src="assets/images/scene-ai-designer.png" alt="SFX Composer Scene AI Sequence Designer" class="sfx-tour-image" />
-            </div>
-          </div>
-
-          <!-- Slide 8: Audio Tools -->
-          <div class="sfx-tour-slide" id="tour-slide-audio">
-            <div class="sfx-tour-slide-header">
-              <div>
-                <h3 class="sfx-tour-slide-title">Audio Tools &amp; Essential Sound Studio</h3>
-                <p class="sfx-tour-slide-desc">3-column workstation with live waveform display, Peak/RMS metering (-2.4 dB / -23.0 dB), dedicated profiles for SFX, Music, Dialogue &amp; Ambience, -1.00 dBFS normalization, parametric EQ, and 24-bit WAV export.</p>
-              </div>
-              <button type="button" class="sfx-button sfx-button--primary sfx-jump-to-live" data-target="audio" style="height: 28px; font-size: 11px;">Try in Live App →</button>
-            </div>
-            <div class="sfx-tour-image-box">
-              <img src="assets/images/audio-tools-studio.png" alt="SFX Composer Audio Tools Essential Sound Studio" class="sfx-tour-image" />
-            </div>
-          </div>
-
-          <!-- Slide 9: Settings -->
-          <div class="sfx-tour-slide" id="tour-slide-settings">
-            <div class="sfx-tour-slide-header">
-              <div>
-                <h3 class="sfx-tour-slide-title">Studio Settings, Appearance &amp; Library Indexing</h3>
-                <p class="sfx-tour-slide-desc">Switch between Studio Dark, Ultra Dark, and Light themes to match your docked Adobe layout. Customize profile accents and rescan local sound folders on demand.</p>
-              </div>
-              <button type="button" class="sfx-button sfx-button--primary sfx-jump-to-live" data-target="library" style="height: 28px; font-size: 11px;">Try in Live App →</button>
-            </div>
-            <div class="sfx-tour-image-box">
-              <img src="assets/images/settings-preferences.png" alt="SFX Composer Settings and Themes" class="sfx-tour-image" />
-            </div>
-          </div>
-        </div>
-      </div>
-          </div><!-- /sfx-interactive-sim-drawer -->
+      </div><!-- /sfx-interactive-sim-drawer -->
 </section>
 
     <!-- ── 3. FEATURES SECTION ── -->

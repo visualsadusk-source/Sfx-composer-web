@@ -1453,33 +1453,8 @@
     }
   }
 
-  // ── 15. MODULE SHOWCASE & TOUR CONTROLLER ──
+  // ── 15. MODULE SHOWCASE CONTROLLER ──
   function setupModuleShowcaseTour() {
-    var btnViewLive = document.getElementById('btn-view-live');
-    var btnViewTour = document.getElementById('btn-view-tour');
-    var liveContainer = document.getElementById('sfx-live-container');
-    var tourContainer = document.getElementById('sfx-tour-container');
-
-    function setView(view) {
-      if (view === 'live') {
-        if (btnViewLive) btnViewLive.classList.add('is-active');
-        if (btnViewTour) btnViewTour.classList.remove('is-active');
-        if (liveContainer) liveContainer.style.display = 'flex';
-        if (tourContainer) tourContainer.classList.remove('is-visible');
-      } else {
-        if (btnViewTour) btnViewTour.classList.add('is-active');
-        if (btnViewLive) btnViewLive.classList.remove('is-active');
-        if (liveContainer) liveContainer.style.display = 'none';
-        if (tourContainer) tourContainer.classList.add('is-visible');
-      }
-    }
-
-    if (btnViewLive) {
-      btnViewLive.addEventListener('click', function () { setView('live'); });
-    }
-    if (btnViewTour) {
-      btnViewTour.addEventListener('click', function () { setView('tour'); });
-    }
 
     // Quick module jump chips
     var chips = document.querySelectorAll('.sfx-demo-chip');
@@ -1748,48 +1723,6 @@
       }
     });
 
-    // Gallery sticky subnav scroll-spy & smooth scroll
-    const navLinks = document.querySelectorAll('.sfx-gallery-nav-link');
-    const sections = Array.from(navLinks).map(link => {
-      const targetId = link.getAttribute('href');
-      return targetId ? document.querySelector(targetId) : null;
-    }).filter(Boolean);
-
-    window.addEventListener('scroll', () => {
-      const scrollPos = window.scrollY + 180;
-      let activeIndex = 0;
-      sections.forEach((sec, idx) => {
-        if (sec.offsetTop <= scrollPos) {
-          activeIndex = idx;
-        }
-      });
-      navLinks.forEach((link, idx) => {
-        if (idx === activeIndex) {
-          link.classList.add('is-active');
-        } else {
-          link.classList.remove('is-active');
-        }
-      });
-    }, { passive: true });
-
-    // Interactive simulator drawer toggle
-    const toggleSimBtn = document.getElementById('btn-toggle-live-simulator');
-    const simDrawer = document.getElementById('sfx-interactive-sim-drawer');
-    const simText = document.getElementById('simulator-toggle-text');
-
-    if (toggleSimBtn && simDrawer) {
-      toggleSimBtn.addEventListener('click', () => {
-        const isHidden = window.getComputedStyle(simDrawer).display === 'none';
-        if (isHidden) {
-          simDrawer.style.display = 'block';
-          if (simText) simText.textContent = 'Hide Live Simulator';
-          simDrawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        } else {
-          simDrawer.style.display = 'none';
-          if (simText) simText.textContent = 'Interactive Live App';
-        }
-      });
-    }
   }
 
 
