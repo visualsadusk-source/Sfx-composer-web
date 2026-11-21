@@ -1621,29 +1621,36 @@
       },
       {
         id: 7,
+        src: 'assets/images/sfx-composer-analytics-dashboard.png',
+        badge: 'Screenshot 07 · Advanced Usage Analytics',
+        title: 'Advanced Usage Analytics Dashboard',
+        desc: 'Track sound usage, project activity, active editing time, favorites, popular categories, and workflow insights through a beautiful analytics dashboard.'
+      },
+      {
+        id: 8,
         src: 'assets/images/sfx-analytics-dashboard.png',
-        badge: 'Screenshot 07 · Usage Analytics',
+        badge: 'Screenshot 08 · Usage Analytics',
         title: 'Dedicated Workflow Analytics & Activity Overview',
         desc: 'Dedicated analytics dashboard featuring key metric cards: Total Sounds Played (23), Timeline Imports (1), Most Used Category ("downloads"), and Unique Sounds Used (13). Displays interactive Activity Overview curve graph and "Most Used Sounds" ranking with play counts, import history, and quick preview controls.'
       },
       {
-        id: 8,
+        id: 9,
         src: 'assets/images/sfx-scene-ai-timeline.png',
-        badge: 'Screenshot 08 · Scene AI',
+        badge: 'Screenshot 09 · Scene AI',
         title: 'Scene AI Sequence Designer & Timeline Control',
         desc: 'Scene AI main interface displaying live host status badges for Adobe Host (PPro/AE) and Ollama local AI server. Features "Analyze Composition" trigger and the AI Timeline Control prompt bar with verified operations and write-operation safety approvals.'
       },
       {
-        id: 9,
+        id: 10,
         src: 'assets/images/sfx-audio-tools-essential-sound.png',
-        badge: 'Screenshot 09 · Essential Sound Studio',
+        badge: 'Screenshot 10 · Essential Sound Studio',
         title: '3-Column Workstation & Essential Sound DSP Rack',
         desc: 'Pro-grade workstation layout: Left sound browser filtering categories, Center high-resolution waveform editor (with 0:00.00 / 0:02.67 timecode, 48000 Hz, 2 ch display), and Right Essential Sound DSP rack with Peak (-2.4 dB) and RMS (-23.0 dB) meters, Gain/Normalize, Fades, EQ, Dynamics Compress, and Character controls.'
       },
       {
-        id: 10,
+        id: 11,
         src: 'assets/images/sfx-settings-workspace.png',
-        badge: 'Screenshot 10 · Workspace Preferences',
+        badge: 'Screenshot 11 · Workspace Preferences',
         title: 'Profile, Accent Colors, Library Folders & Appearance',
         desc: 'Full settings view displaying User Profile with picture upload, 6 accent color swatches, Library Folders management with folder rescan (17,111 sounds indexed), Appearance themes selector (Studio Dark, Ultra Dark, Light), Playback preview volume slider (80%), License verification ("All features are unlocked"), Diagnostics logging, and About credits.'
       }
@@ -1698,6 +1705,13 @@
       card.addEventListener('click', (e) => {
         openLightbox(idx);
       });
+      const fsBtn = card.querySelector('.sfx-btn-open-fullscreen');
+      if (fsBtn) {
+        fsBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openLightbox(idx);
+        });
+      }
     });
 
     // Hero image triggers lightbox
