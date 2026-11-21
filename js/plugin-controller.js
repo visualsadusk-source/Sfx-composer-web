@@ -78,41 +78,83 @@
     }
   }
 
-  // ── 1. HEADER MENU TOOLBAR OVERLAYS ──
+  // ── 1. HEADER MENU TOOLBAR OVERLAYS & EMBEDDED NAVIGATION ──
   function setupHeaderMenu() {
     var menu = document.getElementById('sfx-header-menu');
-    if (!menu) return;
-
-    var buttons = menu.querySelectorAll('.sfx-hm__btn');
-    buttons.forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var tool = this.getAttribute('data-tool');
-        toggleToolOverlay(tool);
+    if (menu) {
+      var buttons = menu.querySelectorAll('.sfx-hm__btn');
+      buttons.forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var tool = this.getAttribute('data-tool');
+          toggleToolOverlay(tool);
+        });
       });
-    });
+    }
 
-    // Tool back buttons (return to main library)
-    document.querySelectorAll('.sfx-tool-back-btn').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
+    // Universal back button listener (delegated for 100% click reliability)
+    document.addEventListener('click', function (e) {
+      var backBtn = e.target.closest('.sfx-tool-back-btn, #sfx-ai-back-btn, #btn-back-settings, #btn-close-settings, .sfx-au__back, .sfx-sd__back, .sfx-an__back');
+      if (backBtn) {
+        e.preventDefault();
         e.stopPropagation();
         closeCurrentToolOverlay();
-      });
+      }
     });
+
+    // Clicking SFX Composer header title or mark returns to main library
+    var shellTitle = document.querySelector('.sfx-shell__title');
+    var shellMark = document.querySelector('.sfx-shell__mark');
+    if (shellTitle) {
+      shellTitle.style.cursor = 'pointer';
+      shellTitle.setAttribute('title', 'Return to Main SFX Library');
+      shellTitle.addEventListener('click', function () {
+        closeCurrentToolOverlay();
+      });
+    }
+    if (shellMark) {
+      shellMark.style.cursor = 'pointer';
+      shellMark.setAttribute('title', 'Return to Main SFX Library');
+      shellMark.addEventListener('click', function () {
+        closeCurrentToolOverlay();
+      });
+    }
+
+    setupHistoryNavigation();
   }
 
-  function toggleToolOverlay(toolId) {
+  function setupHistoryNavigation() {
+    window.addEventListener('popstate', function (event) {
+      if (event.state && event.state.sfxOverlay) {
+        toggleToolOverlay(event.state.sfxOverlay, true);
+      } else if (window.location.hash && window.location.hash.indexOf('#demo-') === 0) {
+        var tool = window.location.hash.replace('#demo-', '');
+        toggleToolOverlay(tool, true);
+      } else {
+        closeCurrentToolOverlay(true);
+      }
+    });
+
+    // Check initial hash on page load
+    if (window.location.hash && window.location.hash.indexOf('#demo-') === 0) {
+      var initialTool = window.location.hash.replace('#demo-', '');
+      toggleToolOverlay(initialTool, true);
+    }
+  }
+
+  function toggleToolOverlay(toolId, isPopState) {
     var tools = {
       browser: document.getElementById('sfx-browser'),
       ai: document.getElementById('sfx-ai-assistant'),
       bgm: document.getElementById('sfx-bgm-flow'),
       analytics: document.getElementById('sfx-analytics'),
       scene: document.getElementById('sfx-scene-designer'),
-      audio: document.getElementById('sfx-audio-tools')
+      audio: document.getElementById('sfx-audio-tools'),
+      settings: document.getElementById('sfx-settings-drawer')
     };
 
     if (state.currentTool === toolId) {
-      // Toggle off
+      // Toggle off -> returns to main library
       closeCurrentToolOverlay();
       return;
     }
@@ -134,6 +176,23 @@
       var activeBtn = document.querySelector('.sfx-hm__btn[data-tool="' + toolId + '"]');
       if (activeBtn) activeBtn.setAttribute('aria-pressed', 'true');
 
+      // Sync top showcase chips
+      var chips = document.querySelectorAll('.sfx-demo-chip');
+      chips.forEach(function (c) {
+        if (c.getAttribute('data-module') === toolId) {
+          c.classList.add('is-active');
+        } else {
+          c.classList.remove('is-active');
+        }
+      });
+
+      // Push history state if not from popstate
+      if (!isPopState && window.history && window.history.pushState) {
+        try {
+          window.history.pushState({ sfxOverlay: toolId }, '', '#demo-' + toolId);
+        } catch (err) {}
+      }
+
       if (toolId === 'audio' && state.activeSound) {
         loadAudioIntoTools(state.activeSound);
       }
@@ -143,7 +202,7 @@
     }
   }
 
-  function closeCurrentToolOverlay() {
+  function closeCurrentToolOverlay(isPopState) {
     var tools = ['sfx-browser', 'sfx-ai-assistant', 'sfx-bgm-flow', 'sfx-analytics', 'sfx-scene-designer', 'sfx-audio-tools', 'sfx-settings-drawer'];
     tools.forEach(function (id) {
       var el = document.getElementById(id);
@@ -153,6 +212,33 @@
       btn.setAttribute('aria-pressed', 'false');
     });
     state.currentTool = null;
+
+    // Sync showcase chips back to library
+    var chips = document.querySelectorAll('.sfx-demo-chip');
+    chips.forEach(function (c) {
+      if (c.getAttribute('data-module') === 'library') {
+        c.classList.add('is-active');
+      } else {
+        c.classList.remove('is-active');
+      }
+    });
+
+    // Clean hash if was #demo-...
+    if (!isPopState && window.location.hash && window.location.hash.indexOf('#demo-') === 0) {
+      if (window.history && window.history.pushState) {
+        try {
+          var cleanUrl = window.location.pathname + window.location.search;
+          window.history.pushState({ sfxOverlay: null }, '', cleanUrl);
+        } catch (err) {}
+      } else {
+        window.location.hash = '';
+      }
+    }
+
+    // Preserve active sound and trim tray state
+    if (state.activeSound) {
+      updateTrimTray(state.activeSound);
+    }
   }
 
   // ── 2. SIDEBAR CATEGORY FILTERING ──
@@ -1438,17 +1524,24 @@
     var profileBtn = document.getElementById('sfx-btn-profile');
     var drawer = document.getElementById('sfx-settings-drawer');
     var closeBtn = document.getElementById('btn-close-settings');
+    var backBtn = document.getElementById('btn-back-settings');
 
     if (profileBtn && drawer) {
       profileBtn.addEventListener('click', function (e) {
         e.stopPropagation();
-        drawer.classList.add('is-open');
+        toggleToolOverlay('settings');
       });
     }
     if (closeBtn && drawer) {
       closeBtn.addEventListener('click', function (e) {
         e.stopPropagation();
-        drawer.classList.remove('is-open');
+        closeCurrentToolOverlay();
+      });
+    }
+    if (backBtn && drawer) {
+      backBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        closeCurrentToolOverlay();
       });
     }
   }

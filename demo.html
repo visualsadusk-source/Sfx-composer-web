@@ -580,7 +580,7 @@
           <!-- ── OVERLAY 2: AI SFX ASSISTANT ── -->
           <div id="sfx-ai-assistant">
             <div style="height: 38px; background: #18181c; border-bottom: 1px solid var(--sfx-border); display: flex; align-items: center; padding: 0 12px; gap: 10px;">
-              <button type="button" class="sfx-button sfx-button--quiet sfx-tool-back-btn" style="height: 26px; padding: 0 8px; font-size: 11px;">
+              <button type="button" class="sfx-button sfx-button--quiet sfx-tool-back-btn" id="sfx-ai-back-btn" style="height: 26px; padding: 0 8px; font-size: 11px;">
                 &larr; Back
               </button>
               <strong style="font-size: 12px;">AI SFX Assistant</strong>
@@ -1040,7 +1040,12 @@
           <!-- ── OVERLAY 7: SETTINGS & APPEARANCE DRAWER ── -->
           <div id="sfx-settings-drawer">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--sfx-border); padding-bottom: 12px; margin-bottom: 14px;">
-              <strong style="font-size: 14px; color: #fff;">Studio Settings &amp; Preferences</strong>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" class="sfx-button sfx-button--quiet sfx-tool-back-btn" id="btn-back-settings" style="height: 26px; padding: 0 8px; font-size: 11px;">
+                  &larr; Back
+                </button>
+                <strong style="font-size: 14px; color: #fff;">Studio Settings &amp; Preferences</strong>
+              </div>
               <button type="button" class="sfx-button sfx-button--primary" id="btn-close-settings" style="height: 26px; padding: 0 12px; font-size: 11px;">Done</button>
             </div>
 

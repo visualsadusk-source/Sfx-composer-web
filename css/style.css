@@ -412,192 +412,460 @@ img, svg {
   overflow: hidden;
 }
 
-/* ── OVERLAY MODULES STYLED ACCORDING TO PLUGIN SPEC ── */
-/* Audio Tools 3-Panel Overlay */
-#sfx-audio-tools.sfx-au {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 50;
-  display: none;
-  flex-direction: column;
-  background: #0e0e10;
-  color: #e8e8ec;
-}
-#sfx-audio-tools.sfx-au.is-open {
-  display: flex;
-}
-
-/* AI Assistant Overlay */
-#sfx-ai-assistant {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 50;
-  display: none;
-  flex-direction: column;
-  background: var(--sfx-surface, #141418);
-  color: var(--sfx-text, #fff);
-}
-#sfx-ai-assistant.is-open {
-  display: flex;
-}
-
-/* Browser Tab Overlay */
-#sfx-browser {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 50;
-  display: none;
-  flex-direction: column;
-  background: var(--sfx-surface, #141418);
-  color: var(--sfx-text, #fff);
-}
-#sfx-browser.is-open {
-  display: flex;
-}
-
-/* Scene Designer Overlay */
-#sfx-scene-designer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 50;
-  display: none;
-  flex-direction: column;
-  background: var(--sfx-surface, #121214);
-  color: var(--sfx-text, #e8e8e8);
-}
-#sfx-scene-designer.is-open {
-  display: flex;
-}
-
-/* Analytics Overlay */
-#sfx-analytics {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 50;
-  display: none;
-  flex-direction: column;
-  background: var(--sfx-surface, #121214);
-  color: var(--sfx-text, #e8e8e8);
-}
-#sfx-analytics.is-open {
-  display: flex;
-}
+/* ═════════════════════════════════════════════════════════════════
+   LIVE PLUGIN DEMO: EMBEDDED VIEWPORT, CONSISTENT NAVIGATION & COMPACT LIST
+   ═════════════════════════════════════════════════════════════════ */
 
 /* ── VIEWPORT & DESKTOP CEP SHELL PROPORTIONS ── */
 .sfx-plugin-viewport {
-  position: relative;
-  height: 600px;
-  background: var(--sfx-surface, #000000);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  position: relative !important;
+  height: 600px !important;
+  min-height: 600px !important;
+  max-height: 600px !important;
+  background: var(--sfx-surface, #000000) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  border-radius: 0 0 10px 10px !important;
 }
 
 .sfx-shell {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-  background: var(--sfx-surface, #000000);
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  background: var(--sfx-surface, #000000) !important;
 }
 
+/* Header bar stays permanently anchored at top of the viewport (z-index 35) */
+.sfx-shell__header {
+  position: relative !important;
+  z-index: 35 !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  max-height: 46px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 12px !important;
+  border-bottom: 1px solid var(--sfx-border, #232326) !important;
+  background: var(--sfx-surface-raised, #121214) !important;
+  box-sizing: border-box !important;
+  flex: 0 0 46px !important;
+}
+
+/* ALL 7 OVERLAYS: Strictly embedded inside .sfx-plugin-viewport underneath the header bar */
+.sfx-plugin-viewport #sfx-audio-tools,
+.sfx-plugin-viewport #sfx-audio-tools.sfx-au,
+.sfx-plugin-viewport #sfx-ai-assistant,
+.sfx-plugin-viewport #sfx-ai-assistant__panel,
+.sfx-plugin-viewport #sfx-browser,
+.sfx-plugin-viewport #sfx-bgm-flow,
+.sfx-plugin-viewport #sfx-bgm-flow.sfx-bf,
+.sfx-plugin-viewport #sfx-scene-designer,
+.sfx-plugin-viewport #sfx-scene-designer.sfx-sd,
+.sfx-plugin-viewport #sfx-analytics,
+.sfx-plugin-viewport #sfx-analytics.sfx-an,
+.sfx-plugin-viewport #sfx-settings-drawer {
+  position: absolute !important;
+  top: 46px !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: calc(100% - 46px) !important;
+  max-height: calc(100% - 46px) !important;
+  z-index: 25 !important;
+  display: none;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  pointer-events: auto !important;
+}
+
+/* Specific background colors for overlays */
+.sfx-plugin-viewport #sfx-audio-tools.sfx-au {
+  background: #0e0e10 !important;
+  color: #e8e8ec !important;
+}
+.sfx-plugin-viewport #sfx-ai-assistant {
+  background: #141418 !important;
+  color: #ffffff !important;
+}
+.sfx-plugin-viewport #sfx-browser {
+  background: #141418 !important;
+  color: #ffffff !important;
+}
+.sfx-plugin-viewport #sfx-bgm-flow.sfx-bf {
+  background: #101014 !important;
+  color: #e8e8ec !important;
+}
+.sfx-plugin-viewport #sfx-scene-designer.sfx-sd {
+  background: #121214 !important;
+  color: #e8e8e8 !important;
+}
+.sfx-plugin-viewport #sfx-analytics.sfx-an {
+  background: #121214 !important;
+  color: #e8e8e8 !important;
+}
+.sfx-plugin-viewport #sfx-settings-drawer {
+  background: #121216 !important;
+  color: #e8e8ec !important;
+  padding: 16px 20px !important;
+  overflow-y: auto !important;
+}
+
+/* Overlay Active Class */
+.sfx-plugin-viewport #sfx-audio-tools.is-open,
+.sfx-plugin-viewport #sfx-ai-assistant.is-open,
+.sfx-plugin-viewport #sfx-browser.is-open,
+.sfx-plugin-viewport #sfx-bgm-flow.is-open,
+.sfx-plugin-viewport #sfx-scene-designer.is-open,
+.sfx-plugin-viewport #sfx-analytics.is-open,
+.sfx-plugin-viewport #sfx-settings-drawer.is-open {
+  display: flex !important;
+}
+
+/* Ensure all back buttons are clickable and visually sharp */
+.sfx-tool-back-btn {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  user-select: none !important;
+  z-index: 5 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+/* ── SFX BROWSER LIST & ROW LAYOUT (COMPACT, NO OVERSIZED BLOCK) ── */
 .sfx-library__split {
-  display: flex;
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: hidden;
+  display: flex !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
 }
 
 .sfx-library {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
-  min-width: 0;
-  overflow: hidden;
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
 }
 
+/* Compact Virtual List Container */
 .sfx-vlist {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  background: var(--sfx-surface, #000000) !important;
 }
 
-/* Gallery Grid View */
+/* Compact Sound Row - strictly 34px, no stretching */
+.sfx-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  padding: 0 10px !important;
+  border-bottom: 1px solid var(--sfx-border, #232326) !important;
+  background: transparent !important;
+  color: var(--sfx-text, #f5f5f7) !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  box-sizing: border-box !important;
+  flex: 0 0 34px !important;
+  width: 100% !important;
+  transition: background-color 0.12s ease !important;
+  overflow: hidden !important;
+}
+
+.sfx-row:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Subtle Selected State - REPLACES OVERSIZED BLUE BLOCK */
+.sfx-row.sfx-row--selected,
+.sfx-row.sfx-row--selected:hover {
+  background: rgba(10, 132, 255, 0.12) !important;
+  box-shadow: inset 3px 0 0 #0a84ff !important;
+  color: #ffffff !important;
+}
+
+.sfx-row.sfx-row--selected .sfx-row__name {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+.sfx-row.sfx-row--selected .sfx-row__meta,
+.sfx-row.sfx-row--selected .sfx-row__duration {
+  color: #a0c4ff !important;
+  opacity: 0.9 !important;
+}
+
+/* Audio Previewing State */
+.sfx-row.sfx-row--previewing {
+  background: rgba(10, 132, 255, 0.18) !important;
+  box-shadow: inset 3px 0 0 #30d158 !important;
+}
+
+.sfx-star {
+  width: 20px !important;
+  height: 20px !important;
+  flex: 0 0 20px !important;
+  font-size: 13px !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  color: var(--sfx-text-muted, #9c9ca4) !important;
+  cursor: pointer !important;
+}
+.sfx-star.sfx-star--on {
+  color: var(--sfx-favourite, #ffd60a) !important;
+}
+
+.sfx-row-play-btn {
+  width: 22px !important;
+  height: 22px !important;
+  flex: 0 0 22px !important;
+  border-radius: 4px !important;
+  border: 1px solid var(--sfx-border-strong, #6e6e75) !important;
+  background: transparent !important;
+  color: var(--sfx-text, #fff) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+}
+.sfx-row-play-btn:hover {
+  background: var(--sfx-surface-hover, #1a1a1d) !important;
+}
+
+.sfx-row__main {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.sfx-row__name {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.2 !important;
+}
+
+.sfx-row__meta {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-size: 10px !important;
+  color: var(--sfx-text-muted, #9c9ca4) !important;
+  line-height: 1 !important;
+  margin-top: 1px !important;
+}
+
+.sfx-row__wave {
+  flex: 0 0 90px !important;
+  width: 90px !important;
+  height: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.sfx-row-wave-canvas {
+  width: 90px !important;
+  height: 18px !important;
+  display: block !important;
+}
+
+.sfx-row__duration {
+  flex: 0 0 42px !important;
+  font-size: 11px !important;
+  color: var(--sfx-text-muted, #9c9ca4) !important;
+  text-align: right !important;
+  font-family: var(--sfx-font-mono, monospace) !important;
+  white-space: nowrap !important;
+}
+
+.sfx-btn-row-trim {
+  width: 22px !important;
+  height: 22px !important;
+  flex: 0 0 22px !important;
+  border-radius: 4px !important;
+  border: 1px solid var(--sfx-border-strong, #6e6e75) !important;
+  background: transparent !important;
+  color: var(--sfx-text-muted, #9c9ca4) !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+}
+.sfx-btn-row-trim:hover {
+  background: var(--sfx-surface-hover, #1a1a1d) !important;
+  color: var(--sfx-text, #fff) !important;
+}
+
+.sfx-row__import {
+  height: 22px !important;
+  padding: 0 8px !important;
+  font-size: 10.5px !important;
+  flex: 0 0 auto !important;
+  border-radius: 4px !important;
+  border: 1px solid var(--sfx-border-strong, #6e6e75) !important;
+  background: transparent !important;
+  color: var(--sfx-text, #fff) !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+}
+.sfx-row__import:hover {
+  background: var(--sfx-accent, #0a84ff) !important;
+  border-color: var(--sfx-accent, #0a84ff) !important;
+  color: #fff !important;
+}
+
+/* Compact Gallery Cards (Grid View) - Prevent stretching */
 .sfx-gallery {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 10px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 10px;
-  align-content: start;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)) !important;
+  gap: 8px !important;
+  padding: 8px !important;
+  align-content: start !important;
+  align-items: start !important;
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
 }
 
 .sfx-card {
-  background: var(--sfx-surface-raised, #121214);
-  border: 1px solid var(--sfx-border, #232326);
-  border-radius: var(--sfx-radius-large, 12px);
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: border-color 0.15s ease, background 0.15s ease;
-  cursor: pointer;
-  user-select: none;
+  height: 115px !important;
+  min-height: 115px !important;
+  max-height: 115px !important;
+  box-sizing: border-box !important;
+  border-radius: 8px !important;
+  padding: 8px !important;
+  background: var(--sfx-surface-raised, #121214) !important;
+  border: 1px solid var(--sfx-border, #232326) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  cursor: pointer !important;
+  overflow: hidden !important;
 }
 .sfx-card:hover {
-  background: var(--sfx-surface-hover, #1a1a1d);
-  border-color: var(--sfx-border-strong, #6e6e75);
+  background: var(--sfx-surface-hover, #1a1a1d) !important;
+  border-color: var(--sfx-border-strong, #6e6e75) !important;
 }
-.sfx-card.sfx-card--on,
-.sfx-card.sfx-card--playing {
-  border-color: var(--sfx-accent, #0a84ff);
-  background: var(--sfx-surface-selected, #1f1f23);
+.sfx-card.sfx-card--on {
+  border-color: rgba(10, 132, 255, 0.7) !important;
+  background: rgba(10, 132, 255, 0.1) !important;
+  box-shadow: inset 0 0 0 1px rgba(10, 132, 255, 0.3) !important;
 }
 .sfx-card__wave {
-  height: 48px;
-  border-radius: 6px;
-  background: var(--sfx-surface-sunken, #000000);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+  border-radius: 4px !important;
+  background: var(--sfx-surface-sunken, #000000) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
 .sfx-card__name {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--sfx-text, #f5f5f7);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  color: var(--sfx-text, #f5f5f7) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 .sfx-card__foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: auto;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-top: auto !important;
 }
 .sfx-card__duration {
-  font-size: 11px;
+  font-size: 10.5px !important;
+  color: var(--sfx-text-muted, #9c9ca4) !important;
+  font-family: var(--sfx-font-mono, monospace) !important;
+}
+
+/* ── COMPACT DEDICATED BOTTOM WAVEFORM PREVIEW TRAY ── */
+.sfx-trim {
+  flex: 0 0 auto !important;
+  height: 118px !important;
+  min-height: 118px !important;
+  max-height: 118px !important;
+  padding: 6px 12px 8px !important;
+  border-top: 1px solid var(--sfx-border, #232326) !important;
+  background: var(--sfx-surface-raised, #121214) !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+}
+
+.sfx-trim__head {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  height: 20px !important;
+}
+
+.sfx-trim__name {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.sfx-trim__length {
+  font-size: 11px !important;
+  color: var(--sfx-accent, #0a84ff) !important;
+  font-weight: 600 !important;
+  font-family: var(--sfx-font-mono, monospace) !important;
+}
+
+.sfx-trim__hint {
+  font-size: 10px !important;
+  color: var(--sfx-text-muted, #9c9ca4) !important;
+  margin-left: auto !important;
+}
+
+.sfx-trim__track {
+  position: relative !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
+  border-radius: 4px !important;
+  background: #000000 !important;
+  overflow: hidden !important;
+  cursor: text !important;
+}
+
+.sfx-trim__bar {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  height: 26px !important;
+}
   color: var(--sfx-text-muted, #9c9ca4);
   font-family: var(--sfx-font-mono);
 }
