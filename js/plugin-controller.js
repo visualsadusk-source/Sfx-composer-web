@@ -1700,6 +1700,22 @@
       });
     });
 
+    // Hero image triggers lightbox
+    const heroStage = document.getElementById('sfx-gallery-hero-stage');
+    const heroBtn = document.getElementById('sfx-hero-expand-btn');
+    function openHeroInLightbox(e) {
+      if (e) e.stopPropagation();
+      imgEl.src = 'assets/images/SFX Composer_ Cinematic Audio Suite.png';
+      imgEl.alt = 'SFX Composer — The Cinematic Audio Suite';
+      counterEl.textContent = 'Flagship Showcase · 16:9';
+      titleEl.textContent = 'SFX Composer — The Cinematic Audio Suite';
+      descEl.textContent = 'The all-in-one audio suite for video editors: find, design, and place SFX with instant waveform preview, local Ollama AI assistant, BGM Flow, and multi-track timeline automation in Premiere Pro CC, After Effects CC, DaVinci Resolve & Final Cut Pro.';
+      modal.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+    }
+    if (heroStage) heroStage.addEventListener('click', openHeroInLightbox);
+    if (heroBtn) heroBtn.addEventListener('click', openHeroInLightbox);
+
     if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
     if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); prevImage(); });
     if (nextBtn) nextBtn.addEventListener('click', (e) => { e.stopPropagation(); nextImage(); });
