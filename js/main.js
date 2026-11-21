@@ -199,11 +199,13 @@
       }
 
       if (modal) modal.classList.add('is-open');
+      document.body.classList.add('sfx-modal-open');
       document.body.style.overflow = 'hidden';
     }
 
     function closeVideoModal() {
       if (modal) modal.classList.remove('is-open');
+      document.body.classList.remove('sfx-modal-open');
       document.body.style.overflow = '';
       if (playerWrapper) {
         playerWrapper.innerHTML = '';
@@ -289,6 +291,7 @@
     function openCheckout() {
       if (modal) {
         modal.classList.add('is-open');
+        document.body.classList.add('sfx-modal-open');
         document.body.style.overflow = 'hidden';
         var tierName = document.getElementById('checkout-tier-name');
         if (tierName) {
@@ -307,6 +310,7 @@
     function closeCheckout() {
       if (modal) {
         modal.classList.remove('is-open');
+        document.body.classList.remove('sfx-modal-open');
         document.body.style.overflow = '';
       }
     }

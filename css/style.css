@@ -59,12 +59,24 @@
 }
 
 html {
+  height: 100%;
+  min-height: 100%;
+  overflow-x: hidden !important;
+  overflow-y: scroll !important;
   scroll-behavior: smooth;
   color-scheme: dark;
   background-color: var(--sfx-surface);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
+  min-height: 100vh !important;
+  height: auto !important;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  position: relative;
   background-color: var(--sfx-surface);
   color: var(--sfx-text);
   font-family: var(--sfx-font);
@@ -72,7 +84,18 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  touch-action: pan-y;
+}
+
+/* Modal Open state: prevent background scroll cleanly */
+body.sfx-modal-open {
+  overflow: hidden !important;
+  touch-action: none !important;
+}
+
+body.sfx-has-header-menu {
+  height: auto !important;
+  min-height: 100vh !important;
 }
 
 a {
@@ -290,8 +313,12 @@ img, svg {
 .sfx-site-main-content {
   margin-left: var(--sidebar-w);
   min-height: 100vh;
+  height: auto;
   padding: 0 32px 80px;
   max-width: 1440px;
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 /* ── Hero Section ── */
@@ -1259,8 +1286,10 @@ img, svg {
   border: 1px solid var(--sfx-border);
   border-radius: var(--sfx-radius-large);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(10, 132, 255, 0.15);
-  max-height: 90vh;
+  max-height: 88vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   animation: sfxModalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
