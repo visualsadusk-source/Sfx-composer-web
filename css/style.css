@@ -1,43 +1,55 @@
 /* ==========================================================================
-   SFX COMPOSER — EXACT PLUGIN DESIGN SYSTEM & WEBSITE STYLESHEET
-   Deep Pro Black (#000000 / #121214) • Authentic Blue Accent (#0A84FF)
-   Extracted directly from the official SFX Composer desktop extension source.
+   SFX COMPOSER — OFFICIAL BRAND IDENTITY & WEBSITE DESIGN SYSTEM
+   Midnight Navy Surface (#060813 / #070e24) • Signature Brand Blue (#1d68ff)
+   Derived directly from the official SFX Composer brand identity master.
    ========================================================================== */
 
 :root {
-  --sfx-surface: #000000;
-  --sfx-surface-raised: #121214;
-  --sfx-surface-sunken: #000000;
-  --sfx-surface-hover: #1a1a1d;
-  --sfx-surface-selected: #1f1f23;
-  --sfx-border: #232326;
-  --sfx-border-strong: #6e6e75;
-  --sfx-text: #f5f5f7;
-  --sfx-text-muted: #9c9ca4;
-  --sfx-text-on-accent: #000000;
+  /* Brand Atmospheric Space Surfaces */
+  --sfx-bg-deep: #060813;
+  --sfx-surface: #070e24;
+  --sfx-surface-raised: #0d1730;
+  --sfx-surface-sunken: #04060c;
+  --sfx-surface-hover: #132244;
+  --sfx-surface-selected: #182b54;
+  --sfx-surface-glass: rgba(13, 23, 48, 0.72);
   
-  /* Authentic SFX Composer Blue System */
-  --sfx-accent: #0a84ff;
-  --sfx-accent-hover: #3d9bff;
-  --sfx-accent-active: #0870d8;
-  --sfx-accent-glow: rgba(10, 132, 255, 0.28);
-  --sfx-accent-subtle: rgba(10, 132, 255, 0.12);
+  /* Brand Fine Borders & Specular Highlights */
+  --sfx-border: rgba(255, 255, 255, 0.08);
+  --sfx-border-strong: rgba(255, 255, 255, 0.16);
+  --sfx-border-specular: rgba(90, 140, 220, 0.28);
+  --sfx-border-glow: rgba(29, 104, 255, 0.4);
+
+  /* Typography Contrast */
+  --sfx-text: #ffffff;
+  --sfx-text-muted: #94a3b8;
+  --sfx-text-dim: #64748b;
+  --sfx-text-on-accent: #ffffff;
   
-  --sfx-positive: #30d158;
-  --sfx-caution: #ffd60a;
-  --sfx-critical: #ff453a;
+  /* Official SFX Composer Blue Gradient System */
+  --sfx-accent: #1d68ff;
+  --sfx-accent-hover: #3b82f6;
+  --sfx-accent-active: #1550c6;
+  --sfx-accent-glow: rgba(29, 104, 255, 0.32);
+  --sfx-accent-subtle: rgba(29, 104, 255, 0.12);
+  --sfx-beam-light: #5478a5;
+  --sfx-beam-core: #1f3876;
   
-  --sfx-waveform: #8a9bb5;
-  --sfx-waveform-played: #4a9eff;
-  --sfx-favourite: #ffd60a;
+  --sfx-positive: #10b981;
+  --sfx-caution: #f59e0b;
+  --sfx-critical: #ef4444;
+  
+  --sfx-waveform: #64748b;
+  --sfx-waveform-played: #38bdf8;
+  --sfx-favourite: #f59e0b;
   
   --sfx-space1: 4px;
   --sfx-space2: 8px;
   --sfx-space3: 12px;
   --sfx-space4: 18px;
   --sfx-space5: 28px;
-  --sfx-radius: 7px;
-  --sfx-radius-large: 12px;
+  --sfx-radius: 8px;
+  --sfx-radius-large: 14px;
   
   --sfx-font-size: 13px;
   --sfx-font-size-small: 11px;
@@ -45,7 +57,7 @@
   --sfx-row-height: 34px;
   --sfx-control-height: 30px;
   
-  --sfx-font: "SF Pro Text", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --sfx-font: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
   --sfx-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   --sidebar-w: 240px;
@@ -65,7 +77,7 @@ html {
   overflow-y: scroll !important;
   scroll-behavior: smooth;
   color-scheme: dark;
-  background-color: var(--sfx-surface);
+  background-color: var(--sfx-bg-deep);
   -webkit-text-size-adjust: 100%;
 }
 
@@ -77,7 +89,12 @@ body {
   overflow-x: hidden !important;
   overflow-y: visible !important;
   position: relative;
-  background-color: var(--sfx-surface);
+  background-color: var(--sfx-bg-deep);
+  background-image: 
+    radial-gradient(1200px 800px at 20% 0%, rgba(31, 56, 118, 0.35) 0%, rgba(13, 23, 48, 0.18) 45%, transparent 75%),
+    radial-gradient(800px 600px at 85% 15%, rgba(18, 35, 89, 0.22) 0%, transparent 60%),
+    linear-gradient(180deg, #070e24 0%, #060813 100%);
+  background-attachment: fixed;
   color: var(--sfx-text);
   font-family: var(--sfx-font);
   font-size: var(--sfx-font-size);
@@ -379,6 +396,205 @@ img, svg {
   flex-wrap: wrap;
   margin-bottom: 14px;
 }
+
+/* ── Official SFX Composer Brand Symbol & Atmospheric Beam ── */
+.sfx-hero-brand-symbol {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.sfx-hero-symbol-beam {
+  position: absolute;
+  top: -90px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  height: 220px;
+  background: radial-gradient(ellipse at 50% 40%, rgba(56, 189, 248, 0.3) 0%, rgba(29, 104, 255, 0.24) 35%, rgba(31, 56, 118, 0.08) 60%, transparent 80%);
+  filter: blur(28px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sfx-hero-symbol-badge {
+  position: relative;
+  z-index: 1;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: rgba(13, 23, 48, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.65), 0 0 24px rgba(29, 104, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+
+.sfx-hero-symbol-badge:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.75), 0 0 32px rgba(29, 104, 255, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.sfx-brand-badge-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  display: block;
+}
+
+.sfx-hero-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
+  display: inline-block;
+}
+
+/* ── Workflow Pipeline Demonstration ── */
+.sfx-workflow-steps {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+  padding: 24px 20px;
+  background: rgba(13, 23, 48, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.sfx-workflow-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.sfx-workflow-step-num {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #3b82f6;
+  background: rgba(29, 104, 255, 0.12);
+  border: 1px solid rgba(29, 104, 255, 0.28);
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sfx-workflow-step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sfx-workflow-step-title {
+  font-size: 14px;
+  font-weight: 650;
+  color: #ffffff;
+  margin: 0;
+}
+
+.sfx-workflow-step-desc {
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.sfx-workflow-step-arrow {
+  color: #3b82f6;
+  font-size: 18px;
+  opacity: 0.6;
+}
+
+@media (max-width: 900px) {
+  .sfx-workflow-steps {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .sfx-workflow-step-arrow {
+    display: none;
+  }
+}
+
+/* ── SaaS Comparison Matrix (Benefits) ── */
+.sfx-comparison-box {
+  background: rgba(13, 23, 48, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  padding: 24px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.sfx-comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.sfx-comparison-col {
+  padding: 16px;
+  border-radius: 10px;
+}
+
+.sfx-comparison-col--bad {
+  background: rgba(15, 20, 30, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sfx-comparison-col--good {
+  background: rgba(29, 104, 255, 0.08);
+  border: 1px solid rgba(29, 104, 255, 0.28);
+}
+
+.sfx-comparison-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.sfx-comparison-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sfx-comparison-item {
+  font-size: 12.5px;
+  line-height: 1.45;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .sfx-comparison-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 /* ── Main Page Primary Hero Product Showcase Visual ── */
 .sfx-main-hero-showcase {
@@ -2845,8 +3061,11 @@ img, svg {
 .sfx-dest-card {
   display: flex;
   flex-direction: column;
-  background: #0d1017;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(13, 23, 48, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   overflow: hidden;
   text-decoration: none;
@@ -3063,7 +3282,7 @@ img, svg {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(135deg, rgba(10, 132, 255, 0.2), rgba(168, 85, 247, 0.2));
+  background: rgba(29, 104, 255, 0.15); border: 1px solid rgba(29, 104, 255, 0.32); color: #60a5fa;
   border: 1px solid rgba(10, 132, 255, 0.5);
   color: #7ec8ff;
   font-size: 11px;
