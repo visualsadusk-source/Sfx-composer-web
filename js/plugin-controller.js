@@ -69,6 +69,7 @@
     setupDualHostSwitcher();
     setupSettingsDrawer();
     setupModuleShowcaseTour();
+    setupGalleryLightbox();
     setupCustomerDashboard();
 
     // Select default active sound
@@ -1597,6 +1598,201 @@
   }
 
   // Expose API
+  
+  // ── GALLERY SHOWCASE & LIGHTBOX CONTROLLER ──
+  function setupGalleryLightbox() {
+    const GALLERY_ITEMS = [
+      {
+        id: 1,
+        src: 'assets/images/sfx-overview-main.png',
+        badge: 'Screenshot 01 · Main Workspace',
+        title: 'Main Production Interface & Waveform Trimmer',
+        desc: 'Primary desktop interface showcasing the 17,111-sound categorized folder tree (Button, Foley, Glitch, Human, Impact, Transitions, etc.), sub-millisecond search bar, waveform preview list, and the docked bottom audio trimmer with draggable In/Out markers (0.000s to 4.431s) and direct "Add to timeline" insertion.'
+      },
+      {
+        id: 2,
+        src: 'assets/images/sfx-browser-pixabay.png',
+        badge: 'Screenshot 02 · Built-in Browser',
+        title: 'Built-in Browser & Royalty-Free SFX Search',
+        desc: 'Docked in-panel browser navigating over 130,000+ royalty-free sounds from Pixabay. Search by keyword or quick tags (whoosh, riser, pop, click, swoosh, glitch) with inline audio waveforms.'
+      },
+      {
+        id: 3,
+        src: 'assets/images/sfx-browser-downloads.png',
+        badge: 'Screenshot 03 · Downloads Manager',
+        title: 'Downloads Manager & Automated Timeline Placement',
+        desc: 'Download history tracking completed audio assets with one-click "Import to Active Timeline" (e.g. placed on track A4 at 0:57.77 in "angela bathroom"), file reveals, and clean storage management.'
+      },
+      {
+        id: 4,
+        src: 'assets/images/sfx-browser-import.png',
+        badge: 'Screenshot 04 · Audio Importer',
+        title: 'Multi-Format Audio File Importer',
+        desc: 'Native file dialog ingestion supporting WAV, MP3, AIFF, M4A, AAC, and FLAC formats with recent downloads queue, audition previews, and background caching into local sound libraries.'
+      },
+      {
+        id: 5,
+        src: 'assets/images/sfx-ai-assistant.png',
+        badge: 'Screenshot 05 · AI SFX Assistant',
+        title: 'Intelligent AI Sound Recommendations (Ollama)',
+        desc: 'Real-time chat interface showing the query "Find the perfect cinematic impact sound". The AI assistant analyzes local library metadata and recommends top matching audio clips complete with interactive "▶ Preview" and "+ Place" buttons.'
+      },
+      {
+        id: 6,
+        src: 'assets/images/sfx-bgm-flow-transitions.png',
+        badge: 'Screenshot 06 · BGM Flow',
+        title: 'BGM Flow Transitions & Parameter Controls',
+        desc: 'Interface showing Music Start presets with 5 available styles (Smooth Fade In, Cinematic Rise, Beat Entry, Soft Intro, Volume Ramp). Transition parameters include real-time sliders for Fade Duration (2.5s), Target Volume (0.0 dB), and mathematical curve selection between S-curve, Exponential, Linear, and Logarithmic.'
+      },
+      {
+        id: 7,
+        src: 'assets/images/sfx-analytics-dashboard.png',
+        badge: 'Screenshot 07 · Usage Analytics',
+        title: 'Dedicated Workflow Analytics & Activity Overview',
+        desc: 'Dedicated analytics dashboard featuring key metric cards: Total Sounds Played (23), Timeline Imports (1), Most Used Category ("downloads"), and Unique Sounds Used (13). Displays interactive Activity Overview curve graph and "Most Used Sounds" ranking with play counts, import history, and quick preview controls.'
+      },
+      {
+        id: 8,
+        src: 'assets/images/sfx-scene-ai-timeline.png',
+        badge: 'Screenshot 08 · Scene AI',
+        title: 'Scene AI Sequence Designer & Timeline Control',
+        desc: 'Scene AI main interface displaying live host status badges for Adobe Host (PPro/AE) and Ollama local AI server. Features "Analyze Composition" trigger and the AI Timeline Control prompt bar with verified operations and write-operation safety approvals.'
+      },
+      {
+        id: 9,
+        src: 'assets/images/sfx-audio-tools-essential-sound.png',
+        badge: 'Screenshot 09 · Essential Sound Studio',
+        title: '3-Column Workstation & Essential Sound DSP Rack',
+        desc: 'Pro-grade workstation layout: Left sound browser filtering categories, Center high-resolution waveform editor (with 0:00.00 / 0:02.67 timecode, 48000 Hz, 2 ch display), and Right Essential Sound DSP rack with Peak (-2.4 dB) and RMS (-23.0 dB) meters, Gain/Normalize, Fades, EQ, Dynamics Compress, and Character controls.'
+      },
+      {
+        id: 10,
+        src: 'assets/images/sfx-settings-workspace.png',
+        badge: 'Screenshot 10 · Workspace Preferences',
+        title: 'Profile, Accent Colors, Library Folders & Appearance',
+        desc: 'Full settings view displaying User Profile with picture upload, 6 accent color swatches, Library Folders management with folder rescan (17,111 sounds indexed), Appearance themes selector (Studio Dark, Ultra Dark, Light), Playback preview volume slider (80%), License verification ("All features are unlocked"), Diagnostics logging, and About credits.'
+      }
+    ];
+
+    let currentLightboxIdx = 0;
+    const modal = document.getElementById('sfx-lightbox-modal');
+    const imgEl = document.getElementById('sfx-lightbox-img');
+    const counterEl = document.getElementById('sfx-lightbox-counter');
+    const titleEl = document.getElementById('sfx-lightbox-title');
+    const descEl = document.getElementById('sfx-lightbox-desc');
+    const closeBtn = document.getElementById('sfx-lightbox-close');
+    const prevBtn = document.getElementById('sfx-lightbox-prev');
+    const nextBtn = document.getElementById('sfx-lightbox-next');
+
+    if (!modal) return;
+
+    function renderLightbox(idx) {
+      currentLightboxIdx = ((idx % GALLERY_ITEMS.length) + GALLERY_ITEMS.length) % GALLERY_ITEMS.length;
+      const item = GALLERY_ITEMS[currentLightboxIdx];
+      if (!item) return;
+
+      imgEl.src = item.src;
+      imgEl.alt = item.title;
+      counterEl.textContent = 'Screenshot ' + (currentLightboxIdx + 1) + ' of ' + GALLERY_ITEMS.length;
+      titleEl.textContent = item.title;
+      descEl.textContent = item.desc;
+    }
+
+    function openLightbox(idx) {
+      renderLightbox(idx);
+      modal.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      modal.classList.remove('is-open');
+      document.body.style.overflow = '';
+    }
+
+    function nextImage() {
+      renderLightbox(currentLightboxIdx + 1);
+    }
+
+    function prevImage() {
+      renderLightbox(currentLightboxIdx - 1);
+    }
+
+    // Attach click triggers to cards
+    document.querySelectorAll('.sfx-screenshot-card[data-lightbox-idx]').forEach(card => {
+      const idx = parseInt(card.getAttribute('data-lightbox-idx'), 10);
+      card.addEventListener('click', (e) => {
+        openLightbox(idx);
+      });
+    });
+
+    if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+    if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); prevImage(); });
+    if (nextBtn) nextBtn.addEventListener('click', (e) => { e.stopPropagation(); nextImage(); });
+
+    // Click outside dialog to close
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal || e.target.classList.contains('sfx-lightbox-stage')) {
+        closeLightbox();
+      }
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!modal.classList.contains('is-open')) return;
+      if (e.key === 'Escape') {
+        closeLightbox();
+      } else if (e.key === 'ArrowRight') {
+        nextImage();
+      } else if (e.key === 'ArrowLeft') {
+        prevImage();
+      }
+    });
+
+    // Gallery sticky subnav scroll-spy & smooth scroll
+    const navLinks = document.querySelectorAll('.sfx-gallery-nav-link');
+    const sections = Array.from(navLinks).map(link => {
+      const targetId = link.getAttribute('href');
+      return targetId ? document.querySelector(targetId) : null;
+    }).filter(Boolean);
+
+    window.addEventListener('scroll', () => {
+      const scrollPos = window.scrollY + 180;
+      let activeIndex = 0;
+      sections.forEach((sec, idx) => {
+        if (sec.offsetTop <= scrollPos) {
+          activeIndex = idx;
+        }
+      });
+      navLinks.forEach((link, idx) => {
+        if (idx === activeIndex) {
+          link.classList.add('is-active');
+        } else {
+          link.classList.remove('is-active');
+        }
+      });
+    }, { passive: true });
+
+    // Interactive simulator drawer toggle
+    const toggleSimBtn = document.getElementById('btn-toggle-live-simulator');
+    const simDrawer = document.getElementById('sfx-interactive-sim-drawer');
+    const simText = document.getElementById('simulator-toggle-text');
+
+    if (toggleSimBtn && simDrawer) {
+      toggleSimBtn.addEventListener('click', () => {
+        const isHidden = window.getComputedStyle(simDrawer).display === 'none';
+        if (isHidden) {
+          simDrawer.style.display = 'block';
+          if (simText) simText.textContent = 'Hide Live Simulator';
+          simDrawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          simDrawer.style.display = 'none';
+          if (simText) simText.textContent = 'Interactive Live App';
+        }
+      });
+    }
+  }
+
+
   window.SFX_PLUGIN_CONTROLLER = {
     state: state,
     toggleToolOverlay: toggleToolOverlay,
