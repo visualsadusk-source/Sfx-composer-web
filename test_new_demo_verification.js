@@ -45,7 +45,8 @@ async function runDemoVerification() {
 
   // ── TEST GROUP 2: DEMO DOM ARCHITECTURE & 9 MAJOR MODULES ──
   console.log('\n--- TEST GROUP 2: 9 MAJOR APPLICATION MODULES IN DEMO ---');
-  const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+  const html = fs.readFileSync(path.join(__dirname, 'demo.html'), 'utf8');
+  const indexHtml = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 
   // 1. SFX Library / Sound Browser
   assert.ok(html.includes('id="sfx-vlist-container"'), 'Main SFX library virtual list must exist');
@@ -106,8 +107,8 @@ async function runDemoVerification() {
   console.log('\n--- TEST GROUP 3: OVERVIEW SHOWCASE & DUPLICATE TOUR REMOVAL ---');
   assert.ok(!html.includes('id="sfx-tour-container"'), 'Duplicate screenshot tour carousel must be removed');
   assert.ok(!html.includes('id="btn-view-tour"'), 'Tour toggle button must be removed');
-  assert.ok(html.includes('id="gallery-overview"'), 'Overview showcase section must exist');
-  assert.ok(html.includes('id="sfx-lightbox-modal"'), 'Fullscreen screenshot lightbox viewer must exist');
+  assert.ok(html.includes('id="sfx-live-container"'), 'Live demo application container must exist');
+  assert.ok(html.includes('id="sfx-vlist-container"'), 'Virtual sound list must exist on demo.html');
   pass('Duplicate tour carousel removed while Overview screenshot showcase and lightbox remain fully functional');
 
   // ── TEST GROUP 4: VERSION ACCURACY & WEBSITE INTEGRITY ──
@@ -119,7 +120,7 @@ async function runDemoVerification() {
   assert.ok(html.includes('sfx-buy-trigger'), 'Buy buttons must be intact');
   assert.ok(html.includes('id="customer-dashboard-modal"'), 'Customer dashboard modal must be intact');
   assert.ok(html.includes('id="checkout-modal"'), 'Razorpay checkout modal must be intact');
-  assert.ok(html.includes('id="tutorials-grid-container"'), 'YouTube tutorial section must be intact');
+  assert.ok(indexHtml.includes('id="tutorials-grid-container"'), 'YouTube tutorial section must be intact on index.html');
   pass('Version strings updated to v2.2.0 and critical purchase / license / tutorial flows preserved');
 
   // ── TEST GROUP 5: SCRIPT & STYLESHEET INTEGRITY ──

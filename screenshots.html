@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Screenshots Gallery — SFX Composer v2.2.0</title>
+  <meta name="description" content="The complete audio and sound-design toolkit for video editors in Premiere Pro and After Effects. Essential Sound Studio, Audio Tools, Local SFX Library, and AI-assisted sound design." />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="assets/brand/mark-128.png" />
+
+  <!-- Plugin Authentic Stylesheets (Extracted Directly From SFX Composer Extension) -->
+  <link rel="stylesheet" href="plugin-dist/core-bundle.css" />
+  <link rel="stylesheet" href="plugin-dist/header-menu.css" />
+  <link rel="stylesheet" href="plugin-dist/audio-tools.css" />
+  <link rel="stylesheet" href="plugin-dist/essential-sound.css" />
+  <link rel="stylesheet" href="plugin-dist/browser-tab.css" />
+  <link rel="stylesheet" href="plugin-dist/ai-assistant.css" />
+  <link rel="stylesheet" href="plugin-dist/scene-designer.css" />
+  <link rel="stylesheet" href="plugin-dist/analytics.css" />
+
+  <!-- Website Outer Styling (Pro Dark + #0A84FF Blue Accent) -->
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- High-Fidelity Audio Manifest (With Bundled Assets & Base64 Data URIs) -->
+  <script src="assets/audio/audio-manifest.js"></script>
+</head>
+<body class="sfx-has-header-menu">
+
+  <!-- Mobile Header -->
+  <header class="sfx-site-mobile-header" id="sfx-site-mobile-header">
+    <div class="sfx-site-logo-wrap" style="margin-bottom: 0;">
+      <div class="sfx-site-logo-mark">
+        <img src="assets/brand/mark-128.png" alt="SFX Composer" width="22" height="22" />
+      </div>
+      <span class="sfx-site-logo-text">SFX <span class="sfx-site-logo-accent">Composer</span></span>
+    </div>
+    <button class="sfx-hamburger" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- Mobile Overlay -->
+  <div class="sfx-nav-overlay" id="sfx-nav-overlay"></div>
+
+
+  <!-- FIXED VERTICAL LEFT NAVIGATION (SFX Composer Pro Dark + Blue) -->
+  <aside class="sfx-site-sidebar" id="sfx-left-nav">
+    <div class="sfx-site-logo-wrap">
+      <div class="sfx-site-logo-mark">
+        <img src="assets/brand/mark-128.png" alt="SFX Composer" width="22" height="22" />
+      </div>
+      <div class="sfx-site-logo-text">
+        <span>SFX <span class="sfx-site-logo-accent">Composer</span></span>
+        <span class="sfx-site-badge">CEP PRO EXTENSION</span>
+      </div>
+    </div>
+
+    <!-- Navigation Links -->
+    <ul class="sfx-site-nav-menu">
+      <li>
+        <a href="index.html" class="sfx-site-nav-link ">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          Overview
+        </a>
+      </li>
+      <li>
+        <a href="demo.html" class="sfx-site-nav-link ">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          Live Plugin Demo
+          <span style="font-size: 9px; font-weight: 700; color: #7ec8ff; background: #132438; padding: 1px 5px; border-radius: 3px; margin-left: auto;">EXACT UI</span>
+        </a>
+      </li>
+      <li>
+        <a href="screenshots.html" class="sfx-site-nav-link is-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          Screenshots Gallery
+          <span style="font-size: 9px; font-weight: 700; color: #7ec8ff; background: #132438; padding: 1px 5px; border-radius: 3px; margin-left: auto;">ALL MODS</span>
+        </a>
+      </li>
+      <li>
+        <a href="index.html#features" class="sfx-site-nav-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Features
+        </a>
+      </li>
+      <li>
+        <a href="index.html#tutorials" class="sfx-site-nav-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+          Tutorials
+        </a>
+      </li>
+      <li>
+        <a href="index.html#pricing" class="sfx-site-nav-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+          Pricing (₹199)
+        </a>
+      </li>
+      <li>
+        <a href="#customer-dashboard" class="sfx-site-nav-link" id="open-customer-dashboard-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          Dashboard &amp; License
+        </a>
+      </li>
+      <li>
+        <a href="index.html#faq" class="sfx-site-nav-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          FAQ
+        </a>
+      </li>
+    </ul>
+
+    <!-- Live Status / Active Extension Pill -->
+    <div class="sfx-site-nav-footer">
+      <div class="sfx-status-indicator">
+        <span class="sfx-status-dot"></span>
+        <span>v2.2.0 Active · Ready</span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="sfx-site-main-content">
+
+    <!-- ── DEDICATED SCREENSHOTS GALLERY ── -->
+    <section class="sfx-site-section" id="screenshots-gallery" style="padding-top: 10px; margin-bottom: 24px;">
+      <div class="sfx-site-sec-head" style="margin-bottom: 24px;">
+        <span class="sfx-site-kicker">High-Resolution Retina Tour · Version 2.2.0</span>
+        <h2 class="sfx-site-title">Screenshots Gallery</h2>
+        <p class="sfx-site-desc">
+          Inspect pixel-perfect screenshots of the complete SFX Composer application interface organized by feature. Click any screenshot to open in high-resolution fullscreen view with keyboard navigation.
+        </p>
+      </div>
+
+<div class="sfx-showcase-wrapper" id="gallery-showcase">
+
+        <!-- Sticky Feature Navigation Bar -->
+        <!-- ── SECTION 01 — OVERVIEW ── -->
+        <section class="sfx-feature-section" id="gallery-overview">
+          <div class="sfx-feature-header">
+            <span class="sfx-feature-kicker">SECTION 01 — OVERVIEW</span>
+            <h3 class="sfx-feature-title">Meet SFX Composer</h3>
+            <p class="sfx-feature-desc">
+              A professional sound effects workflow designed to make audio editing faster, smarter and more efficient. Docked directly inside Adobe Premiere Pro and After Effects, SFX Composer connects your entire audio workflow with instant waveform browsing, multi-track timeline placement, and intelligent creative tools.
+            </p>
+            <div class="sfx-feature-pill-row">
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> 17,111+ Sounds Indexed</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Sub-5ms SQLite Search</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Draggable In/Out Waveform Trimming</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Active Host Sequence Tracking</span>
+            </div>
+          </div>
+
+          <div class="sfx-screenshot-grid-1">
+            <div class="sfx-screenshot-card" data-lightbox-idx="0">
+              <div class="sfx-screenshot-img-wrap">
+                <img src="assets/images/sfx-overview-main.png" alt="SFX Composer Main Production Interface" loading="lazy" />
+                <div class="sfx-screenshot-zoom-overlay">
+                  <span class="sfx-screenshot-zoom-badge">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                    Click to view fullscreen
+                  </span>
+                </div>
+              </div>
+              <div class="sfx-screenshot-meta">
+                <div class="sfx-screenshot-badge-row">
+                  <span class="sfx-screenshot-badge">Screenshot 01 · Main Workspace</span>
+                  <span class="sfx-screenshot-num">1 of 10</span>
+                </div>
+                <h4 class="sfx-screenshot-card-title">Main Production Interface &amp; Waveform Trimmer</h4>
+                <p class="sfx-screenshot-card-desc">
+                  Primary desktop interface showcasing the 17,111-sound categorized folder tree (Button, Foley, Glitch, Human, Impact, Transitions, etc.), sub-millisecond search bar, waveform preview list, and the docked bottom audio trimmer with draggable In/Out markers (0.000s to 4.431s) and direct "Add to timeline" insertion.
+                </p>
+                <div class="sfx-screenshot-card-actions">
+                  <span style="font-size: 11.5px; color: #64748b;">Host: Premiere Pro CC 2024 · Active: angela bathroom (23.976 fps)</span>
+                  <button type="button" class="sfx-btn-open-fullscreen">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path></svg>
+                    Fullscreen
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── SECTION 02 — SOUND BROWSER ── -->
+        <section class="sfx-feature-section" id="gallery-browser">
+          <div class="sfx-feature-header">
+            <span class="sfx-feature-kicker">SECTION 02 — SOUND BROWSER</span>
+            <h3 class="sfx-feature-title">Explore Your Sound Library</h3>
+            <p class="sfx-feature-desc">
+              Discover, organize and preview thousands of sound effects with an advanced sound browsing experience. SFX Composer combines a lightning-fast local library browser with an in-panel web companion — offering instant search across 17,111+ indexed sounds, draggable waveform In/Out boundary trimming, royalty-free online search, and multi-track sequence placement.
+            </p>
+            <div class="sfx-feature-pill-row">
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> 17,111+ Sounds Indexed</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Categorized Folder Tree</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Waveform In/Out Boundary Handles</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Built-in Docked Browser (Pixabay)</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> One-Click Timeline Placement (Track A4)</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> WAV, MP3, AIFF, M4A, AAC, FLAC Support</span>
+            </div>
+          </div>
+
+          <!-- Featured: Main Library & Waveform Browser -->
+          <div class="sfx-screenshot-grid-1" style="margin-bottom: 20px;">
+            <div class="sfx-screenshot-card" data-lightbox-idx="0">
+              <div class="sfx-screenshot-img-wrap">
+                <img src="assets/images/sfx-browser-library.png" alt="SFX Composer Sound Library & Waveform Trimmer" loading="lazy" />
+                <div class="sfx-screenshot-zoom-overlay">
+                  <span class="sfx-screenshot-zoom-badge">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    Click to view fullscreen
+                  </span>
+                </div>
+              </div>
+              <div class="sfx-screenshot-meta">
+                <div class="sfx-screenshot-badge-row">
+                  <span class="sfx-screenshot-badge">Sound Library &amp; Waveforms</span>
+                  <span class="sfx-screenshot-num">Local Workspace</span>
+                </div>
+                <h4 class="sfx-screenshot-card-title">Categorized Sound Library, Search &amp; Waveform Trimmer</h4>
+                <p class="sfx-screenshot-card-desc">
+                  Explore 17,111+ locally indexed sounds organized into folders and collections (Button, Foley, Glitch, Human, Impact, Transitions, Typing, UE SFX). Features instant search, audio waveform preview, volume gain slider, and non-destructive draggable In/Out point handles (0.000s to 4.431s) with direct playhead insertion.
+                </p>
+                <div class="sfx-screenshot-card-actions">
+                  <span style="font-size: 11.5px; color: #64748b;">Library: 17,111 Indexed · Waveform: In/Out Markers · Insertion: Active Playhead</span>
+                  <button type="button" class="sfx-btn-open-fullscreen">Fullscreen</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3-Column: Built-in Browser Companion Tabs -->
+          <div class="sfx-screenshot-grid-3">
+            <!-- Card 2: Pixabay Browser -->
+            <div class="sfx-screenshot-card" data-lightbox-idx="1">
+              <div class="sfx-screenshot-img-wrap">
+                <img src="assets/images/sfx-browser-pixabay.png" alt="Built-in Browser Royalty-Free SFX Search" loading="lazy" />
+                <div class="sfx-screenshot-zoom-overlay">
+                  <span class="sfx-screenshot-zoom-badge">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    Fullscreen
+                  </span>
+                </div>
+              </div>
+              <div class="sfx-screenshot-meta">
+                <div class="sfx-screenshot-badge-row">
+                  <span class="sfx-screenshot-badge">Screenshot 02 · Built-in Browser</span>
+                  <span class="sfx-screenshot-num">2 of 10</span>
+                </div>
+                <h4 class="sfx-screenshot-card-title">Royalty-Free Sound Search</h4>
+                <p class="sfx-screenshot-card-desc">
+                  Docked in-panel browser navigating over 130,000+ royalty-free sounds from Pixabay. Search by keyword or quick tags (whoosh, riser, pop, click, swoosh, glitch) with inline audio waveforms.
+                </p>
+                <div class="sfx-screenshot-card-actions">
+                  <span style="font-size: 11px; color: #64748b;">Browse Tab · Live In-Panel</span>
+                  <button type="button" class="sfx-btn-open-fullscreen">Fullscreen</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3: Downloads Manager -->
+            <div class="sfx-screenshot-card" data-lightbox-idx="2">
+              <div class="sfx-screenshot-img-wrap">
+                <img src="assets/images/sfx-browser-downloads.png" alt="Downloads Manager and Timeline Placement" loading="lazy" />
+                <div class="sfx-screenshot-zoom-overlay">
+                  <span class="sfx-screenshot-zoom-badge">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    Fullscreen
+                  </span>
+                </div>
+              </div>
+              <div class="sfx-screenshot-meta">
+                <div class="sfx-screenshot-badge-row">
+                  <span class="sfx-screenshot-badge">Screenshot 03 · Downloads</span>
+                  <span class="sfx-screenshot-num">3 of 10</span>
+                </div>
+                <h4 class="sfx-screenshot-card-title">Downloads &amp; Timeline Placement</h4>
+                <p class="sfx-screenshot-card-desc">
+                  Download history tracking completed audio assets with one-click "Import to Active Timeline" (e.g. placed on track A4 at 0:57.77 in "angela bathroom"), file reveals, and clean storage management.
+                </p>
+                <div class="sfx-screenshot-card-actions">
+                  <span style="font-size: 11px; color: #64748b;">Downloads Tab · Auto Routing</span>
+                  <button type="button" class="sfx-btn-open-fullscreen">Fullscreen</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 4: Audio Importer -->
+            <div class="sfx-screenshot-card" data-lightbox-idx="3">
+              <div class="sfx-screenshot-img-wrap">
+                <img src="assets/images/sfx-browser-import.png" alt="Audio File Importer" loading="lazy" />
+                <div class="sfx-screenshot-zoom-overlay">
+                  <span class="sfx-screenshot-zoom-badge">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    Fullscreen
+                  </span>
+                </div>
+              </div>
+              <div class="sfx-screenshot-meta">
+                <div class="sfx-screenshot-badge-row">
+                  <span class="sfx-screenshot-badge">Screenshot 04 · File Ingestion</span>
+                  <span class="sfx-screenshot-num">4 of 10</span>
+                </div>
+                <h4 class="sfx-screenshot-card-title">Multi-Format Audio Importer</h4>
+                <p class="sfx-screenshot-card-desc">
+                  Native file dialog ingestion supporting WAV, MP3, AIFF, M4A, AAC, and FLAC formats with recent downloads queue, audition previews, and background caching into local sound libraries.
+                </p>
+                <div class="sfx-screenshot-card-actions">
+                  <span style="font-size: 11px; color: #64748b;">Import Tab · 6 Formats Supported</span>
+                  <button type="button" class="sfx-btn-open-fullscreen">Fullscreen</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── SECTION 03 — AI SFX ASSISTANT ── -->
+        <section class="sfx-feature-section" id="gallery-ai">
+          <div class="sfx-feature-header">
+            <span class="sfx-feature-kicker">SECTION 03 — AI SFX ASSISTANT</span>
+            <h3 class="sfx-feature-title">Your AI-Powered Sound Assistant</h3>
+            <p class="sfx-feature-desc">
+              Find the perfect sound effects using an intelligent assistant that understands your creative requirements and searches your local sound library. Powered by local Ollama (Llama 3.2) or Cloud LLMs, the assistant analyzes your natural-language prompts, identifies matching sound characteristics, and presents ranked results with instant preview and timeline placement actions.
+            </p>
+            <div class="sfx-feature-pill-row">
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Ollama (Llama 3.2 Local Inference)</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Natural Language Scene Understanding</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Interactive Preview &amp; Place Buttons</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> 100% Private On-Device Search</span>
+            </div>
+          </div>
+
+          <div class="sfx-screenshot-grid-1">
+            <div class="sfx-screenshot-card" data-lightbox-idx="4">
+              <div class="sfx-screenshot-img-wrap">
+                <img src="assets/images/sfx-ai-assistant.png" alt="AI SFX Assistant Conversational Interface" loading="lazy" />
+                <div class="sfx-screenshot-zoom-overlay">
+                  <span class="sfx-screenshot-zoom-badge">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    Click to view fullscreen
+                  </span>
+                </div>
+              </div>
+              <div class="sfx-screenshot-meta">
+                <div class="sfx-screenshot-badge-row">
+                  <span class="sfx-screenshot-badge">Screenshot 05 · AI SFX Assistant</span>
+                  <span class="sfx-screenshot-num">5 of 10</span>
+                </div>
+                <h4 class="sfx-screenshot-card-title">Intelligent AI Sound Recommendations</h4>
+                <p class="sfx-screenshot-card-desc">
+                  Real-time chat interface showing the query "Find the perfect cinematic impact sound". The AI assistant analyzes local library metadata and recommends top matching audio clips (e.g. "Epic Cinematic Trailer Impact - 01", "Cinematic 06", "Cinematic 07") complete with interactive "▶ Preview" and "+ Place" buttons.
+                </p>
+                <div class="sfx-screenshot-card-actions">
+                  <span style="font-size: 11.5px; color: #64748b;">Engine: Ollama Local (Llama 3.2) · Status: Ollama ready</span>
+                  <button type="button" class="sfx-btn-open-fullscreen">Fullscreen</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── SECTION 04 — BGM FLOW ── -->
+        <section class="sfx-feature-section" id="gallery-bgm">
+          <div class="sfx-feature-header">
+            <span class="sfx-feature-kicker">SECTION 04 — BGM FLOW</span>
+            <h3 class="sfx-feature-title">Intelligent Background Music Control</h3>
+            <p class="sfx-feature-desc">
+              Create professional background music transitions with precise volume control, fade curves and automatic beat synchronization. BGM Flow provides 14 curated transition styles spanning Music Start, Music End, and Music Change modes, with adjustable fade duration, target volume, and equal-power S-curve envelopes.
+            </p>
+            <div class="sfx-feature-pill-row">
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Music Start, End &amp; Change Modes</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> 14 Transition Styles (Cinematic Rise, Smooth Fade In, Beat Entry, etc.)</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> S-Curve, Exponential, Linear, Log Fade Geometries</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Audition Transition &amp; Apply to Selected Clip</span>
+            </div>
+          </div>
+
+          <div class="sfx-screenshot-grid-1">
+            <div class="sfx-screenshot-card" data-lightbox-idx="5">
+              <div class="sfx-screenshot-img-wrap">
+                <img src="assets/images/sfx-bgm-flow-transitions.png" alt="BGM Flow Background Music Transitions" loading="lazy" />
+                <div class="sfx-screenshot-zoom-overlay">
+                  <span class="sfx-screenshot-zoom-badge">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    Click to view fullscreen
+                  </span>
+                </div>
+              </div>
+              <div class="sfx-screenshot-meta">
+                <div class="sfx-screenshot-badge-row">
+                  <span class="sfx-screenshot-badge">Screenshot 06 · BGM Flow</span>
+                  <span class="sfx-screenshot-num">6 of 10</span>
+                </div>
+                <h4 class="sfx-screenshot-card-title">BGM Flow Transitions &amp; Parameter Controls</h4>
+                <p class="sfx-screenshot-card-desc">
+                  Interface showing Music Start presets with 5 available styles (Smooth Fade In, Cinematic Rise, Beat Entry, Soft Intro, Volume Ramp). Transition parameters include real-time sliders for Fade Duration (2.5s), Target Volume (0.0 dB), and mathematical curve selection between S-curve, Exponential, Linear, and Logarithmic.
+                </p>
+                <div class="sfx-screenshot-card-actions">
+                  <span style="font-size: 11.5px; color: #64748b;">Preset: Smooth Fade In · Mode: Music Start · Status: Ready</span>
+                  <button type="button" class="sfx-btn-open-fullscreen">Fullscreen</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── SECTION 05 — ANALYTICS ── -->
+        <section class="sfx-feature-section" id="gallery-analytics">
+          <div class="sfx-feature-header">
+            <span class="sfx-feature-kicker">SECTION 05 — ANALYTICS</span>
+            <h3 class="sfx-feature-title">Understand Your Audio Workflow</h3>
+            <p class="sfx-feature-desc">
+              Track your sound usage, timeline imports, favorites and activity through a dedicated analytics dashboard. SFX Composer operates 100% locally on your machine, collecting zero telemetry while giving you rich insights into which sound effects, categories, and styles you rely on most in your editing sessions.
+            </p>
+            <div class="sfx-feature-pill-row">
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> 100% Private On-Device Tracking</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Total Sounds Played (23 Previews)</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Timeline Placements &amp; Distinct Files Count</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> 7-Day, 30-Day, 90-Day &amp; All-Time Filters</span>
+            </div>
+          </div>
+
+          <div class="sfx-screenshot-grid-1">
+            <div class="sfx-screenshot-card" data-lightbox-idx="6">
+              <div class="sfx-screenshot-img-wrap">
+                <img src="assets/images/sfx-analytics-dashboard.png" alt="Usage Analytics Dashboard" loading="lazy" />
+                <div class="sfx-screenshot-zoom-overlay">
+                  <span class="sfx-screenshot-zoom-badge">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    Click to view fullscreen
+                  </span>
+                </div>
+              </div>
+              <div class="sfx-screenshot-meta">
+                <div class="sfx-screenshot-badge-row">
+                  <span class="sfx-screenshot-badge">Screenshot 07 · Usage Analytics</span>
+                  <span class="sfx-screenshot-num">7 of 10</span>
+                </div>
+                <h4 class="sfx-screenshot-card-title">Dedicated Workflow Analytics &amp; Activity Overview</h4>
+                <p class="sfx-screenshot-card-desc">
+                  Dedicated analytics dashboard featuring key metric cards: Total Sounds Played (23), Timeline Imports (1), Most Used Category ("downloads"), and Unique Sounds Used (13). Displays interactive Activity Overview curve graph and "Most Used Sounds" ranking with play counts, import history, and quick preview controls.
+                </p>
+                <div class="sfx-screenshot-card-actions">
+                  <span style="font-size: 11.5px; color: #64748b;">Filter: Last 30 days · Privacy: 100% Offline Local Storage</span>
+                  <button type="button" class="sfx-btn-open-fullscreen">Fullscreen</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── SECTION 06 — SCENE AI ── -->
+        <section class="sfx-feature-section" id="gallery-scene-ai">
+          <div class="sfx-feature-header">
+            <span class="sfx-feature-kicker">SECTION 06 — SCENE AI</span>
+            <h3 class="sfx-feature-title">Intelligent AI Timeline Control</h3>
+            <p class="sfx-feature-desc">
+              Analyze your active composition and help build sound design directly around your timeline. Scene AI integrates directly with Adobe Premiere Pro and After Effects via CEP, checking host readiness and local Ollama inference to inspect cuts, evaluate scene energy, and execute verified timeline commands automatically.
+            </p>
+            <div class="sfx-feature-pill-row">
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Adobe Host Connection (PPro / AE)</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Local Ollama Connection Verification</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Active Composition Cut Analysis</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> AI Timeline Command Console</span>
+            </div>
+          </div>
+
+          <div class="sfx-screenshot-grid-1">
+            <div class="sfx-screenshot-card" data-lightbox-idx="7">
+              <div class="sfx-screenshot-img-wrap">
+                <img src="assets/images/sfx-scene-ai-timeline.png" alt="Scene AI Sequence Designer" loading="lazy" />
+                <div class="sfx-screenshot-zoom-overlay">
+                  <span class="sfx-screenshot-zoom-badge">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    Click to view fullscreen
+                  </span>
+                </div>
+              </div>
+              <div class="sfx-screenshot-meta">
+                <div class="sfx-screenshot-badge-row">
+                  <span class="sfx-screenshot-badge">Screenshot 08 · Scene AI</span>
+                  <span class="sfx-screenshot-num">8 of 10</span>
+                </div>
+                <h4 class="sfx-screenshot-card-title">Scene AI Sequence Designer &amp; Timeline Control</h4>
+                <p class="sfx-screenshot-card-desc">
+                  Scene AI main interface displaying live host status badges for Adobe Host (PPro/AE) and Ollama local AI server. Features "Analyze Composition" trigger and the AI Timeline Control prompt bar ("e.g. Seek to 00:05 · Play · Find whoosh · Add impact at 00:10") with verified operations and write-operation safety approvals.
+                </p>
+                <div class="sfx-screenshot-card-actions">
+                  <span style="font-size: 11.5px; color: #64748b;">Host: PPro / AE · AI: Ollama Local · Ops: Restricted &amp; Verified</span>
+                  <button type="button" class="sfx-btn-open-fullscreen">Fullscreen</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── SECTION 07 — AUDIO TOOLS ── -->
+        <section class="sfx-feature-section" id="gallery-audio-tools">
+          <div class="sfx-feature-header">
+            <span class="sfx-feature-kicker">SECTION 07 — AUDIO TOOLS</span>
+            <h3 class="sfx-feature-title">Essential Sound Studio</h3>
+            <p class="sfx-feature-desc">
+              Fine-tune your audio with professional processing controls and waveform-based editing. The Essential Sound Studio gives editors a dedicated 3-column workstation: quick library browsing on the left, high-precision central waveform viewer with Peak and RMS meters in the middle, and professional DSP controls on the right.
+            </p>
+            <div class="sfx-feature-pill-row">
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> 3-Column Studio Workstation</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Peak (-2.4 dB) &amp; RMS (-23.0 dB) Metering</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Normalization, Gain &amp; Fades (In/Out)</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> 3-Band Parametric EQ &amp; Dynamics</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Pitch, Reverb, Width &amp; Transient Character</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> 48kHz WAV Export</span>
+            </div>
+          </div>
+
+          <div class="sfx-screenshot-grid-1">
+            <div class="sfx-screenshot-card" data-lightbox-idx="8">
+              <div class="sfx-screenshot-img-wrap">
+                <img src="assets/images/sfx-audio-tools-essential-sound.png" alt="Audio Tools Essential Sound Studio" loading="lazy" />
+                <div class="sfx-screenshot-zoom-overlay">
+                  <span class="sfx-screenshot-zoom-badge">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    Click to view fullscreen
+                  </span>
+                </div>
+              </div>
+              <div class="sfx-screenshot-meta">
+                <div class="sfx-screenshot-badge-row">
+                  <span class="sfx-screenshot-badge">Screenshot 09 · Essential Sound Studio</span>
+                  <span class="sfx-screenshot-num">9 of 10</span>
+                </div>
+                <h4 class="sfx-screenshot-card-title">3-Column Workstation &amp; Essential Sound DSP Rack</h4>
+                <p class="sfx-screenshot-card-desc">
+                  Pro-grade workstation layout: Left sound browser filtering categories (Music, SFX, Dialogue, Ambience), Center high-resolution waveform editor (with 0:00.00 / 0:02.67 timecode, 48000 Hz, 2 ch display), and Right Essential Sound DSP rack with Peak (-2.4 dB) and RMS (-23.0 dB) meters, Gain/Normalize, Fades, EQ (Bass, High-pass, Low-pass, Presence), Dynamics Compress, and Character controls (Pitch, Reverb, Width, Transient).
+                </p>
+                <div class="sfx-screenshot-card-actions">
+                  <span style="font-size: 11.5px; color: #64748b;">Clip: 10. Whoosh Swoosh · Format: 48000 Hz 2-ch · Export: WAV</span>
+                  <button type="button" class="sfx-btn-open-fullscreen">Fullscreen</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── SECTION 08 — SETTINGS ── -->
+        <section class="sfx-feature-section" id="gallery-settings">
+          <div class="sfx-feature-header">
+            <span class="sfx-feature-kicker">SECTION 08 — SETTINGS</span>
+            <h3 class="sfx-feature-title">Customize Your Workspace</h3>
+            <p class="sfx-feature-desc">
+              Personalize your SFX Composer experience with flexible settings, library management, appearance controls and playback preferences. Configure your user profile, choose from 6 accent color themes, link multiple local sound library folders, switch between Studio Dark, Ultra Dark and Light appearances, and review diagnostics activity logs.
+            </p>
+            <div class="sfx-feature-pill-row">
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> User Profile &amp; Custom Avatar</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> 6 Accent Color Themes (Blue, Purple, Pink, Orange, Green, Silver)</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Multi-Folder Library Indexing (17,111 Sounds)</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Studio Dark, Ultra Dark &amp; Light Appearances</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Playback Volume Slider (0-100%)</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Unlocked License Information</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Diagnostics Logs &amp; Activity History</span>
+              <span class="sfx-feature-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> About SFX Composer</span>
+            </div>
+          </div>
+
+          <div class="sfx-screenshot-grid-1">
+            <div class="sfx-screenshot-card" data-lightbox-idx="9">
+              <div class="sfx-screenshot-img-wrap">
+                <img src="assets/images/sfx-settings-workspace.png" alt="Settings and Preferences Panel" loading="lazy" />
+                <div class="sfx-screenshot-zoom-overlay">
+                  <span class="sfx-screenshot-zoom-badge">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    Click to view fullscreen
+                  </span>
+                </div>
+              </div>
+              <div class="sfx-screenshot-meta">
+                <div class="sfx-screenshot-badge-row">
+                  <span class="sfx-screenshot-badge">Screenshot 10 · Workspace Preferences</span>
+                  <span class="sfx-screenshot-num">10 of 10</span>
+                </div>
+                <h4 class="sfx-screenshot-card-title">Profile, Accent Colors, Library Folders &amp; Appearance</h4>
+                <p class="sfx-screenshot-card-desc">
+                  Full settings view displaying User Profile with picture upload, 6 accent color swatches, Library Folders management with folder rescan (17,111 sounds indexed), Appearance themes selector (Studio Dark, Ultra Dark, Light), Playback preview volume slider (80%), License verification ("All features are unlocked"), Diagnostics logging, and About credits.
+                </p>
+                <div class="sfx-screenshot-card-actions">
+                  <span style="font-size: 11.5px; color: #64748b;">Theme: Ultra Dark · Library: 17,111 Indexed · Licence: All features unlocked</span>
+                  <button type="button" class="sfx-btn-open-fullscreen">Fullscreen</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </section>
+
+<!-- ── 7. FOOTER ── -->
+    <footer style="border-top: 1px solid var(--sfx-border); padding: 40px 0 20px; margin-top: 60px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 12px; color: var(--sfx-text-muted);">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <img src="assets/brand/mark-128.png" width="18" height="18" alt="" />
+        <span>&copy; 2026 SFX Composer. All rights reserved.</span>
+      </div>
+      <div>Support: <a href="mailto:visualsadusk@gmail.com" style="color: var(--sfx-accent);">visualsadusk@gmail.com</a></div>
+    </footer>
+
+  </main>
+
+  <!-- ── CUSTOMER DASHBOARD MODAL ── -->
+  <div class="sfx-modal" id="customer-dashboard-modal" role="dialog" aria-modal="true">
+    <div class="sfx-modal-backdrop" id="cdm-backdrop"></div>
+    <div class="sfx-modal-dialog" style="max-width: 680px;">
+      <div class="sfx-modal-header">
+        <h3 class="sfx-modal-title">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          Customer Dashboard &amp; My Licenses
+        </h3>
+        <button class="sfx-modal-close" id="cdm-close">&times;</button>
+      </div>
+      <div class="sfx-modal-body" style="display: flex; flex-direction: column; gap: 16px;">
+        
+        <!-- VIEW 1: SECURE EMAIL VERIFICATION (OTP / MAGIC LINK) -->
+        <div id="cdm-auth-view" style="display: block;">
+          <div style="background: var(--sfx-surface-raised); border: 1px solid var(--sfx-border); border-radius: 8px; padding: 20px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+              <div style="width: 28px; height: 28px; border-radius: 6px; background: rgba(10,132,255,0.15); border: 1px solid rgba(10,132,255,0.3); display: flex; align-items: center; justify-content: center; color: var(--sfx-accent);">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </div>
+              <h4 style="font-size: 15px; font-weight: 700; color: #fff; margin: 0;">Access Your Licenses &amp; Downloads</h4>
+            </div>
+            <p style="font-size: 12.5px; color: var(--sfx-text-muted); line-height: 1.5; margin: 0 0 16px 0;">
+              To protect your license keys from unauthorized access, please verify ownership of your registered purchase email address.
+            </p>
+
+            <!-- Recent Purchase Quick Access Banner (If verified session found) -->
+            <div id="cdm-recent-session-banner" style="display: none; background: rgba(0, 255, 102, 0.08); border: 1px solid rgba(0, 255, 102, 0.25); border-radius: 6px; padding: 12px; margin-bottom: 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div>
+                  <span style="color: var(--sfx-positive); font-weight: 700; font-size: 12px;">✓ Verified Purchase on this device:</span>
+                  <strong id="cdm-recent-session-email" style="color: #fff; font-size: 12px; margin-left: 4px;"></strong>
+                </div>
+                <button type="button" id="cdm-btn-instant-unlock" class="sfx-site-btn-primary" style="height: 28px; padding: 0 12px; font-size: 11px;">
+                  Open My Dashboard
+                </button>
+              </div>
+            </div>
+
+            <!-- Email Form (Step 1) -->
+            <form id="cdm-form-request-otp" style="display: flex; flex-direction: column; gap: 10px;">
+              <label style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sfx-text-muted); font-weight: 600;">Registered Email Address</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="email" id="cdm-email-input" class="sfx-input" placeholder="editor@studio.com" style="flex: 1; height: 38px; padding: 0 12px; font-size: 13px;" required />
+                <button type="submit" id="cdm-btn-send-otp" class="sfx-site-btn-primary" style="height: 38px; padding: 0 18px; font-size: 12.5px; font-weight: 700; white-space: nowrap;">
+                  Send Code
+                </button>
+              </div>
+            </form>
+
+            <!-- OTP Code Form (Step 2 - Revealed when code requested) -->
+            <div id="cdm-otp-step" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--sfx-border);">
+              <label style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sfx-accent); font-weight: 700; display: block; margin-bottom: 6px;">Enter 6-Digit Email Code</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="cdm-otp-input" class="sfx-input" placeholder="123456" maxlength="6" style="flex: 1; height: 38px; padding: 0 12px; font-size: 16px; font-family: monospace; letter-spacing: 0.2em; text-align: center;" />
+                <button type="button" id="cdm-btn-verify-otp" class="sfx-site-btn-primary" style="height: 38px; padding: 0 18px; font-size: 12.5px; font-weight: 700; white-space: nowrap;">
+                  Verify &amp; Access
+                </button>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                <button type="button" id="cdm-btn-resend-otp" class="sfx-button sfx-button--quiet" style="font-size: 11px; color: var(--sfx-text-muted); border: none; padding: 0; cursor: pointer;">
+                  Didn't receive code? Resend
+                </button>
+                <button type="button" id="cdm-btn-change-email" class="sfx-button sfx-button--quiet" style="font-size: 11px; color: var(--sfx-text-muted); border: none; padding: 0; cursor: pointer;">
+                  Change Email
+                </button>
+              </div>
+            </div>
+
+            <div id="cdm-auth-status" style="display: none; margin-top: 12px; padding: 10px 12px; border-radius: 6px; font-size: 12px;"></div>
+          </div>
+        </div>
+
+        <!-- VIEW 2: VERIFIED DASHBOARD & MY LICENSES -->
+        <div id="cdm-dashboard-view" style="display: none; flex-direction: column; gap: 14px;">
+          <!-- Account Status Header -->
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--sfx-surface-raised); border: 1px solid var(--sfx-border); border-radius: 6px;">
+            <div>
+              <span style="font-size: 11px; color: var(--sfx-text-muted);">Verified Customer: </span>
+              <strong id="cdm-auth-email-display" style="color: #fff; font-size: 13px;"></strong>
+            </div>
+            <button type="button" id="cdm-btn-signout" class="sfx-button sfx-button--quiet" style="height: 26px; padding: 0 10px; font-size: 11px; border: 1px solid var(--sfx-border);">
+              Switch Email / Sign Out
+            </button>
+          </div>
+
+          <!-- Dedicated Section: My Licenses -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+            <h4 style="font-size: 14px; font-weight: 700; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              My Licenses
+            </h4>
+            <span style="font-size: 11px; color: var(--sfx-accent); font-weight: 600;">AES-256-GCM Secured</span>
+          </div>
+
+          <!-- Dynamic Licenses Container -->
+          <div id="cdm-licenses-container">
+            <!-- Rendered by JS -->
+          </div>
+
+          <!-- Direct Downloads Card -->
+          <div class="sfx-dashboard-card">
+            <div style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px;">Download Plugin Packages</div>
+            <div style="font-size: 11.5px; color: var(--sfx-text-muted); margin-bottom: 12px;">Compatible with Premiere Pro &amp; After Effects CC 2021 – 2026 (Windows &amp; macOS Apple Silicon / Intel)</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <a href="/downloads/sfx-composer-pro-v2.4.0.zxp" download class="sfx-button sfx-button--quiet" style="height: 38px; border: 1px solid var(--sfx-border); justify-content: center; font-size: 12px; color: #fff; background: #121418;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                ZXP Installer (.zxp)
+              </a>
+              <a href="/downloads/sfx-composer-pro-v2.4.0.zip" download class="sfx-button sfx-button--quiet" style="height: 38px; border: 1px solid var(--sfx-border); justify-content: center; font-size: 12px; color: #fff; background: #121418;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Manual CEP ZIP (.zip)
+              </a>
+            </div>
+          </div>
+
+          <!-- Purchase History Table -->
+          <div class="sfx-dashboard-card">
+            <div style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 10px;">Verified Payment Orders</div>
+            <div style="max-height: 140px; overflow-y: auto;">
+              <table class="sfx-data-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Payment ID</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="cdm-orders-tbody">
+                  <tr><td colspan="5" style="text-align: center; color: var(--sfx-text-muted);">Loading payment orders...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Quick Setup Guide -->
+          <div style="background: #09090c; border: 1px solid var(--sfx-border); border-radius: 6px; padding: 12px; font-size: 11.5px; color: var(--sfx-text-muted); line-height: 1.6;">
+            <strong style="color: #fff; display: block; margin-bottom: 4px;">Activation in Adobe Premiere Pro / After Effects:</strong>
+            1. Install package using ZXP Installer or Anastasiy's Extension Manager.<br/>
+            2. Open Premiere Pro or After Effects &gt; <strong>Window &gt; Extensions &gt; SFX Composer</strong>.<br/>
+            3. On first launch, enter your registered email and your license key from above, then click <strong>Activate License</strong>.<br/>
+            4. Once activated, your machine is bound and you can compose sound effects offline without restrictions.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CHECKOUT MODAL ── -->
+  <div class="sfx-modal" id="checkout-modal" role="dialog" aria-modal="true">
+    <div class="sfx-modal-backdrop" id="checkout-backdrop"></div>
+    <div class="sfx-modal-dialog">
+      <div class="sfx-modal-header">
+        <h3 class="sfx-modal-title">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+          Get SFX Composer Pro
+        </h3>
+        <button class="sfx-modal-close" id="checkout-close">&times;</button>
+      </div>
+      <div class="sfx-modal-body">
+        <!-- Step 1: Purchase Form -->
+        <form id="checkout-form" style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="background: #141f2e; border: 1px solid rgba(10, 132, 255, 0.3); border-radius: var(--sfx-radius); padding: 14px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 700; font-size: 14px;" id="checkout-tier-name">SFX Composer Pro + Starter SFX Pack</div>
+              <div style="font-size: 11.5px; color: var(--sfx-text-muted);">Lifetime License for Premiere Pro &amp; After Effects</div>
+            </div>
+            <strong style="font-size: 22px; color: var(--sfx-accent);" id="checkout-total-price">₹199</strong>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="checkout-email" style="font-size: 12px; font-weight: 600; color: var(--sfx-text);">Customer Email Address <span style="color: var(--sfx-accent); font-weight: 400;">(License key &amp; downloads delivered here)</span>:</label>
+            <input type="email" id="checkout-email" class="sfx-input" placeholder="editor@studio.com" style="height: 38px; padding: 0 12px; font-size: 13px;" required />
+          </div>
+
+          <div style="font-size: 11.5px; color: var(--sfx-text-muted); line-height: 1.5;">
+            🔒 256-bit encrypted checkout via Razorpay. Automatic server-side verification and instant license delivery.
+          </div>
+
+          <div id="checkout-error-msg" style="display: none; background: rgba(255, 69, 58, 0.15); border: 1px solid var(--sfx-critical); color: #ff8580; padding: 8px 12px; border-radius: 6px; font-size: 12px;"></div>
+
+          <button type="submit" class="sfx-site-btn-primary" id="checkout-submit-btn" style="padding: 13px; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+            Pay ₹199 via Razorpay
+          </button>
+        </form>
+
+        <!-- Step 2: Verified Success Screen -->
+        <div id="checkout-success" style="display: none; text-align: left; padding: 4px 0;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(48, 209, 88, 0.15); border: 2px solid var(--sfx-positive); display: flex; align-items: center; justify-content: center; color: var(--sfx-positive); flex-shrink: 0;">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <div>
+              <h4 style="font-size: 17px; font-weight: 700; color: #ffffff; margin: 0;">Payment Verified &amp; License Issued!</h4>
+              <div style="font-size: 12px; color: var(--sfx-text-muted);">Thank you! Your official lifetime license is ready.</div>
+            </div>
+          </div>
+
+          <div style="background: #000000; border: 1px solid var(--sfx-accent); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sfx-accent); font-weight: 700;">Lifetime License Key</span>
+              <span class="sfx-badge-status active">Active Pro</span>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+              <code id="issued-license-key-val" style="font-family: var(--sfx-font-mono); font-size: 18px; font-weight: 800; color: #ffffff; letter-spacing: 0.08em;">SFX-XXXX-XXXX-XXXX-XXXX</code>
+              <button type="button" id="btn-copy-license-key" class="sfx-button sfx-button--quiet" style="height: 30px; font-size: 11px; padding: 0 10px; border: 1px solid var(--sfx-border); color: #fff;">
+                Copy Key
+              </button>
+            </div>
+          </div>
+
+          <div style="background: var(--sfx-surface-raised); border: 1px solid var(--sfx-border); border-radius: 8px; padding: 14px; margin-bottom: 16px; font-size: 12px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--sfx-text-muted);">Registered Email:</span>
+              <strong id="success-email-display" style="color: #fff;"></strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--sfx-text-muted);">Payment ID:</span>
+              <code id="success-payment-id-display" style="color: #fff; font-size: 11px;"></code>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--sfx-text-muted);">Email Delivery:</span>
+              <span id="success-email-status-display" style="color: var(--sfx-accent);">Checking...</span>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-bottom: 14px;">
+            <a href="/downloads/sfx-composer-pro-v2.4.0.zxp" download class="sfx-site-btn-primary" style="flex: 1; text-align: center; padding: 10px; font-size: 12.5px;">
+              Download ZXP Installer
+            </a>
+            <a href="/downloads/sfx-composer-pro-v2.4.0.zip" download class="sfx-site-btn-secondary" style="flex: 1; text-align: center; padding: 10px; font-size: 12.5px;">
+              Download CEP ZIP
+            </a>
+          </div>
+
+          <button type="button" id="btn-go-to-dashboard" class="sfx-button sfx-button--quiet" style="width: 100%; height: 34px; font-size: 12px; border: 1px solid var(--sfx-border); justify-content: center; color: #fff;">
+            Open Customer Dashboard &amp; Installation Guide &rarr;
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TUTORIAL VIDEO PREVIEW MODAL ── -->
+  <div class="sfx-modal" id="tutorial-video-modal" role="dialog" aria-modal="true">
+    <div class="sfx-modal-backdrop" id="tvm-backdrop"></div>
+    <div class="sfx-modal-dialog" style="max-width: 720px; width: 92%;">
+      <div class="sfx-modal-header">
+        <h3 class="sfx-modal-title" id="tvm-title" style="font-size: 14px;">Tutorial Video</h3>
+        <button class="sfx-modal-close" id="tvm-close">&times;</button>
+      </div>
+      <div class="sfx-modal-body" style="padding: 16px;">
+        <div id="tvm-player-wrapper" style="background: #000; border-radius: 6px; border: 1px solid var(--sfx-border); aspect-ratio: 16 / 9; overflow: hidden; margin-bottom: 12px; display: flex; align-items: center; justify-content: center;">
+          <!-- YouTube Iframe Embed Injected Here -->
+        </div>
+        <p id="tvm-desc" style="font-size: 13px; color: var(--sfx-text-muted); line-height: 1.5;"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="sfx-toast"></div>
+
+  <!-- Scripts -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/audio-engine.js"></script>
+  <script src="js/browser-demo-adapter.js"></script>
+  <script src="js/plugin-controller.js"></script>
+  <script src="js/payment-service.js"></script>
+  <script src="js/content-service.js"></script>
+  <script src="js/main.js"></script>
+
+
+  <!-- ══════════════════════════════════════════════════════════════
+       FULLSCREEN SCREENSHOT VIEWER (LIGHTBOX MODAL)
+       ══════════════════════════════════════════════════════════════ -->
+  <div class="sfx-lightbox-modal" id="sfx-lightbox-modal" role="dialog" aria-modal="true" aria-label="Fullscreen Screenshot Lightbox">
+    <div class="sfx-lightbox-dialog" id="sfx-lightbox-dialog">
+      <div class="sfx-lightbox-topbar">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="sfx-lightbox-counter-badge" id="sfx-lightbox-counter">Screenshot 1 of 10</span>
+          <span class="sfx-lightbox-keyhint">Use ← and → arrow keys to navigate · Esc to close</span>
+        </div>
+        <button type="button" class="sfx-lightbox-close-btn" id="sfx-lightbox-close" title="Close viewer (Esc)" aria-label="Close viewer">✕</button>
+      </div>
+
+      <div class="sfx-lightbox-stage" id="sfx-lightbox-stage">
+        <button type="button" class="sfx-lightbox-nav-btn sfx-lightbox-nav-prev" id="sfx-lightbox-prev" title="Previous screenshot (←)" aria-label="Previous screenshot">‹</button>
+        <img src="assets/images/sfx-overview-main.png" alt="SFX Composer Screenshot" class="sfx-lightbox-img" id="sfx-lightbox-img" />
+        <button type="button" class="sfx-lightbox-nav-btn sfx-lightbox-nav-next" id="sfx-lightbox-next" title="Next screenshot (→)" aria-label="Next screenshot">›</button>
+      </div>
+
+      <div class="sfx-lightbox-caption">
+        <h4 class="sfx-lightbox-caption-title" id="sfx-lightbox-title">Main Production Interface &amp; Waveform Trimmer</h4>
+        <p class="sfx-lightbox-caption-desc" id="sfx-lightbox-desc">Primary desktop interface showcasing the 17,111-sound categorized folder tree...</p>
+      </div>
+    </div>
+  </div>
+
+
+
+<!-- ══════════════════════════════════════════════════════════════
+       FULLSCREEN SCREENSHOT VIEWER (LIGHTBOX MODAL)
+       ══════════════════════════════════════════════════════════════ -->
+  <div class="sfx-lightbox-modal" id="sfx-lightbox-modal" role="dialog" aria-modal="true" aria-label="Fullscreen Screenshot Lightbox">
+    <div class="sfx-lightbox-dialog" id="sfx-lightbox-dialog">
+      <div class="sfx-lightbox-topbar">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="sfx-lightbox-counter-badge" id="sfx-lightbox-counter">Screenshot 1 of 10</span>
+          <span class="sfx-lightbox-keyhint">Use ← and → arrow keys to navigate · Esc to close</span>
+        </div>
+        <button type="button" class="sfx-lightbox-close-btn" id="sfx-lightbox-close" title="Close viewer (Esc)" aria-label="Close viewer">✕</button>
+      </div>
+
+      <div class="sfx-lightbox-stage" id="sfx-lightbox-stage">
+        <button type="button" class="sfx-lightbox-nav-btn sfx-lightbox-nav-prev" id="sfx-lightbox-prev" title="Previous screenshot (←)" aria-label="Previous screenshot">‹</button>
+        <img src="assets/images/sfx-overview-main.png" alt="SFX Composer Screenshot" class="sfx-lightbox-img" id="sfx-lightbox-img" />
+        <button type="button" class="sfx-lightbox-nav-btn sfx-lightbox-nav-next" id="sfx-lightbox-next" title="Next screenshot (→)" aria-label="Next screenshot">›</button>
+      </div>
+
+      <div class="sfx-lightbox-caption">
+        <h4 class="sfx-lightbox-caption-title" id="sfx-lightbox-title">Main Production Interface &amp; Waveform Trimmer</h4>
+        <p class="sfx-lightbox-caption-desc" id="sfx-lightbox-desc">Primary desktop interface showcasing the 17,111-sound categorized folder tree...</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

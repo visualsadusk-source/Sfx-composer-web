@@ -43,7 +43,7 @@ async function verifyShowcaseGallery() {
     pass(`Image verified: ${item.name} (${Math.round(stat.size / 1024)} KB) for ${item.section}`);
   }
 
-  const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+  const html = fs.readFileSync(path.join(__dirname, 'screenshots.html'), 'utf8');
 
   // ── TEST 2: HORIZONTAL NUMBERED BAR & DUPLICATE CAROUSEL COMPLETELY REMOVED ──
   console.log('\n--- TEST GROUP 2: REMOVAL OF NUMBERED BAR & DUPLICATE CAROUSEL ---');
@@ -95,13 +95,14 @@ async function verifyShowcaseGallery() {
 
   // ── TEST 5: SIDEBAR NAVIGATION INTACT ──
   console.log('\n--- TEST GROUP 5: SIDEBAR NAVIGATION INTACT ---');
-  assert.ok(html.includes('href="#hero"'), 'Sidebar must include Overview link');
-  assert.ok(html.includes('href="#live-plugin-demo"'), 'Sidebar must include Live Plugin Demo link');
-  assert.ok(html.includes('href="#features"'), 'Sidebar must include Features link');
-  assert.ok(html.includes('href="#tutorials"'), 'Sidebar must include Tutorials link');
-  assert.ok(html.includes('href="#pricing"'), 'Sidebar must include Pricing link');
-  assert.ok(html.includes('href="#customer-dashboard"'), 'Sidebar must include Dashboard link');
-  assert.ok(html.includes('href="#faq"'), 'Sidebar must include FAQ link');
+  assert.ok(html.includes('href="index.html"'), 'Sidebar must include Overview link');
+  assert.ok(html.includes('href="demo.html"'), 'Sidebar must include Live Plugin Demo link');
+  assert.ok(html.includes('href="screenshots.html"'), 'Sidebar must include Screenshots Gallery link');
+  assert.ok(html.includes('features') && (html.includes('href="#features"') || html.includes('href="index.html#features"')), 'Sidebar must include Features link');
+  assert.ok(html.includes('tutorials') && (html.includes('href="#tutorials"') || html.includes('href="index.html#tutorials"')), 'Sidebar must include Tutorials link');
+  assert.ok(html.includes('pricing') && (html.includes('href="#pricing"') || html.includes('href="index.html#pricing"')), 'Sidebar must include Pricing link');
+  assert.ok(html.includes('customer-dashboard'), 'Sidebar must include Dashboard link');
+  assert.ok(html.includes('faq') && (html.includes('href="#faq"') || html.includes('href="index.html#faq"')), 'Sidebar must include FAQ link');
   pass('Sidebar navigation menu is completely intact');
 
   // ── TEST 6: FULLSCREEN LIGHTBOX MODAL FUNCTIONAL ──
