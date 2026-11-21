@@ -123,7 +123,7 @@
     <!-- ── 1. HERO SECTION ── -->
     <section class="sfx-site-hero" id="hero">
       <div class="sfx-site-hero-badge">
-        <span>⚡ SFX Composer v1.2 — Premiere Pro &amp; After Effects Audio Toolkit</span>
+        <span>⚡ SFX Composer v2.2.0 — Premiere Pro &amp; After Effects Audio Toolkit</span>
       </div>
 
       <h1 class="sfx-site-hero-headline">
@@ -156,37 +156,102 @@
       </div>
     </section>
 
-    <!-- ── 2. THE EXACT SFX COMPOSER PLUGIN DEMO (CENTERPIECE) ── -->
-        <section class="sfx-site-section" id="live-plugin-demo" style="padding-top: 10px;">
+    <!-- ── 2. THE ALL-NEW SFX COMPOSER v2.2.0 DEMO & STUDIO SHOWCASE ── -->
+    <section class="sfx-site-section" id="live-plugin-demo" style="padding-top: 10px;">
       <div class="sfx-site-sec-head">
-        <span class="sfx-site-kicker">Authentic Desktop Extension</span>
-        <h2 class="sfx-site-title">Interactive SFX Composer Plugin</h2>
+        <span class="sfx-site-kicker">Redesigned Desktop Extension • v2.2.0</span>
+        <h2 class="sfx-site-title">Experience the All-New SFX Composer</h2>
         <p class="sfx-site-desc">
-          Experience the actual SFX Composer CEP interface directly inside your browser. Audition lossless sound effects, adjust volume, test non-destructive In/Out trimming, and explore the AI Sound Designer, Essential Sound Studio, Browser Companion, and Analytics.
+          Explore the latest, redesigned SFX Composer application interface directly in your browser. Audition lossless sounds, test non-destructive In/Out trimming, background music transitions with BGM Flow, local AI sound recommendations, and seamless Premiere Pro &amp; After Effects timeline integration.
         </p>
       </div>
 
-      <!-- Host Application Frame (Adobe CEP Environment) -->
-      <div class="sfx-plugin-container">
-        <!-- Titlebar -->
+      <!-- Module Showcase & Mode Selector -->
+      <div class="sfx-demo-showcase-bar">
+        <div class="sfx-demo-top-controls">
+          <div class="sfx-demo-view-toggle">
+            <button type="button" class="sfx-demo-view-btn is-active" id="btn-view-live" title="Interact directly with working application controls">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <span>Interactive Live App</span>
+            </button>
+            <button type="button" class="sfx-demo-view-btn" id="btn-view-tour" title="Inspect high-resolution retina application screenshots">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span>Studio Screenshot Tour</span>
+            </button>
+          </div>
+
+          <div style="font-size: 11.5px; color: var(--sfx-text-muted); display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--sfx-positive); box-shadow: 0 0 6px rgba(48,209,88,0.6);"></span>
+            <span>Web Audio Engine Active • 17,111 Sounds Indexed</span>
+          </div>
+        </div>
+
+        <!-- Quick Module Jump Chips -->
+        <div class="sfx-demo-chip-group" role="tablist" aria-label="SFX Composer Modules">
+          <button type="button" class="sfx-demo-chip is-active" data-module="library" title="Browse, audition and trim sound library">
+            <span>🎧 SFX Library (17K+)</span>
+          </button>
+          <button type="button" class="sfx-demo-chip" data-module="bgm" title="Background music transitions, beat sync and auto EQ">
+            <span>🎵 BGM Flow &amp; Beat Sync</span>
+          </button>
+          <button type="button" class="sfx-demo-chip" data-module="ai" title="AI SFX Assistant powered by local Ollama &amp; Cloud LLMs">
+            <span>✨ AI SFX Assistant</span>
+          </button>
+          <button type="button" class="sfx-demo-chip" data-module="audio" title="Essential Sound Studio and 3-panel audio workstation">
+            <span>🎛️ Audio Tools Studio</span>
+          </button>
+          <button type="button" class="sfx-demo-chip" data-module="browser" title="In-panel browser for royalty-free sound effects">
+            <span>🌐 Built-in Browser</span>
+          </button>
+          <button type="button" class="sfx-demo-chip" data-module="scene" title="Visual cut analysis and AI timeline control">
+            <span>🎬 Scene AI</span>
+          </button>
+          <button type="button" class="sfx-demo-chip" data-module="analytics" title="100% private local usage analytics">
+            <span>📊 Usage Analytics</span>
+          </button>
+          <button type="button" class="sfx-demo-chip" data-module="host" title="Dual host support for Premiere Pro and After Effects">
+            <span>🎞️ Premiere &amp; AE Sync</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── VIEW 1: LIVE INTERACTIVE APPLICATION FRAME ── -->
+      <div class="sfx-plugin-container" id="sfx-live-container">
+        <!-- Host Titlebar -->
         <div class="sfx-host-titlebar">
           <div class="sfx-host-dots">
             <span class="sfx-host-dot sfx-hd-red"></span>
             <span class="sfx-host-dot sfx-hd-yellow"></span>
             <span class="sfx-host-dot sfx-hd-green"></span>
           </div>
+
           <div class="sfx-host-title">
             SFX Composer — Window &gt; Extensions &gt; SFX Composer
           </div>
-          <div class="sfx-host-env-pill">
-            ● Premiere Pro CC 2024 • Sequence: Epic_Teaser_Cut_v04
+
+          <!-- Interactive Dual-Host Switcher -->
+          <div class="sfx-host-switcher" role="radiogroup" aria-label="Host application">
+            <button type="button" class="sfx-host-btn is-active" id="btn-host-ppro" title="Simulate Adobe Premiere Pro environment">
+              <span class="sfx-host-badge sfx-host-badge--pr">Pr</span>
+              <span>Premiere Pro CC 2024</span>
+            </button>
+            <button type="button" class="sfx-host-btn" id="btn-host-ae" title="Simulate Adobe After Effects environment">
+              <span class="sfx-host-badge sfx-host-badge--ae">Ae</span>
+              <span>After Effects CC 2024</span>
+            </button>
           </div>
+
+          <!-- Dynamic Active Sequence/Comp Pill -->
+          <div class="sfx-host-env-pill" id="sfx-host-env-pill">
+            ● Sequence: angela bathroom • Playhead: 01:19:496 @ 23.976 fps
+          </div>
+
           <button type="button" class="sfx-button sfx-button--primary sfx-demo-buy-btn sfx-buy-trigger" style="height: 24px; padding: 0 10px; font-size: 11px; margin-left: 8px; font-weight: 600; text-decoration: none;">
-            Purchase Full Version (₹199)
+            Unlock Pro (₹199)
           </button>
         </div>
 
-        <!-- PLUGIN SHELL (EXACT CODEBASE REUSE) -->
+        <!-- PLUGIN SHELL -->
         <div class="sfx-plugin-viewport">
           <div class="sfx-shell">
 
@@ -194,27 +259,31 @@
             <div class="sfx-shell__header">
               <img src="assets/brand/mark-128.png" alt="Logo" class="sfx-shell__mark" />
               <h1 class="sfx-shell__title">SFX Composer</h1>
-              <span class="sfx-badge">v2.4.0</span>
+              <span class="sfx-badge">v2.2.0</span>
 
-              <!-- Authentic Header Menu Toolbar (Browser, AI SFX, Analytics, Scene AI, Audio Tools) -->
+              <!-- Authentic Header Menu Toolbar -->
               <div id="sfx-header-menu" role="toolbar" aria-label="SFX Composer tools">
                 <button type="button" class="sfx-hm__btn" data-tool="browser" title="Built-in browser, downloads and import" aria-pressed="false">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>
                   <span>Browser</span>
                 </button>
-                <button type="button" class="sfx-hm__btn" data-tool="ai" title="AI SFX Assistant (local AI)" aria-pressed="false">
+                <button type="button" class="sfx-hm__btn" data-tool="ai" title="AI SFX Assistant (local Ollama / Cloud)" aria-pressed="false">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"/><path d="M19 3l.6 1.7L21 5.3l-1.4.6L19 7.6l-.6-1.7L17 5.3l1.4-.6L19 3z"/></svg>
                   <span>AI SFX</span>
                 </button>
-                <button type="button" class="sfx-hm__btn" data-tool="analytics" title="Usage analytics (local only)" aria-pressed="false">
+                <button type="button" class="sfx-hm__btn" data-tool="bgm" title="BGM Flow: Background music start, end and change transitions" aria-pressed="false">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                  <span>BGM Flow</span>
+                </button>
+                <button type="button" class="sfx-hm__btn" data-tool="analytics" title="Usage analytics (100% local storage)" aria-pressed="false">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 17V9M12 17v-6M16 17v-3"/></svg>
                   <span>Analytics</span>
                 </button>
-                <button type="button" class="sfx-hm__btn" data-tool="scene" title="Local Scene Sound Designer" aria-pressed="false">
+                <button type="button" class="sfx-hm__btn" data-tool="scene" title="Scene AI: Visual Transition Sound Placement" aria-pressed="false">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 12h18"/></svg>
                   <span>Scene AI</span>
                 </button>
-                <button type="button" class="sfx-hm__btn" data-tool="audio" title="Trim, fade, normalize, volume (non-destructive)" aria-pressed="false">
+                <button type="button" class="sfx-hm__btn" data-tool="audio" title="Essential Sound Studio: Trim, fade, normalize, EQ" aria-pressed="false">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 12h2l2-6 3 12 3-9 2 3h6"/></svg>
                   <span>Audio Tools</span>
                 </button>
@@ -222,12 +291,20 @@
 
               <!-- Host Status Pill & Track Target -->
               <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
-                <select class="sfx-select sfx-select--track" id="sfx-track-target" title="Target Audio Track in Host Sequence">
+                <select class="sfx-select sfx-select--track" id="sfx-track-target" title="Target Audio Track or Layer in Host">
                   <option value="A1">Track A1</option>
                   <option value="A2">Track A2</option>
                   <option value="A3">Track A3</option>
                   <option value="A4">Track A4</option>
+                  <option value="BGM">BGM Track</option>
                 </select>
+
+                <!-- Profile Avatar -->
+                <div class="sfx-profile-avatar" id="sfx-btn-profile" title="Studio Settings &amp; Preferences">
+                  <span class="sfx-avatar-dot">AA</span>
+                  <span>aaaaaaa</span>
+                </div>
+
                 <button type="button" class="sfx-badge sfx-badge--trial sfx-buy-trigger" style="border-color: var(--sfx-accent); color: var(--sfx-accent); background: rgba(10, 132, 255, 0.1); cursor: pointer; text-decoration: none;" title="Click to purchase license">Demo Mode • Unlock Pro (₹199)</button>
               </div>
             </div>
@@ -241,56 +318,91 @@
                   <button type="button" class="sfx-cat sfx-sidebar-cat-btn sfx-cat--on" data-category="all">
                     <span class="sfx-cat__hit">
                       <span class="sfx-cat__name">All Sounds</span>
-                      <span class="sfx-cat__count">17,420</span>
+                      <span class="sfx-cat__count">17,111</span>
                     </span>
                   </button>
                   <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="favorites">
                     <span class="sfx-cat__hit">
                       <span class="sfx-cat__icon sfx-cat__icon--star">★</span>
-                      <span class="sfx-cat__name">Favorites</span>
-                      <span class="sfx-cat__count" id="sfx-fav-count">24</span>
+                      <span class="sfx-cat__name">Favourites</span>
+                      <span class="sfx-cat__count" id="sfx-fav-count">2</span>
                     </span>
                   </button>
 
                   <div class="sfx-sidebar__rule"></div>
 
-                  <div class="sfx-sidebar__heading">CATEGORIES</div>
+                  <div class="sfx-sidebar__heading" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>COLLECTIONS</span>
+                    <span style="cursor: pointer; color: var(--sfx-accent); font-weight: 700;">+</span>
+                  </div>
+                  <div style="font-size: 10px; color: var(--sfx-text-muted); padding: 2px 8px 6px;">Your own sets of sounds, from any folder.</div>
+
+                  <div class="sfx-sidebar__heading">SFX CATEGORIES</div>
                   <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="whoosh">
                     <span class="sfx-cat__hit">
-                      <span class="sfx-cat__name">Whooshes &amp; Sweeps</span>
-                      <span class="sfx-cat__count">4,120</span>
+                      <span class="sfx-cat__name">🔘 Button &amp; Hits</span>
+                      <span class="sfx-cat__count">97</span>
                     </span>
                   </button>
-                  <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="impacts">
+                  <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="whoosh">
                     <span class="sfx-cat__hit">
-                      <span class="sfx-cat__name">Cinematic Hits</span>
-                      <span class="sfx-cat__count">3,210</span>
+                      <span class="sfx-cat__name">⏱️ Countdown</span>
+                      <span class="sfx-cat__count">33</span>
+                    </span>
+                  </button>
+                  <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="whoosh">
+                    <span class="sfx-cat__hit">
+                      <span class="sfx-cat__name">👟 Foley Movements</span>
+                      <span class="sfx-cat__count">31</span>
                     </span>
                   </button>
                   <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="transitions">
                     <span class="sfx-cat__hit">
-                      <span class="sfx-cat__name">Transitions</span>
-                      <span class="sfx-cat__count">2,450</span>
+                      <span class="sfx-cat__name">⚡ Glitch &amp; Zap</span>
+                      <span class="sfx-cat__count">49</span>
                     </span>
                   </button>
                   <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="ui">
                     <span class="sfx-cat__hit">
-                      <span class="sfx-cat__name">UI &amp; Snaps</span>
-                      <span class="sfx-cat__count">1,980</span>
+                      <span class="sfx-cat__name">👤 Human Voice</span>
+                      <span class="sfx-cat__count">13</span>
                     </span>
                   </button>
-                  <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="ambience">
+                  <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="impacts">
                     <span class="sfx-cat__hit">
-                      <span class="sfx-cat__name">Ambience &amp; Drones</span>
-                      <span class="sfx-cat__count">3,820</span>
+                      <span class="sfx-cat__name">💥 Impacts &amp; Booms</span>
+                      <span class="sfx-cat__count">22</span>
                     </span>
                   </button>
                   <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="music">
                     <span class="sfx-cat__hit">
-                      <span class="sfx-cat__name">Music Beds</span>
-                      <span class="sfx-cat__count">1,840</span>
+                      <span class="sfx-cat__name">🎵 Music &amp; Beds</span>
+                      <span class="sfx-cat__count">387</span>
                     </span>
                   </button>
+                  <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="transitions">
+                    <span class="sfx-cat__hit">
+                      <span class="sfx-cat__name">🌊 Transitions &amp; Sweeps</span>
+                      <span class="sfx-cat__count">102</span>
+                    </span>
+                  </button>
+                  <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="ui">
+                    <span class="sfx-cat__hit">
+                      <span class="sfx-cat__name">⌨️ Typing &amp; Keystrokes</span>
+                      <span class="sfx-cat__count">53</span>
+                    </span>
+                  </button>
+                  <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="ambience">
+                    <span class="sfx-cat__hit">
+                      <span class="sfx-cat__name">🌫️ Ambience &amp; Drones</span>
+                      <span class="sfx-cat__count">120</span>
+                    </span>
+                  </button>
+
+                  <div style="margin-top: auto; padding: 10px 8px; border-top: 1px solid var(--sfx-border);">
+                    <div style="font-size: 10px; color: var(--sfx-text-muted); margin-bottom: 6px;">17,111 sounds indexed</div>
+                    <button type="button" class="sfx-button" style="width: 100%; height: 24px; font-size: 10.5px;">+ Folder</button>
+                  </div>
                 </div>
                 <div class="sfx-resizer"><div class="sfx-resizer__grip"></div></div>
               </div>
@@ -300,7 +412,7 @@
                 <!-- Toolbar -->
                 <div class="sfx-toolbar">
                   <div class="sfx-toolbar__search">
-                    <input type="text" class="sfx-input" id="sfx-main-search" placeholder="Search 17,420 sounds by name, tag, category..." style="width: 100%;" />
+                    <input type="text" class="sfx-input" id="sfx-main-search" placeholder="Search 17,111 sounds by name, tag, category..." style="width: 100%;" />
                   </div>
                   <div class="sfx-viewtoggle">
                     <button type="button" class="sfx-viewtoggle__button sfx-viewtoggle__button--on" id="sfx-view-list" title="List View">
@@ -315,21 +427,21 @@
                     <input type="range" id="sfx-main-gain" min="0" max="1.5" step="0.05" value="1.0" />
                     <span class="sfx-gain__value" id="sfx-main-gain-val">100%</span>
                   </div>
-                  <span class="sfx-toolbar__count" id="sfx-sounds-count" style="font-size: 11px; color: var(--sfx-text-muted);">17,420 sounds</span>
+                  <span class="sfx-toolbar__count" id="sfx-sounds-count" style="font-size: 11px; color: var(--sfx-text-muted);">17,111 sounds</span>
                 </div>
 
-                <!-- Sound List Table (Virtual List Simulation) -->
+                <!-- Sound List Table -->
                 <div class="sfx-vlist" id="sfx-vlist-container"></div>
 
-                <!-- Gallery Grid View (Toggleable) -->
+                <!-- Gallery Grid View -->
                 <div class="sfx-gallery" id="sfx-gallery-container" style="display: none;"></div>
 
                 <!-- Active Sound Trim / Waveform Preview Tray -->
                 <div class="sfx-trim" id="sfx-trim-tray">
                   <div class="sfx-trim__head">
-                    <span class="sfx-trim__name" id="sfx-trim-name">Cinematic Whoosh</span>
-                    <span class="sfx-trim__length" id="sfx-trim-length">1.40s</span>
-                    <span class="sfx-trim__hint">Non-destructive trim preview • Drag handles to set In/Out</span>
+                    <span class="sfx-trim__name" id="sfx-trim-name">_Whoosh 20</span>
+                    <span class="sfx-trim__length" id="sfx-trim-length">4.43s</span>
+                    <span class="sfx-trim__hint">Space to play · I and O to mark · Esc to close</span>
                     <button type="button" class="sfx-iconbutton sfx-trim__close" id="sfx-trim-close" title="Hide Trim Tray">✕</button>
                   </div>
                   <div class="sfx-trim__track" id="sfx-trim-track" style="height: 64px;">
@@ -345,16 +457,16 @@
                     <button type="button" class="sfx-button sfx-button--quiet sfx-trim__play" id="sfx-trim-play-btn" title="Play Selection" style="width: 28px; height: 26px; padding: 0;">
                       <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                     </button>
-                    <div class="sfx-trim__readout" id="sfx-trim-readout">In: 0.00s • Out: 1.40s (1.40s)</div>
+                    <div class="sfx-trim__readout" id="sfx-trim-readout">In: 0.00s • Out: 4.43s (4.43s)</div>
                     <div class="sfx-trim__pitch" style="display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--sfx-text-muted);">
                       <span>Pitch:</span>
                       <span class="sfx-trim__pitchvalue" id="sfx-trim-pitch-val">0 st</span>
                     </div>
-                    <button type="button" class="sfx-button sfx-button--primary sfx-trim__import" id="sfx-trim-import-btn" style="height: 26px; font-size: 11px;">
-                      + Place at Playhead (Track A1)
+                    <button type="button" class="sfx-button sfx-button--quiet" id="sfx-trim-reset-btn" style="height: 26px; font-size: 10.5px;">
+                      Reset
                     </button>
-                    <button type="button" class="sfx-button sfx-button--quiet" id="sfx-trim-open-studio-btn" style="height: 26px; font-size: 11px; margin-left: auto;">
-                      Open in Audio Tools Studio
+                    <button type="button" class="sfx-button sfx-button--primary sfx-trim__import" id="sfx-trim-import-btn" style="height: 26px; font-size: 11px; margin-left: auto;">
+                      + Add to timeline (Track A1)
                     </button>
                   </div>
                 </div>
@@ -362,9 +474,9 @@
                 <!-- Statusbar -->
                 <div class="sfx-statusbar">
                   <span class="sfx-statusbar__dot sfx-statusbar__dot--live" title="Live CEP Bridge Connection"></span>
-                  <span class="sfx-statusbar__name">Connected: Premiere Pro 2024 (v24.2) • Sequence: Epic_Teaser_Cut_v04</span>
+                  <span class="sfx-statusbar__name" id="sfx-status-host-text">Connected: Premiere Pro 2024 (v24.2) • Sequence: angela bathroom</span>
                   <span class="sfx-statusbar__muted" id="sfx-status-clip-info">Track A1 Active • Ready to insert</span>
-                  <span class="sfx-statusbar__time" id="sfx-status-timecode">Sequence Playhead: 00:01:24:08</span>
+                  <span class="sfx-statusbar__time" id="sfx-status-timecode">Sequence Playhead: 01:19:496 @ 23.976 fps</span>
                 </div>
               </div>
             </div>
@@ -384,7 +496,7 @@
               </div>
               <div class="sfx-au__header-actions">
                 <button type="button" class="sfx-button sfx-button--quiet" id="at-apply-timeline-btn" style="height: 26px; font-size: 11px;">
-                  + Insert into Premiere Sequence
+                  + Insert into Sequence
                 </button>
                 <button type="button" class="sfx-button" id="at-export-wav-btn" style="height: 26px; font-size: 11px;">
                   Export Processed WAV
@@ -405,8 +517,8 @@
               <!-- Center: Waveform, Transport, Trim -->
               <div class="sfx-au__center" style="flex: 1; display: flex; flex-direction: column; background: #000; padding: 12px; border-right: 1px solid var(--sfx-border);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <strong id="at-active-sound-name" style="font-size: 13px;">Cinematic Whoosh (1.40s)</strong>
-                  <span id="at-center-timecode" style="font-family: var(--sfx-font-mono); font-size: 11px; color: var(--sfx-accent);">00:00:00:00 / 00:00:01:40</span>
+                  <strong id="at-active-sound-name" style="font-size: 13px;">10. Whoosh Swoosh (2.67s)</strong>
+                  <span id="at-center-timecode" style="font-family: var(--sfx-font-mono); font-size: 11px; color: var(--sfx-accent);">0:00.00 / 0:02.67 · 48000 Hz · 2 ch</span>
                 </div>
 
                 <!-- Interactive Waveform Canvas -->
@@ -422,7 +534,7 @@
                   </div>
                   <div>
                     <label style="color: var(--sfx-text-muted);">Trim End:</label>
-                    <input type="range" id="at-trim-end-range" min="0" max="5" step="0.05" value="1.4" style="width: 100%; accent-color: var(--sfx-accent);" />
+                    <input type="range" id="at-trim-end-range" min="0" max="5" step="0.05" value="2.67" style="width: 100%; accent-color: var(--sfx-accent);" />
                   </div>
                 </div>
 
@@ -434,6 +546,7 @@
                   <button type="button" class="sfx-button sfx-button--quiet" id="at-transport-stop" style="height: 28px; width: 34px; padding: 0;">
                     <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>
                   </button>
+                  <span style="font-size: 11px; color: var(--sfx-text-muted); margin-left: 10px;">Peak: <strong style="color: #60a5fa;">-2.4 dB</strong> · RMS: <strong style="color: #60a5fa;">-23.0 dB</strong></span>
                   <button type="button" class="sfx-button sfx-button--quiet" id="at-ctrl-norm-btn" style="height: 28px; font-size: 11px; margin-left: auto;">
                     Normalize (-1 dBFS)
                   </button>
@@ -442,7 +555,7 @@
 
               <!-- Right: Essential Sound Category Controls -->
               <div class="sfx-au__es" style="width: 250px; background: #121214; padding: 12px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto;">
-                <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--sfx-text-muted);">Audio Category</div>
+                <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--sfx-text-muted);">Essential Sound Category</div>
                 <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                   <button type="button" class="sfx-es-cat-btn is-active" data-cat="sfx" style="flex: 1; padding: 4px 8px; font-size: 10.5px; border-radius: 4px; border: 1px solid var(--sfx-border); background: var(--sfx-accent); color: #fff;">SFX</button>
                   <button type="button" class="sfx-es-cat-btn" data-cat="music" style="flex: 1; padding: 4px 8px; font-size: 10.5px; border-radius: 4px; border: 1px solid var(--sfx-border); background: var(--sfx-surface-hover); color: var(--sfx-text);">Music</button>
@@ -511,65 +624,362 @@
               <button type="button" class="sfx-button sfx-button--quiet sfx-tool-back-btn" style="height: 26px; padding: 0 8px; font-size: 11px;">
                 &larr; Back
               </button>
-              <strong style="font-size: 12px;">AI SFX Assistant (Local AI / Cloud)</strong>
-              <span style="font-size: 10.5px; color: var(--sfx-positive); margin-left: auto;">● Ready</span>
+              <strong style="font-size: 12px;">AI SFX Assistant</strong>
+              <span style="font-size: 10.5px; color: var(--sfx-positive); margin-left: auto;">● Ollama ready (llama3.2 local)</span>
             </div>
 
             <div style="flex: 1; display: flex; flex-direction: column; padding: 14px; overflow: hidden;">
               <div id="sfx-ai-msg-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px;">
                 <div class="sfx-ai-chat-bubble sfx-ai-bubble--assistant">
                   <div class="sfx-ai-bubble-text">
-                    Welcome to SFX Composer AI! Tell me what you're editing, or describe the sonic emotion you need.
+                    Welcome to SFX Composer AI! Tell me what scene you're editing or what sound feeling you need.
                   </div>
                 </div>
                 <div class="sfx-ai-chat-bubble sfx-ai-bubble--user">
                   <div class="sfx-ai-bubble-text">
-                    I need a cinematic whoosh followed by a deep impact.
+                    Find the perfect cinematic impact sound
                   </div>
                 </div>
                 <div class="sfx-ai-chat-bubble sfx-ai-bubble--assistant">
                   <div class="sfx-ai-bubble-text">
-                    Try a rising cinematic whoosh followed by a low-frequency impact. Place the impact at the visual transition for maximum visceral punch.
+                    To find the perfect cinematic impact sound, I've analyzed your local SFX library and recommend these calibrated layers:
                   </div>
-                  <div style="display: flex; gap: 6px; margin-top: 8px;">
-                    <button class="sfx-button" onclick="window.SFX_AUDIO_ENGINE.playSample(window.SFX_AUDIO_CATALOG[0])" style="height: 24px; padding: 0 8px; font-size: 11px;">▶ Audition Whoosh</button>
-                    <button class="sfx-button" onclick="window.SFX_AUDIO_ENGINE.playSample(window.SFX_AUDIO_CATALOG[1])" style="height: 24px; padding: 0 8px; font-size: 11px;">▶ Audition Impact</button>
+
+                  <!-- Sound Recommendation Cards inside Chat -->
+                  <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;">
+                    <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--sfx-border); border-radius: 6px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between;">
+                      <div>
+                        <strong style="font-size: 11.5px; color: #fff; display: block;">Epic Cinematic Trailer Impact - 01</strong>
+                        <span style="font-size: 10px; color: var(--sfx-text-muted);">SFX monster/Epic Cinematic Trailer Impact · Heavy sub punch</span>
+                      </div>
+                      <div style="display: flex; gap: 4px;">
+                        <button class="sfx-button" onclick="window.SFX_AUDIO_ENGINE.playSample(window.SFX_AUDIO_CATALOG[1])" style="height: 24px; padding: 0 8px; font-size: 10.5px;">▶ Preview</button>
+                        <button class="sfx-button sfx-button--primary" onclick="window.SFX_PLUGIN_CONTROLLER.insertSoundToSequence('earthquake')" style="height: 24px; padding: 0 8px; font-size: 10.5px;">+ Place</button>
+                      </div>
+                    </div>
+
+                    <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--sfx-border); border-radius: 6px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between;">
+                      <div>
+                        <strong style="font-size: 11.5px; color: #fff; display: block;">Cinematic 06 Tension Riser</strong>
+                        <span style="font-size: 10px; color: var(--sfx-text-muted);">Sound Effects/Cinematic Riser · Ascending anticipation swell</span>
+                      </div>
+                      <div style="display: flex; gap: 4px;">
+                        <button class="sfx-button" onclick="window.SFX_AUDIO_ENGINE.playSample(window.SFX_AUDIO_CATALOG[2])" style="height: 24px; padding: 0 8px; font-size: 10.5px;">▶ Preview</button>
+                        <button class="sfx-button sfx-button--primary" onclick="window.SFX_PLUGIN_CONTROLLER.insertSoundToSequence('cyberriser')" style="height: 24px; padding: 0 8px; font-size: 10.5px;">+ Place</button>
+                      </div>
+                    </div>
+
+                    <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--sfx-border); border-radius: 6px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between;">
+                      <div>
+                        <strong style="font-size: 11.5px; color: #fff; display: block;">Cinematic 07 Explosive Hit</strong>
+                        <span style="font-size: 10px; color: var(--sfx-text-muted);">Sound Effects/Cinematic Riser · Dramatic explosive crack</span>
+                      </div>
+                      <div style="display: flex; gap: 4px;">
+                        <button class="sfx-button" onclick="window.SFX_AUDIO_ENGINE.playSample(window.SFX_AUDIO_CATALOG[0])" style="height: 24px; padding: 0 8px; font-size: 10.5px;">▶ Preview</button>
+                        <button class="sfx-button sfx-button--primary" onclick="window.SFX_PLUGIN_CONTROLLER.insertSoundToSequence('airlock')" style="height: 24px; padding: 0 8px; font-size: 10.5px;">+ Place</button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
               <!-- Quick Prompt Chips -->
               <div style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 6px;">
-                <button type="button" class="sfx-ai-chip-prompt" style="padding: 3px 8px; border-radius: 999px; background: var(--sfx-surface-hover); border: 1px solid var(--sfx-border); font-size: 10.5px; color: var(--sfx-text-muted); white-space: nowrap;">"I need a cinematic whoosh followed by a deep impact."</button>
-                <button type="button" class="sfx-ai-chip-prompt" style="padding: 3px 8px; border-radius: 999px; background: var(--sfx-surface-hover); border: 1px solid var(--sfx-border); font-size: 10.5px; color: var(--sfx-text-muted); white-space: nowrap;">"How do I clean up muffled dialogue?"</button>
+                <button type="button" class="sfx-ai-chip-prompt" style="padding: 3px 8px; border-radius: 999px; background: var(--sfx-surface-hover); border: 1px solid var(--sfx-border); font-size: 10.5px; color: var(--sfx-text-muted); white-space: nowrap;">"Find the perfect cinematic impact sound"</button>
                 <button type="button" class="sfx-ai-chip-prompt" style="padding: 3px 8px; border-radius: 999px; background: var(--sfx-surface-hover); border: 1px solid var(--sfx-border); font-size: 10.5px; color: var(--sfx-text-muted); white-space: nowrap;">"Suggest sound design for a fast logo reveal"</button>
+                <button type="button" class="sfx-ai-chip-prompt" style="padding: 3px 8px; border-radius: 999px; background: var(--sfx-surface-hover); border: 1px solid var(--sfx-border); font-size: 10.5px; color: var(--sfx-text-muted); white-space: nowrap;">"How do I clean up muffled dialogue?"</button>
               </div>
 
               <div style="display: flex; gap: 6px;">
-                <input type="text" class="sfx-input" id="sfx-ai-textarea" placeholder="Ask AI assistant for sound recommendations..." style="flex: 1;" />
+                <input type="text" class="sfx-input" id="sfx-ai-textarea" placeholder="Ask about SFX or your library..." style="flex: 1;" />
                 <button type="button" class="sfx-button" id="sfx-ai-send-btn" style="height: 30px; font-size: 11px;">Send</button>
               </div>
             </div>
           </div>
 
-          <!-- ── OVERLAY 3: BROWSER COMPANION ── -->
+          <!-- ── OVERLAY 3: BUILT-IN BROWSER ── -->
           <div id="sfx-browser">
             <div class="sfx-br__header">
               <button type="button" class="sfx-button sfx-button--quiet sfx-tool-back-btn" style="height: 26px; padding: 0 8px; font-size: 11px;">
                 &larr; Back
               </button>
-              <div class="sfx-br__title">Browser Companion &amp; Asset Importer</div>
-              <input type="text" class="sfx-input" id="sfx-br-search" placeholder="Search audio resources..." style="width: 220px; height: 26px; font-size: 11px; margin-left: 10px;" />
-            </div>
-            <div style="padding: 12px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
-              <div style="font-size: 11.5px; color: var(--sfx-text-muted);">
-                Browse, search, and download sound effects directly into your Premiere Pro / After Effects project without leaving the host application.
+              <div class="sfx-br__title">Built-in Browser</div>
+
+              <!-- Browser Subtabs -->
+              <div style="display: flex; gap: 4px; margin-left: 14px;">
+                <button type="button" class="sfx-button sfx-br-tab-btn is-active" data-tab="browse" style="height: 24px; padding: 0 10px; font-size: 10.5px;">Browse</button>
+                <button type="button" class="sfx-button sfx-button--quiet sfx-br-tab-btn" data-tab="downloads" style="height: 24px; padding: 0 10px; font-size: 10.5px;">Downloads (4)</button>
+                <button type="button" class="sfx-button sfx-button--quiet sfx-br-tab-btn" data-tab="import" style="height: 24px; padding: 0 10px; font-size: 10.5px;">Import</button>
               </div>
-              <div id="sfx-br-downloads-list" style="background: var(--sfx-surface-raised); border: 1px solid var(--sfx-border); border-radius: 6px;"></div>
+
+              <span style="font-size: 10px; color: var(--sfx-positive); margin-left: auto;">● Built-in browser running</span>
+            </div>
+
+            <div style="padding: 12px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
+              <!-- Tab 1: Browse Pixabay / Free Sound effects -->
+              <div id="sfx-br-view-browse" style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <input type="text" class="sfx-input" id="sfx-br-url-bar" value="https://pixabay.com/sound-effects/" style="flex: 1; font-family: var(--sfx-font-mono); font-size: 11px;" />
+                  <button type="button" class="sfx-button sfx-button--primary" style="height: 28px; font-size: 11px;">→ Go</button>
+                  <button type="button" class="sfx-button sfx-button--quiet" style="height: 28px; font-size: 11px;">+ New Tab</button>
+                </div>
+
+                <!-- Popular Tag Chips -->
+                <div style="display: flex; gap: 6px; overflow-x: auto; padding: 4px 0;">
+                  <span style="font-size: 10.5px; padding: 3px 8px; border-radius: 4px; background: rgba(255,255,255,0.06); border: 1px solid var(--sfx-border); cursor: pointer;">whoosh</span>
+                  <span style="font-size: 10.5px; padding: 3px 8px; border-radius: 4px; background: rgba(255,255,255,0.06); border: 1px solid var(--sfx-border); cursor: pointer;">riser</span>
+                  <span style="font-size: 10.5px; padding: 3px 8px; border-radius: 4px; background: rgba(255,255,255,0.06); border: 1px solid var(--sfx-border); cursor: pointer;">click</span>
+                  <span style="font-size: 10.5px; padding: 3px 8px; border-radius: 4px; background: rgba(255,255,255,0.06); border: 1px solid var(--sfx-border); cursor: pointer;">pop</span>
+                  <span style="font-size: 10.5px; padding: 3px 8px; border-radius: 4px; background: rgba(255,255,255,0.06); border: 1px solid var(--sfx-border); cursor: pointer;">funny</span>
+                  <span style="font-size: 10.5px; padding: 3px 8px; border-radius: 4px; background: rgba(255,255,255,0.06); border: 1px solid var(--sfx-border); cursor: pointer;">typing</span>
+                  <span style="font-size: 10.5px; padding: 3px 8px; border-radius: 4px; background: rgba(255,255,255,0.06); border: 1px solid var(--sfx-border); cursor: pointer;">glitch</span>
+                </div>
+
+                <div id="sfx-br-downloads-list" style="background: var(--sfx-surface-raised); border: 1px solid var(--sfx-border); border-radius: 6px;"></div>
+              </div>
+
+              <!-- Tab 2: Downloads List -->
+              <div id="sfx-br-view-downloads" style="display: none; flex-direction: column; gap: 8px;">
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--sfx-border); border-radius: 6px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between;">
+                  <div>
+                    <strong style="font-size: 12px; color: #fff;">hitslab-upbeat-happy-fun-626358.mp3</strong>
+                    <div style="font-size: 10.5px; color: var(--sfx-positive); margin-top: 2px;">Imported ✓ — Placed on A4 at 0:57.77 in "angela bathroom"</div>
+                  </div>
+                  <div style="display: flex; gap: 4px;">
+                    <button class="sfx-button" onclick="window.SFX_AUDIO_ENGINE.playSample(window.SFX_AUDIO_CATALOG[0])" style="height: 24px; padding: 0 8px; font-size: 10.5px;">▶ Preview</button>
+                    <button class="sfx-button sfx-button--primary" onclick="window.SFX_PLUGIN_CONTROLLER.insertSoundToSequence('shimmer', 'A4')" style="height: 24px; padding: 0 8px; font-size: 10.5px;">Place Again</button>
+                  </div>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--sfx-border); border-radius: 6px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between;">
+                  <div>
+                    <strong style="font-size: 12px; color: #fff;">bodleasons-keep-moving-forward-short.mp3</strong>
+                    <div style="font-size: 10.5px; color: var(--sfx-text-muted); margin-top: 2px;">1.0 MB · cdn.pixabay.com · Completed</div>
+                  </div>
+                  <div style="display: flex; gap: 4px;">
+                    <button class="sfx-button" onclick="window.SFX_AUDIO_ENGINE.playSample(window.SFX_AUDIO_CATALOG[2])" style="height: 24px; padding: 0 8px; font-size: 10.5px;">▶ Preview</button>
+                    <button class="sfx-button sfx-button--primary" onclick="window.SFX_PLUGIN_CONTROLLER.insertSoundToSequence('cyberriser', 'A4')" style="height: 24px; padding: 0 8px; font-size: 10.5px;">Import to Timeline</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab 3: Import -->
+              <div id="sfx-br-view-import" style="display: none; flex-direction: column; gap: 10px;">
+                <div style="border: 2px dashed var(--sfx-border); border-radius: 8px; padding: 24px; text-align: center;">
+                  <button type="button" class="sfx-button sfx-button--primary" style="padding: 8px 16px; font-size: 12px;">📁 Choose audio file...</button>
+                  <div style="font-size: 11px; color: var(--sfx-text-muted); margin-top: 8px;">Supports WAV, MP3, AIFF, M4A, AAC, and FLAC into Premiere Pro &amp; After Effects.</div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- ── OVERLAY 4: SCENE SOUND DESIGNER ── -->
+          <!-- ── OVERLAY 4: BGM FLOW (BACKGROUND MUSIC TRANSITIONS & BEAT SYNC) ── -->
+          <div id="sfx-bgm-flow" class="sfx-bf">
+            <div class="sfx-bf__header">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" class="sfx-button sfx-button--quiet sfx-tool-back-btn" style="height: 26px; padding: 0 8px; font-size: 11px;">
+                  &larr; Back
+                </button>
+                <strong style="font-size: 12px; color: #fff;">🎵 BGM Flow</strong>
+                <span style="font-size: 11px; color: var(--sfx-text-muted); border-left: 1px solid rgba(255,255,255,0.15); padding-left: 8px;">Background Music Transitions</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 10.5px; color: var(--sfx-positive);">● Ready (Track A4 BGM)</span>
+                <button type="button" class="sfx-button sfx-button--quiet" style="height: 24px; padding: 0 8px; font-size: 10.5px;">✦ Save Preset</button>
+              </div>
+            </div>
+
+            <div class="sfx-bf__body">
+              <!-- Mode Tabs -->
+              <div class="sfx-bf__mode-tabs" role="tablist">
+                <button type="button" class="sfx-bf__mode-btn is-active" data-bgm-mode="start">▶ Music Start</button>
+                <button type="button" class="sfx-bf__mode-btn" data-bgm-mode="end">■ Music End</button>
+                <button type="button" class="sfx-bf__mode-btn" data-bgm-mode="change">⬡ Music Change</button>
+                <button type="button" class="sfx-bf__mode-btn" data-bgm-mode="beatsync">🥁 Beat Sync</button>
+                <button type="button" class="sfx-bf__mode-btn" data-bgm-mode="autoeq">🎚️ Auto EQ</button>
+              </div>
+
+              <!-- Clip Status Card -->
+              <div class="sfx-bf__clip-card">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 9.5px; font-weight: 700; background: rgba(59,130,246,0.2); color: #60a5fa; border: 1px solid rgba(59,130,246,0.4); padding: 1px 5px; border-radius: 3px;">TRACK A4</span>
+                    <strong style="font-size: 12px; color: #fff;">Summer_Vlog_Upbeat_BGM.mp3</strong>
+                  </div>
+                  <div style="font-size: 10.5px; color: var(--sfx-text-muted); margin-top: 3px;">2:45 Duration · 124 BPM · Key: G Major · Downbeat aligned</div>
+                </div>
+                <button type="button" class="sfx-button sfx-button--quiet" style="height: 26px; font-size: 10.5px;">🔄 Sync Clip</button>
+              </div>
+
+              <!-- Mode View 1: Start Styles -->
+              <div id="bgm-view-start" class="bgm-mode-view">
+                <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: var(--sfx-text-muted); margin-bottom: 8px;">AVAILABLE START STYLES (5)</div>
+                <div class="sfx-bf__styles-grid">
+                  <div class="sfx-bf__style-card is-active" data-style="smooth-fade">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Smooth Fade In</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Natural musical entry with equal-power S-curve gain ramp</span>
+                  </div>
+                  <div class="sfx-bf__style-card" data-style="cinematic-rise">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Cinematic Rise</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Exponential volume swell with dynamic filter build into the drop</span>
+                  </div>
+                  <div class="sfx-bf__style-card" data-style="beat-entry">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Beat Entry</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Punchy transient entry hitting full volume right on the downbeat</span>
+                  </div>
+                  <div class="sfx-bf__style-card" data-style="soft-intro">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Soft Intro</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Warm low-pass filter opening smoothly; keeps music under dialogue</span>
+                  </div>
+                  <div class="sfx-bf__style-card" data-style="volume-ramp">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Volume Ramp</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Clean linear/logarithmic volume ramp to target listening level</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mode View 2: End Styles -->
+              <div id="bgm-view-end" class="bgm-mode-view" style="display: none;">
+                <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: var(--sfx-text-muted); margin-bottom: 8px;">AVAILABLE END STYLES (5)</div>
+                <div class="sfx-bf__styles-grid">
+                  <div class="sfx-bf__style-card is-active" data-style="exp-fade-out">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Exponential Fade Out</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Musical decay following human hearing curve</span>
+                  </div>
+                  <div class="sfx-bf__style-card" data-style="stinger-out">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Stinger Ring Out</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Trailing crash &amp; sub-impact finish at video cut</span>
+                  </div>
+                  <div class="sfx-bf__style-card" data-style="tape-stop">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Tape Stop Slowdown</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Pitch dive vinyl stop effect on timeline transition</span>
+                  </div>
+                  <div class="sfx-bf__style-card" data-style="reverb-tail">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Reverb Tail Spill</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Lush 3-second cathedral reverb freeze tail</span>
+                  </div>
+                  <div class="sfx-bf__style-card" data-style="sharp-cut">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Sharp Cut on Downbeat</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Precision zero-crossing cut exactly on beat 1</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mode View 3: Change Styles -->
+              <div id="bgm-view-change" class="bgm-mode-view" style="display: none;">
+                <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: var(--sfx-text-muted); margin-bottom: 8px;">BGM CHANGE / CROSSFADE STYLES (4)</div>
+                <div class="sfx-bf__styles-grid">
+                  <div class="sfx-bf__style-card is-active" data-style="crossfade">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Crossfade Blend</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Equal-power 3s crossfade between music tracks</span>
+                  </div>
+                  <div class="sfx-bf__style-card" data-style="beat-swap">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Beat Swap Transition</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Swaps music precisely on the bar with riser fill</span>
+                  </div>
+                  <div class="sfx-bf__style-card" data-style="duck-drop">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Duck &amp; Drop Swap</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Dips track 1 abruptly before explosive track 2 intro</span>
+                  </div>
+                  <div class="sfx-bf__style-card" data-style="echo-freeze">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Echo Freeze Spill</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Delay wash spills over new track entrance</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mode View 4: Beat Sync & Transient Detector -->
+              <div id="bgm-view-beatsync" class="bgm-mode-view" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <span style="font-size: 11px; font-weight: 700; color: #fff;">BEAT DETECTION &amp; TIMELINE MARKERS</span>
+                  <span style="font-size: 11px; color: #60a5fa; font-family: var(--sfx-font-mono);">124 BPM · 4/4 Time · Confidence: 98%</span>
+                </div>
+                <div style="height: 80px; background: #000; border: 1px solid var(--sfx-border); border-radius: 6px; position: relative; overflow: hidden;">
+                  <canvas id="bgm-beat-canvas" width="600" height="80" style="width: 100%; height: 100%; display: block;"></canvas>
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                  <button type="button" class="sfx-button sfx-button--quiet" id="bgm-btn-snap-beat" style="flex: 1; height: 26px; font-size: 11px;">Snap Cut to Nearest Beat</button>
+                  <button type="button" class="sfx-button sfx-button--quiet" id="bgm-btn-snap-bar" style="flex: 1; height: 26px; font-size: 11px;">Snap to Downbeat (Bar 1)</button>
+                  <button type="button" class="sfx-button sfx-button--primary" id="bgm-btn-gen-markers" style="flex: 1; height: 26px; font-size: 11px;">Generate Sequence Markers</button>
+                </div>
+              </div>
+
+              <!-- Mode View 5: Auto EQ Profiles -->
+              <div id="bgm-view-autoeq" class="bgm-mode-view" style="display: none;">
+                <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: var(--sfx-text-muted); margin-bottom: 8px;">AUTO EQ PROFILES (SPEECH &amp; MUSIC MASTERING)</div>
+                <div class="sfx-bf__styles-grid">
+                  <div class="sfx-bf__style-card is-active" data-eq="voiceover">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Voiceover Clarity</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Carves vocal presence space (1–3.5 kHz) so speech cuts through cleanly</span>
+                  </div>
+                  <div class="sfx-bf__style-card" data-eq="warm">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Warm</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Rich low-mids with smooth rounded highs, eliminating digital harshness</span>
+                  </div>
+                  <div class="sfx-bf__style-card" data-eq="balanced">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Balanced</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Subtle mastering curve with controlled bass and crystalline top end</span>
+                  </div>
+                  <div class="sfx-bf__style-card" data-eq="bright">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Bright</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Punchy modern presence with energetic high-end sizzle</span>
+                  </div>
+                  <div class="sfx-bf__style-card" data-eq="cinematic">
+                    <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Cinematic</strong>
+                    <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Epic sub-bass swell with scooped mids and expansive orchestral air</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Transition Parameters (Shared) -->
+              <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px;">
+                <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: var(--sfx-text-muted);">TRANSITION PARAMETERS</div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                  <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px;">
+                      <span style="color: var(--sfx-text-muted);">Fade Duration:</span>
+                      <strong id="bgm-val-duration" style="color: #60a5fa; font-family: var(--sfx-font-mono);">2.5s</strong>
+                    </div>
+                    <input type="range" id="bgm-slider-duration" min="0.5" max="8.0" step="0.1" value="2.5" style="width: 100%; accent-color: var(--sfx-accent);" />
+                  </div>
+
+                  <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px;">
+                      <span style="color: var(--sfx-text-muted);">Target Volume:</span>
+                      <strong id="bgm-val-volume" style="color: #60a5fa; font-family: var(--sfx-font-mono);">0.0 dB</strong>
+                    </div>
+                    <input type="range" id="bgm-slider-volume" min="-24" max="6" step="0.5" value="0" style="width: 100%; accent-color: var(--sfx-accent);" />
+                  </div>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 4px;">
+                  <span style="font-size: 11px; color: var(--sfx-text-muted);">Fade Curve:</span>
+                  <div class="sfx-bf__curve-group" style="flex: 1; max-width: 380px;">
+                    <button type="button" class="sfx-bf__curve-btn is-active" data-curve="s-curve">s-curve</button>
+                    <button type="button" class="sfx-bf__curve-btn" data-curve="exponential">exponential</button>
+                    <button type="button" class="sfx-bf__curve-btn" data-curve="linear">linear</button>
+                    <button type="button" class="sfx-bf__curve-btn" data-curve="logarithmic">logarithmic</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="sfx-bf__action-bar">
+              <button type="button" class="sfx-button" id="bgm-btn-audition" style="height: 30px; font-size: 11.5px; padding: 0 14px;">
+                ▶ Audition Transition
+              </button>
+              <button type="button" class="sfx-button sfx-button--quiet" id="bgm-btn-undo" style="height: 30px; font-size: 11.5px;">
+                ↩ Undo
+              </button>
+              <button type="button" class="sfx-button sfx-button--primary" id="bgm-btn-apply" style="height: 30px; font-size: 11.5px; padding: 0 16px; margin-left: auto;">
+                ✓ Apply to Selected Clip (Track A4)
+              </button>
+            </div>
+          </div>
+
+          <!-- ── OVERLAY 5: SCENE SOUND DESIGNER ── -->
           <div id="sfx-scene-designer" class="sfx-sd">
             <div class="sfx-sd__header">
               <button type="button" class="sfx-sd__back sfx-tool-back-btn">
@@ -578,45 +988,300 @@
               <div class="sfx-sd__title">
                 <span>Scene AI — Visual Transition Sound Placement</span>
               </div>
+              <span style="font-size: 10.5px; color: var(--sfx-positive); margin-left: auto;">● Adobe Host Linked</span>
             </div>
-            <div class="sfx-sd__body">
+            <div class="sfx-sd__body" style="padding: 14px; display: flex; flex-direction: column; gap: 12px;">
+              <div style="display: flex; gap: 10px;">
+                <div style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--sfx-border); border-radius: 6px; padding: 10px;">
+                  <span style="font-size: 10.5px; color: var(--sfx-positive);">● Adobe Host (PPro / AE)</span>
+                  <div style="font-size: 12px; font-weight: 600; margin-top: 2px;">Sequence: angela bathroom</div>
+                </div>
+                <div style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--sfx-border); border-radius: 6px; padding: 10px;">
+                  <span style="font-size: 10.5px; color: var(--sfx-positive);">● Ollama (local AI)</span>
+                  <div style="font-size: 12px; font-weight: 600; margin-top: 2px;">Model: llama3.2 · Inference Ready</div>
+                </div>
+              </div>
+
+              <!-- AI Timeline Control Prompt -->
+              <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--sfx-border); border-radius: 8px; padding: 12px;">
+                <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 4px;">AI Timeline Control</strong>
+                <div style="font-size: 10.5px; color: var(--sfx-text-muted); margin-bottom: 8px;">Commands run through verified host ops (playhead, transport, search, place audio).</div>
+                <div style="display: flex; gap: 6px;">
+                  <input type="text" class="sfx-input" id="sfx-sd-cmd-input" value="Seek to 00:05 · Play · Find whoosh · Add impact at 00:10" style="flex: 1; font-family: var(--sfx-font-mono); font-size: 11px;" />
+                  <button type="button" class="sfx-button sfx-button--primary" id="sfx-sd-cmd-run" style="height: 28px; font-size: 11px;">Run</button>
+                </div>
+                <div style="display: flex; gap: 6px; margin-top: 8px;">
+                  <button type="button" class="sfx-button sfx-button--quiet" style="height: 22px; font-size: 10px;">Playhead 0</button>
+                  <button type="button" class="sfx-button sfx-button--quiet" style="height: 22px; font-size: 10px;">Play</button>
+                  <button type="button" class="sfx-button sfx-button--quiet" style="height: 22px; font-size: 10px;">Pause</button>
+                  <button type="button" class="sfx-button sfx-button--quiet" style="height: 22px; font-size: 10px;">Inspect Sequence</button>
+                </div>
+              </div>
+
               <div class="sfx-sd__toolbar">
-                <button type="button" class="sfx-sd__btn sfx-sd__btn--primary" id="sfx-sd-analyze-btn">
-                  Analyze Active Sequence Cuts
+                <button type="button" class="sfx-sd__btn sfx-sd__btn--primary" id="sfx-sd-analyze-btn" style="width: 100%; height: 32px; font-size: 12px;">
+                  🔍 Analyze Active Sequence Cuts &amp; Place Sound Cues
                 </button>
               </div>
-              <div id="sfx-sd-status" style="font-size: 12px; color: var(--sfx-accent); margin-top: 10px;">
+
+              <div id="sfx-sd-status" style="font-size: 11.5px; color: var(--sfx-accent); padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 6px;">
                 Ready to analyze sequence keyframes and place synchronized audio whooshes and hits.
               </div>
             </div>
           </div>
 
-          <!-- ── OVERLAY 5: ANALYTICS DASHBOARD ── -->
+          <!-- ── OVERLAY 6: ANALYTICS DASHBOARD ── -->
           <div id="sfx-analytics" class="sfx-an">
             <div class="sfx-an__header">
               <button type="button" class="sfx-an__back sfx-tool-back-btn">
                 &larr; Back
               </button>
               <div class="sfx-an__title">Usage Analytics (100% Local Storage)</div>
+              <button type="button" class="sfx-button sfx-button--quiet" style="height: 24px; padding: 0 8px; font-size: 10.5px; margin-left: auto;">Clear Data</button>
             </div>
-            <div class="sfx-an__body">
-              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
-                <div style="background: var(--sfx-surface-raised); padding: 14px; border-radius: 6px; border: 1px solid var(--sfx-border);">
-                  <div style="font-size: 11px; color: var(--sfx-text-muted);">Total Auditions</div>
-                  <div id="an-stat-auditions" style="font-size: 24px; font-weight: 700; color: var(--sfx-accent);">38</div>
+            <div class="sfx-an__body" style="padding: 14px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto;">
+              <!-- 4 Stat Cards Matching Screenshot -->
+              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                <div style="background: var(--sfx-surface-raised); padding: 12px; border-radius: 6px; border: 1px solid var(--sfx-border);">
+                  <div style="font-size: 10px; color: var(--sfx-text-muted); text-transform: uppercase;">Total Sounds Played</div>
+                  <div id="an-stat-auditions" style="font-size: 22px; font-weight: 700; color: var(--sfx-accent); margin-top: 2px;">23</div>
+                  <div style="font-size: 10px; color: var(--sfx-text-muted);">Previews</div>
                 </div>
-                <div style="background: var(--sfx-surface-raised); padding: 14px; border-radius: 6px; border: 1px solid var(--sfx-border);">
-                  <div style="font-size: 11px; color: var(--sfx-text-muted);">Sequence Imports</div>
-                  <div id="an-stat-imports" style="font-size: 24px; font-weight: 700; color: var(--sfx-positive);">14</div>
+                <div style="background: var(--sfx-surface-raised); padding: 12px; border-radius: 6px; border: 1px solid var(--sfx-border);">
+                  <div style="font-size: 10px; color: var(--sfx-text-muted); text-transform: uppercase;">Timeline Imports</div>
+                  <div id="an-stat-imports" style="font-size: 22px; font-weight: 700; color: var(--sfx-positive); margin-top: 2px;">14</div>
+                  <div style="font-size: 10px; color: var(--sfx-text-muted);">Successful placements</div>
                 </div>
-                <div style="background: var(--sfx-surface-raised); padding: 14px; border-radius: 6px; border: 1px solid var(--sfx-border);">
-                  <div style="font-size: 11px; color: var(--sfx-text-muted);">Session Lifetime</div>
-                  <div id="an-stat-timelines" style="font-size: 24px; font-weight: 700; color: #fff;">Pro</div>
+                <div style="background: var(--sfx-surface-raised); padding: 12px; border-radius: 6px; border: 1px solid var(--sfx-border);">
+                  <div style="font-size: 10px; color: var(--sfx-text-muted); text-transform: uppercase;">Most Used Category</div>
+                  <div style="font-size: 16px; font-weight: 700; color: #fff; margin-top: 6px;">downloads</div>
+                  <div style="font-size: 10px; color: var(--sfx-text-muted);">By activity</div>
+                </div>
+                <div style="background: var(--sfx-surface-raised); padding: 12px; border-radius: 6px; border: 1px solid var(--sfx-border);">
+                  <div style="font-size: 10px; color: var(--sfx-text-muted); text-transform: uppercase;">Unique Sounds</div>
+                  <div id="an-stat-timelines" style="font-size: 22px; font-weight: 700; color: #7ec8ff; margin-top: 2px;">13</div>
+                  <div style="font-size: 10px; color: var(--sfx-text-muted);">Distinct files</div>
+                </div>
+              </div>
+
+              <!-- Activity Overview Canvas -->
+              <div style="background: var(--sfx-surface-raised); border: 1px solid var(--sfx-border); border-radius: 8px; padding: 12px;">
+                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--sfx-text-muted); margin-bottom: 8px;">ACTIVITY OVERVIEW</div>
+                <div style="height: 100px; width: 100%; position: relative;">
+                  <canvas id="an-chart-canvas" width="600" height="100" style="width: 100%; height: 100%; display: block;"></canvas>
+                </div>
+                <div style="display: flex; gap: 14px; font-size: 10.5px; color: var(--sfx-text-muted); margin-top: 6px;">
+                  <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 8px; height: 3px; background: #3b82f6;"></span> Previews</span>
+                  <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 8px; height: 3px; background: #a855f7;"></span> Timeline Imports</span>
                 </div>
               </div>
             </div>
           </div>
 
+          <!-- ── OVERLAY 7: SETTINGS & APPEARANCE DRAWER ── -->
+          <div id="sfx-settings-drawer">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--sfx-border); padding-bottom: 12px; margin-bottom: 14px;">
+              <strong style="font-size: 14px; color: #fff;">Studio Settings &amp; Preferences</strong>
+              <button type="button" class="sfx-button sfx-button--primary" id="btn-close-settings" style="height: 26px; padding: 0 12px; font-size: 11px;">Done</button>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div>
+                <strong style="font-size: 11.5px; color: #fff; display: block;">YOUR PROFILE</strong>
+                <div style="font-size: 10.5px; color: var(--sfx-text-muted); margin-bottom: 6px;">Your name and avatar appear in the top-right corner.</div>
+                <input type="text" class="sfx-input" value="aaaaaaa" style="max-width: 300px;" />
+              </div>
+
+              <div>
+                <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 6px;">ACCENT COLOR</strong>
+                <div style="display: flex; gap: 8px;">
+                  <span style="width: 22px; height: 22px; border-radius: 50%; background: #0a84ff; border: 2px solid #fff; cursor: pointer;"></span>
+                  <span style="width: 22px; height: 22px; border-radius: 50%; background: #bf5af2; cursor: pointer;"></span>
+                  <span style="width: 22px; height: 22px; border-radius: 50%; background: #ff375f; cursor: pointer;"></span>
+                  <span style="width: 22px; height: 22px; border-radius: 50%; background: #ff9f0a; cursor: pointer;"></span>
+                  <span style="width: 22px; height: 22px; border-radius: 50%; background: #30d158; cursor: pointer;"></span>
+                </div>
+              </div>
+
+              <div>
+                <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 6px;">APPEARANCE THEME</strong>
+                <div style="display: flex; gap: 10px;">
+                  <div style="border: 1px solid var(--sfx-border); background: #16161a; border-radius: 6px; padding: 10px; width: 140px; cursor: pointer;">
+                    <strong style="font-size: 11px; color: #fff; display: block;">Studio Dark</strong>
+                    <span style="font-size: 9.5px; color: var(--sfx-text-muted);">Matches docked Adobe panels</span>
+                  </div>
+                  <div style="border: 2px solid var(--sfx-accent); background: #0c0c0e; border-radius: 6px; padding: 10px; width: 140px; cursor: pointer;">
+                    <strong style="font-size: 11px; color: #60a5fa; display: block;">Ultra Dark</strong>
+                    <span style="font-size: 9.5px; color: var(--sfx-text-muted);">Deep contrast for audio work</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="border-top: 1px solid var(--sfx-border); padding-top: 12px; font-size: 11px; color: var(--sfx-text-muted);">
+                Installed Version: <strong>SFX Composer v2.2.0</strong> · License: <strong>Pro Unlocked</strong>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── VIEW 2: STUDIO SCREENSHOT TOUR GALLERY ── -->
+      <div class="sfx-tour-container" id="sfx-tour-container">
+        <!-- Tour Navigation Bar -->
+        <div class="sfx-tour-navbar" role="tablist">
+          <button type="button" class="sfx-tour-tab is-active" data-tour="library">🎧 SFX Library &amp; Waveform Trim</button>
+          <button type="button" class="sfx-tour-tab" data-tour="browser">🌐 Built-in Browser</button>
+          <button type="button" class="sfx-tour-tab" data-tour="downloads">📁 Downloads &amp; Timeline Placement</button>
+          <button type="button" class="sfx-tour-tab" data-tour="ai">✨ AI SFX Assistant (Ollama)</button>
+          <button type="button" class="sfx-tour-tab" data-tour="bgm">🎵 BGM Flow Transitions</button>
+          <button type="button" class="sfx-tour-tab" data-tour="analytics">📊 Local Usage Analytics</button>
+          <button type="button" class="sfx-tour-tab" data-tour="scene">🎬 Scene AI &amp; Timeline Control</button>
+          <button type="button" class="sfx-tour-tab" data-tour="audio">🎛️ Audio Tools &amp; Essential Sound</button>
+          <button type="button" class="sfx-tour-tab" data-tour="settings">⚙️ Studio Settings &amp; Themes</button>
+        </div>
+
+        <!-- Tour Viewport -->
+        <div class="sfx-tour-viewport">
+          <!-- Slide 1: Library -->
+          <div class="sfx-tour-slide is-active" id="tour-slide-library">
+            <div class="sfx-tour-slide-header">
+              <div>
+                <h3 class="sfx-tour-slide-title">Main SFX Library &amp; Non-Destructive Waveform Trim</h3>
+                <p class="sfx-tour-slide-desc">Ultra-fast SQLite in-memory catalog indexing 17,111+ sounds with sub-5ms search, category hierarchy, draggable In/Out boundary handles, real-time pitch shifting, and direct one-click sequence insertion.</p>
+              </div>
+              <button type="button" class="sfx-button sfx-button--primary sfx-jump-to-live" data-target="library" style="height: 28px; font-size: 11px;">Try in Live App →</button>
+            </div>
+            <div class="sfx-tour-image-box">
+              <img src="assets/images/sfx-library-main.png" alt="SFX Composer Main Sound Library and Trim Tray" class="sfx-tour-image" />
+            </div>
+            <div class="sfx-tour-features-grid">
+              <div class="sfx-tour-feat-item">
+                <strong>Instant Sub-5ms Search</strong>
+                <span>Searches tens of thousands of sound effects in real time across tags, categories and subfolders.</span>
+              </div>
+              <div class="sfx-tour-feat-item">
+                <strong>Non-Destructive Trimming</strong>
+                <span>Set In and Out points right inside the panel without altering your original source audio files on disk.</span>
+              </div>
+              <div class="sfx-tour-feat-item">
+                <strong>Live Sequence Playhead Sync</strong>
+                <span>Inspects active Premiere Pro sequence &amp; After Effects comp to place audio precisely on active audio tracks.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 2: Browser -->
+          <div class="sfx-tour-slide" id="tour-slide-browser">
+            <div class="sfx-tour-slide-header">
+              <div>
+                <h3 class="sfx-tour-slide-title">Docked In-Panel Royalty-Free Browser</h3>
+                <p class="sfx-tour-slide-desc">Search, audition, and download external sound effects from Pixabay and royalty-free repositories directly inside your editing workspace without ever leaving Premiere Pro or After Effects.</p>
+              </div>
+              <button type="button" class="sfx-button sfx-button--primary sfx-jump-to-live" data-target="browser" style="height: 28px; font-size: 11px;">Try in Live App →</button>
+            </div>
+            <div class="sfx-tour-image-box">
+              <img src="assets/images/builtin-browser-pixabay.png" alt="SFX Composer Built-in Browser" class="sfx-tour-image" />
+            </div>
+          </div>
+
+          <!-- Slide 3: Downloads -->
+          <div class="sfx-tour-slide" id="tour-slide-downloads">
+            <div class="sfx-tour-slide-header">
+              <div>
+                <h3 class="sfx-tour-slide-title">Browser Downloads &amp; Timeline Placement Manager</h3>
+                <p class="sfx-tour-slide-desc">Track active download queues, preview newly acquired assets, convert formats automatically, and inject sounds directly into project bins or onto the active timeline at the playhead.</p>
+              </div>
+              <button type="button" class="sfx-button sfx-button--primary sfx-jump-to-live" data-target="browser" style="height: 28px; font-size: 11px;">Try in Live App →</button>
+            </div>
+            <div class="sfx-tour-image-box">
+              <img src="assets/images/browser-downloads.png" alt="SFX Composer Browser Downloads" class="sfx-tour-image" />
+            </div>
+          </div>
+
+          <!-- Slide 4: AI SFX Assistant -->
+          <div class="sfx-tour-slide" id="tour-slide-ai">
+            <div class="sfx-tour-slide-header">
+              <div>
+                <h3 class="sfx-tour-slide-title">AI SFX Assistant (Local Ollama &amp; Cloud LLM)</h3>
+                <p class="sfx-tour-slide-desc">Describe your scene or emotion to get multi-layered sound design recipes, frequency-balanced suggestions, and one-click preview &amp; place cards that drop sounds into your active edit.</p>
+              </div>
+              <button type="button" class="sfx-button sfx-button--primary sfx-jump-to-live" data-target="ai" style="height: 28px; font-size: 11px;">Try in Live App →</button>
+            </div>
+            <div class="sfx-tour-image-box">
+              <img src="assets/images/ai-sfx-assistant.png" alt="SFX Composer AI Assistant" class="sfx-tour-image" />
+            </div>
+          </div>
+
+          <!-- Slide 5: BGM Flow -->
+          <div class="sfx-tour-slide" id="tour-slide-bgm">
+            <div class="sfx-tour-slide-header">
+              <div>
+                <h3 class="sfx-tour-slide-title">BGM Flow — Background Music Transitions &amp; Beat Sync</h3>
+                <p class="sfx-tour-slide-desc">14 professional transition styles across Music Start, Music End, and Music Change. Features real-time DSP preview, S-curve/exponential envelope sculpting, transient beat detection, and Auto EQ speech carving.</p>
+              </div>
+              <button type="button" class="sfx-button sfx-button--primary sfx-jump-to-live" data-target="bgm" style="height: 28px; font-size: 11px;">Try in Live App →</button>
+            </div>
+            <div class="sfx-tour-image-box">
+              <img src="assets/images/bgm-flow-transitions.png" alt="SFX Composer BGM Flow Transitions" class="sfx-tour-image" />
+            </div>
+          </div>
+
+          <!-- Slide 6: Analytics -->
+          <div class="sfx-tour-slide" id="tour-slide-analytics">
+            <div class="sfx-tour-slide-header">
+              <div>
+                <h3 class="sfx-tour-slide-title">100% Local Privacy-First Usage Analytics</h3>
+                <p class="sfx-tour-slide-desc">Track sound auditions, timeline imports, top categories, and activity over time without telemetry or external tracking. All data is kept 100% local on your workstation.</p>
+              </div>
+              <button type="button" class="sfx-button sfx-button--primary sfx-jump-to-live" data-target="analytics" style="height: 28px; font-size: 11px;">Try in Live App →</button>
+            </div>
+            <div class="sfx-tour-image-box">
+              <img src="assets/images/analytics-dashboard.png" alt="SFX Composer Analytics Dashboard" class="sfx-tour-image" />
+            </div>
+          </div>
+
+          <!-- Slide 7: Scene AI -->
+          <div class="sfx-tour-slide" id="tour-slide-scene">
+            <div class="sfx-tour-slide-header">
+              <div>
+                <h3 class="sfx-tour-slide-title">Scene AI Sequence Cut Designer &amp; AI Timeline Control</h3>
+                <p class="sfx-tour-slide-desc">Analyze visual cut points and camera markers across your sequence. Execute natural language timeline commands like seeking, playback, sound searching, and impact placement.</p>
+              </div>
+              <button type="button" class="sfx-button sfx-button--primary sfx-jump-to-live" data-target="scene" style="height: 28px; font-size: 11px;">Try in Live App →</button>
+            </div>
+            <div class="sfx-tour-image-box">
+              <img src="assets/images/scene-ai-designer.png" alt="SFX Composer Scene AI Sequence Designer" class="sfx-tour-image" />
+            </div>
+          </div>
+
+          <!-- Slide 8: Audio Tools -->
+          <div class="sfx-tour-slide" id="tour-slide-audio">
+            <div class="sfx-tour-slide-header">
+              <div>
+                <h3 class="sfx-tour-slide-title">Audio Tools &amp; Essential Sound Studio</h3>
+                <p class="sfx-tour-slide-desc">3-column workstation with live waveform display, Peak/RMS metering (-2.4 dB / -23.0 dB), dedicated profiles for SFX, Music, Dialogue &amp; Ambience, -1.00 dBFS normalization, parametric EQ, and 24-bit WAV export.</p>
+              </div>
+              <button type="button" class="sfx-button sfx-button--primary sfx-jump-to-live" data-target="audio" style="height: 28px; font-size: 11px;">Try in Live App →</button>
+            </div>
+            <div class="sfx-tour-image-box">
+              <img src="assets/images/audio-tools-studio.png" alt="SFX Composer Audio Tools Essential Sound Studio" class="sfx-tour-image" />
+            </div>
+          </div>
+
+          <!-- Slide 9: Settings -->
+          <div class="sfx-tour-slide" id="tour-slide-settings">
+            <div class="sfx-tour-slide-header">
+              <div>
+                <h3 class="sfx-tour-slide-title">Studio Settings, Appearance &amp; Library Indexing</h3>
+                <p class="sfx-tour-slide-desc">Switch between Studio Dark, Ultra Dark, and Light themes to match your docked Adobe layout. Customize profile accents and rescan local sound folders on demand.</p>
+              </div>
+              <button type="button" class="sfx-button sfx-button--primary sfx-jump-to-live" data-target="library" style="height: 28px; font-size: 11px;">Try in Live App →</button>
+            </div>
+            <div class="sfx-tour-image-box">
+              <img src="assets/images/settings-preferences.png" alt="SFX Composer Settings and Themes" class="sfx-tour-image" />
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -624,59 +1289,75 @@
     <!-- ── 3. FEATURES SECTION ── -->
     <section class="sfx-site-section" id="features">
       <div class="sfx-site-sec-head">
-        <span class="sfx-site-kicker">Professional Audio Toolkit</span>
-        <h2 class="sfx-site-title">Designed For High-Speed NLE Workflows</h2>
+        <span class="sfx-site-kicker">Professional Audio Toolkit • v2.2.0</span>
+        <h2 class="sfx-site-title">Engineered For Modern High-Speed NLE Workflows</h2>
         <p class="sfx-site-desc">
-          Everything video editors need to design, sculpt, and lay down sound tracks in Premiere Pro and After Effects.
+          Everything video editors need to design, sculpt, transition, and lay down sound tracks in Adobe Premiere Pro and After Effects.
         </p>
       </div>
 
       <div class="sfx-features-grid">
         <div class="sfx-feature-box">
-          <span class="sfx-badge sfx-badge--trial" style="align-self: flex-start;">Released v1.2</span>
-          <h3 style="font-size: 16px; font-weight: 600;">Essential Sound Studio</h3>
+          <span class="sfx-badge sfx-badge--trial" style="align-self: flex-start;">Released v2.2.0</span>
+          <h3 style="font-size: 16px; font-weight: 600;">17,111+ Local SFX Library &amp; 5ms Search</h3>
           <p style="font-size: 13px; color: var(--sfx-text-muted); line-height: 1.5;">
-            Dedicated processing profiles for Music, SFX, Dialogue, and Ambience. Real-time multi-band EQ, bass shaping, and auto-ducking envelopes.
+            Connect your local hard drive or bundled library. Ultra-fast in-memory indexing searches tens of thousands of sound effects in under 5 milliseconds with category hierarchy and waveform previews.
           </p>
         </div>
 
         <div class="sfx-feature-box">
-          <span class="sfx-badge sfx-badge--trial" style="align-self: flex-start;">Released v1.2</span>
-          <h3 style="font-size: 16px; font-weight: 600;">Audio Tools &amp; Waveform Trim</h3>
+          <span class="sfx-badge sfx-badge--trial" style="align-self: flex-start;">Released v2.2.0</span>
+          <h3 style="font-size: 16px; font-weight: 600;">BGM Flow &amp; Beat Detection</h3>
           <p style="font-size: 13px; color: var(--sfx-text-muted); line-height: 1.5;">
-            Non-destructive waveform editor. Set precise in/out points, smoothstep fade curves, volume boost, and export newly processed 24-bit WAVs in seconds.
+            14 background music transition styles across Music Start, End, and Change. Features transient beat detection, tempo-snapped markers, and Auto EQ curves to carve speech pockets automatically.
           </p>
         </div>
 
         <div class="sfx-feature-box">
-          <span class="sfx-badge sfx-badge--trial" style="align-self: flex-start;">Released v1.2</span>
-          <h3 style="font-size: 16px; font-weight: 600;">17K+ Local SFX Library</h3>
+          <span class="sfx-badge sfx-badge--trial" style="align-self: flex-start;">Released v2.2.0</span>
+          <h3 style="font-size: 16px; font-weight: 600;">Essential Sound Studio &amp; Audio Tools</h3>
           <p style="font-size: 13px; color: var(--sfx-text-muted); line-height: 1.5;">
-            Connect your local hard drive or bundled library. Ultra-fast SQLite in-memory indexing searches tens of thousands of sound effects in under 5 milliseconds.
+            3-panel audio workstation. Real-time multi-band biquad EQ, bass shaping, -1.00 dBFS normalization, smoothstep fade curves, and non-destructive 24-bit WAV exports.
           </p>
         </div>
 
         <div class="sfx-feature-box">
-          <span class="sfx-badge sfx-badge--trial" style="align-self: flex-start;">Released v1.2</span>
-          <h3 style="font-size: 16px; font-weight: 600;">AI SFX Assistant</h3>
+          <span class="sfx-badge sfx-badge--trial" style="align-self: flex-start;">Released v2.2.0</span>
+          <h3 style="font-size: 16px; font-weight: 600;">AI SFX Assistant (Local Ollama &amp; Cloud)</h3>
           <p style="font-size: 13px; color: var(--sfx-text-muted); line-height: 1.5;">
-            Describe the visual scene or feeling you need, and the AI suggests exact sonic combinations, frequency balancing, and optimal placement for transitions and impacts.
+            Describe the visual scene or feeling you need. Local AI analyzes your prompt and recommends optimal multi-layered sound stacks with one-click preview and timeline placement cards.
           </p>
         </div>
 
         <div class="sfx-feature-box">
-          <span class="sfx-badge" style="align-self: flex-start;">Labs / Preview</span>
-          <h3 style="font-size: 16px; font-weight: 600;">Scene Sound Designer</h3>
+          <span class="sfx-badge sfx-badge--trial" style="align-self: flex-start;">Released v2.2.0</span>
+          <h3 style="font-size: 16px; font-weight: 600;">Built-in Browser Companion</h3>
           <p style="font-size: 13px; color: var(--sfx-text-muted); line-height: 1.5;">
-            Analyze video cuts and motion markers across your sequence. The engine automatically suggests sound-design cues for high-impact visual transitions.
+            Search and download external royalty-free sound effects directly inside the extension panel. Files are downloaded, converted, and placed onto the sequence playhead without switching apps.
           </p>
         </div>
 
         <div class="sfx-feature-box">
-          <span class="sfx-badge sfx-badge--trial" style="align-self: flex-start;">Released v1.2</span>
-          <h3 style="font-size: 16px; font-weight: 600;">Embedded Browser Companion</h3>
+          <span class="sfx-badge sfx-badge--trial" style="align-self: flex-start;">Released v2.2.0</span>
+          <h3 style="font-size: 16px; font-weight: 600;">Scene AI &amp; AI Timeline Control</h3>
           <p style="font-size: 13px; color: var(--sfx-text-muted); line-height: 1.5;">
-            Browse and download external sound effects and music directly into your active project without switching to an external browser.
+            Analyze video cuts and motion markers across your sequence. Run natural-language timeline commands and place synchronized audio whooshes and hits automatically.
+          </p>
+        </div>
+
+        <div class="sfx-feature-box">
+          <span class="sfx-badge sfx-badge--trial" style="align-self: flex-start;">Released v2.2.0</span>
+          <h3 style="font-size: 16px; font-weight: 600;">Premiere Pro &amp; After Effects Dual-Host Sync</h3>
+          <p style="font-size: 13px; color: var(--sfx-text-muted); line-height: 1.5;">
+            One single extension bundle serves both Premiere Pro and After Effects natively. Automatically adapts to active sequence tracks (A1–A4, BGM) and After Effects audio comp layers.
+          </p>
+        </div>
+
+        <div class="sfx-feature-box">
+          <span class="sfx-badge sfx-badge--trial" style="align-self: flex-start;">Released v2.2.0</span>
+          <h3 style="font-size: 16px; font-weight: 600;">100% Local Privacy-First Analytics</h3>
+          <p style="font-size: 13px; color: var(--sfx-text-muted); line-height: 1.5;">
+            Track your audition volume, timeline placements, and workflow time saved with zero cloud telemetry. All database records remain 100% on your local machine.
           </p>
         </div>
       </div>

@@ -65,6 +65,10 @@
     setupBrowserPanel();
     setupSceneDesignerPanel();
     setupAnalyticsPanel();
+    setupBgmFlowPanel();
+    setupDualHostSwitcher();
+    setupSettingsDrawer();
+    setupModuleShowcaseTour();
     setupCustomerDashboard();
 
     // Select default active sound
@@ -100,6 +104,7 @@
     var tools = {
       browser: document.getElementById('sfx-browser'),
       ai: document.getElementById('sfx-ai-assistant'),
+      bgm: document.getElementById('sfx-bgm-flow'),
       analytics: document.getElementById('sfx-analytics'),
       scene: document.getElementById('sfx-scene-designer'),
       audio: document.getElementById('sfx-audio-tools')
@@ -138,7 +143,7 @@
   }
 
   function closeCurrentToolOverlay() {
-    var tools = ['sfx-browser', 'sfx-ai-assistant', 'sfx-analytics', 'sfx-scene-designer', 'sfx-audio-tools'];
+    var tools = ['sfx-browser', 'sfx-ai-assistant', 'sfx-bgm-flow', 'sfx-analytics', 'sfx-scene-designer', 'sfx-audio-tools', 'sfx-settings-drawer'];
     tools.forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.classList.remove('is-open');
@@ -1211,6 +1216,384 @@
 
   function showToast(msg) {
     showHostToast(msg);
+  }
+
+
+  // ── 12. BGM FLOW (BACKGROUND MUSIC TRANSITIONS & BEAT SYNC) ──
+  function setupBgmFlowPanel() {
+    var bgmState = {
+      mode: 'start',
+      style: 'smooth-fade',
+      duration: 2.5,
+      volumeDb: 0.0,
+      curve: 's-curve',
+      autoEq: 'voiceover'
+    };
+
+    // Mode tab switching
+    var modeBtns = document.querySelectorAll('.sfx-bf__mode-btn');
+    modeBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        modeBtns.forEach(function (b) { b.classList.remove('is-active'); });
+        this.classList.add('is-active');
+        var mode = this.getAttribute('data-bgm-mode');
+        bgmState.mode = mode;
+
+        document.querySelectorAll('.bgm-mode-view').forEach(function (v) { v.style.display = 'none'; });
+        var view = document.getElementById('bgm-view-' + mode);
+        if (view) view.style.display = 'block';
+
+        if (mode === 'beatsync') {
+          drawBeatSyncCanvas();
+        }
+      });
+    });
+
+    // Style card selection
+    document.querySelectorAll('.sfx-bf__style-card').forEach(function (card) {
+      card.addEventListener('click', function () {
+        var parentGrid = this.closest('.sfx-bf__styles-grid');
+        if (parentGrid) {
+          parentGrid.querySelectorAll('.sfx-bf__style-card').forEach(function (c) { c.classList.remove('is-active'); });
+        }
+        this.classList.add('is-active');
+        var style = this.getAttribute('data-style') || this.getAttribute('data-eq');
+        if (style) {
+          bgmState.style = style;
+          var title = this.querySelector('strong') ? this.querySelector('strong').textContent : style;
+          showToast('Selected BGM Transition style: ' + title);
+        }
+      });
+    });
+
+    // Sliders
+    var durSlider = document.getElementById('bgm-slider-duration');
+    var durVal = document.getElementById('bgm-val-duration');
+    if (durSlider && durVal) {
+      durSlider.addEventListener('input', function () {
+        bgmState.duration = parseFloat(this.value);
+        durVal.textContent = bgmState.duration.toFixed(1) + 's';
+      });
+    }
+
+    var volSlider = document.getElementById('bgm-slider-volume');
+    var volVal = document.getElementById('bgm-val-volume');
+    if (volSlider && volVal) {
+      volSlider.addEventListener('input', function () {
+        bgmState.volumeDb = parseFloat(this.value);
+        volVal.textContent = (bgmState.volumeDb > 0 ? '+' : '') + bgmState.volumeDb.toFixed(1) + ' dB';
+      });
+    }
+
+    // Curve buttons
+    document.querySelectorAll('.sfx-bf__curve-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.sfx-bf__curve-btn').forEach(function (b) { b.classList.remove('is-active'); });
+        this.classList.add('is-active');
+        bgmState.curve = this.getAttribute('data-curve');
+      });
+    });
+
+    // Audition Transition (Web Audio API)
+    var auditionBtn = document.getElementById('bgm-btn-audition');
+    if (auditionBtn) {
+      auditionBtn.addEventListener('click', function () {
+        state.analyticsData.auditions++;
+        updateAnalyticsDisplay();
+
+        if (engine && engine.playSample) {
+          var bgmSound = extendedCatalog.find(function (c) { return c.cat === 'Ambience' || c.cat === 'Music'; }) || extendedCatalog[0];
+          engine.playSample(bgmSound);
+        }
+
+        this.textContent = '▶ Auditioning…';
+        var self = this;
+        setTimeout(function () {
+          self.textContent = '▶ Audition Transition';
+        }, 2200);
+
+        showToast('Auditioning ' + bgmState.style + ' transition (' + bgmState.duration + 's, ' + bgmState.curve + ' curve)');
+      });
+    }
+
+    // Apply to selected clip
+    var applyBtn = document.getElementById('bgm-btn-apply');
+    if (applyBtn) {
+      applyBtn.addEventListener('click', function () {
+        state.analyticsData.imports++;
+        updateAnalyticsDisplay();
+        showHostToast('✓ Applied ' + bgmState.style + ' transition (' + bgmState.duration + 's) to BGM clip on Track A4 in Premiere Pro!');
+      });
+    }
+
+    // Beat Sync Marker Generation
+    var genMarkersBtn = document.getElementById('bgm-btn-gen-markers');
+    if (genMarkersBtn) {
+      genMarkersBtn.addEventListener('click', function () {
+        showHostToast('✓ Generated 32 beat markers on host sequence timeline at 124 BPM!');
+      });
+    }
+
+    // Beat Canvas Drawing
+    function drawBeatSyncCanvas() {
+      var canvas = document.getElementById('bgm-beat-canvas');
+      if (!canvas) return;
+      var ctx = canvas.getContext('2d');
+      var w = canvas.width;
+      var h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      ctx.fillStyle = '#08080c';
+      ctx.fillRect(0, 0, w, h);
+
+      var beats = 16;
+      var beatW = w / beats;
+      for (var b = 0; b <= beats; b++) {
+        var isBar = b % 4 === 0;
+        ctx.strokeStyle = isBar ? '#60a5fa' : '#272730';
+        ctx.lineWidth = isBar ? 2 : 1;
+        ctx.beginPath();
+        ctx.moveTo(b * beatW, 0);
+        ctx.lineTo(b * beatW, h);
+        ctx.stroke();
+
+        if (isBar && b < beats) {
+          ctx.fillStyle = '#60a5fa';
+          ctx.font = '9px monospace';
+          ctx.fillText('BAR ' + (Math.floor(b / 4) + 1), b * beatW + 4, 12);
+        }
+      }
+
+      ctx.fillStyle = 'rgba(59, 130, 246, 0.45)';
+      for (var x = 0; x < w; x++) {
+        var normX = x / beatW;
+        var beatDist = Math.abs(normX - Math.round(normX));
+        var transient = Math.exp(-beatDist * 18) * 0.7;
+        var noise = (Math.sin(x * 0.1) + Math.cos(x * 0.05)) * 0.15;
+        var amp = Math.min(1, Math.max(0.1, transient + noise + 0.15));
+        var barH = amp * (h - 24);
+        var barY = (h - barH) / 2;
+        ctx.fillRect(x, barY, 1, barH);
+      }
+    }
+  }
+
+  // ── 13. DUAL HOST SWITCHER (PREMIERE PRO & AFTER EFFECTS) ──
+  function setupDualHostSwitcher() {
+    var btnPpro = document.getElementById('btn-host-ppro');
+    var btnAe = document.getElementById('btn-host-ae');
+    var envPill = document.getElementById('sfx-host-env-pill');
+    var hostStatusText = document.getElementById('sfx-status-host-text');
+    var timecodeEl = document.getElementById('sfx-status-timecode');
+    var trackSelect = document.getElementById('sfx-track-target');
+
+    if (btnPpro && btnAe) {
+      btnPpro.addEventListener('click', function () {
+        btnPpro.classList.add('is-active');
+        btnAe.classList.remove('is-active');
+        state.activeHost = 'ppro';
+        if (envPill) envPill.textContent = '● Sequence: angela bathroom • Playhead: 01:19:496 @ 23.976 fps';
+        if (hostStatusText) hostStatusText.textContent = 'Connected: Premiere Pro 2024 (v24.2) • Sequence: angela bathroom';
+        if (timecodeEl) timecodeEl.textContent = 'Sequence Playhead: 01:19:496 @ 23.976 fps';
+
+        if (trackSelect) {
+          trackSelect.innerHTML =
+            '<option value="A1">Track A1</option>' +
+            '<option value="A2">Track A2</option>' +
+            '<option value="A3">Track A3</option>' +
+            '<option value="A4">Track A4</option>' +
+            '<option value="BGM">BGM Track</option>';
+          state.activeTrack = 'A1';
+          updateTrackLabels();
+        }
+
+        showHostToast('Connected to Adobe Premiere Pro CC 2024 • Active Sequence: angela bathroom');
+      });
+
+      btnAe.addEventListener('click', function () {
+        btnAe.classList.add('is-active');
+        btnPpro.classList.remove('is-active');
+        state.activeHost = 'ae';
+        if (envPill) envPill.textContent = '● Comp: Motion_Graphics_Main_Comp • Playhead: 00:04:12 @ 60.000 fps';
+        if (hostStatusText) hostStatusText.textContent = 'Connected: After Effects CC 2024 (v24.2) • Comp: Motion_Graphics_Main_Comp';
+        if (timecodeEl) timecodeEl.textContent = 'Comp Playhead: 00:04:12 @ 60.000 fps';
+
+        if (trackSelect) {
+          trackSelect.innerHTML =
+            '<option value="Layer 1">Layer 1 [Audio]</option>' +
+            '<option value="Layer 2">Layer 2 [Audio]</option>' +
+            '<option value="Layer 3">Layer 3 [Audio]</option>';
+          state.activeTrack = 'Layer 1';
+          updateTrackLabels();
+        }
+
+        showHostToast('Connected to Adobe After Effects CC 2024 • Active Comp: Motion_Graphics_Main_Comp');
+      });
+    }
+  }
+
+  // ── 14. SETTINGS & PREFERENCES DRAWER ──
+  function setupSettingsDrawer() {
+    var profileBtn = document.getElementById('sfx-btn-profile');
+    var drawer = document.getElementById('sfx-settings-drawer');
+    var closeBtn = document.getElementById('btn-close-settings');
+
+    if (profileBtn && drawer) {
+      profileBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        drawer.classList.add('is-open');
+      });
+    }
+    if (closeBtn && drawer) {
+      closeBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        drawer.classList.remove('is-open');
+      });
+    }
+  }
+
+  // ── 15. MODULE SHOWCASE & TOUR CONTROLLER ──
+  function setupModuleShowcaseTour() {
+    var btnViewLive = document.getElementById('btn-view-live');
+    var btnViewTour = document.getElementById('btn-view-tour');
+    var liveContainer = document.getElementById('sfx-live-container');
+    var tourContainer = document.getElementById('sfx-tour-container');
+
+    function setView(view) {
+      if (view === 'live') {
+        if (btnViewLive) btnViewLive.classList.add('is-active');
+        if (btnViewTour) btnViewTour.classList.remove('is-active');
+        if (liveContainer) liveContainer.style.display = 'flex';
+        if (tourContainer) tourContainer.classList.remove('is-visible');
+      } else {
+        if (btnViewTour) btnViewTour.classList.add('is-active');
+        if (btnViewLive) btnViewLive.classList.remove('is-active');
+        if (liveContainer) liveContainer.style.display = 'none';
+        if (tourContainer) tourContainer.classList.add('is-visible');
+      }
+    }
+
+    if (btnViewLive) {
+      btnViewLive.addEventListener('click', function () { setView('live'); });
+    }
+    if (btnViewTour) {
+      btnViewTour.addEventListener('click', function () { setView('tour'); });
+    }
+
+    // Quick module jump chips
+    var chips = document.querySelectorAll('.sfx-demo-chip');
+    chips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        chips.forEach(function (c) { c.classList.remove('is-active'); });
+        this.classList.add('is-active');
+        var mod = this.getAttribute('data-module');
+
+        if (mod === 'library') {
+          setView('live');
+          closeCurrentToolOverlay();
+        } else if (mod === 'host') {
+          setView('live');
+          var pproBtn = document.getElementById('btn-host-ppro');
+          if (pproBtn) pproBtn.click();
+        } else {
+          setView('live');
+          toggleToolOverlay(mod);
+        }
+
+        switchTourTab(mod);
+      });
+    });
+
+    // Tour slide switcher
+    function switchTourTab(target) {
+      var tabs = document.querySelectorAll('.sfx-tour-tab');
+      tabs.forEach(function (t) {
+        if (t.getAttribute('data-tour') === target) {
+          t.classList.add('is-active');
+        } else {
+          t.classList.remove('is-active');
+        }
+      });
+      document.querySelectorAll('.sfx-tour-slide').forEach(function (s) { s.classList.remove('is-active'); });
+      var slide = document.getElementById('tour-slide-' + target);
+      if (slide) slide.classList.add('is-active');
+    }
+
+    document.querySelectorAll('.sfx-tour-tab').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var target = this.getAttribute('data-tour');
+        switchTourTab(target);
+      });
+    });
+
+    document.querySelectorAll('.sfx-jump-to-live').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var target = this.getAttribute('data-target');
+        setView('live');
+        if (target === 'library') {
+          closeCurrentToolOverlay();
+        } else {
+          toggleToolOverlay(target);
+        }
+      });
+    });
+
+    // Reset button in trim tray
+    var resetBtn = document.getElementById('sfx-trim-reset-btn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        if (state.activeSound) {
+          updateTrimTray(state.activeSound);
+          showToast('Reset trim boundaries to full sample length.');
+        }
+      });
+    }
+
+    // Draw analytics chart
+    drawAnalyticsChart();
+  }
+
+  function drawAnalyticsChart() {
+    var canvas = document.getElementById('an-chart-canvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var w = canvas.width;
+    var h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    ctx.strokeStyle = '#181822';
+    ctx.lineWidth = 1;
+    for (var y = 0; y < h; y += 25) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+
+    var previewsData = [2, 3, 2, 4, 3, 5, 4, 7, 6, 8, 12, 18, 23];
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    var step = w / (previewsData.length - 1);
+    previewsData.forEach(function (val, idx) {
+      var x = idx * step;
+      var y = h - (val / 25) * (h - 20) - 10;
+      if (idx === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    var importsData = [0, 1, 1, 1, 2, 2, 3, 3, 4, 6, 9, 11, 14];
+    ctx.strokeStyle = '#a855f7';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    importsData.forEach(function (val, idx) {
+      var x = idx * step;
+      var y = h - (val / 25) * (h - 20) - 10;
+      if (idx === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
   }
 
   // Expose API

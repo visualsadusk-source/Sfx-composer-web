@@ -954,3 +954,494 @@ img, svg {
   .sfx-site-main-content { margin-left: 0; padding-top: 60px; padding-left: 18px; padding-right: 18px; }
   .sfx-plugin-container { border-radius: var(--sfx-radius); }
 }
+
+/* ==========================================================================
+   SFX COMPOSER v2.2.0 REDESIGNED DEMO & MODULE SHOWCASE STYLES
+   ========================================================================== */
+
+/* ── 1. MODULE SHOWCASE & TOUR BAR ── */
+.sfx-demo-showcase-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.sfx-demo-top-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.sfx-demo-view-toggle {
+  display: inline-flex;
+  background: var(--sfx-surface-raised, #121214);
+  border: 1px solid var(--sfx-border, rgba(255, 255, 255, 0.12));
+  border-radius: 999px;
+  padding: 3px;
+  gap: 4px;
+}
+
+.sfx-demo-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--sfx-text-muted, #9c9ca4);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sfx-demo-view-btn:hover {
+  color: #fff;
+}
+
+.sfx-demo-view-btn.is-active {
+  background: var(--sfx-accent, #0a84ff);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(10, 132, 255, 0.35);
+}
+
+.sfx-demo-chip-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.sfx-demo-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: 6px;
+  background: var(--sfx-surface, #141418);
+  border: 1px solid var(--sfx-border, rgba(255, 255, 255, 0.1));
+  color: var(--sfx-text-muted, #a1a1aa);
+  font-size: 11.5px;
+  font-weight: 550;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.sfx-demo-chip:hover {
+  background: var(--sfx-surface-hover, #1e1e24);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.sfx-demo-chip.is-active {
+  background: rgba(10, 132, 255, 0.15);
+  border-color: var(--sfx-accent, #0a84ff);
+  color: #7ec8ff;
+  box-shadow: 0 0 10px rgba(10, 132, 255, 0.2);
+}
+
+/* ── 2. DUAL-HOST SWITCHER IN TITLEBAR ── */
+.sfx-host-switcher {
+  display: inline-flex;
+  align-items: center;
+  background: #0d0d10;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.sfx-host-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--sfx-text-muted, #8e8e93);
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.sfx-host-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sfx-host-btn.is-active {
+  background: #1e2638;
+  color: #85c8ff;
+  border: 1px solid rgba(10, 132, 255, 0.3);
+}
+
+.sfx-host-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  font-size: 8.5px;
+  font-weight: 800;
+  font-family: var(--sfx-font-mono);
+}
+.sfx-host-badge--pr { background: #9999ff; color: #000033; }
+.sfx-host-badge--ae { background: #d291ff; color: #1a0033; }
+
+/* ── 3. PROFILE AVATAR ── */
+.sfx-profile-avatar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 11px;
+  color: var(--sfx-text, #fff);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.sfx-profile-avatar:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.sfx-avatar-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--sfx-accent, #0a84ff);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── 4. BGM FLOW OVERLAY MODULE ── */
+#sfx-bgm-flow.sfx-bf {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  display: none;
+  flex-direction: column;
+  background: #101014;
+  color: #e8e8ec;
+  overflow: hidden;
+}
+
+#sfx-bgm-flow.sfx-bf.is-open {
+  display: flex;
+}
+
+.sfx-bf__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+  padding: 0 12px;
+  background: #18181e;
+  border-bottom: 1px solid var(--sfx-border, rgba(255, 255, 255, 0.1));
+  flex-shrink: 0;
+}
+
+.sfx-bf__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sfx-bf__mode-tabs {
+  display: flex;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 4px;
+  overflow-x: auto;
+}
+
+.sfx-bf__mode-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--sfx-text-muted, #9c9ca4);
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sfx-bf__mode-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sfx-bf__mode-btn.is-active {
+  background: var(--sfx-accent, #0a84ff);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(10, 132, 255, 0.35);
+}
+
+.sfx-bf__clip-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 10px;
+}
+
+.sfx-bf__styles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.sfx-bf__style-card {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.sfx-bf__style-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.sfx-bf__style-card.is-active {
+  background: rgba(10, 132, 255, 0.14);
+  border-color: var(--sfx-accent, #0a84ff);
+  box-shadow: 0 0 10px rgba(10, 132, 255, 0.25);
+}
+
+.sfx-bf__curve-group {
+  display: flex;
+  border: 1px solid var(--sfx-border, rgba(255, 255, 255, 0.1));
+  border-radius: 6px;
+  overflow: hidden;
+  background: #000;
+}
+
+.sfx-bf__curve-btn {
+  flex: 1;
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  color: var(--sfx-text-muted, #9c9ca4);
+  font-size: 11px;
+  font-weight: 550;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.sfx-bf__curve-btn:hover {
+  color: #fff;
+}
+
+.sfx-bf__curve-btn.is-active {
+  background: var(--sfx-accent, #0a84ff);
+  color: #fff;
+}
+
+.sfx-bf__action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-top: 1px solid var(--sfx-border, rgba(255, 255, 255, 0.1));
+  background: #141418;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ── 5. SETTINGS DRAWER ── */
+#sfx-settings-drawer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 55;
+  display: none;
+  flex-direction: column;
+  background: #121216;
+  color: #e8e8ec;
+  overflow-y: auto;
+  padding: 18px 24px;
+}
+#sfx-settings-drawer.is-open {
+  display: flex;
+}
+
+/* ── 6. STUDIO SCREENSHOT GALLERY TOUR ── */
+.sfx-tour-container {
+  display: none;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 60px;
+  background: #0c0c0f;
+  border: 1px solid var(--sfx-border, rgba(255, 255, 255, 0.12));
+  border-radius: var(--sfx-radius-large, 14px);
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(10, 132, 255, 0.12);
+}
+.sfx-tour-container.is-visible {
+  display: flex;
+  flex-direction: column;
+}
+
+.sfx-tour-navbar {
+  display: flex;
+  align-items: center;
+  background: #16161c;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 12px;
+  gap: 6px;
+  overflow-x: auto;
+}
+
+.sfx-tour-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--sfx-text-muted, #9c9ca4);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.sfx-tour-tab:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+.sfx-tour-tab.is-active {
+  background: #202636;
+  border-color: rgba(10, 132, 255, 0.35);
+  color: #7ec8ff;
+}
+
+.sfx-tour-viewport {
+  position: relative;
+  width: 100%;
+  min-height: 540px;
+  background: #08080a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.sfx-tour-slide {
+  display: none;
+  width: 100%;
+  flex-direction: column;
+  gap: 16px;
+}
+.sfx-tour-slide.is-active {
+  display: flex;
+}
+
+.sfx-tour-slide-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 12px;
+}
+
+.sfx-tour-slide-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.sfx-tour-slide-desc {
+  font-size: 12.5px;
+  color: var(--sfx-text-muted, #9c9ca4);
+  max-width: 750px;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.sfx-tour-image-box {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #000;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+  position: relative;
+}
+
+.sfx-tour-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.sfx-tour-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.sfx-tour-feat-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.sfx-tour-feat-item strong {
+  display: block;
+  font-size: 12px;
+  color: #fff;
+  margin-bottom: 3px;
+}
+.sfx-tour-feat-item span {
+  font-size: 11px;
+  color: var(--sfx-text-muted, #9c9ca4);
+  line-height: 1.4;
+}
+
