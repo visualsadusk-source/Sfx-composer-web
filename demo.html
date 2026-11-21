@@ -590,7 +590,7 @@
               <button type="button" class="sfx-button sfx-button--quiet sfx-tool-back-btn" id="sfx-ai-back-btn" style="height: 26px; padding: 0 8px; font-size: 11px;">
                 &larr; Back
               </button>
-              <strong style="font-size: 12px;">AI SFX Assistant</strong>
+              <strong style="font-size: 12px; color: #fff;">✨ AI SFX Assistant</strong>
               <span style="font-size: 10.5px; color: var(--sfx-positive); margin-left: auto;">● Ollama ready (llama3.2 local)</span>
             </div>
 
@@ -751,7 +751,7 @@
               </div>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 10.5px; color: var(--sfx-positive);">● Ready (Track A4 BGM)</span>
-                <button type="button" class="sfx-button sfx-button--quiet" style="height: 24px; padding: 0 8px; font-size: 10.5px;">✦ Save Preset</button>
+                <button type="button" class="sfx-button sfx-button--quiet" id="bgm-btn-save-preset" style="height: 24px; padding: 0 8px; font-size: 10.5px;">✦ Save Preset</button>
               </div>
             </div>
 
@@ -774,7 +774,7 @@
                   </div>
                   <div style="font-size: 10.5px; color: var(--sfx-text-muted); margin-top: 3px;">2:45 Duration · 124 BPM · Key: G Major · Downbeat aligned</div>
                 </div>
-                <button type="button" class="sfx-button sfx-button--quiet" style="height: 26px; font-size: 10.5px;">🔄 Sync Clip</button>
+                <button type="button" class="sfx-button sfx-button--quiet" id="bgm-btn-sync-clip" style="height: 26px; font-size: 10.5px;">🔄 Sync Clip</button>
               </div>
 
               <!-- Mode View 1: Start Styles -->
@@ -872,7 +872,14 @@
 
               <!-- Mode View 5: Auto EQ Profiles -->
               <div id="bgm-view-autoeq" class="bgm-mode-view" style="display: none;">
-                <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: var(--sfx-text-muted); margin-bottom: 8px;">AUTO EQ PROFILES (SPEECH &amp; MUSIC MASTERING)</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <span style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: var(--sfx-text-muted);">AUTO EQ PROFILES &amp; FREQUENCY RESPONSE</span>
+                  <span id="bgm-eq-readout" style="font-size: 10.5px; color: #38bdf8; font-family: var(--sfx-font-mono); font-weight: 600;">Voiceover Clarity • Notch 2.2 kHz (-4.5 dB)</span>
+                </div>
+                <!-- Interactive Auto EQ Curve Graph -->
+                <div style="height: 85px; background: #08080c; border: 1px solid var(--sfx-border); border-radius: 6px; position: relative; overflow: hidden; margin-bottom: 10px;">
+                  <canvas id="bgm-eq-canvas" width="600" height="85" style="width: 100%; height: 100%; display: block;"></canvas>
+                </div>
                 <div class="sfx-bf__styles-grid">
                   <div class="sfx-bf__style-card is-active" data-eq="voiceover">
                     <strong style="font-size: 11.5px; color: #fff; display: block; margin-bottom: 3px;">Voiceover Clarity</strong>
@@ -895,10 +902,16 @@
                     <span style="font-size: 10.5px; color: var(--sfx-text-muted); line-height: 1.35; display: block;">Epic sub-bass swell with scooped mids and expansive orchestral air</span>
                   </div>
                 </div>
+                <!-- Auto EQ Curve Intensity & Bypass Controls -->
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px;">
+                  <span style="font-size: 10.5px; color: var(--sfx-text-muted); white-space: nowrap;">EQ Intensity:</span>
+                  <input type="range" id="bgm-slider-eq-intensity" min="20" max="150" step="5" value="100" style="flex: 1; accent-color: #38bdf8;" />
+                  <span id="bgm-val-eq-intensity" style="font-size: 11px; color: #38bdf8; font-family: var(--sfx-font-mono); min-width: 40px; text-align: right; font-weight: 600;">100%</span>
+                  <button type="button" class="sfx-button sfx-button--quiet" id="bgm-btn-eq-bypass" style="height: 24px; padding: 0 8px; font-size: 10.5px; white-space: nowrap;">A/B Bypass</button>
+                </div>
               </div>
-
               <!-- Transition Parameters (Shared) -->
-              <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px;">
+              <div id="bgm-transition-params" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px;">
                 <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: var(--sfx-text-muted);">TRANSITION PARAMETERS</div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">

@@ -193,6 +193,19 @@
         } catch (err) {}
       }
 
+      if (toolId === 'ai') {
+        var aiInput = document.getElementById('sfx-ai-textarea');
+        if (aiInput) {
+          setTimeout(function () {
+            try { aiInput.focus(); } catch (err) {}
+          }, 60);
+        }
+      }
+      if (toolId === 'bgm') {
+        if (window.SFX_DRAW_AUTO_EQ) {
+          window.SFX_DRAW_AUTO_EQ();
+        }
+      }
       if (toolId === 'audio' && state.activeSound) {
         loadAudioIntoTools(state.activeSound);
       }
@@ -1045,21 +1058,30 @@
         if (!txt) return;
         appendAiMsg(txt, 'user');
         textarea.value = '';
+        textarea.focus();
         processAiPrompt(txt);
       }
 
-      sendBtn.addEventListener('click', sendMsg);
+      sendBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        sendMsg();
+      });
+
       textarea.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') {
           e.preventDefault();
+          e.stopPropagation();
           sendMsg();
         }
       });
     }
 
     document.querySelectorAll('.sfx-ai-chip-prompt').forEach(function (chip) {
-      chip.addEventListener('click', function () {
-        var txt = this.textContent.replace(/^"|"$/g, '');
+      chip.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var txt = this.textContent.replace(/^"|"$/g, '').trim();
         appendAiMsg(txt, 'user');
         processAiPrompt(txt);
       });
@@ -1306,15 +1328,93 @@
   }
 
 
-  // ── 12. BGM FLOW (BACKGROUND MUSIC TRANSITIONS & BEAT SYNC) ──
+  // ── 12. BGM FLOW (BACKGROUND MUSIC TRANSITIONS, BEAT SYNC & AUTO EQ) ──
   function setupBgmFlowPanel() {
+    var EQ_PROFILES = {
+      voiceover: {
+        id: 'voiceover',
+        name: 'Voiceover Clarity',
+        readout: 'Voiceover Clarity • Notch 2.2 kHz (-4.5 dB)',
+        lowGain: -1.5,
+        lowFreq: 100,
+        midGain: -4.5,
+        midFreq: 2200,
+        midQ: 1.2,
+        highGain: 2.0,
+        highFreq: 10000,
+        highpassFreq: 75
+      },
+      warm: {
+        id: 'warm',
+        name: 'Warm',
+        readout: 'Warm • Low-Mid Boost 180 Hz (+2.5 dB) • Soft Highs',
+        lowGain: 2.5,
+        lowFreq: 180,
+        midGain: -1.5,
+        midFreq: 2500,
+        midQ: 1.0,
+        highGain: -3.0,
+        highFreq: 8000,
+        highpassFreq: 35
+      },
+      balanced: {
+        id: 'balanced',
+        name: 'Balanced',
+        readout: 'Balanced • Reference Mastering Curve (Flat ±1 dB)',
+        lowGain: 1.0,
+        lowFreq: 100,
+        midGain: -1.5,
+        midFreq: 450,
+        midQ: 1.4,
+        highGain: 1.5,
+        highFreq: 10000,
+        highpassFreq: 30
+      },
+      bright: {
+        id: 'bright',
+        name: 'Bright',
+        readout: 'Bright • High Presence Boost 4.2 kHz (+3.5 dB)',
+        lowGain: 0.0,
+        lowFreq: 120,
+        midGain: 3.5,
+        midFreq: 4200,
+        midQ: 1.0,
+        highGain: 3.0,
+        highFreq: 10000,
+        highpassFreq: 45
+      },
+      cinematic: {
+        id: 'cinematic',
+        name: 'Cinematic',
+        readout: 'Cinematic • Deep Sub 65 Hz (+3.5 dB) • Scooped Mids',
+        lowGain: 3.5,
+        lowFreq: 65,
+        midGain: -2.5,
+        midFreq: 600,
+        midQ: 1.1,
+        highGain: 2.8,
+        highFreq: 12000,
+        highpassFreq: 25
+      }
+    };
+
     var bgmState = {
       mode: 'start',
       style: 'smooth-fade',
       duration: 2.5,
       volumeDb: 0.0,
       curve: 's-curve',
-      autoEq: 'voiceover'
+      autoEq: 'voiceover',
+      eqIntensity: 100,
+      eqBypass: false,
+      selectedClip: {
+        name: 'Summer_Vlog_Upbeat_BGM.mp3',
+        track: 'A4',
+        duration: 165.0,
+        bpm: 124,
+        key: 'G Major',
+        path: 'assets/audio/Summer_Vlog_Upbeat_BGM.mp3'
+      }
     };
 
     // Mode tab switching
@@ -1330,13 +1430,20 @@
         var view = document.getElementById('bgm-view-' + mode);
         if (view) view.style.display = 'block';
 
+        var transParams = document.getElementById('bgm-transition-params');
+        if (transParams) {
+          transParams.style.display = (mode === 'autoeq' || mode === 'beatsync') ? 'none' : 'flex';
+        }
+
         if (mode === 'beatsync') {
           drawBeatSyncCanvas();
+        } else if (mode === 'autoeq') {
+          drawAutoEqCanvas(bgmState.autoEq, bgmState.eqIntensity, bgmState.eqBypass);
         }
       });
     });
 
-    // Style card selection
+    // Style card selection (Transitions & Auto EQ)
     document.querySelectorAll('.sfx-bf__style-card').forEach(function (card) {
       card.addEventListener('click', function () {
         var parentGrid = this.closest('.sfx-bf__styles-grid');
@@ -1344,14 +1451,46 @@
           parentGrid.querySelectorAll('.sfx-bf__style-card').forEach(function (c) { c.classList.remove('is-active'); });
         }
         this.classList.add('is-active');
-        var style = this.getAttribute('data-style') || this.getAttribute('data-eq');
-        if (style) {
+
+        var eq = this.getAttribute('data-eq');
+        var style = this.getAttribute('data-style');
+
+        if (eq) {
+          bgmState.autoEq = eq;
+          var prof = EQ_PROFILES[eq] || EQ_PROFILES.voiceover;
+          var readout = document.getElementById('bgm-eq-readout');
+          if (readout) readout.textContent = prof.readout;
+          drawAutoEqCanvas(eq, bgmState.eqIntensity, bgmState.eqBypass);
+          showToast('Selected Auto EQ profile: ' + prof.name);
+        } else if (style) {
           bgmState.style = style;
           var title = this.querySelector('strong') ? this.querySelector('strong').textContent : style;
           showToast('Selected BGM Transition style: ' + title);
         }
       });
     });
+
+    // Auto EQ Intensity Slider & Bypass Controls
+    var eqSlider = document.getElementById('bgm-slider-eq-intensity');
+    var eqVal = document.getElementById('bgm-val-eq-intensity');
+    if (eqSlider && eqVal) {
+      eqSlider.addEventListener('input', function () {
+        bgmState.eqIntensity = parseInt(this.value, 10);
+        eqVal.textContent = bgmState.eqIntensity + '%';
+        drawAutoEqCanvas(bgmState.autoEq, bgmState.eqIntensity, bgmState.eqBypass);
+      });
+    }
+
+    var eqBypassBtn = document.getElementById('bgm-btn-eq-bypass');
+    if (eqBypassBtn) {
+      eqBypassBtn.addEventListener('click', function () {
+        bgmState.eqBypass = !bgmState.eqBypass;
+        this.classList.toggle('is-active', bgmState.eqBypass);
+        this.textContent = bgmState.eqBypass ? 'Bypass Active (Dry)' : 'A/B Bypass';
+        drawAutoEqCanvas(bgmState.autoEq, bgmState.eqIntensity, bgmState.eqBypass);
+        showToast(bgmState.eqBypass ? 'Auto EQ Bypassed (Auditioning dry original)' : 'Auto EQ Filter Active');
+      });
+    }
 
     // Sliders
     var durSlider = document.getElementById('bgm-slider-duration');
@@ -1381,16 +1520,62 @@
       });
     });
 
-    // Audition Transition (Web Audio API)
+    // Save Preset button
+    var savePresetBtn = document.getElementById('bgm-btn-save-preset');
+    if (savePresetBtn) {
+      savePresetBtn.addEventListener('click', function () {
+        var name = (bgmState.mode === 'autoeq') ? (EQ_PROFILES[bgmState.autoEq] ? EQ_PROFILES[bgmState.autoEq].name : 'Auto EQ') : (bgmState.style || 'Custom');
+        showToast('✦ Saved preset: ' + name + ' (' + bgmState.mode.toUpperCase() + ')');
+      });
+    }
+
+    // Sync Clip button
+    var syncClipBtn = document.getElementById('bgm-btn-sync-clip');
+    if (syncClipBtn) {
+      syncClipBtn.addEventListener('click', function () {
+        showToast('✓ Resynced timeline clip: ' + bgmState.selectedClip.name + ' on Track A4 (00:00:10 - 00:02:55)');
+      });
+    }
+
+    // Beat Sync buttons
+    var snapBeatBtn = document.getElementById('bgm-btn-snap-beat');
+    if (snapBeatBtn) {
+      snapBeatBtn.addEventListener('click', function () {
+        showHostToast('✓ Snapped edit cut to nearest beat at 00:01:24:12 on Track A4');
+      });
+    }
+
+    var snapBarBtn = document.getElementById('bgm-btn-snap-bar');
+    if (snapBarBtn) {
+      snapBarBtn.addEventListener('click', function () {
+        showHostToast('✓ Snapped edit cut to Downbeat (Bar 12) at 00:01:21:00 on Track A4');
+      });
+    }
+
+    var genMarkersBtn = document.getElementById('bgm-btn-gen-markers');
+    if (genMarkersBtn) {
+      genMarkersBtn.addEventListener('click', function () {
+        showHostToast('✓ Generated 32 beat markers on host sequence timeline at 124 BPM!');
+      });
+    }
+
+    // Audition Transition & Auto EQ (Web Audio API)
     var auditionBtn = document.getElementById('bgm-btn-audition');
     if (auditionBtn) {
       auditionBtn.addEventListener('click', function () {
         state.analyticsData.auditions++;
         updateAnalyticsDisplay();
 
+        var bgmSound = extendedCatalog.find(function (c) { return c.cat === 'Ambience' || c.cat === 'Music'; }) || extendedCatalog[0];
         if (engine && engine.playSample) {
-          var bgmSound = extendedCatalog.find(function (c) { return c.cat === 'Ambience' || c.cat === 'Music'; }) || extendedCatalog[0];
           engine.playSample(bgmSound);
+        }
+
+        if (bgmState.mode === 'autoeq') {
+          var prof = EQ_PROFILES[bgmState.autoEq] || EQ_PROFILES.voiceover;
+          showToast('Auditioning Auto EQ (' + prof.name + ') on ' + bgmState.selectedClip.name + (bgmState.eqBypass ? ' [BYPASS ACTIVE]' : ''));
+        } else {
+          showToast('Auditioning ' + bgmState.style + ' transition (' + bgmState.duration + 's, ' + bgmState.curve + ' curve)');
         }
 
         this.textContent = '▶ Auditioning…';
@@ -1398,28 +1583,140 @@
         setTimeout(function () {
           self.textContent = '▶ Audition Transition';
         }, 2200);
-
-        showToast('Auditioning ' + bgmState.style + ' transition (' + bgmState.duration + 's, ' + bgmState.curve + ' curve)');
       });
     }
 
-    // Apply to selected clip
+    // Apply to selected clip (with STRICT audio source path validation)
     var applyBtn = document.getElementById('bgm-btn-apply');
     if (applyBtn) {
       applyBtn.addEventListener('click', function () {
+        // Source audio path resolution & validation
+        var audioPath = (bgmState.selectedClip && bgmState.selectedClip.path) || (state.activeSound && state.activeSound.url) || '';
+
+        if (!audioPath || typeof audioPath !== 'string') {
+          showToast('Failed to apply Auto EQ: No audio file path was supplied. Please select a valid audio clip first.', true);
+          return;
+        }
+
         state.analyticsData.imports++;
         updateAnalyticsDisplay();
-        showHostToast('✓ Applied ' + bgmState.style + ' transition (' + bgmState.duration + 's) to BGM clip on Track A4 in Premiere Pro!');
+
+        if (bgmState.mode === 'autoeq') {
+          var prof = EQ_PROFILES[bgmState.autoEq] || EQ_PROFILES.voiceover;
+          showHostToast('✓ Applied Auto EQ (' + prof.name + ') to BGM clip: ' + bgmState.selectedClip.name + ' on Track A4 in Premiere Pro!');
+        } else if (bgmState.mode === 'beatsync') {
+          showHostToast('✓ Applied beat-synced timeline markers to clip: ' + bgmState.selectedClip.name + ' on Track A4!');
+        } else {
+          showHostToast('✓ Applied ' + bgmState.style + ' transition (' + bgmState.duration + 's) to BGM clip on Track A4 in Premiere Pro!');
+        }
       });
     }
 
-    // Beat Sync Marker Generation
-    var genMarkersBtn = document.getElementById('bgm-btn-gen-markers');
-    if (genMarkersBtn) {
-      genMarkersBtn.addEventListener('click', function () {
-        showHostToast('✓ Generated 32 beat markers on host sequence timeline at 124 BPM!');
+    // Undo button
+    var undoBtn = document.getElementById('bgm-btn-undo');
+    if (undoBtn) {
+      undoBtn.addEventListener('click', function () {
+        showHostToast('↩ Undid BGM ' + (bgmState.mode === 'autoeq' ? 'Auto EQ' : 'Transition') + ' on Track A4 in Premiere Pro.');
       });
     }
+
+    // Auto EQ Interactive Graph Drawing
+    function drawAutoEqCanvas(profileId, intensity, isBypassed) {
+      var canvas = document.getElementById('bgm-eq-canvas');
+      if (!canvas) return;
+      var ctx = canvas.getContext('2d');
+      var w = canvas.width;
+      var h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      // Dark background
+      ctx.fillStyle = '#08080c';
+      ctx.fillRect(0, 0, w, h);
+
+      // dB Grid lines (-12dB, -6dB, 0dB, +6dB, +12dB)
+      ctx.strokeStyle = '#1e1e24';
+      ctx.lineWidth = 1;
+
+      var gridDbs = [-12, -6, 0, 6, 12];
+      ctx.font = '9px monospace';
+      gridDbs.forEach(function (db) {
+        var y = ((-db + 15) / 30) * h;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+
+        ctx.fillStyle = db === 0 ? '#505060' : '#303038';
+        ctx.fillText((db > 0 ? '+' : '') + db + 'dB', 4, y - 2);
+      });
+
+      // Frequency grid lines (100Hz, 1kHz, 10kHz)
+      var freqs = [100, 1000, 10000];
+      freqs.forEach(function (f) {
+        var r = (Math.log10(f) - Math.log10(20)) / (Math.log10(20000) - Math.log10(20));
+        var x = r * w;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+
+        ctx.fillStyle = '#40404c';
+        var label = f >= 1000 ? (f / 1000 + 'k') : (f + 'Hz');
+        ctx.fillText(label, x + 3, h - 4);
+      });
+
+      // Plot frequency response curve
+      var prof = EQ_PROFILES[profileId] || EQ_PROFILES.voiceover;
+      var factor = isBypassed ? 0 : (intensity / 100);
+
+      ctx.beginPath();
+      var numPts = 120;
+      for (var i = 0; i <= numPts; i++) {
+        var r = i / numPts;
+        var freq = Math.pow(10, Math.log10(20) + r * (Math.log10(20000) - Math.log10(20)));
+
+        var db = 0;
+        if (freq < prof.highpassFreq) {
+          db -= 18 * Math.log2(prof.highpassFreq / Math.max(10, freq));
+        }
+        if (freq < prof.lowFreq) {
+          db += prof.lowGain * factor * (1 - (freq / prof.lowFreq) * 0.5);
+        }
+        var midOctDiff = Math.abs(Math.log2(freq / prof.midFreq));
+        var bell = Math.exp(-Math.pow(midOctDiff * prof.midQ * 1.5, 2));
+        db += prof.midGain * factor * bell;
+        if (freq > prof.highFreq * 0.5) {
+          var hRatio = Math.min(1, (freq - prof.highFreq * 0.5) / (prof.highFreq * 0.5));
+          db += prof.highGain * factor * hRatio;
+        }
+
+        db = Math.max(-18, Math.min(15, db));
+        var y = ((-db + 15) / 30) * h;
+        var x = r * w;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = isBypassed ? '#ef4444' : '#38bdf8';
+      ctx.stroke();
+
+      // Fill area underneath
+      ctx.lineTo(w, h * 0.5);
+      ctx.lineTo(0, h * 0.5);
+      ctx.closePath();
+      ctx.fillStyle = isBypassed ? 'rgba(239, 68, 68, 0.08)' : 'rgba(56, 189, 248, 0.12)';
+      ctx.fill();
+    }
+
+    // Expose drawAutoEqCanvas for initial render on tool switch
+    window.SFX_DRAW_AUTO_EQ = function () {
+      drawAutoEqCanvas(bgmState.autoEq, bgmState.eqIntensity, bgmState.eqBypass);
+    };
+
+    // Initial pre-draw of canvases
+    drawBeatSyncCanvas();
+    drawAutoEqCanvas(bgmState.autoEq, bgmState.eqIntensity, bgmState.eqBypass);
 
     // Beat Canvas Drawing
     function drawBeatSyncCanvas() {
@@ -1558,14 +1855,11 @@
         var mod = this.getAttribute('data-module');
 
         if (mod === 'library') {
-          setView('live');
           closeCurrentToolOverlay();
         } else if (mod === 'host') {
-          setView('live');
           var pproBtn = document.getElementById('btn-host-ppro');
           if (pproBtn) pproBtn.click();
         } else {
-          setView('live');
           toggleToolOverlay(mod);
         }
 
@@ -1598,7 +1892,6 @@
     document.querySelectorAll('.sfx-jump-to-live').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var target = this.getAttribute('data-target');
-        setView('live');
         if (target === 'library') {
           closeCurrentToolOverlay();
         } else {
