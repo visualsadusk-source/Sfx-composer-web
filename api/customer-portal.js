@@ -485,16 +485,43 @@ module.exports = async function handler(req, res) {
   const processedLicIds = new Set();
 
   if (hasPlugin) {
+    // Decrypt keys using Supabase Edge Function (holding server-side master encryption secret)
+    const edgeDecryptedMap = new Map();
+    try {
+      const edgeRes = await fetch(`${SUPABASE_URL}/functions/v1/customer-portal`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SERVICE_KEY,
+          'Authorization': `Bearer ${SERVICE_KEY}`
+        },
+        body: JSON.stringify({ email: targetEmail, payment_id: paymentRef || verifiedPaymentOrder?.provider_payment_id || 'verified_purchase' })
+      });
+      if (edgeRes.ok) {
+        const edgeData = await edgeRes.json();
+        if (edgeData && Array.isArray(edgeData.licenses)) {
+          for (const el of edgeData.licenses) {
+            if (el.id && el.license_key) {
+              edgeDecryptedMap.set(el.id, el.license_key);
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Edge function decryption fallback error:', err.message);
+    }
+
     for (const lic of foundLicenseRows) {
       const lId = lic.id || lic.license_id;
       if (!lId || processedLicIds.has(lId)) continue;
       processedLicIds.add(lId);
 
-      let decryptedKey = lic.license_key || null;
+      let decryptedKey = edgeDecryptedMap.get(lId) || lic.license_key || null;
       if (!decryptedKey && lic.encrypted_license_key) {
         decryptedKey = decryptLicenseKey(lic.encrypted_license_key);
       }
       const isLegacy = !decryptedKey && !lic.encrypted_license_key && !!lic.license_key_hash;
+      const isMissingEncryptedKey = !decryptedKey;
 
       // Link each license to its specific payment order
       const matchingOrder = completedOrders.find(o => o.license_id === lId || o.provider_order_id === lic.provider_order_id);
@@ -503,10 +530,10 @@ module.exports = async function handler(req, res) {
         id: lId,
         license_id: lId,
         license_key: decryptedKey,
-        has_encrypted_key: !!(lic.encrypted_license_key || decryptedKey),
-        legacy_key: isLegacy,
+        has_encrypted_key: !!(decryptedKey || lic.encrypted_license_key),
+        legacy_key: isLegacy || isMissingEncryptedKey,
         product_id: lic.product_id || (matchingOrder && matchingOrder.product_id) || 'sfx-composer-pro',
-        product_name: 'SFX Composer Pro v2.4 (Universal)',
+        product_name: 'SFX Composer Pro',
         status: lic.status || 'active',
         license_type: lic.license_type || 'lifetime',
         created_at: lic.created_at || (matchingOrder && matchingOrder.created_at) || new Date().toISOString(),

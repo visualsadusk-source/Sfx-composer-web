@@ -1047,13 +1047,13 @@
                 '<div style="background: #000; border: 1px solid var(--sfx-accent); border-radius: 8px; padding: 14px; margin: 12px 0;">' +
                   '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">' +
                     '<span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sfx-accent); font-weight: 700;">Official License Key</span>' +
-                    '<span style="font-size: 11px; color: var(--sfx-text-muted);">AES-256-GCM Decrypted</span>' +
+                    '<span style="font-size: 11px; color: var(--sfx-positive); font-weight: 600;">Verified & Active</span>' +
                   '</div>' +
                   '<div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">' +
-                    '<code class="portal-lic-key-val" data-raw="' + lic.license_key + '" style="font-family: var(--sfx-font-mono); font-size: 17px; font-weight: 800; color: #ffffff; letter-spacing: 0.08em; user-select: all;">••••-••••-••••-••••</code>' +
+                    '<code class="portal-lic-key-val" data-raw="' + lic.license_key + '" style="font-family: var(--sfx-font-mono); font-size: 17px; font-weight: 800; color: #ffffff; letter-spacing: 0.08em; user-select: all;">' + lic.license_key + '</code>' +
                     '<div style="display: flex; gap: 6px;">' +
                       '<button type="button" class="btn-toggle-portal-key sfx-button sfx-button--quiet" style="height: 30px; font-size: 11px; padding: 0 12px; border: 1px solid var(--sfx-border); color: var(--sfx-accent);">' +
-                        'Reveal' +
+                        'Hide' +
                       '</button>' +
                       '<button type="button" class="btn-copy-portal-key sfx-button sfx-button--quiet" data-key="' + lic.license_key + '" style="height: 30px; font-size: 11px; padding: 0 12px; border: 1px solid var(--sfx-border); color: #fff;">' +
                         'Copy' +
@@ -1061,35 +1061,27 @@
                     '</div>' +
                   '</div>' +
                 '</div>';
-            } else if (lic.legacy_key) {
-              // Pre-encryption license: key hash exists but cannot be decrypted
-              keyBoxHtml =
-                '<div style="background: rgba(255, 159, 10, 0.08); border: 1px solid rgba(255, 159, 10, 0.3); border-radius: 8px; padding: 14px; margin: 12px 0;">' +
-                  '<div style="color: #ff9f0a; font-weight: 700; font-size: 12.5px; margin-bottom: 6px;">&#9888; License Key Retrieval Required</div>' +
-                  '<p style="font-size: 12px; color: var(--sfx-text-muted); line-height: 1.6; margin: 0 0 10px 0;">' +
-                    'Your purchase is verified. Your license was issued before our encrypted key storage was introduced, ' +
-                    'so the key cannot be automatically displayed here.<br>' +
-                    'Please contact support with your Payment ID and we will send your key within 24 hours.' +
-                  '</p>' +
-                  '<a href="mailto:sfxcomposer@gmail.com?subject=License%20Key%20Retrieval%20Request&body=Purchase%20Email%3A%20' + encodeURIComponent(lic.customer_email || currentAuthEmail) + '%0APayment%20ID%3A%20' + encodeURIComponent(lic.provider_payment_id || '') + '" ' +
-                  'style="display: inline-block; height: 32px; line-height: 32px; padding: 0 16px; background: transparent; border: 1px solid rgba(255,159,10,0.5); border-radius: 6px; color: #ff9f0a; font-size: 12px; font-weight: 700; text-decoration: none;">' +
-                    'Email Support to Retrieve Key' +
-                  '</a>' +
-                '</div>';
             } else {
               keyBoxHtml = 
-                '<div style="background: rgba(255, 159, 10, 0.08); border: 1px solid rgba(255, 159, 10, 0.3); border-radius: 8px; padding: 14px; margin: 12px 0;">' +
-                  '<div style="color: #ff9f0a; font-weight: 700; font-size: 12.5px; margin-bottom: 4px;">License Key Unavailable</div>' +
-                  '<p style="font-size: 11.5px; color: var(--sfx-text-muted); line-height: 1.5; margin: 0 0 10px 0;">' +
-                    'Your purchase is verified. Contact support at <a href="mailto:sfxcomposer@gmail.com" style="color: var(--sfx-accent);">sfxcomposer@gmail.com</a> with your Payment ID to retrieve your key.' +
+                '<div style="background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.35); border-radius: 8px; padding: 14px; margin: 12px 0;">' +
+                  '<div style="color: #ff453a; font-weight: 700; font-size: 12.5px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">' +
+                    '<span>⚠️</span> Administrative Action Required: License Key Missing' +
+                  '</div>' +
+                  '<p style="font-size: 12px; color: var(--sfx-text-muted); line-height: 1.6; margin: 0 0 10px 0;">' +
+                    'A valid purchase record exists for this order, but no encrypted license key was generated in the database.<br>' +
+                    'Please contact support at <a href="mailto:visualsadusk@gmail.com" style="color: var(--sfx-accent);">visualsadusk@gmail.com</a> with your Payment ID (<code>' + (lic.provider_payment_id || 'receipt') + '</code>) to receive your official key.' +
                   '</p>' +
+                  '<a href="mailto:visualsadusk@gmail.com?subject=License%20Key%20Issue%20Request%20-%20Payment%20' + encodeURIComponent(lic.provider_payment_id || '') + '&body=Hello%20SFX%20Composer%20Support%2C%0A%0AMy%20verified%20purchase%20email%20is%3A%20' + encodeURIComponent(lic.customer_email || currentAuthEmail) + '%0APayment%20ID%3A%20' + encodeURIComponent(lic.provider_payment_id || '') + '%0AOrder%20ID%3A%20' + encodeURIComponent(lic.provider_order_id || '') + '%0ALicense%20ID%3A%20' + encodeURIComponent(lic.id || '') + '%0A%0APlease%20issue%20my%20license%20key.%20Thank%20you!" ' +
+                  'style="display: inline-block; height: 32px; line-height: 32px; padding: 0 16px; background: rgba(255,69,58,0.15); border: 1px solid rgba(255,69,58,0.5); border-radius: 6px; color: #ff453a; font-size: 12px; font-weight: 700; text-decoration: none;">' +
+                    'Request License Key from Support' +
+                  '</a>' +
                 '</div>';
             }
 
             return '<div class="sfx-dashboard-card" style="margin-bottom: 12px;">' +
               '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
                 '<div>' +
-                  '<div style="font-weight: 700; font-size: 15px; color: #fff;">SFX Composer Pro (Plugin)</div>' +
+                  '<div style="font-weight: 700; font-size: 15px; color: #fff;">SFX Composer Pro</div>' +
                   '<div style="font-size: 11.5px; color: var(--sfx-text-muted);">License ID: <code style="color:var(--sfx-accent); font-size:11px;">' + (lic.license_id || lic.id) + '</code></div>' +
                 '</div>' +
                 statusBadge +
@@ -1099,8 +1091,8 @@
               '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 10px 0; background: rgba(0,0,0,0.25); border: 1px solid var(--sfx-border); border-radius: 6px; padding: 10px 12px; font-size: 11.5px;">' +
                 '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Purchase Date</span><strong>' + purchaseDateStr + '</strong></div>' +
                 '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Payment Status</span>' + paymentStatusStr + '</div>' +
-                '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">License Activation Status</span>' + workstationStatus + '</div>' +
-                '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Product ID</span><code style="font-size: 10.5px; color: var(--sfx-text);">' + (lic.product_id || 'sfx-composer-bundle') + '</code></div>' +
+                '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Activation Status</span>' + workstationStatus + '</div>' +
+                '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Product Name</span><span style="font-size: 11.5px; color: #fff; font-weight: 600;">SFX Composer Pro</span></div>' +
                 (lic.provider_payment_id ? '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Payment ID</span><code style="font-size: 10.5px; color: var(--sfx-accent);">' + lic.provider_payment_id + '</code></div>' : '') +
               '</div>' +
             '</div>';
@@ -1113,12 +1105,12 @@
               var valEl = parent.querySelector('.portal-lic-key-val');
               if (!valEl) return;
               var rawKey = valEl.getAttribute('data-raw');
-              if (this.textContent === 'Reveal') {
+              if (this.textContent.trim() === 'Hide') {
+                valEl.textContent = '••••-••••-••••-••••';
+                this.textContent = 'Show';
+              } else {
                 valEl.textContent = rawKey;
                 this.textContent = 'Hide';
-              } else {
-                valEl.textContent = '••••-••••-••••-••••';
-                this.textContent = 'Reveal';
               }
             });
           });
@@ -1128,7 +1120,16 @@
             btn.addEventListener('click', function () {
               var key = this.getAttribute('data-key');
               if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(key);
+                navigator.clipboard.writeText(key).catch(function () {});
+              } else {
+                var ta = document.createElement('textarea');
+                ta.value = key;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); } catch (e) {}
+                document.body.removeChild(ta);
               }
               var originalText = this.textContent;
               this.textContent = 'Copied!';
