@@ -3,7 +3,15 @@
   applies once the menu is really in the top bar; otherwise the original
   floating buttons keep working exactly as before.
 */
+.sfx-shell__header {
+  position: relative !important;
+  z-index: 1000010 !important;
+  pointer-events: auto !important;
+}
 #sfx-header-menu {
+  position: relative !important;
+  z-index: 1000010 !important;
+  pointer-events: auto !important;
   display: flex;
   align-items: center;
   gap: 4px;
