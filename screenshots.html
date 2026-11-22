@@ -608,7 +608,7 @@
             </div>
 
             <p style="font-size: 12.5px; color: var(--sfx-text-muted); line-height: 1.5; margin: 0 0 18px 0;">
-              Enter the email address used during your purchase to retrieve your SFX Composer order.
+              Enter the email address used during your purchase and your Razorpay Payment ID to retrieve your SFX Composer license and downloads.
             </p>
 
             <!-- Recent Purchase Quick Access Banner (If verified session found on this device) -->
@@ -631,19 +631,17 @@
                 <input type="email" id="cdm-email-input" class="sfx-input" placeholder="editor@studio.com" spellcheck="false" autocomplete="email" style="width: 100%; height: 40px; padding: 0 14px; font-size: 13.5px;" required />
               </div>
 
-              <!-- Ownership Verification Step (Shown when querying from a new device without cached session) -->
-              <div id="cdm-proof-container" style="display: none; flex-direction: column; gap: 6px; background: rgba(10,132,255,0.06); border: 1px solid rgba(10,132,255,0.25); border-radius: 6px; padding: 12px;">
-                <div style="font-size: 12px; font-weight: 600; color: #fff;">
-                  Ownership Verification Required
-                </div>
-                <p style="font-size: 11.5px; color: var(--sfx-text-muted); line-height: 1.4; margin: 0 0 6px 0;">
-                  To protect your license on this device, enter your Razorpay Order ID or Payment ID (from your receipt):
-                </p>
-                <input type="text" id="cdm-proof-input" class="sfx-input" placeholder="order_... or pay_..." spellcheck="false" autocomplete="off" style="width: 100%; height: 36px; padding: 0 12px; font-size: 12.5px;" />
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="cdm-payment-id-input" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sfx-text-muted); font-weight: 600;">Razorpay Payment ID</label>
+                <input type="text" id="cdm-payment-id-input" class="sfx-input" placeholder="pay_XXXXXXXXXXXXXX (from your receipt)" spellcheck="false" autocomplete="off" style="width: 100%; height: 40px; padding: 0 14px; font-size: 13.5px;" required />
               </div>
 
+              <!-- Retain cdm-proof-input and cdm-proof-container as fallback aliases -->
+              <input type="hidden" id="cdm-proof-input" />
+              <div id="cdm-proof-container" style="display: none;"></div>
+
               <button type="submit" id="cdm-btn-lookup" class="sfx-site-btn-primary" style="height: 42px; font-size: 13px; font-weight: 700; justify-content: center; letter-spacing: 0.04em;">
-                FIND MY PURCHASE
+                FIND MY LICENSE
               </button>
             </form>
 

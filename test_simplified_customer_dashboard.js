@@ -199,7 +199,11 @@ async function runTests() {
     body: JSON.stringify({ email: purchaseA.email })
   });
   const attack1Data = await attackWithoutProof.json();
-  assert.strictEqual(attack1Data.requires_verification, true, 'Unverified query must not leak data');
+  // Backend now returns HTTP 403 NOT_PAID when proof is missing
+  assert.ok(
+    attackWithoutProof.status === 403 || attack1Data.code === 'NOT_PAID',
+    'Unverified query must be rejected (HTTP 403 or NOT_PAID), got: ' + JSON.stringify(attack1Data)
+  );
   assert.ok(!attack1Data.licenses, 'Licenses MUST NOT be returned without proof');
   assert.ok(!attack1Data.downloads, 'Downloads MUST NOT be returned without proof');
 

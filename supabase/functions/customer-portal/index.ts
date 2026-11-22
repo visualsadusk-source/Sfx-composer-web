@@ -80,51 +80,102 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // 3. If no verified session/proof, verify purchase status in database
-    if (!authEmail) {
-      if (!cleanReqEmail) {
-        return new Response(JSON.stringify({
-          ok: false,
-          code: 'UNAUTHENTICATED',
-          message: 'Registered purchase email address is required.'
-        }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      // Check if email has completed purchase
-      const { data: completedOrders } = await supabase
-        .from('payment_orders')
-        .select('id, provider_order_id, provider_payment_id, payment_status')
-        .eq('customer_email', cleanReqEmail)
-        .eq('payment_status', 'completed')
-        .limit(1);
-
-      if (!completedOrders || completedOrders.length === 0) {
+    // 3. Strict Purchase Protection: Require BOTH Email AND Payment ID
+    if (!isAdmin && !authEmail) {
+      if (!cleanReqEmail || !paymentRef) {
         return new Response(JSON.stringify({
           ok: false,
           code: 'NOT_PAID',
           is_paid: false,
-          email: cleanReqEmail,
-          message: 'No verified purchase was found for this email.'
+          message: 'No verified purchase was found for this email. Both purchase email and Razorpay Payment ID are required.'
         }), {
           status: 403,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
 
-      // Paid purchase exists, but proof not yet provided on fresh session
-      return new Response(JSON.stringify({
-        ok: true,
-        requires_verification: true,
-        is_paid: true,
-        email: cleanReqEmail,
-        message: 'Verified purchase found! To protect your license details, please enter your Razorpay Order ID or Payment ID (from your receipt).'
-      }), {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+      // Check cross-customer mismatch: does paymentRef belong to someone else?
+      const { data: crossRows } = await supabase
+        .from('payment_orders')
+        .select('customer_email, payment_status')
+        .or(`provider_payment_id.eq.${paymentRef},provider_order_id.eq.${paymentRef}`);
+
+      if (crossRows && crossRows.length > 0) {
+        const belongsToTarget = crossRows.some(r => r.customer_email.trim().toLowerCase() === cleanReqEmail);
+        if (!belongsToTarget) {
+          return new Response(JSON.stringify({
+            ok: false,
+            code: 'FORBIDDEN',
+            is_paid: false,
+            message: 'No verified purchase was found matching these details. Please check your purchase email and Razorpay Payment ID.'
+          }), {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+      }
+
+      // Check if order exists for targetEmail + paymentRef
+      const { data: orderRows } = await supabase
+        .from('payment_orders')
+        .select('*')
+        .eq('customer_email', cleanReqEmail)
+        .or(`provider_payment_id.eq.${paymentRef},provider_order_id.eq.${paymentRef}`);
+
+      if (!orderRows || orderRows.length === 0) {
+        return new Response(JSON.stringify({
+          ok: false,
+          code: 'NOT_PAID',
+          is_paid: false,
+          email: cleanReqEmail,
+          message: 'No verified purchase was found matching these details. Please check your purchase email and Razorpay Payment ID.'
+        }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Status check
+      const isRefunded = orderRows.some(r => r.payment_status === 'refunded' || r.payment_status === 'revoked');
+      if (isRefunded) {
+        return new Response(JSON.stringify({
+          ok: false,
+          code: 'REFUNDED',
+          is_paid: false,
+          message: 'This purchase has been refunded or revoked. Access to licenses and downloads is disabled.'
+        }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      const isFailed = orderRows.some(r => r.payment_status === 'failed' || r.payment_status === 'cancelled');
+      if (isFailed) {
+        return new Response(JSON.stringify({
+          ok: false,
+          code: 'PAYMENT_FAILED',
+          is_paid: false,
+          message: 'Payment for this order was not completed. No active license found.'
+        }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      const isPending = orderRows.some(r => r.payment_status === 'pending' || r.payment_status === 'created');
+      if (isPending) {
+        return new Response(JSON.stringify({
+          ok: false,
+          code: 'PAYMENT_PENDING',
+          is_paid: false,
+          message: 'Payment for this order is pending confirmation. Please check back shortly.'
+        }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      authEmail = cleanReqEmail;
     }
 
     // Link authenticated auth.users ID with customer and license records for seamless ownership

@@ -55,6 +55,14 @@ module.exports = async function handler(req, res) {
     }
   }
 
+  for (const [pId, pur] of memoryStore.purchases.entries()) {
+    if (pur.email === targetEmail || pur.order_id === order_id || pur.payment_id === payment_id || pId === payment_id) {
+      pur.payment_status = 'refunded';
+      pur.revoked_at = new Date().toISOString();
+      pur.revoked_reason = revokeReason;
+    }
+  }
+
   // 2. Call Supabase RPC sfx_revoke_entitlement
   try {
     const rpcRes = await fetch(`${SUPABASE_URL}/rest/v1/rpc/sfx_revoke_entitlement`, {

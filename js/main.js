@@ -521,6 +521,7 @@
     // Minimal Lookup Form Elements
     var lookupForm = document.getElementById('cdm-lookup-form');
     var emailInput = document.getElementById('cdm-email-input');
+    var paymentInput = document.getElementById('cdm-payment-id-input');
     var proofContainer = document.getElementById('cdm-proof-container');
     var proofInput = document.getElementById('cdm-proof-input');
     var btnLookup = document.getElementById('cdm-btn-lookup');
@@ -681,12 +682,18 @@
 
     // ── SUPABASE AUTH ERROR FORMATTER ──
     function formatAuthError(err) {
-      if (!err) return 'No verified purchase was found for this email.';
+      if (!err) return 'No verified purchase was found matching these details.';
       var raw = (typeof err === 'string' ? err : err.message || err.error_description || err.msg || '');
       var msg = raw.toLowerCase();
 
-      if (msg.includes('not_paid') || msg.includes('no verified purchase')) {
-        return 'No verified purchase was found for this email.';
+      if (msg.includes('refunded') || msg.includes('revoked')) {
+        return 'This purchase has been refunded or revoked. Access to licenses and downloads is disabled.';
+      }
+      if (msg.includes('failed') || msg.includes('cancelled')) {
+        return 'Payment for this order was not completed. No active license found.';
+      }
+      if (msg.includes('pending')) {
+        return 'Payment for this order is pending confirmation. Please check back shortly.';
       }
       if (msg.includes('rate limit') || msg.includes('too many requests') || (err && err.error_code === 'over_email_send_rate_limit')) {
         return 'Too many requests. Service is temporarily rate-limited. Please wait a minute before searching again.';
@@ -700,7 +707,10 @@
       if (msg.includes('network') || msg.includes('fetch') || msg.includes('failed to fetch')) {
         return 'Could not connect to verification server. Please check your internet connection.';
       }
-      return raw || 'No verified purchase was found for this email.';
+      if (msg.includes('not_paid') || msg.includes('no verified purchase') || msg.includes('forbidden') || msg.includes('access denied')) {
+        return raw || 'No verified purchase was found matching these details. Please check your purchase email and Razorpay Payment ID.';
+      }
+      return raw || 'No verified purchase was found matching these details.';
     }
 
     // Expose deliverability validator globally for unit testing
@@ -744,6 +754,9 @@
             }
             if (emailInput && !emailInput.value) {
               emailInput.value = cached.email;
+            }
+            if (paymentInput && !paymentInput.value && cached.payment_id) {
+              paymentInput.value = cached.payment_id;
             }
           }
         }
@@ -804,7 +817,7 @@
     // In-flight submission lock to prevent duplicate requests
     var isSubmittingLookup = false;
 
-    // ── SUBMIT: FIND MY PURCHASE ──
+    // ── SUBMIT: FIND MY LICENSE (EMAIL + PAYMENT ID) ──
     if (lookupForm) {
       lookupForm.addEventListener('submit', async function (e) {
         e.preventDefault();
@@ -817,67 +830,44 @@
         }
 
         var email = emailCheck.email;
-        var proof = (proofInput?.value || '').trim();
+        var paymentId = (paymentInput?.value || proofInput?.value || '').trim();
 
-        // Check if we have cached proof for this email from recent session
-        var cachedOrder = '';
-        var cachedPayment = '';
-        var cachedToken = '';
-        if (activeCustomerSession && activeCustomerSession.email === email) {
-          cachedOrder = activeCustomerSession.order_id || '';
-          cachedPayment = activeCustomerSession.payment_id || '';
-          cachedToken = activeCustomerSession.token || '';
+        if (!paymentId) {
+          setAuthStatus('Please enter your Razorpay Payment ID from your email receipt.', false);
+          if (paymentInput) paymentInput.focus();
+          return;
         }
 
         isSubmittingLookup = true;
         btnLookup.disabled = true;
         var origBtnText = btnLookup.textContent;
-        btnLookup.textContent = 'Finding Purchase…';
+        btnLookup.textContent = 'Verifying Purchase…';
         setAuthStatus('', true);
 
         try {
-          var payload = { email: email };
-          if (proof) {
-            payload.proof = proof;
-          } else if (cachedOrder && cachedPayment) {
-            payload.order_id = cachedOrder;
-            payload.payment_id = cachedPayment;
-          }
-          if (cachedToken) {
-            payload.token = cachedToken;
-          }
-
+          var payload = { email: email, payment_id: paymentId };
           var portal = await window.SFX_PAYMENT_SERVICE.getCustomerPortal(payload);
 
-          if (portal && portal.requires_verification) {
-            // Verified purchase found, but ownership verification is required on this new device
-            if (proofContainer) proofContainer.style.display = 'flex';
-            if (proofInput) proofInput.focus();
-            btnLookup.textContent = 'VERIFY & ACCESS PURCHASE';
-            setAuthStatus('Verified purchase found for ' + email + '! Enter your Razorpay Order ID or Payment ID (from your receipt) to reveal your license details.', true);
-          } else if (portal && portal.ok && portal.is_paid) {
+          if (portal && portal.ok && portal.is_paid) {
             currentAuthEmail = portal.email || email;
             if (portal.token) {
               localStorage.setItem('sfx_customer_session', JSON.stringify({
                 email: currentAuthEmail,
-                token: portal.token,
-                order_id: portal.orders?.[0]?.provider_order_id || cachedOrder,
-                payment_id: portal.orders?.[0]?.provider_payment_id || cachedPayment
+                payment_id: paymentId,
+                token: portal.token
               }));
             }
             setAuthStatus('', true);
             await loadVerifiedPortalData(portal, currentAuthEmail);
           } else {
-            setAuthStatus(portal?.message || 'No verified purchase was found for this email.', false);
+            setAuthStatus(portal?.message || 'No verified purchase was found matching these details.', false);
           }
         } catch (err) {
           setAuthStatus(formatAuthError(err), false);
         } finally {
           isSubmittingLookup = false;
           btnLookup.disabled = false;
-          if (btnLookup.textContent === 'Finding Purchase…') {
-            btnLookup.textContent = origBtnText;
-          }
+          btnLookup.textContent = origBtnText;
         }
       });
     }
@@ -890,9 +880,10 @@
         currentAuthEmail = '';
         if (recentSessionBanner) recentSessionBanner.style.display = 'none';
         if (emailInput) emailInput.value = '';
+        if (paymentInput) paymentInput.value = '';
         if (proofInput) proofInput.value = '';
         if (proofContainer) proofContainer.style.display = 'none';
-        if (btnLookup) btnLookup.textContent = 'FIND MY PURCHASE';
+        if (btnLookup) btnLookup.textContent = 'FIND MY LICENSE';
         setAuthStatus('', true);
         showAuthView();
       });

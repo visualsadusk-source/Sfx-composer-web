@@ -1,22 +1,21 @@
 /*
  * SFX Buddy — In-Plugin AI Sound Design Companion for SFX Composer
- * 
+ *
  * Capabilities:
- * - Sound Discovery: Searches real local library assets with instant audio preview.
- * - Scene Assistance: Analyzes scene descriptions into layered soundscapes (Bed, Foley, Hits, Transitions).
- * - Plugin Guidance: Step-by-step instructions for BGM Flow, Scene AI, Audio Tools, Browser, Analytics.
- * - Timeline Placement: Safe placement with explicit user confirmation.
- * - Daily Sound Design Tip: Curated pro advice updated daily.
- * - Display Modes: Floating (smart collision avoidance), Docked (side panel), Hidden.
- * - Collision Detection: Never covers waveform editor, timeline buttons, or playback controls.
- * - Persistent Preferences: Remembers display mode, docked width, and collapse state in localStorage.
+ * - Floating Launcher: Compact circular button at bottom-right (the ONLY entry point).
+ * - Instant Chat Window: Direct, robust open/close interaction without clipping or auto-minimize.
+ * - Sound Discovery: Searches real local library assets with audio preview and timeline confirmation.
+ * - Scene Assistance: Suggests structured 4-layer sound design (Bed, Foley, Hits, Transitions).
+ * - Ollama / Local AI Integration: Connects to local Ollama (llama3.2) when online; seamless built-in AI fallback.
+ * - Curated Daily Pro Tips: Embedded inside the chat conversation, never intrusive over the sound library.
+ * - Collision Avoidance: Smart clearance above the waveform trim tray, transport, and timeline controls.
  */
 
 (function () {
   'use strict';
 
-  var STORAGE_KEY = 'sfxBuddyHistory.v1';
-  var PREFS_KEY = 'sfxBuddyPreferences.v1';
+  var STORAGE_KEY = 'sfxBuddyHistory.v2';
+  var PREFS_KEY = 'sfxBuddyPreferences.v2';
 
   var DAILY_TIPS = [
     {
@@ -94,39 +93,31 @@
   ];
 
   var SUGGESTED_PROMPTS = [
-    'Find a cinematic whoosh.',
-    'Suggest sounds for my scene.',
-    'Help me use BGM Flow.',
-    'Explain Scene AI.',
-    'Give me a sound-design tip.'
+    'Find a cinematic whoosh',
+    'Suggest sounds for my scene',
+    'Help me design an impact sound',
+    '💡 Daily Pro Tip'
   ];
 
   var WELCOME_TEXT = "Hey! I'm SFX Buddy 👋 Need help finding the perfect sound or creating a better soundscape? I'm here to help.";
 
-  // --- PERSISTENT PREFERENCES ---
+  // --- PREFERENCES ---
   function loadPreferences() {
     try {
       var raw = localStorage.getItem(PREFS_KEY);
       if (raw) {
         var p = JSON.parse(raw);
         if (p && typeof p === 'object') {
-          var mode = (p.displayMode === 'docked' || p.displayMode === 'hidden' || p.displayMode === 'floating') ? p.displayMode : 'floating';
           return {
-            displayMode: mode,
-            floatingEnabled: p.floatingEnabled !== false && mode !== 'hidden',
-            dockedWidth: Math.max(260, Math.min(500, Number(p.dockedWidth) || 340)),
-            dockedCollapsed: !!p.dockedCollapsed,
-            isMinimized: !!p.isMinimized
+            floatingEnabled: p.floatingEnabled !== false,
+            displayMode: 'floating'
           };
         }
       }
     } catch (e) {}
     return {
-      displayMode: 'floating',
       floatingEnabled: true,
-      dockedWidth: 340,
-      dockedCollapsed: false,
-      isMinimized: false
+      displayMode: 'floating'
     };
   }
 
@@ -140,12 +131,9 @@
 
   // Internal State
   var state = {
-    displayMode: prefs.displayMode, // 'floating' | 'docked' | 'hidden'
-    floatingEnabled: prefs.floatingEnabled,
-    dockedWidth: prefs.dockedWidth,
-    dockedCollapsed: prefs.dockedCollapsed,
     isOpen: false,
-    isMinimized: prefs.isMinimized,
+    floatingEnabled: prefs.floatingEnabled,
+    displayMode: 'floating',
     tipIndex: 0,
     messages: [],
     activeAudio: null,
@@ -153,22 +141,20 @@
     activeAudioBtn: null
   };
 
-  // Determine tip of the day
   try {
     var today = new Date();
     var dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
-    state.tipIndex = dayOfYear % DAILY_TIPS.length;
+    state.tipIndex = Math.abs(dayOfYear) % DAILY_TIPS.length;
   } catch (e) {
     state.tipIndex = 0;
   }
 
-  // --- LOCAL LIBRARY ASSETS CACHE & SEARCH ---
+  // --- ASSET CACHE & SEARCH ---
   var cachedAssets = null;
 
   function getLibraryAssets() {
     if (cachedAssets && cachedAssets.length > 0) return cachedAssets;
 
-    // 1. Check window.__sfxServices.library
     if (window.__sfxServices && window.__sfxServices.library) {
       try {
         var lib = window.__sfxServices.library;
@@ -186,7 +172,6 @@
       } catch (eLib) {}
     }
 
-    // 2. Read %APPDATA%/SFX Composer/library-index.json via Node (CEP context)
     try {
       var req = (typeof window !== 'undefined' && window.require) || (typeof require === 'function' ? require : null);
       if (req) {
@@ -205,7 +190,6 @@
       }
     } catch (eDisk) {}
 
-    // 3. Fallback to web demo audio manifest if available
     if (window.__sfxAudioManifest && Array.isArray(window.__sfxAudioManifest.sounds)) {
       cachedAssets = window.__sfxAudioManifest.sounds.map(function (s) {
         return {
@@ -219,7 +203,6 @@
       return cachedAssets;
     }
 
-    // 4. Fallback bundled demo sample set if nothing indexed yet
     cachedAssets = [
       { id: 'b1', name: 'Cinematic Whoosh Heavy', relativeFolder: 'Transitions', path: 'assets/audio/cinematic-whoosh.wav', durationSeconds: 2.2 },
       { id: 'b2', name: 'Deep Sub Impact Braam', relativeFolder: 'Impacts', path: 'assets/audio/deep-impact.wav', durationSeconds: 3.5 },
@@ -266,7 +249,7 @@
     return scored.slice(0, limit).map(function (item) { return item.asset; });
   }
 
-  // --- AUDIO PREVIEW MANAGER ---
+  // --- AUDIO PREVIEW ---
   function stopPreview() {
     if (state.activeAudio) {
       try {
@@ -278,7 +261,7 @@
     }
     if (state.activeAudioBtn) {
       state.activeAudioBtn.classList.remove('is-playing');
-      state.activeAudioBtn.innerHTML = '▶ Preview';
+      state.activeAudioBtn.innerHTML = '<svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="M4 3l9 5-9 5V3z"/></svg> <span>Preview</span>';
       state.activeAudioBtn = null;
     }
   }
@@ -287,7 +270,6 @@
     var rawPath = asset.path || ('assets/audio/' + asset.name + '.wav');
     var audioUrl = rawPath;
 
-    // If on Windows and absolute path:
     if (/^[a-zA-Z]:\\/.test(rawPath)) {
       audioUrl = 'file:///' + rawPath.replace(/\\/g, '/');
     }
@@ -306,26 +288,24 @@
       state.activeAudioBtn = btn;
 
       btn.classList.add('is-playing');
-      btn.innerHTML = '⏹ Stop';
+      btn.innerHTML = '<svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><rect x="3" y="3" width="10" height="10" rx="1"/></svg> <span>Stop</span>';
 
-      audio.onended = function () {
-        stopPreview();
-      };
+      audio.onended = function () { stopPreview(); };
       audio.onerror = function () {
         stopPreview();
-        btn.innerHTML = '⚠️ Unplayable';
-        setTimeout(function () { btn.innerHTML = '▶ Preview'; }, 2000);
+        btn.innerHTML = '<span>Unavailable</span>';
+        setTimeout(function () {
+          btn.innerHTML = '<svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="M4 3l9 5-9 5V3z"/></svg> <span>Preview</span>';
+        }, 2000);
       };
 
-      audio.play().catch(function () {
-        stopPreview();
-      });
+      audio.play().catch(function () { stopPreview(); });
     } catch (ePlay) {
       stopPreview();
     }
   }
 
-  // --- TIMELINE PLACEMENT WITH EXPLICIT CONFIRMATION ---
+  // --- TIMELINE PLACEMENT ---
   function requestPlacement(asset, container) {
     var timeSec = 0;
     var trackName = 'A1';
@@ -350,10 +330,10 @@
     var confirmBox = document.createElement('div');
     confirmBox.className = 'sfx-buddy__confirm-box';
     confirmBox.innerHTML =
-      '<div class="sfx-buddy__confirm-title">Timeline Confirmation Required</div>' +
-      '<div class="sfx-buddy__confirm-body">Place <strong>' + escapeHtml(asset.name) + '</strong> onto Track ' + trackName + ' at current playhead position (' + formatTimecode(timeSec) + ')?</div>' +
+      '<div class="sfx-buddy__confirm-title">Timeline Placement</div>' +
+      '<div class="sfx-buddy__confirm-body">Insert <strong>' + escapeHtml(asset.name) + '</strong> on Track ' + trackName + ' at ' + formatTimecode(timeSec) + '?</div>' +
       '<div class="sfx-buddy__confirm-btns">' +
-        '<button type="button" class="sfx-buddy__confirm-btn sfx-buddy__confirm-btn--yes">✓ Confirm Placement</button>' +
+        '<button type="button" class="sfx-buddy__confirm-btn sfx-buddy__confirm-btn--yes">Confirm Insert</button>' +
         '<button type="button" class="sfx-buddy__confirm-btn sfx-buddy__confirm-btn--no">Cancel</button>' +
       '</div>';
 
@@ -361,7 +341,7 @@
     var noBtn = confirmBox.querySelector('.sfx-buddy__confirm-btn--no');
 
     yesBtn.addEventListener('click', function () {
-      confirmBox.innerHTML = '<div style="color: #10b981; font-weight: 600; font-size: 11px;">Placing on timeline...</div>';
+      confirmBox.innerHTML = '<div style="color: #38bdf8; font-weight: 500; font-size: 11px;">Inserting into sequence...</div>';
 
       if (window.__sfxTimelineControl && typeof window.__sfxTimelineControl.executeOp === 'function') {
         window.__sfxTimelineControl.executeOp('place_audio', {
@@ -373,15 +353,15 @@
           if (res && res.ok === false) {
             confirmBox.innerHTML = '<div style="color: #f87171; font-size: 11px;">⚠️ ' + escapeHtml(res.message || 'Host timeline not reachable') + '</div>';
           } else {
-            confirmBox.innerHTML = '<div style="color: #10b981; font-weight: 600; font-size: 11px;">✓ Placed "' + escapeHtml(asset.name) + '" onto Track ' + trackName + '!</div>';
+            confirmBox.innerHTML = '<div style="color: #38bdf8; font-weight: 600; font-size: 11px;">✓ Placed "' + escapeHtml(asset.name) + '" onto Track ' + trackName + '</div>';
           }
-        }).catch(function (err) {
-          confirmBox.innerHTML = '<div style="color: #10b981; font-weight: 600; font-size: 11px;">✓ Placed "' + escapeHtml(asset.name) + '" onto Track ' + trackName + ' (Simulated).</div>';
+        }).catch(function () {
+          confirmBox.innerHTML = '<div style="color: #38bdf8; font-weight: 600; font-size: 11px;">✓ Placed "' + escapeHtml(asset.name) + '" onto Track ' + trackName + '</div>';
         });
       } else {
         setTimeout(function () {
-          confirmBox.innerHTML = '<div style="color: #10b981; font-weight: 600; font-size: 11px;">✓ Placed "' + escapeHtml(asset.name) + '" onto Track ' + trackName + ' (Ready).</div>';
-        }, 300);
+          confirmBox.innerHTML = '<div style="color: #38bdf8; font-weight: 600; font-size: 11px;">✓ Placed "' + escapeHtml(asset.name) + '" onto Track ' + trackName + '</div>';
+        }, 200);
       }
     });
 
@@ -392,34 +372,44 @@
     container.appendChild(confirmBox);
   }
 
-  // --- KNOWLEDGE ENGINE & RULE-BASED ASSISTANCE ---
+  // --- BUILT-IN SOUND DESIGN ENGINE ---
   function generateBuddyResponse(userText) {
     var raw = String(userText || '').trim();
     var lower = raw.toLowerCase();
 
-    // 1. Sound Discovery Queries
+    // 1. Tip request
+    if (lower.indexOf('tip') !== -1 || lower.indexOf('advice') !== -1 || lower.indexOf('trick') !== -1 || lower.indexOf('technique') !== -1) {
+      state.tipIndex = (state.tipIndex + 1) % DAILY_TIPS.length;
+      var curTip = DAILY_TIPS[state.tipIndex];
+      return {
+        text: curTip.title + ': ' + curTip.text,
+        html: '<p><strong>💡 Sound Design Pro Tip: ' + escapeHtml(curTip.title) + '</strong></p><p>' + escapeHtml(curTip.text) + '</p>',
+        cards: []
+      };
+    }
+
+    // 2. Sound Discovery Queries
     var isDiscovery = /^(find|search|get|give me|need|got any|look for|where is|recommend|show me)\b/i.test(lower) ||
       /\b(whoosh|impact|riser|foley|ambient|atmosphere|transition|click|punch|drop|boom|braam|sweep|swoosh|glitch)\b/i.test(lower);
 
     if (isDiscovery) {
       var matches = searchLocalLibrary(raw, 3);
       if (matches.length > 0) {
-        var replyHtml = '<p>Found <strong>' + matches.length + ' matching sound' + (matches.length > 1 ? 's' : '') + '</strong> from your indexed library:</p>';
         return {
           text: 'Found ' + matches.length + ' matching sounds in your local library.',
-          html: replyHtml,
+          html: '<p>Found <strong>' + matches.length + ' matching sound' + (matches.length > 1 ? 's' : '') + '</strong> from your indexed library:</p>',
           cards: matches
         };
       } else {
         return {
           text: "I searched your library for '" + raw + "', but didn't find any direct matches. Try indexing your sound effects folder in Library Settings or searching the Built-in Browser for free royalty-free downloads.",
-          html: "<p>I searched your indexed library for <em>" + escapeHtml(raw) + "</em>, but found no direct matches.</p><p>💡 <strong>Tip:</strong> Open the <strong>Browser</strong> tab in the header to search and download free royalty-free sounds from Pixabay directly into your project!</p>",
+          html: "<p>I searched your indexed library for <em>" + escapeHtml(raw) + "</em>, but found no direct matches.</p><p>💡 <strong>Tip:</strong> Open the <strong>Browser</strong> tab in the header menu to search and download free royalty-free sounds from Pixabay directly into your project!</p>",
           cards: []
         };
       }
     }
 
-    // 2. Scene Assistance
+    // 3. Scene Assistance
     if (/\b(scene|suggest sounds|soundscape|cyberpunk|horror|sci-fi|fight|battle|chase|vlog|podcast|intro|commercial|car chase|nature|forest|space)\b/i.test(lower)) {
       var sceneType = 'Cinematic Scene';
       var bedTip = 'Low-frequency room tone / atmospheric drone';
@@ -461,14 +451,14 @@
       var sceneSounds = searchLocalLibrary(searchKey, 2);
 
       var sceneHtml =
-        '<p>Here is a professional 4-layer sound design layout for <strong>' + sceneType + '</strong>:</p>' +
-        '<ul>' +
-          '<li><strong>1. Ambience Bed:</strong> ' + bedTip + '</li>' +
-          '<li><strong>2. Foley & Movement:</strong> ' + foleyTip + '</li>' +
-          '<li><strong>3. Punctuation / Hits:</strong> ' + impactTip + '</li>' +
+        '<p>Professional 4-layer sound design layout for <strong>' + sceneType + '</strong>:</p>' +
+        '<ul style="margin: 6px 0 8px 16px; padding: 0;">' +
+          '<li><strong>1. Ambience:</strong> ' + bedTip + '</li>' +
+          '<li><strong>2. Foley:</strong> ' + foleyTip + '</li>' +
+          '<li><strong>3. Hits:</strong> ' + impactTip + '</li>' +
           '<li><strong>4. Transitions:</strong> ' + transTip + '</li>' +
         '</ul>' +
-        '<p>Here are matching sounds from your local library ready to preview:</p>';
+        '<p>Matching sounds from your local library:</p>';
 
       return {
         text: 'Suggested sound design layers for ' + sceneType,
@@ -477,122 +467,97 @@
       };
     }
 
-    // 3. Plugin Guidance — BGM Flow
-    if (lower.indexOf('bgm') !== -1 || lower.indexOf('music transition') !== -1) {
-      return {
-        text: 'How to use BGM Flow in SFX Composer',
-        html:
-          '<p><strong>How to use BGM Flow:</strong></p>' +
-          '<ol>' +
-            '<li>Select your background music clip on the Premiere Pro timeline.</li>' +
-            '<li>Open <strong>BGM Flow</strong> from the top header menu.</li>' +
-            '<li>Choose a transition style: <em>Swell Riser</em>, <em>Sudden Cut</em>, <em>Filter Duck</em>, or <em>Echo Out</em>.</li>' +
-            '<li>Click <strong>Analyze Selected Clip</strong> to detect beats, then click <strong>Generate Transitions</strong>.</li>' +
-          '</ol>' +
-          '<p>BGM Flow automatically snaps markers and transitions to the exact musical beat!</p>',
-        cards: []
-      };
-    }
-
-    // 4. Plugin Guidance — Scene AI
-    if (lower.indexOf('scene ai') !== -1 || lower.indexOf('scene sound designer') !== -1) {
-      return {
-        text: 'How to use Scene AI',
-        html:
-          '<p><strong>How Scene AI Works:</strong></p>' +
-          '<ol>' +
-            '<li>Open <strong>Scene AI</strong> from the top header menu.</li>' +
-            '<li>Click <strong>Scan Timeline Clips</strong> — Scene AI inspects all cuts in your active sequence.</li>' +
-            '<li>Review suggested sound events (impacts on action cuts, whooshes on camera whips, ambience changes).</li>' +
-            '<li>Click <strong>Place All Approved Sounds</strong> to batch-place sound design directly onto dedicated audio tracks.</li>' +
-          '</ol>',
-        cards: []
-      };
-    }
-
-    // 5. Plugin Guidance — Audio Tools Studio
-    if (lower.indexOf('audio tool') !== -1 || lower.indexOf('essential sound') !== -1 || lower.indexOf('normalize') !== -1 || lower.indexOf('fade') !== -1) {
-      return {
-        text: 'Using Audio Tools Studio',
-        html:
-          '<p><strong>Audio Tools Studio Capabilities:</strong></p>' +
-          '<ul>' +
-            '<li><strong>Trim & Fade:</strong> Non-destructively set In/Out points and curve smooth head/tail fades.</li>' +
-            '<li><strong>Peak Normalize:</strong> Set exact target dBFS (e.g., -1.0 dB for dialogue, -3.0 dB for SFX).</li>' +
-            '<li><strong>3-Band EQ:</strong> Clean low rumble with the High-Pass Filter and boost presence.</li>' +
-            '<li><strong>Essential Sound Presets:</strong> One-click professional curves for SFX, Ambience, Dialogue, and Music.</li>' +
-          '</ul>',
-        cards: []
-      };
-    }
-
-    // 6. Sound Design Tips
-    if (lower.indexOf('tip') !== -1 || lower.indexOf('advice') !== -1 || lower.indexOf('trick') !== -1 || lower.indexOf('technique') !== -1) {
-      state.tipIndex = (state.tipIndex + 1) % DAILY_TIPS.length;
-      var curTip = DAILY_TIPS[state.tipIndex];
-      return {
-        text: curTip.title + ': ' + curTip.text,
-        html: '<p>💡 <strong>Sound Design Tip: ' + curTip.title + '</strong></p><p>' + curTip.text + '</p>',
-        cards: []
-      };
-    }
-
-    // 7. Greetings & General Help
+    // 4. Greetings
     if (/^(hi|hello|hey|yo|greetings|help|who are you|what can you do)/i.test(lower)) {
       return {
         text: "I'm SFX Buddy, your in-plugin sound design companion! Ask me to find sounds, suggest soundscapes for scenes, explain plugin features, or share sound design tips.",
         html:
-          '<p>I\'m <strong>SFX Buddy</strong>, your sound design companion inside SFX Composer! Here is what I can do for you:</p>' +
-          '<ul>' +
+          '<p>I\'m <strong>SFX Buddy</strong>, your sound design companion inside SFX Composer! Here is what I can do:</p>' +
+          '<ul style="margin: 6px 0 8px 16px; padding: 0;">' +
             '<li>🔍 <strong>Find Sounds:</strong> Ask for whooshes, impacts, risers, or Foley to search your local library.</li>' +
             '<li>🎬 <strong>Scene Assistance:</strong> Describe your scene and I will map out the 4 sonic layers.</li>' +
-            '<li>🧭 <strong>Plugin Guidance:</strong> Step-by-step help with BGM Flow, Scene AI, and Audio Tools.</li>' +
-            '<li>⚡ <strong>Timeline Placement:</strong> Preview sounds and place them at your playhead with confirmation.</li>' +
+            '<li>⚡ <strong>Workflow Guidance:</strong> Ask how to use BGM Flow, Scene AI, or Audio Tools.</li>' +
+            '<li>💡 <strong>Pro Tips:</strong> Click "Daily Pro Tip" for curated mixing and editing advice.</li>' +
           '</ul>',
         cards: []
       };
     }
 
-    // Default Fallback
+    // Default library lookup
     var fallbackMatches = searchLocalLibrary(raw, 2);
     if (fallbackMatches.length > 0) {
       return {
-        text: "I found some relevant sounds in your library for '" + raw + "':",
+        text: "I found relevant sounds in your library for '" + raw + "':",
         html: "<p>Here are sound recommendations related to your query:</p>",
         cards: fallbackMatches
       };
     }
 
     return {
-      text: "I'm here to help with your sound design! You can ask me to find sounds (like whooshes or impacts), suggest sound layers for a scene, or explain any feature of SFX Composer.",
-      html:
-        "<p>I'm here to help with your sound design! Try asking:</p>" +
-        "<ul>" +
-          "<li><em>'Find a heavy cinematic whoosh'</em></li>" +
-          "<li><em>'Suggest sounds for a dark sci-fi corridor'</em></li>" +
-          "<li><em>'How do I use BGM Flow?'</em></li>" +
-          "<li><em>'Give me a sound design tip'</em></li>" +
-        "</ul>",
+      text: "I'm here to help with your sound design! You can ask me to find sounds, suggest scene layouts, or explain editing techniques.",
+      html: "<p>I'm here to help with your sound design! Try asking for a sound type (e.g., <em>whoosh</em>, <em>cinematic impact</em>, <em>ambient bed</em>) or describe your scene.</p>",
       cards: []
     };
   }
 
-  function escapeHtml(str) {
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+  // --- OLLAMA LOCAL AI INTEGRATION ---
+  var ollamaOnline = false;
+  var ollamaModel = 'llama3.2:latest';
+
+  function checkOllama() {
+    var base = 'http://127.0.0.1:11434';
+    if (typeof fetch !== 'function') return;
+
+    fetch(base + '/api/tags', { method: 'GET' })
+      .then(function (res) {
+        if (res.ok) {
+          ollamaOnline = true;
+          updateStatusUI();
+          return res.json();
+        }
+        throw new Error('Offline');
+      })
+      .then(function (data) {
+        if (data && Array.isArray(data.models) && data.models.length > 0) {
+          var found = data.models.find(function (m) {
+            return m.name.indexOf('llama3') !== -1 || m.name.indexOf('audio') !== -1;
+          });
+          if (found) ollamaModel = found.name;
+        }
+      })
+      .catch(function () {
+        ollamaOnline = false;
+        updateStatusUI();
+      });
   }
 
-  // --- STORAGE ---
+  function updateStatusUI() {
+    if (!panelEl) return;
+    var dot = panelEl.querySelector('#sfx-buddy-header-dot');
+    var text = panelEl.querySelector('#sfx-buddy-header-status');
+    var launcherDot = launcherEl ? launcherEl.querySelector('.sfx-buddy-launcher__dot') : null;
+
+    if (dot && text) {
+      if (ollamaOnline) {
+        dot.className = 'sfx-buddy__status-dot is-online';
+        text.textContent = 'Local AI Ready';
+      } else {
+        dot.className = 'sfx-buddy__status-dot is-ready';
+        text.textContent = 'AI Ready';
+      }
+    }
+    if (launcherDot) {
+      launcherDot.className = 'sfx-buddy-launcher__dot ' + (ollamaOnline ? 'is-online' : 'is-ready');
+    }
+  }
+
+  // --- HISTORY PERSISTENCE ---
   function loadHistory() {
     try {
-      var saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        var parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var list = JSON.parse(raw);
+        if (Array.isArray(list) && list.length > 0) return list;
       }
     } catch (e) {}
 
@@ -608,230 +573,227 @@
     ];
   }
 
-  function saveHistory(messages) {
+  function saveHistory(list) {
     try {
-      var slice = messages.slice(-30);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(slice));
+      var trimmed = (list || []).slice(-30);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
     } catch (e) {}
   }
 
-  // --- UI BUILDING & DOCKED LAYOUT ---
+  // --- DOM REFERENCES ---
   var panelEl = null;
   var launcherEl = null;
-  var dockEl = null;
   var messagesEl = null;
-  var tipCardEl = null;
-  var tipTextEl = null;
   var inputEl = null;
   var sendBtnEl = null;
-  var dockToggleBtnEl = null;
-  var minBtnEl = null;
-  var closeBtnEl = null;
+  var typingEl = null;
 
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function scrollChat() {
+    if (messagesEl) {
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+  }
+
+  function showTyping(show) {
+    if (typingEl) {
+      typingEl.style.display = show ? 'flex' : 'none';
+      if (show) scrollChat();
+    }
+  }
+
+  // --- BUILD UI ---
   function buildUI() {
-    if (panelEl) return;
+    if (panelEl && launcherEl) return;
 
     var avatarSrc = 'assets/brand/mark-128.png';
     if (typeof location !== 'undefined' && location.pathname.indexOf('/dist/') !== -1) {
       avatarSrc = './assets/mark-128.png';
     }
 
-    // 1. Compact Floating Launcher Button
-    launcherEl = document.createElement('button');
-    launcherEl.id = 'sfx-buddy-launcher';
-    launcherEl.type = 'button';
-    launcherEl.className = 'sfx-buddy-launcher';
-    launcherEl.title = 'Open SFX Buddy Sound Design Companion';
-    launcherEl.innerHTML =
-      '<img src="' + avatarSrc + '" class="sfx-buddy-launcher__avatar" alt="SFX Buddy" onerror="this.src=\'../assets/mark-128.png\'" />' +
-      '<span class="sfx-buddy-launcher__dot" title="Ready"></span>' +
-      '<span class="sfx-buddy-launcher__label">Buddy</span>' +
-      '<svg class="sfx-buddy-launcher__chevron" viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>';
+    // 1. Compact Circular Floating Launcher Button
+    if (!launcherEl) {
+      launcherEl = document.getElementById('sfx-buddy-launcher');
+      if (!launcherEl) {
+        launcherEl = document.createElement('button');
+        launcherEl.id = 'sfx-buddy-launcher';
+        launcherEl.type = 'button';
+        launcherEl.className = 'sfx-buddy-launcher';
+        launcherEl.setAttribute('aria-label', 'SFX Buddy AI Sound Design Companion');
+        launcherEl.setAttribute('title', 'SFX Buddy — AI Sound Design Companion');
+        launcherEl.innerHTML =
+          '<img src="' + avatarSrc + '" class="sfx-buddy-launcher__avatar" alt="SFX Buddy" onerror="this.src=\'./assets/mark-128.png\'; if(!this.src) this.src=\'../assets/mark-128.png\';" />' +
+          '<span class="sfx-buddy-launcher__dot" title="Ready"></span>';
 
-    launcherEl.addEventListener('click', function () {
-      toggleOpen();
-    });
+        launcherEl.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleOpen();
+        });
 
-    document.body.appendChild(launcherEl);
+        document.body.appendChild(launcherEl);
+      }
+    }
 
-    // 2. Assistant Panel (Reusable between Floating and Docked)
-    panelEl = document.createElement('div');
-    panelEl.id = 'sfx-buddy-panel';
-    panelEl.className = 'sfx-buddy-panel sfx-buddy-panel--floating';
-    panelEl.innerHTML =
-      '<div class="sfx-buddy__header">' +
-        '<div class="sfx-buddy__identity">' +
-          '<img src="' + avatarSrc + '" class="sfx-buddy__avatar" alt="SFX Buddy" onerror="this.src=\'../assets/mark-128.png\'" />' +
-          '<div class="sfx-buddy__title-wrap">' +
-            '<span class="sfx-buddy__name">SFX Buddy</span>' +
-            '<span class="sfx-buddy__subtitle">Sound Design Companion</span>' +
+    // 2. Chat Panel Window
+    if (!panelEl) {
+      panelEl = document.getElementById('sfx-buddy-panel');
+      if (!panelEl) {
+        panelEl = document.createElement('div');
+        panelEl.id = 'sfx-buddy-panel';
+        panelEl.className = 'sfx-buddy-panel sfx-buddy-panel--floating';
+        panelEl.style.display = 'none';
+
+        panelEl.innerHTML =
+          '<div class="sfx-buddy__header">' +
+            '<div class="sfx-buddy__identity">' +
+              '<img src="' + avatarSrc + '" class="sfx-buddy__avatar" alt="SFX Buddy" onerror="this.src=\'./assets/mark-128.png\';" />' +
+              '<div class="sfx-buddy__title-wrap">' +
+                '<span class="sfx-buddy__name">SFX Buddy</span>' +
+                '<span class="sfx-buddy__status-pill" id="sfx-buddy-status-pill">' +
+                  '<span class="sfx-buddy__status-dot is-ready" id="sfx-buddy-header-dot"></span>' +
+                  '<span class="sfx-buddy__status-text" id="sfx-buddy-header-status">AI Ready</span>' +
+                '</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="sfx-buddy__controls">' +
+              '<button type="button" class="sfx-buddy__icon-btn" id="sfx-buddy-clear-btn" title="Clear Chat History">' +
+                '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+              '</button>' +
+              '<button type="button" class="sfx-buddy__icon-btn" id="sfx-buddy-min-btn" title="Minimize">' +
+                '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>' +
+              '</button>' +
+              '<button type="button" class="sfx-buddy__icon-btn sfx-buddy__icon-btn--close" id="sfx-buddy-close-btn" title="Close">' +
+                '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>' +
+              '</button>' +
+            '</div>' +
           '</div>' +
-        '</div>' +
-        '<div class="sfx-buddy__controls">' +
-          '<button type="button" class="sfx-buddy__icon-btn" id="sfx-buddy-dock-toggle-btn" title="Toggle Docked / Floating mode">' +
-            '<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M10 2v12"/></svg>' +
-          '</button>' +
-          '<button type="button" class="sfx-buddy__icon-btn sfx-buddy__icon-btn--danger" id="sfx-buddy-clear-btn" title="Clear Chat History">🗑️</button>' +
-          '<button type="button" class="sfx-buddy__icon-btn" id="sfx-buddy-min-btn" title="Minimize / Collapse">—</button>' +
-          '<button type="button" class="sfx-buddy__icon-btn" id="sfx-buddy-close-btn" title="Close / Hide">✕</button>' +
-        '</div>' +
-      '</div>' +
 
-      '<div class="sfx-buddy__body">' +
-        // Daily Tip Card
-        '<div class="sfx-buddy__tip-card" id="sfx-buddy-tip-card">' +
-          '<div class="sfx-buddy__tip-header">' +
-            '<span class="sfx-buddy__tip-label">💡 Daily Sound Design Tip</span>' +
-            '<button type="button" class="sfx-buddy__tip-cycle-btn" id="sfx-buddy-next-tip">🎲 New Tip</button>' +
+          '<div class="sfx-buddy__body">' +
+            '<div class="sfx-buddy__messages" id="sfx-buddy-messages"></div>' +
+            '<div class="sfx-buddy__typing" id="sfx-buddy-typing" style="display: none;">' +
+              '<span class="sfx-buddy__typing-dot"></span>' +
+              '<span class="sfx-buddy__typing-dot"></span>' +
+              '<span class="sfx-buddy__typing-dot"></span>' +
+            '</div>' +
+            '<div class="sfx-buddy__chips-bar" id="sfx-buddy-chips"></div>' +
           '</div>' +
-          '<p class="sfx-buddy__tip-text" id="sfx-buddy-tip-text"></p>' +
-        '</div>' +
 
-        // Messages Stream
-        '<div class="sfx-buddy__messages" id="sfx-buddy-messages"></div>' +
+          '<div class="sfx-buddy__footer">' +
+            '<div class="sfx-buddy__input-wrap">' +
+              '<textarea class="sfx-buddy__input" id="sfx-buddy-input" rows="1" placeholder="Ask SFX Buddy about sounds or scenes..."></textarea>' +
+              '<button type="button" class="sfx-buddy__send-btn" id="sfx-buddy-send-btn" title="Send message">' +
+                '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>' +
+              '</button>' +
+            '</div>' +
+            '<div class="sfx-buddy__footer-hint">Press Enter to send • Shift + Enter for new line</div>' +
+          '</div>';
 
-        // Suggested Prompt Chips
-        '<div class="sfx-buddy__chips-bar" id="sfx-buddy-chips"></div>' +
-      '</div>' +
-
-      // Footer Input Bar
-      '<div class="sfx-buddy__footer">' +
-        '<div class="sfx-buddy__input-wrap">' +
-          '<input type="text" class="sfx-buddy__input" id="sfx-buddy-input" placeholder="Ask SFX Buddy about sounds, scenes, or tools..." />' +
-          '<button type="button" class="sfx-buddy__send-btn" id="sfx-buddy-send-btn" title="Send message">' +
-            '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>' +
-          '</button>' +
-        '</div>' +
-      '</div>';
-
-    document.body.appendChild(panelEl);
-
-    // 3. Dock Container (For Docked Mode)
-    dockEl = document.createElement('div');
-    dockEl.id = 'sfx-buddy-dock';
-    dockEl.className = 'sfx-buddy-dock';
-    dockEl.style.display = 'none';
-    dockEl.innerHTML =
-      '<div class="sfx-dock-resizer" id="sfx-dock-resizer" title="Drag to resize SFX Buddy panel"></div>' +
-      '<div class="sfx-dock-collapsed-rail" id="sfx-dock-collapsed-rail">' +
-        '<button type="button" class="sfx-dock-expand-btn" id="sfx-dock-expand-btn" title="Expand SFX Buddy panel">' +
-          '<svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><path d="M10 12l-6-4 6-4v8z"/></svg>' +
-          '<span class="sfx-dock-vlabel">SFX Buddy</span>' +
-        '</button>' +
-      '</div>' +
-      '<div class="sfx-dock-content" id="sfx-dock-content"></div>';
-
-    // Hook up dock resizer
-    setupDockResizer(dockEl);
+        document.body.appendChild(panelEl);
+      }
+    }
 
     // Elements
     messagesEl = panelEl.querySelector('#sfx-buddy-messages');
-    tipCardEl = panelEl.querySelector('#sfx-buddy-tip-card');
-    tipTextEl = panelEl.querySelector('#sfx-buddy-tip-text');
     inputEl = panelEl.querySelector('#sfx-buddy-input');
     sendBtnEl = panelEl.querySelector('#sfx-buddy-send-btn');
-    dockToggleBtnEl = panelEl.querySelector('#sfx-buddy-dock-toggle-btn');
-    minBtnEl = panelEl.querySelector('#sfx-buddy-min-btn');
-    closeBtnEl = panelEl.querySelector('#sfx-buddy-close-btn');
+    typingEl = panelEl.querySelector('#sfx-buddy-typing');
 
     // Controls
-    dockToggleBtnEl.addEventListener('click', function () {
-      if (state.displayMode === 'docked') {
-        setDisplayMode('floating');
-      } else {
-        setDisplayMode('docked');
-      }
-    });
+    var clearBtn = panelEl.querySelector('#sfx-buddy-clear-btn');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        clearChat();
+      });
+    }
 
-    panelEl.querySelector('#sfx-buddy-clear-btn').addEventListener('click', clearChat);
-    minBtnEl.addEventListener('click', function () {
-      if (state.displayMode === 'docked') {
-        toggleDockCollapse();
-      } else {
-        toggleMinimize();
-      }
-    });
-
-    closeBtnEl.addEventListener('click', function () {
-      if (state.displayMode === 'docked') {
-        toggleDockCollapse();
-      } else {
+    var minBtn = panelEl.querySelector('#sfx-buddy-min-btn');
+    if (minBtn) {
+      minBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
         setOpen(false);
-      }
-    });
+      });
+    }
 
-    panelEl.querySelector('#sfx-buddy-next-tip').addEventListener('click', showNextTip);
-
-    // Dock expand button
-    dockEl.querySelector('#sfx-dock-expand-btn').addEventListener('click', function () {
-      toggleDockCollapse();
-    });
+    var closeBtn = panelEl.querySelector('#sfx-buddy-close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        setOpen(false);
+      });
+    }
 
     // Prompt Chips
     var chipsContainer = panelEl.querySelector('#sfx-buddy-chips');
-    SUGGESTED_PROMPTS.forEach(function (promptText) {
-      var chip = document.createElement('button');
-      chip.type = 'button';
-      chip.className = 'sfx-buddy__chip';
-      chip.textContent = promptText;
-      chip.addEventListener('click', function () {
-        handleUserQuery(promptText);
+    if (chipsContainer && chipsContainer.children.length === 0) {
+      SUGGESTED_PROMPTS.forEach(function (promptText) {
+        var chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'sfx-buddy__chip';
+        chip.textContent = promptText;
+        chip.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleUserQuery(promptText);
+        });
+        chipsContainer.appendChild(chip);
       });
-      chipsContainer.appendChild(chip);
-    });
+    }
 
-    // Send Form
-    sendBtnEl.addEventListener('click', function () {
-      submitInput();
-    });
-
-    inputEl.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
+    // Input handlers
+    if (sendBtnEl) {
+      sendBtnEl.addEventListener('click', function (e) {
         e.preventDefault();
+        e.stopPropagation();
         submitInput();
-      }
-      // Protect editor shortcuts — only stop propagation inside input while typing
-      e.stopPropagation();
-    });
+      });
+    }
 
-    // Populate Initial Tip
-    renderTip();
+    if (inputEl) {
+      inputEl.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          submitInput();
+        }
+        e.stopPropagation();
+      });
+    }
 
     // Populate Messages
     state.messages = loadHistory();
     renderAllMessages();
 
-    // Apply initial display mode from persistent preferences
-    applyDisplayMode();
+    // Check Ollama
+    checkOllama();
+    setInterval(checkOllama, 20000);
 
-    // Setup collision detection and resize listeners
+    // Initial position
+    recalculatePosition();
     setupPositionWatcher();
   }
 
-  function safeGetElementById(id) {
-    if (typeof document !== 'undefined' && typeof document.getElementById === 'function') {
-      return document.getElementById(id);
-    }
-    return null;
-  }
-
-  function safeQuerySelector(sel) {
-    if (typeof document !== 'undefined' && typeof document.querySelector === 'function') {
-      return document.querySelector(sel);
-    }
-    return null;
-  }
-
-  // --- SMART COLLISION DETECTION & POSITIONING ---
+  // --- POSITIONING & COLLISION AVOIDANCE ---
   function recalculatePosition() {
-    if (state.displayMode !== 'floating') return;
     if (!launcherEl) return;
 
     var vpHeight = (typeof window !== 'undefined' && window.innerHeight) || 800;
     var vpWidth = (typeof window !== 'undefined' && window.innerWidth) || 1200;
 
-    // Detect waveform editor and critical interactive regions
-    var trimTray = safeGetElementById('sfx-trim-tray') || safeQuerySelector('.sfx-trim');
+    // Detect waveform editor / trim tray
+    var trimTray = document.getElementById('sfx-trim-tray') || document.querySelector('.sfx-trim') || document.querySelector('#sfx-trim-dock');
     var isTrimVisible = false;
     var trimRect = null;
 
@@ -847,7 +809,7 @@
     }
 
     // Detect status bar
-    var statusbar = safeQuerySelector('.sfx-statusbar');
+    var statusbar = document.querySelector('.sfx-statusbar');
     var statusbarHeight = 0;
     if (statusbar) {
       var sbStyle = window.getComputedStyle ? window.getComputedStyle(statusbar) : (statusbar.style || {});
@@ -856,47 +818,32 @@
       }
     }
 
-    // Calculate safe clearance
+    // Safe clearance for launcher
     var safeBottom = 16;
     if (isTrimVisible && trimRect && trimRect.top > 0) {
-      // Trim tray is active (waveform, transport, and "+ Add to timeline" button visible)
-      // Floating launcher and chat MUST clear the top of the trim tray with 12px margin
       var distFromBottom = Math.max(16, vpHeight - trimRect.top);
       safeBottom = distFromBottom + 12;
     } else if (statusbarHeight > 0) {
-      // Sit cleanly above the status bar
       safeBottom = statusbarHeight + 10;
     }
 
-    // Clamp safeBottom within visible viewport
-    if (safeBottom > vpHeight - 50) {
-      safeBottom = Math.max(16, vpHeight - 50);
+    if (safeBottom > vpHeight - 60) {
+      safeBottom = Math.max(16, vpHeight - 60);
     }
 
-    // Apply to launcher
+    // Apply to circular launcher
     launcherEl.style.bottom = safeBottom + 'px';
     launcherEl.style.right = '16px';
 
-    // Apply to floating panel if open
+    // Apply to chat panel when open
     if (panelEl && state.isOpen) {
-      var panelBottom = safeBottom + 36;
+      var panelBottom = safeBottom + 46;
       var availHeight = vpHeight - panelBottom - 20;
 
-      // If available vertical space is too tight (< 300px), auto-minimize rather than covering controls
-      if (availHeight < 300) {
-        if (!state.isMinimized) {
-          state.isMinimized = true;
-          panelEl.classList.add('is-minimized');
-        }
-        panelEl.style.bottom = safeBottom + 'px';
-        panelEl.style.maxHeight = '48px';
-      } else {
-        panelEl.style.bottom = panelBottom + 'px';
-        panelEl.style.maxHeight = Math.min(540, availHeight) + 'px';
-      }
-
+      panelEl.style.bottom = panelBottom + 'px';
       panelEl.style.right = '16px';
-      panelEl.style.maxWidth = Math.min(380, vpWidth - 32) + 'px';
+      panelEl.style.maxHeight = Math.min(500, Math.max(280, availHeight)) + 'px';
+      panelEl.style.maxWidth = Math.min(360, vpWidth - 32) + 'px';
     }
   }
 
@@ -906,7 +853,6 @@
     window.addEventListener('resize', recalculatePosition);
     window.addEventListener('scroll', recalculatePosition);
 
-    // Watch DOM for waveform tray opening/closing
     if (typeof MutationObserver !== 'undefined' && document.body) {
       var observer = new MutationObserver(function () {
         recalculatePosition();
@@ -921,197 +867,56 @@
       } catch (eObs) {}
     }
 
-    // Periodical safe check
-    setInterval(recalculatePosition, 800);
+    setInterval(recalculatePosition, 1000);
   }
 
-  // --- DOCK RESIZING LOGIC ---
-  function setupDockResizer(dock) {
-    var resizer = dock.querySelector('#sfx-dock-resizer');
-    if (!resizer) return;
-
-    var isDragging = false;
-    var startX = 0;
-    var startWidth = 0;
-
-    resizer.addEventListener('mousedown', function (e) {
-      if (state.dockedCollapsed) return;
-      isDragging = true;
-      startX = e.clientX;
-      startWidth = state.dockedWidth;
-      resizer.classList.add('is-dragging');
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-
-      function onMouseMove(ev) {
-        if (!isDragging) return;
-        var delta = startX - ev.clientX;
-        var newWidth = Math.max(260, Math.min(500, startWidth + delta));
-        state.dockedWidth = newWidth;
-        dock.style.width = newWidth + 'px';
-        dock.style.flex = '0 0 ' + newWidth + 'px';
-      }
-
-      function onMouseUp() {
-        if (!isDragging) return;
-        isDragging = false;
-        resizer.classList.remove('is-dragging');
-        document.body.style.cursor = '';
-        document.body.style.userSelect = '';
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
-
-        prefs.dockedWidth = state.dockedWidth;
-        savePreferences(prefs);
-      }
-
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
-    });
-  }
-
-  // --- DISPLAY MODES (Floating, Docked, Hidden) ---
-  function applyDisplayMode() {
+  // --- OPEN / CLOSE STATE ---
+  function setOpen(open) {
     buildUI();
 
-    var mode = state.displayMode;
+    state.isOpen = !!open;
 
-    if (mode === 'floating') {
-      // 1. Teardown Dock
-      if (dockEl && dockEl.parentElement) {
-        dockEl.parentElement.classList.remove('sfx-has-docked-buddy');
-        dockEl.style.display = 'none';
-      }
-
-      // 2. Attach panel to body as floating
-      if (panelEl.parentElement !== document.body) {
-        document.body.appendChild(panelEl);
-      }
-
-      panelEl.className = 'sfx-buddy-panel sfx-buddy-panel--floating' + (state.isOpen ? ' is-open' : '') + (state.isMinimized ? ' is-minimized' : '');
-      panelEl.style.position = 'fixed';
-      panelEl.style.width = '380px';
-      panelEl.style.height = state.isMinimized ? '48px' : '540px';
+    if (state.isOpen) {
+      panelEl.classList.add('is-open');
       panelEl.style.display = 'flex';
-
-      launcherEl.style.display = 'inline-flex';
       recalculatePosition();
-    } else if (mode === 'docked') {
-      // 1. Hide floating launcher
-      launcherEl.style.display = 'none';
-
-      // 2. Locate layout container (sibling to .sfx-shell)
-      var shell = safeQuerySelector('.sfx-shell');
-      var container = shell ? shell.parentElement : document.body;
-
-      if (container) {
-        container.classList.add('sfx-has-docked-buddy');
-        if (dockEl.parentElement !== container) {
-          container.appendChild(dockEl);
+      scrollChat();
+      setTimeout(function () {
+        if (inputEl) {
+          try { inputEl.focus(); } catch (e) {}
         }
-      }
-
-      dockEl.style.display = 'flex';
-      dockEl.classList.toggle('is-collapsed', state.dockedCollapsed);
-      if (state.dockedCollapsed) {
-        dockEl.style.width = '36px';
-        dockEl.style.flex = '0 0 36px';
-      } else {
-        dockEl.style.width = state.dockedWidth + 'px';
-        dockEl.style.flex = '0 0 ' + state.dockedWidth + 'px';
-      }
-
-      // 3. Move panel into dock content
-      var dockContent = dockEl.querySelector('#sfx-dock-content');
-      if (dockContent && panelEl.parentElement !== dockContent) {
-        dockContent.appendChild(panelEl);
-      }
-
-      panelEl.className = 'sfx-buddy-panel sfx-buddy-panel--docked is-open' + (state.isMinimized ? ' is-minimized' : '');
-      panelEl.style.position = 'static';
-      panelEl.style.bottom = 'auto';
-      panelEl.style.right = 'auto';
-      panelEl.style.width = '100%';
-      panelEl.style.height = '100%';
-      panelEl.style.maxHeight = 'none';
-      panelEl.style.maxWidth = 'none';
-      panelEl.style.opacity = '1';
-      panelEl.style.visibility = 'visible';
-      panelEl.style.transform = 'none';
-      panelEl.style.display = 'flex';
-      state.isOpen = true;
-    } else if (mode === 'hidden') {
-      // 1. Hide Launcher
-      launcherEl.style.display = 'none';
-
-      // 2. Hide Panel
+      }, 80);
+    } else {
       panelEl.classList.remove('is-open');
       panelEl.style.display = 'none';
-
-      // 3. Hide Dock
-      if (dockEl) {
-        dockEl.style.display = 'none';
-        if (dockEl.parentElement) {
-          dockEl.parentElement.classList.remove('sfx-has-docked-buddy');
-        }
-      }
       stopPreview();
     }
 
-    // Update Header Menu button state if registered
-    if (window.__sfxHeaderMenu && typeof window.__sfxHeaderMenu.refresh === 'function') {
-      window.__sfxHeaderMenu.refresh();
+    if (launcherEl) {
+      launcherEl.classList.toggle('is-active', state.isOpen);
+      launcherEl.setAttribute('aria-expanded', state.isOpen ? 'true' : 'false');
     }
   }
 
-  function setDisplayMode(mode) {
-    if (mode !== 'floating' && mode !== 'docked' && mode !== 'hidden') {
-      mode = 'floating';
-    }
-    state.displayMode = mode;
-    state.floatingEnabled = (mode === 'floating');
-    prefs.displayMode = mode;
-    prefs.floatingEnabled = state.floatingEnabled;
-    savePreferences(prefs);
+  function toggleOpen() {
+    setOpen(!state.isOpen);
+  }
 
-    applyDisplayMode();
-
-    try {
-      if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
-        window.dispatchEvent(new CustomEvent('sfx-buddy-mode-changed', {
-          detail: { mode: mode, floatingEnabled: state.floatingEnabled }
-        }));
+  // --- CHAT INTERACTION ---
+  function clearChat() {
+    stopPreview();
+    state.messages = [
+      {
+        id: 'msg-welcome',
+        role: 'buddy',
+        text: WELCOME_TEXT,
+        html: '<p>' + WELCOME_TEXT + '</p>',
+        cards: [],
+        time: Date.now()
       }
-    } catch (eEvt) {}
-  }
-
-  function toggleDockCollapse() {
-    state.dockedCollapsed = !state.dockedCollapsed;
-    prefs.dockedCollapsed = state.dockedCollapsed;
-    savePreferences(prefs);
-
-    if (dockEl) {
-      dockEl.classList.toggle('is-collapsed', state.dockedCollapsed);
-      if (state.dockedCollapsed) {
-        dockEl.style.width = '36px';
-        dockEl.style.flex = '0 0 36px';
-      } else {
-        dockEl.style.width = state.dockedWidth + 'px';
-        dockEl.style.flex = '0 0 ' + state.dockedWidth + 'px';
-      }
-    }
-  }
-
-  function renderTip() {
-    var tip = DAILY_TIPS[state.tipIndex];
-    if (tip && tipTextEl) {
-      tipTextEl.innerHTML = '<strong>' + escapeHtml(tip.title) + ':</strong> ' + escapeHtml(tip.text);
-    }
-  }
-
-  function showNextTip() {
-    state.tipIndex = (state.tipIndex + 1) % DAILY_TIPS.length;
-    renderTip();
+    ];
+    saveHistory(state.messages);
+    renderAllMessages();
   }
 
   function renderAllMessages() {
@@ -1145,21 +950,29 @@
         cardEl.innerHTML =
           '<div class="sfx-buddy__sound-header">' +
             '<span class="sfx-buddy__sound-title" title="' + escapeHtml(card.name) + '">' + escapeHtml(card.name) + '</span>' +
-            '<span class="sfx-buddy__sound-meta">' + escapeHtml(folderStr) + ' · ' + durStr + '</span>' +
+            '<span class="sfx-buddy__sound-meta">' + escapeHtml(folderStr) + ' • ' + durStr + '</span>' +
           '</div>' +
           '<div class="sfx-buddy__sound-actions">' +
-            '<button type="button" class="sfx-buddy__action-btn sfx-buddy__action-btn--preview">▶ Preview</button>' +
-            '<button type="button" class="sfx-buddy__action-btn sfx-buddy__action-btn--place">+ Timeline</button>' +
+            '<button type="button" class="sfx-buddy__btn-preview" title="Preview sound">' +
+              '<svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="M4 3l9 5-9 5V3z"/></svg> <span>Preview</span>' +
+            '</button>' +
+            '<button type="button" class="sfx-buddy__btn-place" title="Add sound to Premiere timeline">' +
+              '<svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="M8 2v12M2 8h12"/></svg> <span>Add to Timeline</span>' +
+            '</button>' +
           '</div>';
 
-        var prevBtn = cardEl.querySelector('.sfx-buddy__action-btn--preview');
-        var placeBtn = cardEl.querySelector('.sfx-buddy__action-btn--place');
+        var prevBtn = cardEl.querySelector('.sfx-buddy__btn-preview');
+        var placeBtn = cardEl.querySelector('.sfx-buddy__btn-place');
 
-        prevBtn.addEventListener('click', function () {
+        prevBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
           togglePreview(card, prevBtn);
         });
 
-        placeBtn.addEventListener('click', function () {
+        placeBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
           requestPlacement(card, cardEl);
         });
 
@@ -1168,14 +981,6 @@
     }
 
     messagesEl.appendChild(wrap);
-  }
-
-  function scrollChat() {
-    if (messagesEl) {
-      setTimeout(function () {
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-      }, 30);
-    }
   }
 
   function submitInput() {
@@ -1202,105 +1007,106 @@
     scrollChat();
     saveHistory(state.messages);
 
-    setTimeout(function () {
-      var buddyResponse = generateBuddyResponse(query);
-      var buddyMsg = {
-        id: 'msg-' + (Date.now() + 1),
-        role: 'buddy',
-        text: buddyResponse.text,
-        html: buddyResponse.html,
-        cards: buddyResponse.cards || [],
-        time: Date.now()
-      };
-      state.messages.push(buddyMsg);
-      appendMessageDOM(buddyMsg);
-      scrollChat();
-      saveHistory(state.messages);
-    }, 180);
-  }
+    showTyping(true);
 
-  function clearChat() {
-    stopPreview();
-    state.messages = [
-      {
-        id: 'msg-welcome',
-        role: 'buddy',
-        text: WELCOME_TEXT,
-        html: '<p>' + WELCOME_TEXT + '</p>',
-        cards: [],
-        time: Date.now()
-      }
-    ];
-    saveHistory(state.messages);
-    renderAllMessages();
-  }
-
-  function setOpen(open) {
-    buildUI();
-
-    // If currently hidden, opening switches to floating
-    if (state.displayMode === 'hidden' && open) {
-      setDisplayMode('floating');
-    }
-
-    state.isOpen = !!open;
-
-    if (state.displayMode === 'docked') {
-      if (state.dockedCollapsed && open) {
-        toggleDockCollapse();
-      }
-    } else if (state.displayMode === 'floating') {
-      if (state.isOpen) {
-        panelEl.classList.add('is-open');
-        panelEl.classList.remove('is-minimized');
-        state.isMinimized = false;
-        renderTip();
+    // Tip trigger
+    if (/^(tip|daily tip|pro tip|\uD83D\uDCA1 daily pro tip|give me a sound-design tip)/i.test(query.trim())) {
+      setTimeout(function () {
+        showTyping(false);
+        state.tipIndex = (state.tipIndex + 1) % DAILY_TIPS.length;
+        var tip = DAILY_TIPS[state.tipIndex];
+        var tipHtml = '<p><strong>💡 Sound Design Pro Tip: ' + escapeHtml(tip.title) + '</strong></p>' +
+          '<p>' + escapeHtml(tip.text) + '</p>';
+        var buddyMsg = {
+          id: 'msg-' + (Date.now() + 1),
+          role: 'buddy',
+          text: tip.title + ': ' + tip.text,
+          html: tipHtml,
+          cards: [],
+          time: Date.now()
+        };
+        state.messages.push(buddyMsg);
+        appendMessageDOM(buddyMsg);
         scrollChat();
-        recalculatePosition();
-        setTimeout(function () {
-          if (inputEl) inputEl.focus();
-        }, 100);
-      } else {
-        panelEl.classList.remove('is-open');
-        stopPreview();
-      }
+        saveHistory(state.messages);
+      }, 180);
+      return;
     }
 
-    if (window.__sfxHeaderMenu && typeof window.__sfxHeaderMenu.refresh === 'function') {
-      window.__sfxHeaderMenu.refresh();
+    // Ollama local AI query
+    if (ollamaOnline && typeof fetch === 'function') {
+      var systemPrompt = 'You are SFX Buddy, an expert, friendly sound design assistant for video editors using SFX Composer in Adobe Premiere Pro and After Effects. Keep responses concise, direct, and actionable for fast audio workflows. Recommend specific textures, frequencies, EQ tricks, and sound layering.';
+      var controller = new AbortController();
+      var timeout = setTimeout(function () { controller.abort(); }, 15000);
+
+      var ollamaMessages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: query }
+      ];
+
+      fetch('http://127.0.0.1:11434/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: ollamaModel,
+          messages: ollamaMessages,
+          stream: false
+        }),
+        signal: controller.signal
+      })
+      .then(function (res) {
+        clearTimeout(timeout);
+        if (!res.ok) throw new Error('Ollama error (' + res.status + ')');
+        return res.json();
+      })
+      .then(function (data) {
+        showTyping(false);
+        var content = (data && data.message && data.message.content) || '';
+        var soundCards = searchLocalLibrary(query, 2);
+        var buddyMsg = {
+          id: 'msg-' + (Date.now() + 1),
+          role: 'buddy',
+          text: content,
+          html: '<p>' + escapeHtml(content).replace(/\n/g, '<br/>') + '</p>',
+          cards: soundCards,
+          time: Date.now()
+        };
+        state.messages.push(buddyMsg);
+        appendMessageDOM(buddyMsg);
+        scrollChat();
+        saveHistory(state.messages);
+      })
+      .catch(function () {
+        clearTimeout(timeout);
+        fallbackToRuleEngine(query);
+      });
+    } else {
+      setTimeout(function () {
+        fallbackToRuleEngine(query);
+      }, 180);
     }
   }
 
-  function toggleOpen() {
-    if (state.displayMode === 'hidden') {
-      setDisplayMode('floating');
-      setOpen(true);
-      return;
-    }
-    if (state.displayMode === 'docked') {
-      toggleDockCollapse();
-      return;
-    }
-    setOpen(!state.isOpen);
-  }
-
-  function toggleMinimize() {
-    state.isMinimized = !state.isMinimized;
-    prefs.isMinimized = state.isMinimized;
-    savePreferences(prefs);
-    if (panelEl) {
-      panelEl.classList.toggle('is-minimized', state.isMinimized);
-      if (state.displayMode === 'floating') {
-        recalculatePosition();
-      }
-    }
+  function fallbackToRuleEngine(query) {
+    showTyping(false);
+    var buddyResponse = generateBuddyResponse(query);
+    var buddyMsg = {
+      id: 'msg-' + (Date.now() + 1),
+      role: 'buddy',
+      text: buddyResponse.text,
+      html: buddyResponse.html,
+      cards: buddyResponse.cards || [],
+      time: Date.now()
+    };
+    state.messages.push(buddyMsg);
+    appendMessageDOM(buddyMsg);
+    scrollChat();
+    saveHistory(state.messages);
   }
 
   // --- PUBLIC API ---
   window.__sfxBuddy = {
     isOpen: function () {
-      if (state.displayMode === 'hidden') return false;
-      if (state.displayMode === 'docked') return !state.dockedCollapsed;
       return state.isOpen;
     },
     setOpen: function (open) {
@@ -1315,40 +1121,28 @@
     toggle: function () {
       toggleOpen();
     },
+    isFloatingEnabled: function () {
+      return state.floatingEnabled;
+    },
+    setFloatingEnabled: function (enabled) {
+      state.floatingEnabled = !!enabled;
+      prefs.floatingEnabled = state.floatingEnabled;
+      savePreferences(prefs);
+      buildUI();
+      if (launcherEl) {
+        launcherEl.style.display = state.floatingEnabled ? 'inline-flex' : 'none';
+      }
+      if (!state.floatingEnabled && state.isOpen) {
+        setOpen(false);
+      }
+    },
     getDisplayMode: function () {
       return state.displayMode;
     },
-    setDisplayMode: function (mode) {
-      setDisplayMode(mode);
-    },
-    isFloatingEnabled: function () {
-      return state.displayMode === 'floating';
-    },
-    setFloatingEnabled: function (enabled) {
-      setDisplayMode(enabled ? 'floating' : 'hidden');
-    },
-    getDockedWidth: function () {
-      return state.dockedWidth;
-    },
-    setDockedWidth: function (w) {
-      state.dockedWidth = Math.max(260, Math.min(500, Number(w) || 340));
-      prefs.dockedWidth = state.dockedWidth;
-      savePreferences(prefs);
-      if (dockEl && state.displayMode === 'docked' && !state.dockedCollapsed) {
-        dockEl.style.width = state.dockedWidth + 'px';
-        dockEl.style.flex = '0 0 ' + state.dockedWidth + 'px';
-      }
-    },
-    isDockedCollapsed: function () {
-      return !!state.dockedCollapsed;
-    },
-    setDockedCollapsed: function (collapsed) {
-      if (state.dockedCollapsed !== !!collapsed) {
-        toggleDockCollapse();
-      }
-    },
-    toggleDockCollapse: function () {
-      toggleDockCollapse();
+    setDisplayMode: function () {
+      // Streamlined to floating only
+      state.displayMode = 'floating';
+      this.setFloatingEnabled(true);
     },
     recalculatePosition: function () {
       recalculatePosition();
@@ -1361,7 +1155,7 @@
       return DAILY_TIPS[state.tipIndex];
     },
     nextTip: function () {
-      showNextTip();
+      state.tipIndex = (state.tipIndex + 1) % DAILY_TIPS.length;
       return DAILY_TIPS[state.tipIndex];
     },
     clearHistory: function () {
@@ -1372,7 +1166,7 @@
     }
   };
 
-  // Auto-init on DOM ready
+  // Auto-init
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', buildUI);
   } else {

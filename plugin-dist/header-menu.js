@@ -32,7 +32,6 @@
 
   var TOOLS = [
     { id: 'browser', label: 'Browser', icon: ICON.globe, title: 'Built-in browser, downloads and import', api: function () { return window.__sfxBrowserTab ? { isOpen: window.__sfxBrowserTab.isOpen, setOpen: function (v) { v ? window.__sfxBrowserTab.open() : window.__sfxBrowserTab.close(); } } : null; } },
-    { id: 'buddy', label: 'SFX Buddy', icon: ICON.buddy, title: 'SFX Buddy — AI Sound Design Companion', api: function () { return window.__sfxBuddy || null; } },
     { id: 'ai', label: 'AI SFX', icon: ICON.sparkle, title: 'AI SFX Assistant (local AI)', api: function () { return window.__sfxAiAssistant || null; } },
     { id: 'bgm', label: 'BGM Flow', icon: ICON.music, title: 'Background music start and end transitions', api: function () { return window.__sfxBgmFlow || null; } },
     { id: 'analytics', label: 'Analytics', icon: ICON.chart, title: 'Usage analytics (local only)', api: function () { return window.__sfxAnalytics || null; } },

@@ -183,8 +183,8 @@
             return data;
           } else if (data.requires_verification) {
             return data;
-          } else if (data.code === 'NOT_PAID' || data.code === 'FORBIDDEN' || data.code === 'RATE_LIMITED') {
-            throw new Error(data.message || 'No verified purchase was found for this email.');
+          } else if (data.code === 'NOT_PAID' || data.code === 'FORBIDDEN' || data.code === 'RATE_LIMITED' || data.code === 'REFUNDED' || data.code === 'PAYMENT_FAILED' || data.code === 'PAYMENT_PENDING' || data.code === 'UNAUTHENTICATED') {
+            throw new Error(data.message || 'No verified purchase was found matching these details.');
           } else if (res.status === 404 && i < endpoints.length - 1) {
             continue;
           } else {
