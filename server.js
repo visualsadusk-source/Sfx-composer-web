@@ -35,6 +35,8 @@ const apiHandlers = {
   '/api/create-order': require('./api/create-order'),
   '/api/verify-payment': require('./api/verify-payment'),
   '/api/payment-webhook': require('./api/payment-webhook'),
+  '/api/download': require('./api/download'),
+  '/api/refund': require('./api/refund'),
   '/api/health': require('./api/health')
 };
 
@@ -91,6 +93,11 @@ const server = http.createServer((req, res) => {
       res.setHeader('Content-Type', 'application/json');
       return res.end(JSON.stringify({ ok: false, message: 'API Route Not Found' }));
     }
+  }
+
+  // 1.5. Secure Download Gateway: NEVER serve /downloads/ statically!
+  if (cleanPath.startsWith('/downloads/')) {
+    return apiHandlers['/api/download'](req, res);
   }
 
   // 2. Static File Serving & Clean URLs

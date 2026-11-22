@@ -104,7 +104,9 @@ function makeRazorpayRequest(endpoint, method, payload, keyId, keySecret) {
 const memoryStore = {
   orders: new Map(),
   licenses: new Map(),
-  processedPayments: new Set()
+  processedPayments: new Set(),
+  purchases: new Map(),
+  entitlements: new Map()
 };
 
 module.exports = {

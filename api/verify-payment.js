@@ -123,6 +123,32 @@ module.exports = async function handler(req, res) {
 
   // 5. Save order & license state
   memoryStore.processedPayments.add(razorpay_payment_id);
+  
+  // Record verified purchase
+  memoryStore.purchases.set(razorpay_payment_id, {
+    order_id: razorpay_order_id,
+    payment_id: razorpay_payment_id,
+    email: cleanEmail,
+    name: name || '',
+    amount: 199,
+    currency: 'INR',
+    product_id: 'sfx-composer-bundle',
+    product_name: 'SFX Composer Complete Bundle',
+    payment_status: 'completed',
+    created_at: new Date().toISOString()
+  });
+
+  // Record active product entitlement
+  memoryStore.entitlements.set(cleanEmail, {
+    email: cleanEmail,
+    product_id: 'sfx-composer-bundle',
+    product_name: 'SFX Composer Complete Bundle',
+    status: 'active',
+    granted_by: 'payment',
+    created_at: new Date().toISOString()
+  });
+
+  // Record active license
   memoryStore.licenses.set(razorpay_order_id, {
     license_key: licenseKey,
     order_id: razorpay_order_id,

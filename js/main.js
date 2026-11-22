@@ -302,7 +302,7 @@
     var successEmailStatusDisp = document.getElementById('success-email-status-display');
     var goToDashboardBtn = document.getElementById('btn-go-to-dashboard');
 
-    function openCheckout() {
+    function openCheckout(prefillEmail) {
       if (modal) {
         modal.classList.add('is-open');
         document.body.classList.add('sfx-modal-open');
@@ -310,6 +310,9 @@
         var tierName = document.getElementById('checkout-tier-name');
         if (tierName) {
           tierName.textContent = 'SFX Composer Ultimate Bundle';
+        }
+        if (emailInput && prefillEmail && typeof prefillEmail === 'string') {
+          emailInput.value = prefillEmail.trim();
         }
         if (checkoutForm) checkoutForm.style.display = 'flex';
         if (successView) successView.style.display = 'none';
@@ -320,6 +323,7 @@
         }
       }
     }
+    window.openSFXCheckout = openCheckout;
 
     function closeCheckout() {
       if (modal) {
@@ -552,7 +556,9 @@
     // Dashboard View Elements
     var authEmailDisplay = document.getElementById('cdm-auth-email-display');
     var btnSignout = document.getElementById('cdm-btn-signout');
+    var statusBanner = document.getElementById('cdm-account-status-banner');
     var licensesContainer = document.getElementById('cdm-licenses-container');
+    var downloadsContainer = document.getElementById('cdm-downloads-container');
     var ordersTbody = document.getElementById('cdm-orders-tbody');
 
     var currentAuthEmail = '';
@@ -978,20 +984,68 @@
     async function loadVerifiedPortalData(authArg, emailHint) {
       var portal = await window.SFX_PAYMENT_SERVICE.getCustomerPortal(authArg);
       var email = portal.email || emailHint || 'Customer';
+      var authToken = typeof authArg === 'string' ? authArg : (authArg && authArg.token ? authArg.token : '');
 
       if (authEmailDisplay) {
         authEmailDisplay.textContent = email;
       }
 
-      // Render Licenses List
+      var isPaid = !!(portal && portal.is_paid && Array.isArray(portal.licenses) && portal.licenses.length > 0);
+
+      // ── 1. Render Account Status Banner (Unpaid vs Paid Lifetime) ──
+      if (statusBanner) {
+        if (!isPaid) {
+          statusBanner.innerHTML = 
+            '<div class="sfx-dashboard-card" style="border: 1px solid rgba(255, 159, 10, 0.4); background: rgba(255, 159, 10, 0.05); padding: 16px; margin-bottom: 4px;">' +
+              '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">' +
+                '<span class="sfx-badge-status revoked" style="color: #ff9f0a; border-color: rgba(255, 159, 10, 0.5); background: rgba(255, 159, 10, 0.1);">Account Active — Purchase Required</span>' +
+                '<span style="font-size: 13px; font-weight: 700; color: #fff;">₹199 <span style="font-size: 11px; font-weight: 400; color: var(--sfx-text-muted);">(one-time payment)</span></span>' +
+              '</div>' +
+              '<div style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px;">SFX Composer Complete Bundle</div>' +
+              '<p style="font-size: 12px; color: var(--sfx-text-muted); line-height: 1.5; margin: 0 0 14px 0;">' +
+                'Your account is ready. Purchase SFX Composer to unlock your downloads and license.' +
+              '</p>' +
+              '<button type="button" id="cdm-btn-upgrade-checkout" class="sfx-site-btn-primary" style="width: 100%; justify-content: center; height: 38px; font-size: 13px; font-weight: 700;">' +
+                '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 6px;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>' +
+                'Purchase SFX Composer (₹199)' +
+              '</button>' +
+            '</div>';
+
+          var upgradeBtn = statusBanner.querySelector('#cdm-btn-upgrade-checkout');
+          if (upgradeBtn) {
+            upgradeBtn.addEventListener('click', function () {
+              closeDashboard();
+              if (typeof window.openSFXCheckout === 'function') {
+                window.openSFXCheckout(email);
+              } else {
+                var buyBtn = document.querySelector('a[href="#buy-now"], .sfx-buy-trigger');
+                if (buyBtn) buyBtn.click();
+              }
+            });
+          }
+        } else {
+          statusBanner.innerHTML = 
+            '<div class="sfx-dashboard-card" style="border: 1px solid rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.05); padding: 14px; margin-bottom: 4px;">' +
+              '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
+                '<div>' +
+                  '<div style="font-size: 14px; font-weight: 700; color: #fff;">SFX Composer Complete Bundle</div>' +
+                  '<div style="font-size: 11.5px; color: var(--sfx-text-muted);">₹199 • Lifetime Access • Official License Granted</div>' +
+                '</div>' +
+                '<span class="sfx-badge-status active">Active Lifetime Entitlement</span>' +
+              '</div>' +
+            '</div>';
+        }
+      }
+
+      // ── 2. Render Licenses List ──
       if (licensesContainer) {
         var licenses = portal.licenses || [];
-        if (!licenses.length) {
+        if (!isPaid || !licenses.length) {
           licensesContainer.innerHTML = 
-            '<div class="sfx-dashboard-card" style="text-align: center; padding: 24px;">' +
-              '<div style="font-size: 14px; color: var(--sfx-caution); font-weight: 700; margin-bottom: 6px;">No Active Licenses Found</div>' +
-              '<div style="font-size: 12px; color: var(--sfx-text-muted); margin-bottom: 14px;">We could not find an issued license for ' + email + '. Complete a purchase for ₹199 to instantly unlock SFX Composer.</div>' +
-              '<a href="#buy-now" class="sfx-site-btn-primary" style="padding: 8px 18px; font-size: 12px; display: inline-block;">Purchase Lifetime License (₹199)</a>' +
+            '<div class="sfx-dashboard-card" style="text-align: center; padding: 22px; border: 1px dashed var(--sfx-border);">' +
+              '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="var(--sfx-text-muted)" stroke-width="1.5" style="margin: 0 auto 8px; display: block;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>' +
+              '<div style="font-size: 13px; color: #fff; font-weight: 700; margin-bottom: 4px;">No Active License</div>' +
+              '<div style="font-size: 11.5px; color: var(--sfx-text-muted); max-width: 380px; margin: 0 auto;">Complete payment to generate and bind your cryptographically secured AES-256-GCM license key.</div>' +
             '</div>';
         } else {
           licensesContainer.innerHTML = licenses.map(function (lic) {
@@ -1154,6 +1208,64 @@
               alert('To transfer your workstation license: Simply open SFX Composer on your new workstation in Premiere Pro or After Effects, enter your registered email (' + email + ') and license key. The server will automatically rebind your activation slot.');
             });
           });
+        }
+      }
+
+      // ── 3. Render Downloads Container (Locked for Unpaid, Unlocked for Paid) ──
+      if (downloadsContainer) {
+        if (!isPaid) {
+          downloadsContainer.innerHTML = 
+            '<div class="sfx-dashboard-card">' +
+              '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">' +
+                '<div style="font-size: 13px; font-weight: 700; color: #fff;">Download Plugin &amp; SFX Library</div>' +
+                '<span class="sfx-badge-status revoked" style="color: #ff9f0a; border-color: rgba(255, 159, 10, 0.4);">Locked — Purchase Required</span>' +
+              '</div>' +
+              '<div style="font-size: 11.5px; color: var(--sfx-text-muted); margin-bottom: 12px;">Active purchase entitlement is required to download installer packages and sound libraries.</div>' +
+              '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">' +
+                '<button type="button" disabled class="sfx-button sfx-button--quiet" style="height: 38px; border: 1px solid var(--sfx-border); justify-content: center; font-size: 12px; color: var(--sfx-text-muted); opacity: 0.5; cursor: not-allowed; background: #0c0d10;">' +
+                  '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>' +
+                  'Locked — ZXP Installer' +
+                '</button>' +
+                '<button type="button" disabled class="sfx-button sfx-button--quiet" style="height: 38px; border: 1px solid var(--sfx-border); justify-content: center; font-size: 12px; color: var(--sfx-text-muted); opacity: 0.5; cursor: not-allowed; background: #0c0d10;">' +
+                  '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>' +
+                  'Locked — CEP ZIP' +
+                '</button>' +
+              '</div>' +
+              '<button type="button" disabled class="sfx-button" style="height: 38px; width: 100%; border: 1px solid var(--sfx-border); justify-content: center; font-size: 12px; font-weight: 600; color: var(--sfx-text-muted); opacity: 0.5; cursor: not-allowed; background: #0c0d10;">' +
+                '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>' +
+                'Locked — 7GB SFX Library (Purchase Required)' +
+              '</button>' +
+            '</div>';
+        } else {
+          var tokenQuery = authToken ? ('&token=' + encodeURIComponent(authToken)) : '';
+          var zxpUrl = '/api/download?type=zxp' + tokenQuery;
+          var zipUrl = '/api/download?type=zip' + tokenQuery;
+          var sfxLibUrl = (portal.downloads && portal.downloads.sfx_library_url) 
+            ? portal.downloads.sfx_library_url 
+            : ('/api/download?type=sfx-library' + tokenQuery);
+
+          downloadsContainer.innerHTML = 
+            '<div class="sfx-dashboard-card">' +
+              '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">' +
+                '<div style="font-size: 13px; font-weight: 700; color: #fff;">Download Plugin &amp; SFX Library</div>' +
+                '<span class="sfx-badge-status active">Unlocked</span>' +
+              '</div>' +
+              '<div style="font-size: 11.5px; color: var(--sfx-text-muted); margin-bottom: 12px;">Compatible with Premiere Pro &amp; After Effects CC 2021 – 2026 (Windows &amp; macOS Apple Silicon / Intel)</div>' +
+              '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">' +
+                '<a href="' + zxpUrl + '" download class="sfx-button sfx-button--quiet" style="height: 38px; border: 1px solid var(--sfx-border); justify-content: center; font-size: 12px; color: #fff; background: #121418; text-decoration: none;">' +
+                  '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>' +
+                  'ZXP Installer (.zxp)' +
+                '</a>' +
+                '<a href="' + zipUrl + '" download class="sfx-button sfx-button--quiet" style="height: 38px; border: 1px solid var(--sfx-border); justify-content: center; font-size: 12px; color: #fff; background: #121418; text-decoration: none;">' +
+                  '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>' +
+                  'Manual CEP ZIP (.zip)' +
+                '</a>' +
+              '</div>' +
+              '<a href="' + sfxLibUrl + '" id="cdm-sfx-library-btn" target="_blank" rel="noopener noreferrer" class="sfx-button" style="height: 38px; width: 100%; border: 1px solid #10b981; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; background: #059669; text-decoration: none;">' +
+                '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>' +
+                'Download 7GB SFX Library (Google Drive)' +
+              '</a>' +
+            '</div>';
         }
       }
 
