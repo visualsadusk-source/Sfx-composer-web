@@ -1826,6 +1826,7 @@
       profileBtn.addEventListener('click', function (e) {
         e.stopPropagation();
         toggleToolOverlay('settings');
+        syncBuddySettingsUI();
       });
     }
     if (closeBtn && drawer) {
@@ -1840,6 +1841,62 @@
         closeCurrentToolOverlay();
       });
     }
+
+    // SFX Buddy Display Controls
+    var floatingToggle = document.getElementById('sfx-buddy-floating-toggle');
+    var toggleStatus = document.getElementById('sfx-buddy-toggle-status');
+    var modeButtons = [
+      { id: 'sfx-mode-btn-floating', mode: 'floating' },
+      { id: 'sfx-mode-btn-docked', mode: 'docked' },
+      { id: 'sfx-mode-btn-hidden', mode: 'hidden' }
+    ];
+
+    function syncBuddySettingsUI() {
+      if (!window.__sfxBuddy) return;
+      var curMode = window.__sfxBuddy.getDisplayMode ? window.__sfxBuddy.getDisplayMode() : 'floating';
+
+      modeButtons.forEach(function (item) {
+        var btn = document.getElementById(item.id);
+        if (btn) {
+          btn.classList.toggle('sfx-buddy-mode-card--active', item.mode === curMode);
+        }
+      });
+
+      if (floatingToggle) {
+        floatingToggle.checked = (curMode === 'floating');
+      }
+      if (toggleStatus) {
+        toggleStatus.textContent = (curMode === 'floating') ? 'Currently Active' : (curMode === 'docked' ? 'Docked Side Panel' : 'Hidden');
+      }
+    }
+
+    modeButtons.forEach(function (item) {
+      var btn = document.getElementById(item.id);
+      if (btn) {
+        btn.addEventListener('click', function () {
+          if (window.__sfxBuddy && typeof window.__sfxBuddy.setDisplayMode === 'function') {
+            window.__sfxBuddy.setDisplayMode(item.mode);
+          }
+          syncBuddySettingsUI();
+        });
+      }
+    });
+
+    if (floatingToggle) {
+      floatingToggle.addEventListener('change', function () {
+        if (window.__sfxBuddy && typeof window.__sfxBuddy.setFloatingEnabled === 'function') {
+          window.__sfxBuddy.setFloatingEnabled(this.checked);
+        }
+        syncBuddySettingsUI();
+      });
+    }
+
+    window.addEventListener('sfx-buddy-mode-changed', function () {
+      syncBuddySettingsUI();
+    });
+
+    // Initial sync
+    setTimeout(syncBuddySettingsUI, 300);
   }
 
   // ── 15. MODULE SHOWCASE CONTROLLER ──

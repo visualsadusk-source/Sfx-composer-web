@@ -1,15 +1,20 @@
 /**
  * api/customer-portal.js
- * Simplified Customer Dashboard Backend: License ID Storage & Retrieval Only.
+ * Simplified Customer License Retrieval Backend.
  * 
  * Secure server-side verification:
- * 1. Checks if customer email has completed payment order in database / memoryStore.
- * 2. Unpaid emails are strictly rejected (HTTP 403 NOT_PAID).
- * 3. Never trusts an email address alone as proof of purchase ownership.
- *    If on a new device without cached session, requires Order ID / Payment ID proof.
- * 4. Verified owners receive their License ID, decrypted AES-256 key, purchase details, and downloads.
- * 5. Strictly isolates customer data: users cannot query other customers' licenses.
- * 6. Preserves idempotency and prevents duplicate licenses.
+ * 1. Normalizes email (trim whitespace & lowercase).
+ * 2. Rate limiting & abuse protection (in-memory per IP / email).
+ * 3. Queries Supabase database & memoryStore for completed purchases associated with email.
+ * 4. Unpaid / unpurchased emails strictly receive neutral message:
+ *    "No verified purchase was found for this email."
+ * 5. Requires proof of purchase (Razorpay Order ID / Payment ID or valid session token)
+ *    before disclosing sensitive license keys or downloads on unverified browsers.
+ * 6. Strictly isolates customer data: one customer cannot access another's licenses.
+ * 7. Product isolation:
+ *    - Plugin only purchase: reveals plugin license & installers; hides 7GB library download.
+ *    - Library only purchase: reveals 7GB library download; hides plugin license.
+ *    - Complete bundle: reveals both plugin license & 7GB library download.
  */
 
 const crypto = require('crypto');
@@ -18,6 +23,21 @@ const { handleCors, memoryStore } = require('./_shared');
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://wyjazmiihwjlrkggeeez.supabase.co';
 const ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxNzMxMTQsImV4cCI6MjExMDc0OTExNH0.FXKso4hkmUYcl_FfjG4GnHxwyCr09j5DkJ6ak1B2auY';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5NTE3MzExNCwiZXhwIjoyMTEwNzQ5MTE0fQ.Y6GbsUSzkh4b-Uze1JiLSie6PEb8SfG6xg36P4SPrNA';
+
+// Rate limiting & abuse protection
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 30;
+
+function isRateLimited(identifier) {
+  if (!identifier) return false;
+  const now = Date.now();
+  const timestamps = rateLimitMap.get(identifier) || [];
+  const recent = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW_MS);
+  recent.push(now);
+  rateLimitMap.set(identifier, recent);
+  return recent.length > RATE_LIMIT_MAX_REQUESTS;
+}
 
 // Encryption key derivation for AES-256-GCM
 function getAesKey() {
@@ -96,11 +116,26 @@ module.exports = async function handler(req, res) {
     body = {};
   }
 
+  const cleanReqEmail = (body.email || '').trim().toLowerCase();
+  const clientIp = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown';
+  const rateLimitKey = `${clientIp}_${cleanReqEmail}`;
+
+  // Rate Limiting & Abuse Protection
+  if (isRateLimited(rateLimitKey)) {
+    res.statusCode = 429;
+    res.setHeader('Content-Type', 'application/json');
+    return res.end(JSON.stringify({
+      ok: false,
+      code: 'RATE_LIMITED',
+      message: 'Too many requests. Please wait a minute before searching again.'
+    }));
+  }
+
   const authHeader = req.headers['authorization'] || '';
   let authEmail = null;
   let isVerifiedOwner = false;
 
-  // 1. Check for Bearer token (Supabase Auth JWT or custom session token)
+  // 1. Check for Bearer token (Custom Session Token or Supabase Auth JWT)
   if (authHeader.startsWith('Bearer ')) {
     const token = authHeader.substring(7).trim();
     if (token && token !== ANON_KEY) {
@@ -123,26 +158,41 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  const cleanReqEmail = (body.email || '').trim().toLowerCase();
   const orderId = (body.order_id || body.razorpay_order_id || '').trim();
   const paymentId = (body.payment_id || body.razorpay_payment_id || '').trim();
   const proof = (body.proof || body.verification_proof || '').trim();
 
-  // 2. Check for ownership verification proof in body (Order ID or Payment ID)
+  // 2. Check for ownership verification proof in request body (Order ID or Payment ID)
   if (!isVerifiedOwner && cleanReqEmail) {
-    // A. Check memoryStore
+    // A. Check memoryStore purchases and licenses
     if (orderId && paymentId) {
-      const memLic = memoryStore.licenses.get(orderId);
-      if (memLic && memLic.email === cleanReqEmail && memLic.payment_id === paymentId) {
+      const memPur = memoryStore.purchases.get(paymentId);
+      if (memPur && memPur.email === cleanReqEmail && memPur.order_id === orderId) {
         authEmail = cleanReqEmail;
         isVerifiedOwner = true;
       }
+      if (!isVerifiedOwner) {
+        const memLic = memoryStore.licenses.get(orderId);
+        if (memLic && memLic.email === cleanReqEmail && memLic.payment_id === paymentId) {
+          authEmail = cleanReqEmail;
+          isVerifiedOwner = true;
+        }
+      }
     } else if (proof) {
-      for (const [oId, lic] of memoryStore.licenses.entries()) {
-        if (lic.email === cleanReqEmail && (lic.order_id === proof || lic.payment_id === proof || oId === proof)) {
+      for (const [pId, pur] of memoryStore.purchases.entries()) {
+        if (pur.email === cleanReqEmail && (pur.order_id === proof || pur.payment_id === proof || pId === proof)) {
           authEmail = cleanReqEmail;
           isVerifiedOwner = true;
           break;
+        }
+      }
+      if (!isVerifiedOwner) {
+        for (const [oId, lic] of memoryStore.licenses.entries()) {
+          if (lic.email === cleanReqEmail && (lic.order_id === proof || lic.payment_id === proof || oId === proof)) {
+            authEmail = cleanReqEmail;
+            isVerifiedOwner = true;
+            break;
+          }
         }
       }
     }
@@ -206,19 +256,40 @@ module.exports = async function handler(req, res) {
   let completedOrders = [];
   let foundLicenseRows = [];
 
-  // Memory store check
+  // Memory store check: purchases
+  for (const [pId, pur] of memoryStore.purchases.entries()) {
+    if (pur.email === targetEmail) {
+      completedOrders.push({
+        id: pur.order_id,
+        provider_order_id: pur.order_id,
+        provider_payment_id: pur.payment_id || pId,
+        amount: pur.amount || 199,
+        currency: pur.currency || 'INR',
+        product_id: pur.product_id || 'sfx-composer-bundle',
+        product_name: pur.product_name || 'SFX Composer Complete Bundle',
+        payment_status: 'completed',
+        created_at: pur.created_at
+      });
+    }
+  }
+
+  // Memory store check: licenses
   for (const [oId, lic] of memoryStore.licenses.entries()) {
     if (lic.email === targetEmail) {
       foundLicenseRows.push(lic);
-      completedOrders.push({
-        id: oId,
-        provider_order_id: lic.order_id || oId,
-        provider_payment_id: lic.payment_id,
-        amount: lic.amount || 199,
-        currency: lic.currency || 'INR',
-        payment_status: 'completed',
-        created_at: lic.created_at
-      });
+      if (!completedOrders.some(o => o.provider_order_id === (lic.order_id || oId))) {
+        completedOrders.push({
+          id: oId,
+          provider_order_id: lic.order_id || oId,
+          provider_payment_id: lic.payment_id,
+          amount: lic.amount || 199,
+          currency: lic.currency || 'INR',
+          product_id: lic.product_id || 'sfx-composer-bundle',
+          product_name: lic.product_name || 'SFX Composer Complete Bundle',
+          payment_status: 'completed',
+          created_at: lic.created_at
+        });
+      }
     }
   }
 
@@ -249,7 +320,7 @@ module.exports = async function handler(req, res) {
 
   const hasPaidPurchase = completedOrders.length > 0 || foundLicenseRows.length > 0;
 
-  // 6. Test 1 Check: An unpaid email cannot retrieve a license
+  // 6. Test: An unpaid email cannot retrieve a license (Return Neutral Message)
   if (!hasPaidPurchase) {
     res.statusCode = 403;
     res.setHeader('Content-Type', 'application/json');
@@ -258,12 +329,12 @@ module.exports = async function handler(req, res) {
       code: 'NOT_PAID',
       is_paid: false,
       email: targetEmail,
-      message: 'No verified purchase found for this email address. Please make sure to enter the exact email used during checkout.'
+      message: 'No verified purchase was found for this email.'
     }));
   }
 
-  // 7. Security: If paid customer, but ownership proof not yet provided (e.g. typing email on fresh browser)
-  // NEVER trust an email address alone as proof of purchase ownership!
+  // 7. Security: If paid customer, but ownership proof not yet provided on fresh session
+  // NEVER return another customer's license details based on an unverified email!
   if (!isVerifiedOwner) {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
@@ -272,7 +343,7 @@ module.exports = async function handler(req, res) {
       requires_verification: true,
       is_paid: true,
       email: targetEmail,
-      message: 'Verified purchase found! To protect your license key, please enter your Razorpay Order ID or Payment ID (from your receipt).'
+      message: 'Verified purchase found! To protect your license details, please enter your Razorpay Order ID or Payment ID (from your receipt).'
     }));
   }
 
@@ -308,50 +379,89 @@ module.exports = async function handler(req, res) {
     }));
   }
 
-  // 9. Format Customer Licenses & Decrypt Keys
+  // 9. Determine Specific Product Entitlements
+  // If customer purchased only plugin: do not show 7GB library download.
+  // If customer purchased only library: do not show plugin license.
+  let hasPlugin = false;
+  let hasLibrary = false;
+
+  for (const ord of completedOrders) {
+    const pId = String(ord.product_id || (ord.notes && ord.notes.product_id) || '').toLowerCase();
+    const pName = String(ord.product_name || (ord.notes && ord.notes.product) || '').toLowerCase();
+
+    const isLibOnly = (pId.includes('library') || pName.includes('library')) && !pId.includes('bundle') && !pName.includes('bundle') && !pId.includes('plugin') && !pName.includes('plugin');
+    const isPluginOnly = (pId.includes('plugin') || pName.includes('plugin') || pId.includes('pro')) && !pId.includes('bundle') && !pName.includes('bundle') && !pId.includes('library') && !pName.includes('library');
+
+    if (isLibOnly) {
+      hasLibrary = true;
+    } else if (isPluginOnly) {
+      hasPlugin = true;
+    } else {
+      // Default bundle includes both
+      hasPlugin = true;
+      hasLibrary = true;
+    }
+  }
+
+  if (foundLicenseRows.length > 0 && !hasPlugin && !hasLibrary) {
+    hasPlugin = true;
+    hasLibrary = true;
+  }
+  if (!hasPlugin && !hasLibrary) {
+    hasPlugin = true;
+    hasLibrary = true;
+  }
+
+  // 10. Format Customer Licenses & Decrypt Keys (Only if customer owns plugin)
   const licensesList = [];
   const processedLicIds = new Set();
 
-  for (const lic of foundLicenseRows) {
-    const lId = lic.id || lic.license_id || 'SFX-LIC-' + Math.random().toString(36).substring(2, 9);
-    if (processedLicIds.has(lId)) continue;
-    processedLicIds.add(lId);
+  if (hasPlugin) {
+    for (const lic of foundLicenseRows) {
+      const lId = lic.id || lic.license_id || 'SFX-LIC-' + Math.random().toString(36).substring(2, 9);
+      if (processedLicIds.has(lId)) continue;
+      processedLicIds.add(lId);
 
-    let decryptedKey = lic.license_key || null;
-    if (!decryptedKey && lic.encrypted_license_key) {
-      decryptedKey = decryptLicenseKey(lic.encrypted_license_key);
+      let decryptedKey = lic.license_key || null;
+      if (!decryptedKey && lic.encrypted_license_key) {
+        decryptedKey = decryptLicenseKey(lic.encrypted_license_key);
+      }
+
+      const matchingOrder = completedOrders.find(o => o.license_id === lId || o.provider_order_id === lic.provider_order_id) || completedOrders[0] || {};
+
+      licensesList.push({
+        id: lId,
+        license_id: lId,
+        license_key: decryptedKey,
+        has_encrypted_key: !!(lic.encrypted_license_key || decryptedKey),
+        product_id: lic.product_id || 'sfx-composer-pro',
+        product_name: 'SFX Composer Pro v2.4 (Universal)',
+        status: lic.status || 'active',
+        license_type: lic.license_type || 'lifetime',
+        created_at: lic.created_at || matchingOrder.created_at || new Date().toISOString(),
+        purchase_date: matchingOrder.created_at || lic.created_at || new Date().toISOString(),
+        provider_order_id: matchingOrder.provider_order_id || lic.order_id || '',
+        provider_payment_id: matchingOrder.provider_payment_id || lic.payment_id || '',
+        payment_status: 'completed',
+        payment_amount: matchingOrder.amount || 199,
+        payment_currency: matchingOrder.currency || 'INR',
+        max_devices: lic.max_devices || 1,
+        active_devices: lic.active_devices || []
+      });
     }
-
-    const matchingOrder = completedOrders.find(o => o.license_id === lId || o.provider_order_id === lic.provider_order_id) || completedOrders[0] || {};
-
-    licensesList.push({
-      id: lId,
-      license_id: lId,
-      license_key: decryptedKey,
-      has_encrypted_key: !!(lic.encrypted_license_key || decryptedKey),
-      product_id: 'sfx-composer-bundle',
-      product_name: 'SFX Composer Complete Bundle',
-      status: lic.status || 'active',
-      license_type: lic.license_type || 'lifetime',
-      created_at: lic.created_at || matchingOrder.created_at || new Date().toISOString(),
-      purchase_date: matchingOrder.created_at || lic.created_at || new Date().toISOString(),
-      provider_order_id: matchingOrder.provider_order_id || lic.order_id || '',
-      provider_payment_id: matchingOrder.provider_payment_id || lic.payment_id || '',
-      payment_status: 'completed',
-      payment_amount: matchingOrder.amount || 199,
-      payment_currency: matchingOrder.currency || 'INR',
-      max_devices: lic.max_devices || 1,
-      active_devices: lic.active_devices || []
-    });
   }
 
-  // Generate verified session token
+  // Generate verified session token for subsequent seamless access on this device
   const sessionToken = 'sfx_token_' + Buffer.from(JSON.stringify({
     email: targetEmail,
     exp: Date.now() + 30 * 24 * 3600 * 1000
   })).toString('base64');
 
   const driveUrl = process.env.SFX_LIBRARY_DRIVE_URL || 'https://drive.google.com/file/d/1rF1f3KEKSpri1KoZqP8SCv-Q0-NYxvGD/view?usp=sharing';
+
+  const productName = (hasPlugin && hasLibrary)
+    ? 'SFX Composer Complete Bundle'
+    : (hasPlugin ? 'SFX Composer Plugin' : '7GB Master SFX Library');
 
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
@@ -361,15 +471,22 @@ module.exports = async function handler(req, res) {
     verified: true,
     email: targetEmail,
     token: sessionToken,
+    entitlements: {
+      has_plugin: hasPlugin,
+      has_library: hasLibrary,
+      product_name: productName
+    },
     licenses: licensesList,
     orders: completedOrders,
     downloads: {
       has_access: true,
-      product_id: 'sfx-composer-bundle',
-      product_name: 'SFX Composer Complete Bundle',
-      zxp_url: `/downloads/sfx-composer-pro-v2.4.0.zxp?token=${encodeURIComponent(sessionToken)}`,
-      zip_url: `/downloads/sfx-composer-pro-v2.4.0.zip?token=${encodeURIComponent(sessionToken)}`,
-      sfx_library_url: driveUrl
+      has_plugin: hasPlugin,
+      has_library: hasLibrary,
+      product_id: (hasPlugin && hasLibrary) ? 'sfx-composer-bundle' : (hasPlugin ? 'sfx-composer-plugin' : 'sfx-library'),
+      product_name: productName,
+      zxp_url: hasPlugin ? `/downloads/sfx-composer-pro-v2.4.0.zxp?token=${encodeURIComponent(sessionToken)}` : null,
+      zip_url: hasPlugin ? `/downloads/sfx-composer-pro-v2.4.0.zip?token=${encodeURIComponent(sessionToken)}` : null,
+      sfx_library_url: hasLibrary ? driveUrl : null
     }
   }));
 };

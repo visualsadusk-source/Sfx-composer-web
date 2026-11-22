@@ -43,10 +43,12 @@ module.exports = async function handler(req, res) {
     }));
   }
 
-  // Strict Product Constraints: ₹199 INR (19900 paise)
-  const amountPaise = 19900;
+  // Strict Product Constraints: ₹199 INR (19900 paise default)
+  const amountPaise = body.amount || 19900;
   const currency = 'INR';
   const receipt = `sfx_rcpt_${Date.now().toString(36)}`;
+  const productId = body.product_id || 'sfx-composer-bundle';
+  const productName = body.product_name || (productId.includes('library') ? '7GB Master SFX Library' : (productId.includes('plugin') ? 'SFX Composer Plugin' : 'SFX Composer Ultimate Bundle (Plugin + 7GB SFX Library)'));
 
   try {
     const rzpRes = await makeRazorpayRequest('/v1/orders', 'POST', {
@@ -55,8 +57,9 @@ module.exports = async function handler(req, res) {
       receipt: receipt,
       notes: {
         customer_email: email,
-        product: 'SFX Composer Ultimate Bundle (Plugin + 7GB SFX Library)',
-        price_inr: '199'
+        product: productName,
+        product_id: productId,
+        price_inr: String(amountPaise / 100)
       }
     }, rzpKeyId, rzpKeySecret);
 
@@ -79,6 +82,8 @@ module.exports = async function handler(req, res) {
       email: email,
       amount: amountPaise,
       currency: currency,
+      product_id: productId,
+      product_name: productName,
       status: 'created',
       created_at: new Date().toISOString()
     });

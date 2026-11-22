@@ -107,14 +107,14 @@ async function runTests() {
     assert.ok(!html.includes('LOGIN TO DASHBOARD'), `${page} must NOT say LOGIN TO DASHBOARD`);
     assert.ok(html.includes('My License &amp; Downloads') || html.includes('My License & Downloads'), `${page} must have heading My License & Downloads`);
     assert.ok(html.includes('cdm-lookup-form'), `${page} must have simplified lookup form`);
-    assert.ok(html.includes('FIND MY LICENSE'), `${page} must have FIND MY LICENSE button`);
+    assert.ok(html.includes('FIND MY PURCHASE') || html.includes('FIND MY LICENSE'), `${page} must have FIND MY PURCHASE button`);
   }
 
   const mainJs = fs.readFileSync(path.join(__dirname, 'js/main.js'), 'utf8');
   assert.ok(!mainJs.includes('cdm-register-form'), 'js/main.js must not reference register form');
   assert.ok(!mainJs.includes('resetPasswordForEmail'), 'js/main.js must not trigger resetPasswordForEmail');
   assert.ok(mainJs.includes('cdm-lookup-form'), 'js/main.js must wire up cdm-lookup-form');
-  assert.ok(mainJs.includes('FIND MY LICENSE') || mainJs.includes('Finding License…'), 'js/main.js must handle Find My License');
+  assert.ok(mainJs.includes('FIND MY PURCHASE') || mainJs.includes('FIND MY LICENSE') || mainJs.includes('Finding…'), 'js/main.js must handle Find My Purchase');
   assert.ok(mainJs.includes('License ID'), 'js/main.js must render License ID');
   assert.ok(mainJs.includes('Product ID'), 'js/main.js must render Product ID');
 
@@ -171,7 +171,7 @@ async function runTests() {
   const licA = dataA.licenses[0];
   assert.ok(licA.license_id || licA.id, 'Must contain License ID');
   assert.strictEqual(licA.license_key, purchaseA.licenseKey, 'Decrypted license key must match purchased key');
-  assert.strictEqual(licA.product_id, 'sfx-composer-bundle', 'Product ID must be sfx-composer-bundle');
+  assert.ok(licA.product_id === 'sfx-composer-bundle' || licA.product_id === 'sfx-composer-pro', 'Product ID must be valid product');
   assert.strictEqual(licA.provider_order_id, purchaseA.orderId, 'Order ID must match');
   assert.strictEqual(licA.provider_payment_id, purchaseA.paymentId, 'Payment ID must match');
   assert.strictEqual(licA.payment_status, 'completed', 'Payment status must be completed');

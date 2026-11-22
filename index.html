@@ -827,24 +827,28 @@
       <div class="sfx-modal-header">
         <h3 class="sfx-modal-title">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-          Customer Dashboard &amp; My Licenses
+          My License &amp; Downloads
         </h3>
         <button class="sfx-modal-close" id="cdm-close">&times;</button>
       </div>
       <div class="sfx-modal-body" style="display: flex; flex-direction: column; gap: 16px;">
         
-        <!-- VIEW 1: SECURE EMAIL + PASSWORD AUTHENTICATION -->
+        <!-- VIEW 1: MINIMAL LICENSE & DOWNLOAD RETRIEVAL -->
         <div id="cdm-auth-view" style="display: block;">
-          <div style="background: var(--sfx-surface-raised); border: 1px solid var(--sfx-border); border-radius: 8px; padding: 22px;">
+          <div style="background: var(--sfx-surface-raised); border: 1px solid var(--sfx-border); border-radius: 8px; padding: 24px;">
             
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
               <div style="width: 28px; height: 28px; border-radius: 6px; background: rgba(10,132,255,0.15); border: 1px solid rgba(10,132,255,0.3); display: flex; align-items: center; justify-content: center; color: var(--sfx-accent);">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
               </div>
-              <h4 style="font-size: 15px; font-weight: 700; color: #fff; margin: 0;">Access Your Licenses &amp; Downloads</h4>
+              <h4 style="font-size: 16px; font-weight: 700; color: #fff; margin: 0;">My License &amp; Downloads</h4>
             </div>
-            
-            <!-- Recent Purchase Quick Access Banner (If verified session found) -->
+
+            <p style="font-size: 12.5px; color: var(--sfx-text-muted); line-height: 1.5; margin: 0 0 18px 0;">
+              Enter the email address used during your purchase to retrieve your SFX Composer order.
+            </p>
+
+            <!-- Recent Purchase Quick Access Banner (If verified session found on this device) -->
             <div id="cdm-recent-session-banner" style="display: none; background: rgba(0, 255, 102, 0.08); border: 1px solid rgba(0, 255, 102, 0.25); border-radius: 6px; padding: 12px; margin-bottom: 16px;">
               <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                 <div>
@@ -857,109 +861,26 @@
               </div>
             </div>
 
-            <!-- FORM 1: EMAIL + PASSWORD LOGIN (Default View) -->
-            <form id="cdm-login-form" novalidate style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- MINIMAL PURCHASE LOOKUP FORM -->
+            <form id="cdm-lookup-form" novalidate style="display: flex; flex-direction: column; gap: 14px;">
               <div style="display: flex; flex-direction: column; gap: 6px;">
-                <label for="cdm-email-input" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sfx-text-muted); font-weight: 600;">Registered Email Address</label>
-                <input type="email" id="cdm-email-input" class="sfx-input" placeholder="editor@studio.com" spellcheck="false" autocomplete="email" style="width: 100%; height: 38px; padding: 0 12px; font-size: 13px;" required />
+                <label for="cdm-email-input" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sfx-text-muted); font-weight: 600;">Purchase Email Address</label>
+                <input type="email" id="cdm-email-input" class="sfx-input" placeholder="editor@studio.com" spellcheck="false" autocomplete="email" style="width: 100%; height: 40px; padding: 0 14px; font-size: 13.5px;" required />
               </div>
 
-              <div style="display: flex; flex-direction: column; gap: 6px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <label for="cdm-password-input" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sfx-text-muted); font-weight: 600;">Password</label>
-                  <button type="button" id="cdm-link-forgot-password" style="background: none; border: none; padding: 0; font-size: 11.5px; color: var(--sfx-accent); cursor: pointer; text-decoration: underline;">Forgot Password?</button>
+              <!-- Ownership Verification Step (Shown when querying from a new device without cached session) -->
+              <div id="cdm-proof-container" style="display: none; flex-direction: column; gap: 6px; background: rgba(10,132,255,0.06); border: 1px solid rgba(10,132,255,0.25); border-radius: 6px; padding: 12px;">
+                <div style="font-size: 12px; font-weight: 600; color: #fff;">
+                  Ownership Verification Required
                 </div>
-                <div style="position: relative; display: flex; align-items: center;">
-                  <input type="password" id="cdm-password-input" class="sfx-input" placeholder="Enter your password" style="width: 100%; height: 38px; padding: 0 38px 0 12px; font-size: 13px;" required />
-                  <button type="button" id="cdm-toggle-password-btn" aria-label="Show or hide password" title="Toggle password visibility" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: transparent; border: none; padding: 6px; color: var(--sfx-text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                    <svg id="cdm-icon-eye" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    <svg id="cdm-icon-eye-off" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
-                  </button>
-                </div>
+                <p style="font-size: 11.5px; color: var(--sfx-text-muted); line-height: 1.4; margin: 0 0 6px 0;">
+                  To protect your license on this device, enter your Razorpay Order ID or Payment ID (from your receipt):
+                </p>
+                <input type="text" id="cdm-proof-input" class="sfx-input" placeholder="order_... or pay_..." spellcheck="false" autocomplete="off" style="width: 100%; height: 36px; padding: 0 12px; font-size: 12.5px;" />
               </div>
 
-              <button type="submit" id="cdm-btn-login" class="sfx-site-btn-primary" style="height: 40px; font-size: 13px; font-weight: 700; justify-content: center; margin-top: 4px; letter-spacing: 0.04em;">
-                LOGIN TO DASHBOARD
-              </button>
-
-              <div style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 6px; font-size: 11.5px; color: var(--sfx-text-muted);">
-                <span>First time here or purchased without a password?</span>
-                <button type="button" id="cdm-link-to-register" style="background: none; border: none; padding: 0; color: var(--sfx-accent); font-weight: 600; cursor: pointer; text-decoration: underline;">Create Account / Set Password</button>
-              </div>
-            </form>
-
-            <!-- FORM 2: CREATE ACCOUNT / SET PASSWORD (For purchasers setting password or registering) -->
-            <form id="cdm-register-form" novalidate style="display: none; flex-direction: column; gap: 12px;">
-              <p style="font-size: 12px; color: var(--sfx-text-muted); line-height: 1.5; margin: 0 0 2px 0;">
-                If you purchased SFX Composer, set your password here to link your verified licenses and access your downloads.
-              </p>
-
-              <div style="display: flex; flex-direction: column; gap: 6px;">
-                <label for="cdm-register-email" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sfx-text-muted); font-weight: 600;">Registered Email Address</label>
-                <input type="email" id="cdm-register-email" class="sfx-input" placeholder="editor@studio.com" spellcheck="false" autocomplete="email" style="width: 100%; height: 38px; padding: 0 12px; font-size: 13px;" required />
-              </div>
-
-              <div style="display: flex; flex-direction: column; gap: 6px;">
-                <label for="cdm-register-password" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sfx-text-muted); font-weight: 600;">Choose Password (min. 6 characters)</label>
-                <div style="position: relative; display: flex; align-items: center;">
-                  <input type="password" id="cdm-register-password" class="sfx-input" placeholder="Create a secure password" minlength="6" style="width: 100%; height: 38px; padding: 0 38px 0 12px; font-size: 13px;" required />
-                  <button type="button" id="cdm-toggle-reg-password-btn" aria-label="Show or hide password" title="Toggle password visibility" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: transparent; border: none; padding: 6px; color: var(--sfx-text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                    <svg id="cdm-icon-reg-eye" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    <svg id="cdm-icon-reg-eye-off" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
-                  </button>
-                </div>
-              </div>
-
-              <button type="submit" id="cdm-btn-register" class="sfx-site-btn-primary" style="height: 40px; font-size: 13px; font-weight: 700; justify-content: center; margin-top: 4px; letter-spacing: 0.04em;">
-                CREATE ACCOUNT &amp; ACCESS DASHBOARD
-              </button>
-
-              <div style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 6px; font-size: 11.5px; color: var(--sfx-text-muted);">
-                <span>Already have a password?</span>
-                <button type="button" id="cdm-link-back-from-register" style="background: none; border: none; padding: 0; color: var(--sfx-accent); font-weight: 600; cursor: pointer; text-decoration: underline;">Back to Sign In</button>
-              </div>
-            </form>
-
-            <!-- FORM 3: FORGOT PASSWORD (Password Reset Link) -->
-            <form id="cdm-forgot-form" novalidate style="display: none; flex-direction: column; gap: 12px;">
-              <p style="font-size: 12px; color: var(--sfx-text-muted); line-height: 1.5; margin: 0 0 2px 0;">
-                Enter your registered purchase email address. We'll send you a secure link to reset your password.
-              </p>
-
-              <div style="display: flex; flex-direction: column; gap: 6px;">
-                <label for="cdm-forgot-email" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sfx-text-muted); font-weight: 600;">Registered Email Address</label>
-                <input type="email" id="cdm-forgot-email" class="sfx-input" placeholder="editor@studio.com" spellcheck="false" autocomplete="email" style="width: 100%; height: 38px; padding: 0 12px; font-size: 13px;" required />
-              </div>
-
-              <button type="submit" id="cdm-btn-forgot" class="sfx-site-btn-primary" style="height: 40px; font-size: 13px; font-weight: 700; justify-content: center; margin-top: 4px; letter-spacing: 0.04em;">
-                SEND PASSWORD RESET LINK
-              </button>
-
-              <div style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 6px; font-size: 11.5px; color: var(--sfx-text-muted);">
-                <span>Remembered your password?</span>
-                <button type="button" id="cdm-link-back-from-forgot" style="background: none; border: none; padding: 0; color: var(--sfx-accent); font-weight: 600; cursor: pointer; text-decoration: underline;">Back to Sign In</button>
-              </div>
-            </form>
-
-            <!-- FORM 4: SET NEW PASSWORD (When customer lands on password reset link) -->
-            <form id="cdm-recovery-form" style="display: none; flex-direction: column; gap: 12px;">
-              <p style="font-size: 12px; color: var(--sfx-positive); font-weight: 600; margin: 0;">
-                ✓ Password Reset Verified. Enter a new password below.
-              </p>
-
-              <div style="display: flex; flex-direction: column; gap: 6px;">
-                <label for="cdm-recovery-password" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sfx-text-muted); font-weight: 600;">New Password (min. 6 characters)</label>
-                <div style="position: relative; display: flex; align-items: center;">
-                  <input type="password" id="cdm-recovery-password" class="sfx-input" placeholder="Enter new password" minlength="6" style="width: 100%; height: 38px; padding: 0 38px 0 12px; font-size: 13px;" required />
-                  <button type="button" id="cdm-toggle-rec-password-btn" aria-label="Show or hide password" title="Toggle password visibility" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: transparent; border: none; padding: 6px; color: var(--sfx-text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                    <svg id="cdm-icon-rec-eye" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    <svg id="cdm-icon-rec-eye-off" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
-                  </button>
-                </div>
-              </div>
-
-              <button type="submit" id="cdm-btn-update-password" class="sfx-site-btn-primary" style="height: 40px; font-size: 13px; font-weight: 700; justify-content: center; margin-top: 4px; letter-spacing: 0.04em;">
-                UPDATE PASSWORD &amp; ACCESS DASHBOARD
+              <button type="submit" id="cdm-btn-lookup" class="sfx-site-btn-primary" style="height: 42px; font-size: 13px; font-weight: 700; justify-content: center; letter-spacing: 0.04em;">
+                FIND MY PURCHASE
               </button>
             </form>
 
@@ -969,7 +890,7 @@
             <!-- Footer Note -->
             <div style="text-align: center; margin-top: 16px; font-size: 11px; color: var(--sfx-text-muted); display: flex; align-items: center; justify-content: center; gap: 6px;">
               <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-              Secure authentication powered by Supabase.
+              Secure instant purchase retrieval powered by Supabase.
             </div>
 
           </div>
@@ -978,13 +899,13 @@
         <!-- VIEW 2: VERIFIED DASHBOARD & MY LICENSES -->
         <div id="cdm-dashboard-view" style="display: none; flex-direction: column; gap: 14px;">
           <!-- Account Status Header -->
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--sfx-surface-raised); border: 1px solid var(--sfx-border); border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--sfx-surface-raised); border: 1px solid var(--sfx-border); border-radius: 6px; flex-wrap: wrap; gap: 8px;">
             <div>
               <span style="font-size: 11px; color: var(--sfx-text-muted);">Verified Customer: </span>
               <strong id="cdm-auth-email-display" style="color: #fff; font-size: 13px;"></strong>
             </div>
             <button type="button" id="cdm-btn-signout" class="sfx-button sfx-button--quiet" style="height: 26px; padding: 0 10px; font-size: 11px; border: 1px solid var(--sfx-border);">
-              Switch Email / Sign Out
+              Switch Email / Search Again
             </button>
           </div>
 

@@ -169,9 +169,7 @@ async function runDeliverabilityAuditSuite() {
   const pages = ['index.html', 'demo.html', 'library.html', 'screenshots.html'];
   pages.forEach(p => {
     const html = fs.readFileSync(path.join(__dirname, p), 'utf8');
-    assert.ok(html.includes('id="cdm-login-form" novalidate'), `${p} login form must specify novalidate`);
-    assert.ok(html.includes('id="cdm-register-form" novalidate'), `${p} register form must specify novalidate`);
-    assert.ok(html.includes('id="cdm-forgot-form" novalidate'), `${p} forgot form must specify novalidate`);
+    assert.ok(html.includes('id="cdm-lookup-form" novalidate') || html.includes('id="cdm-login-form" novalidate'), `${p} lookup form must specify novalidate`);
     assert.ok(html.includes('spellcheck="false" autocomplete="email"'), `${p} must configure clean email autocomplete`);
   });
   console.log('✓ PASS: All 4 pages enforce client-side deliverability validation & autocomplete.\n');

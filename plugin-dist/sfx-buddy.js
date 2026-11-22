@@ -7,14 +7,16 @@
  * - Plugin Guidance: Step-by-step instructions for BGM Flow, Scene AI, Audio Tools, Browser, Analytics.
  * - Timeline Placement: Safe placement with explicit user confirmation.
  * - Daily Sound Design Tip: Curated pro advice updated daily.
- * - Local AI Integration: Connects to Ollama / window.__localAIManager with zero-latency rule-based fallback.
+ * - Display Modes: Floating (smart collision avoidance), Docked (side panel), Hidden.
+ * - Collision Detection: Never covers waveform editor, timeline buttons, or playback controls.
+ * - Persistent Preferences: Remembers display mode, docked width, and collapse state in localStorage.
  */
 
 (function () {
   'use strict';
 
   var STORAGE_KEY = 'sfxBuddyHistory.v1';
-  var TIP_INDEX_KEY = 'sfxBuddyTipIndex.v1';
+  var PREFS_KEY = 'sfxBuddyPreferences.v1';
 
   var DAILY_TIPS = [
     {
@@ -101,10 +103,49 @@
 
   var WELCOME_TEXT = "Hey! I'm SFX Buddy 👋 Need help finding the perfect sound or creating a better soundscape? I'm here to help.";
 
+  // --- PERSISTENT PREFERENCES ---
+  function loadPreferences() {
+    try {
+      var raw = localStorage.getItem(PREFS_KEY);
+      if (raw) {
+        var p = JSON.parse(raw);
+        if (p && typeof p === 'object') {
+          var mode = (p.displayMode === 'docked' || p.displayMode === 'hidden' || p.displayMode === 'floating') ? p.displayMode : 'floating';
+          return {
+            displayMode: mode,
+            floatingEnabled: p.floatingEnabled !== false && mode !== 'hidden',
+            dockedWidth: Math.max(260, Math.min(500, Number(p.dockedWidth) || 340)),
+            dockedCollapsed: !!p.dockedCollapsed,
+            isMinimized: !!p.isMinimized
+          };
+        }
+      }
+    } catch (e) {}
+    return {
+      displayMode: 'floating',
+      floatingEnabled: true,
+      dockedWidth: 340,
+      dockedCollapsed: false,
+      isMinimized: false
+    };
+  }
+
+  function savePreferences(p) {
+    try {
+      localStorage.setItem(PREFS_KEY, JSON.stringify(p));
+    } catch (e) {}
+  }
+
+  var prefs = loadPreferences();
+
   // Internal State
   var state = {
+    displayMode: prefs.displayMode, // 'floating' | 'docked' | 'hidden'
+    floatingEnabled: prefs.floatingEnabled,
+    dockedWidth: prefs.dockedWidth,
+    dockedCollapsed: prefs.dockedCollapsed,
     isOpen: false,
-    isMinimized: false,
+    isMinimized: prefs.isMinimized,
     tipIndex: 0,
     messages: [],
     activeAudio: null,
@@ -286,7 +327,6 @@
 
   // --- TIMELINE PLACEMENT WITH EXPLICIT CONFIRMATION ---
   function requestPlacement(asset, container) {
-    // Check if timeline control is available
     var timeSec = 0;
     var trackName = 'A1';
 
@@ -570,40 +610,43 @@
 
   function saveHistory(messages) {
     try {
-      // Keep last 30 messages
       var slice = messages.slice(-30);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(slice));
     } catch (e) {}
   }
 
-  // --- UI BUILDING ---
+  // --- UI BUILDING & DOCKED LAYOUT ---
   var panelEl = null;
   var launcherEl = null;
+  var dockEl = null;
   var messagesEl = null;
   var tipCardEl = null;
   var tipTextEl = null;
   var inputEl = null;
   var sendBtnEl = null;
+  var dockToggleBtnEl = null;
+  var minBtnEl = null;
+  var closeBtnEl = null;
 
   function buildUI() {
     if (panelEl) return;
 
-    // Resolve official avatar path
     var avatarSrc = 'assets/brand/mark-128.png';
-    // If in CEP dist folder:
     if (typeof location !== 'undefined' && location.pathname.indexOf('/dist/') !== -1) {
       avatarSrc = './assets/mark-128.png';
     }
 
-    // 1. Floating Launcher Button
+    // 1. Compact Floating Launcher Button
     launcherEl = document.createElement('button');
     launcherEl.id = 'sfx-buddy-launcher';
     launcherEl.type = 'button';
+    launcherEl.className = 'sfx-buddy-launcher';
     launcherEl.title = 'Open SFX Buddy Sound Design Companion';
     launcherEl.innerHTML =
       '<img src="' + avatarSrc + '" class="sfx-buddy-launcher__avatar" alt="SFX Buddy" onerror="this.src=\'../assets/mark-128.png\'" />' +
-      '<span class="sfx-buddy-launcher__label">SFX Buddy</span>' +
-      '<span class="sfx-buddy-launcher__badge"></span>';
+      '<span class="sfx-buddy-launcher__dot" title="Ready"></span>' +
+      '<span class="sfx-buddy-launcher__label">Buddy</span>' +
+      '<svg class="sfx-buddy-launcher__chevron" viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>';
 
     launcherEl.addEventListener('click', function () {
       toggleOpen();
@@ -611,9 +654,10 @@
 
     document.body.appendChild(launcherEl);
 
-    // 2. Assistant Panel
+    // 2. Assistant Panel (Reusable between Floating and Docked)
     panelEl = document.createElement('div');
     panelEl.id = 'sfx-buddy-panel';
+    panelEl.className = 'sfx-buddy-panel sfx-buddy-panel--floating';
     panelEl.innerHTML =
       '<div class="sfx-buddy__header">' +
         '<div class="sfx-buddy__identity">' +
@@ -624,9 +668,12 @@
           '</div>' +
         '</div>' +
         '<div class="sfx-buddy__controls">' +
+          '<button type="button" class="sfx-buddy__icon-btn" id="sfx-buddy-dock-toggle-btn" title="Toggle Docked / Floating mode">' +
+            '<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M10 2v12"/></svg>' +
+          '</button>' +
           '<button type="button" class="sfx-buddy__icon-btn sfx-buddy__icon-btn--danger" id="sfx-buddy-clear-btn" title="Clear Chat History">🗑️</button>' +
-          '<button type="button" class="sfx-buddy__icon-btn" id="sfx-buddy-min-btn" title="Minimize">—</button>' +
-          '<button type="button" class="sfx-buddy__icon-btn" id="sfx-buddy-close-btn" title="Close">✕</button>' +
+          '<button type="button" class="sfx-buddy__icon-btn" id="sfx-buddy-min-btn" title="Minimize / Collapse">—</button>' +
+          '<button type="button" class="sfx-buddy__icon-btn" id="sfx-buddy-close-btn" title="Close / Hide">✕</button>' +
         '</div>' +
       '</div>' +
 
@@ -659,18 +706,66 @@
 
     document.body.appendChild(panelEl);
 
+    // 3. Dock Container (For Docked Mode)
+    dockEl = document.createElement('div');
+    dockEl.id = 'sfx-buddy-dock';
+    dockEl.className = 'sfx-buddy-dock';
+    dockEl.style.display = 'none';
+    dockEl.innerHTML =
+      '<div class="sfx-dock-resizer" id="sfx-dock-resizer" title="Drag to resize SFX Buddy panel"></div>' +
+      '<div class="sfx-dock-collapsed-rail" id="sfx-dock-collapsed-rail">' +
+        '<button type="button" class="sfx-dock-expand-btn" id="sfx-dock-expand-btn" title="Expand SFX Buddy panel">' +
+          '<svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><path d="M10 12l-6-4 6-4v8z"/></svg>' +
+          '<span class="sfx-dock-vlabel">SFX Buddy</span>' +
+        '</button>' +
+      '</div>' +
+      '<div class="sfx-dock-content" id="sfx-dock-content"></div>';
+
+    // Hook up dock resizer
+    setupDockResizer(dockEl);
+
     // Elements
     messagesEl = panelEl.querySelector('#sfx-buddy-messages');
     tipCardEl = panelEl.querySelector('#sfx-buddy-tip-card');
     tipTextEl = panelEl.querySelector('#sfx-buddy-tip-text');
     inputEl = panelEl.querySelector('#sfx-buddy-input');
     sendBtnEl = panelEl.querySelector('#sfx-buddy-send-btn');
+    dockToggleBtnEl = panelEl.querySelector('#sfx-buddy-dock-toggle-btn');
+    minBtnEl = panelEl.querySelector('#sfx-buddy-min-btn');
+    closeBtnEl = panelEl.querySelector('#sfx-buddy-close-btn');
 
     // Controls
+    dockToggleBtnEl.addEventListener('click', function () {
+      if (state.displayMode === 'docked') {
+        setDisplayMode('floating');
+      } else {
+        setDisplayMode('docked');
+      }
+    });
+
     panelEl.querySelector('#sfx-buddy-clear-btn').addEventListener('click', clearChat);
-    panelEl.querySelector('#sfx-buddy-min-btn').addEventListener('click', toggleMinimize);
-    panelEl.querySelector('#sfx-buddy-close-btn').addEventListener('click', function () { setOpen(false); });
+    minBtnEl.addEventListener('click', function () {
+      if (state.displayMode === 'docked') {
+        toggleDockCollapse();
+      } else {
+        toggleMinimize();
+      }
+    });
+
+    closeBtnEl.addEventListener('click', function () {
+      if (state.displayMode === 'docked') {
+        toggleDockCollapse();
+      } else {
+        setOpen(false);
+      }
+    });
+
     panelEl.querySelector('#sfx-buddy-next-tip').addEventListener('click', showNextTip);
+
+    // Dock expand button
+    dockEl.querySelector('#sfx-dock-expand-btn').addEventListener('click', function () {
+      toggleDockCollapse();
+    });
 
     // Prompt Chips
     var chipsContainer = panelEl.querySelector('#sfx-buddy-chips');
@@ -695,6 +790,8 @@
         e.preventDefault();
         submitInput();
       }
+      // Protect editor shortcuts — only stop propagation inside input while typing
+      e.stopPropagation();
     });
 
     // Populate Initial Tip
@@ -703,6 +800,306 @@
     // Populate Messages
     state.messages = loadHistory();
     renderAllMessages();
+
+    // Apply initial display mode from persistent preferences
+    applyDisplayMode();
+
+    // Setup collision detection and resize listeners
+    setupPositionWatcher();
+  }
+
+  function safeGetElementById(id) {
+    if (typeof document !== 'undefined' && typeof document.getElementById === 'function') {
+      return document.getElementById(id);
+    }
+    return null;
+  }
+
+  function safeQuerySelector(sel) {
+    if (typeof document !== 'undefined' && typeof document.querySelector === 'function') {
+      return document.querySelector(sel);
+    }
+    return null;
+  }
+
+  // --- SMART COLLISION DETECTION & POSITIONING ---
+  function recalculatePosition() {
+    if (state.displayMode !== 'floating') return;
+    if (!launcherEl) return;
+
+    var vpHeight = (typeof window !== 'undefined' && window.innerHeight) || 800;
+    var vpWidth = (typeof window !== 'undefined' && window.innerWidth) || 1200;
+
+    // Detect waveform editor and critical interactive regions
+    var trimTray = safeGetElementById('sfx-trim-tray') || safeQuerySelector('.sfx-trim');
+    var isTrimVisible = false;
+    var trimRect = null;
+
+    if (trimTray) {
+      var style = window.getComputedStyle ? window.getComputedStyle(trimTray) : (trimTray.style || {});
+      var isHidden = style.display === 'none' || style.visibility === 'hidden' || trimTray.hidden;
+      if (!isHidden && trimTray.offsetHeight > 15) {
+        isTrimVisible = true;
+        if (typeof trimTray.getBoundingClientRect === 'function') {
+          trimRect = trimTray.getBoundingClientRect();
+        }
+      }
+    }
+
+    // Detect status bar
+    var statusbar = safeQuerySelector('.sfx-statusbar');
+    var statusbarHeight = 0;
+    if (statusbar) {
+      var sbStyle = window.getComputedStyle ? window.getComputedStyle(statusbar) : (statusbar.style || {});
+      if (sbStyle.display !== 'none' && sbStyle.visibility !== 'hidden') {
+        statusbarHeight = statusbar.offsetHeight || 24;
+      }
+    }
+
+    // Calculate safe clearance
+    var safeBottom = 16;
+    if (isTrimVisible && trimRect && trimRect.top > 0) {
+      // Trim tray is active (waveform, transport, and "+ Add to timeline" button visible)
+      // Floating launcher and chat MUST clear the top of the trim tray with 12px margin
+      var distFromBottom = Math.max(16, vpHeight - trimRect.top);
+      safeBottom = distFromBottom + 12;
+    } else if (statusbarHeight > 0) {
+      // Sit cleanly above the status bar
+      safeBottom = statusbarHeight + 10;
+    }
+
+    // Clamp safeBottom within visible viewport
+    if (safeBottom > vpHeight - 50) {
+      safeBottom = Math.max(16, vpHeight - 50);
+    }
+
+    // Apply to launcher
+    launcherEl.style.bottom = safeBottom + 'px';
+    launcherEl.style.right = '16px';
+
+    // Apply to floating panel if open
+    if (panelEl && state.isOpen) {
+      var panelBottom = safeBottom + 36;
+      var availHeight = vpHeight - panelBottom - 20;
+
+      // If available vertical space is too tight (< 300px), auto-minimize rather than covering controls
+      if (availHeight < 300) {
+        if (!state.isMinimized) {
+          state.isMinimized = true;
+          panelEl.classList.add('is-minimized');
+        }
+        panelEl.style.bottom = safeBottom + 'px';
+        panelEl.style.maxHeight = '48px';
+      } else {
+        panelEl.style.bottom = panelBottom + 'px';
+        panelEl.style.maxHeight = Math.min(540, availHeight) + 'px';
+      }
+
+      panelEl.style.right = '16px';
+      panelEl.style.maxWidth = Math.min(380, vpWidth - 32) + 'px';
+    }
+  }
+
+  function setupPositionWatcher() {
+    if (typeof window === 'undefined') return;
+
+    window.addEventListener('resize', recalculatePosition);
+    window.addEventListener('scroll', recalculatePosition);
+
+    // Watch DOM for waveform tray opening/closing
+    if (typeof MutationObserver !== 'undefined' && document.body) {
+      var observer = new MutationObserver(function () {
+        recalculatePosition();
+      });
+      try {
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['style', 'class', 'hidden']
+        });
+      } catch (eObs) {}
+    }
+
+    // Periodical safe check
+    setInterval(recalculatePosition, 800);
+  }
+
+  // --- DOCK RESIZING LOGIC ---
+  function setupDockResizer(dock) {
+    var resizer = dock.querySelector('#sfx-dock-resizer');
+    if (!resizer) return;
+
+    var isDragging = false;
+    var startX = 0;
+    var startWidth = 0;
+
+    resizer.addEventListener('mousedown', function (e) {
+      if (state.dockedCollapsed) return;
+      isDragging = true;
+      startX = e.clientX;
+      startWidth = state.dockedWidth;
+      resizer.classList.add('is-dragging');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+
+      function onMouseMove(ev) {
+        if (!isDragging) return;
+        var delta = startX - ev.clientX;
+        var newWidth = Math.max(260, Math.min(500, startWidth + delta));
+        state.dockedWidth = newWidth;
+        dock.style.width = newWidth + 'px';
+        dock.style.flex = '0 0 ' + newWidth + 'px';
+      }
+
+      function onMouseUp() {
+        if (!isDragging) return;
+        isDragging = false;
+        resizer.classList.remove('is-dragging');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+
+        prefs.dockedWidth = state.dockedWidth;
+        savePreferences(prefs);
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    });
+  }
+
+  // --- DISPLAY MODES (Floating, Docked, Hidden) ---
+  function applyDisplayMode() {
+    buildUI();
+
+    var mode = state.displayMode;
+
+    if (mode === 'floating') {
+      // 1. Teardown Dock
+      if (dockEl && dockEl.parentElement) {
+        dockEl.parentElement.classList.remove('sfx-has-docked-buddy');
+        dockEl.style.display = 'none';
+      }
+
+      // 2. Attach panel to body as floating
+      if (panelEl.parentElement !== document.body) {
+        document.body.appendChild(panelEl);
+      }
+
+      panelEl.className = 'sfx-buddy-panel sfx-buddy-panel--floating' + (state.isOpen ? ' is-open' : '') + (state.isMinimized ? ' is-minimized' : '');
+      panelEl.style.position = 'fixed';
+      panelEl.style.width = '380px';
+      panelEl.style.height = state.isMinimized ? '48px' : '540px';
+      panelEl.style.display = 'flex';
+
+      launcherEl.style.display = 'inline-flex';
+      recalculatePosition();
+    } else if (mode === 'docked') {
+      // 1. Hide floating launcher
+      launcherEl.style.display = 'none';
+
+      // 2. Locate layout container (sibling to .sfx-shell)
+      var shell = safeQuerySelector('.sfx-shell');
+      var container = shell ? shell.parentElement : document.body;
+
+      if (container) {
+        container.classList.add('sfx-has-docked-buddy');
+        if (dockEl.parentElement !== container) {
+          container.appendChild(dockEl);
+        }
+      }
+
+      dockEl.style.display = 'flex';
+      dockEl.classList.toggle('is-collapsed', state.dockedCollapsed);
+      if (state.dockedCollapsed) {
+        dockEl.style.width = '36px';
+        dockEl.style.flex = '0 0 36px';
+      } else {
+        dockEl.style.width = state.dockedWidth + 'px';
+        dockEl.style.flex = '0 0 ' + state.dockedWidth + 'px';
+      }
+
+      // 3. Move panel into dock content
+      var dockContent = dockEl.querySelector('#sfx-dock-content');
+      if (dockContent && panelEl.parentElement !== dockContent) {
+        dockContent.appendChild(panelEl);
+      }
+
+      panelEl.className = 'sfx-buddy-panel sfx-buddy-panel--docked is-open' + (state.isMinimized ? ' is-minimized' : '');
+      panelEl.style.position = 'static';
+      panelEl.style.bottom = 'auto';
+      panelEl.style.right = 'auto';
+      panelEl.style.width = '100%';
+      panelEl.style.height = '100%';
+      panelEl.style.maxHeight = 'none';
+      panelEl.style.maxWidth = 'none';
+      panelEl.style.opacity = '1';
+      panelEl.style.visibility = 'visible';
+      panelEl.style.transform = 'none';
+      panelEl.style.display = 'flex';
+      state.isOpen = true;
+    } else if (mode === 'hidden') {
+      // 1. Hide Launcher
+      launcherEl.style.display = 'none';
+
+      // 2. Hide Panel
+      panelEl.classList.remove('is-open');
+      panelEl.style.display = 'none';
+
+      // 3. Hide Dock
+      if (dockEl) {
+        dockEl.style.display = 'none';
+        if (dockEl.parentElement) {
+          dockEl.parentElement.classList.remove('sfx-has-docked-buddy');
+        }
+      }
+      stopPreview();
+    }
+
+    // Update Header Menu button state if registered
+    if (window.__sfxHeaderMenu && typeof window.__sfxHeaderMenu.refresh === 'function') {
+      window.__sfxHeaderMenu.refresh();
+    }
+  }
+
+  function setDisplayMode(mode) {
+    if (mode !== 'floating' && mode !== 'docked' && mode !== 'hidden') {
+      mode = 'floating';
+    }
+    state.displayMode = mode;
+    state.floatingEnabled = (mode === 'floating');
+    prefs.displayMode = mode;
+    prefs.floatingEnabled = state.floatingEnabled;
+    savePreferences(prefs);
+
+    applyDisplayMode();
+
+    try {
+      if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+        window.dispatchEvent(new CustomEvent('sfx-buddy-mode-changed', {
+          detail: { mode: mode, floatingEnabled: state.floatingEnabled }
+        }));
+      }
+    } catch (eEvt) {}
+  }
+
+  function toggleDockCollapse() {
+    state.dockedCollapsed = !state.dockedCollapsed;
+    prefs.dockedCollapsed = state.dockedCollapsed;
+    savePreferences(prefs);
+
+    if (dockEl) {
+      dockEl.classList.toggle('is-collapsed', state.dockedCollapsed);
+      if (state.dockedCollapsed) {
+        dockEl.style.width = '36px';
+        dockEl.style.flex = '0 0 36px';
+      } else {
+        dockEl.style.width = state.dockedWidth + 'px';
+        dockEl.style.flex = '0 0 ' + state.dockedWidth + 'px';
+      }
+    }
   }
 
   function renderTip() {
@@ -737,7 +1134,6 @@
     bubble.innerHTML = msg.html || ('<p>' + escapeHtml(msg.text) + '</p>');
     wrap.appendChild(bubble);
 
-    // If message contains sound cards
     if (Array.isArray(msg.cards) && msg.cards.length > 0) {
       msg.cards.forEach(function (card) {
         var cardEl = document.createElement('div');
@@ -793,7 +1189,6 @@
   function handleUserQuery(query) {
     if (!query) return;
 
-    // 1. Append User Message
     var userMsg = {
       id: 'msg-' + Date.now(),
       role: 'user',
@@ -807,7 +1202,6 @@
     scrollChat();
     saveHistory(state.messages);
 
-    // 2. Generate Assistant Response
     setTimeout(function () {
       var buddyResponse = generateBuddyResponse(query);
       var buddyMsg = {
@@ -843,41 +1237,70 @@
 
   function setOpen(open) {
     buildUI();
-    state.isOpen = !!open;
-    if (state.isOpen) {
-      panelEl.classList.add('is-open');
-      panelEl.classList.remove('is-minimized');
-      state.isMinimized = false;
-      renderTip();
-      scrollChat();
-      setTimeout(function () {
-        if (inputEl) inputEl.focus();
-      }, 100);
-    } else {
-      panelEl.classList.remove('is-open');
-      stopPreview();
+
+    // If currently hidden, opening switches to floating
+    if (state.displayMode === 'hidden' && open) {
+      setDisplayMode('floating');
     }
 
-    // Refresh header button if header-menu exists
+    state.isOpen = !!open;
+
+    if (state.displayMode === 'docked') {
+      if (state.dockedCollapsed && open) {
+        toggleDockCollapse();
+      }
+    } else if (state.displayMode === 'floating') {
+      if (state.isOpen) {
+        panelEl.classList.add('is-open');
+        panelEl.classList.remove('is-minimized');
+        state.isMinimized = false;
+        renderTip();
+        scrollChat();
+        recalculatePosition();
+        setTimeout(function () {
+          if (inputEl) inputEl.focus();
+        }, 100);
+      } else {
+        panelEl.classList.remove('is-open');
+        stopPreview();
+      }
+    }
+
     if (window.__sfxHeaderMenu && typeof window.__sfxHeaderMenu.refresh === 'function') {
       window.__sfxHeaderMenu.refresh();
     }
   }
 
   function toggleOpen() {
+    if (state.displayMode === 'hidden') {
+      setDisplayMode('floating');
+      setOpen(true);
+      return;
+    }
+    if (state.displayMode === 'docked') {
+      toggleDockCollapse();
+      return;
+    }
     setOpen(!state.isOpen);
   }
 
   function toggleMinimize() {
     state.isMinimized = !state.isMinimized;
+    prefs.isMinimized = state.isMinimized;
+    savePreferences(prefs);
     if (panelEl) {
       panelEl.classList.toggle('is-minimized', state.isMinimized);
+      if (state.displayMode === 'floating') {
+        recalculatePosition();
+      }
     }
   }
 
   // --- PUBLIC API ---
   window.__sfxBuddy = {
     isOpen: function () {
+      if (state.displayMode === 'hidden') return false;
+      if (state.displayMode === 'docked') return !state.dockedCollapsed;
       return state.isOpen;
     },
     setOpen: function (open) {
@@ -891,6 +1314,44 @@
     },
     toggle: function () {
       toggleOpen();
+    },
+    getDisplayMode: function () {
+      return state.displayMode;
+    },
+    setDisplayMode: function (mode) {
+      setDisplayMode(mode);
+    },
+    isFloatingEnabled: function () {
+      return state.displayMode === 'floating';
+    },
+    setFloatingEnabled: function (enabled) {
+      setDisplayMode(enabled ? 'floating' : 'hidden');
+    },
+    getDockedWidth: function () {
+      return state.dockedWidth;
+    },
+    setDockedWidth: function (w) {
+      state.dockedWidth = Math.max(260, Math.min(500, Number(w) || 340));
+      prefs.dockedWidth = state.dockedWidth;
+      savePreferences(prefs);
+      if (dockEl && state.displayMode === 'docked' && !state.dockedCollapsed) {
+        dockEl.style.width = state.dockedWidth + 'px';
+        dockEl.style.flex = '0 0 ' + state.dockedWidth + 'px';
+      }
+    },
+    isDockedCollapsed: function () {
+      return !!state.dockedCollapsed;
+    },
+    setDockedCollapsed: function (collapsed) {
+      if (state.dockedCollapsed !== !!collapsed) {
+        toggleDockCollapse();
+      }
+    },
+    toggleDockCollapse: function () {
+      toggleDockCollapse();
+    },
+    recalculatePosition: function () {
+      recalculatePosition();
     },
     ask: function (question) {
       setOpen(true);

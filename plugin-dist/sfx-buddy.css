@@ -9,35 +9,35 @@
  */
 
 /* ==========================================================================
-   1. Floating Trigger Button (Bottom-Right Pill)
+   1. Floating Trigger Button (Bottom-Right Pill) - Compact & Non-Blocking
    ========================================================================== */
 
 #sfx-buddy-launcher {
   position: fixed;
-  bottom: 24px;
-  right: 20px;
+  bottom: 34px;
+  right: 16px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 38px;
-  padding: 0 14px 0 6px;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 5px;
   background: #081024;
-  border: 1px solid rgba(91, 127, 172, 0.35);
+  border: 1px solid rgba(56, 189, 248, 0.28);
   border-radius: 999px;
   color: #ffffff;
-  font: 600 12px/1 var(--sfx-font, -apple-system, 'Segoe UI', system-ui, sans-serif);
+  font: 600 11px/1 var(--sfx-font, -apple-system, 'Segoe UI', system-ui, sans-serif);
   cursor: pointer;
-  z-index: 9990;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), 0 0 10px rgba(10, 132, 255, 0.25);
-  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+  z-index: 9980;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55), 0 0 8px rgba(10, 132, 255, 0.2);
+  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease, background 140ms ease;
   user-select: none;
 }
 
 #sfx-buddy-launcher:hover {
-  transform: translateY(-2px);
-  background: #0d1a38;
-  border-color: rgba(56, 189, 248, 0.5);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), 0 0 16px rgba(56, 189, 248, 0.35);
+  transform: translateY(-1px);
+  background: #0c1a38;
+  border-color: rgba(56, 189, 248, 0.55);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65), 0 0 12px rgba(56, 189, 248, 0.3);
 }
 
 #sfx-buddy-launcher:active {
@@ -45,66 +45,200 @@
 }
 
 .sfx-buddy-launcher__avatar {
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
   object-fit: cover;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.sfx-buddy-launcher__dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--sfx-brand-highlight, #38bdf8);
+  box-shadow: 0 0 5px rgba(56, 189, 248, 0.85);
 }
 
 .sfx-buddy-launcher__label {
-  font-weight: 650;
+  font-weight: 600;
+  font-size: 11px;
   letter-spacing: -0.01em;
+  color: #f0f6fc;
 }
 
-.sfx-buddy-launcher__badge {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--sfx-brand-highlight, #38bdf8);
-  box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
+.sfx-buddy-launcher__chevron {
+  color: #8fa0be;
+  transition: transform 140ms ease;
+  margin-left: 1px;
+}
+
+#sfx-buddy-launcher:hover .sfx-buddy-launcher__chevron {
+  color: #ffffff;
 }
 
 /* ==========================================================================
-   2. Main Assistant Panel Container
+   2. Main Assistant Panel Container (Floating & Docked)
    ========================================================================== */
 
 #sfx-buddy-panel {
-  position: fixed;
-  bottom: 72px;
-  right: 20px;
-  width: 380px;
-  max-width: calc(100vw - 32px);
-  height: 570px;
-  max-height: calc(100vh - 96px);
   display: flex;
   flex-direction: column;
   background: #070c18;
-  border: 1px solid rgba(91, 127, 172, 0.32);
-  border-radius: 14px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(10, 132, 255, 0.18);
-  z-index: 9995;
   overflow: hidden;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(16px) scale(0.98);
-  transition: opacity 180ms ease, transform 180ms cubic-bezier(0.16, 1, 0.3, 1), visibility 180ms;
 }
 
-#sfx-buddy-panel.is-open {
+/* Floating Mode Panel */
+#sfx-buddy-panel.sfx-buddy-panel--floating {
+  position: fixed;
+  bottom: 76px;
+  right: 16px;
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  height: 540px;
+  max-height: calc(100vh - 120px);
+  border: 1px solid rgba(91, 127, 172, 0.32);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(10, 132, 255, 0.18);
+  z-index: 9985;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px) scale(0.98);
+  transition: opacity 160ms ease, transform 160ms cubic-bezier(0.16, 1, 0.3, 1), visibility 160ms;
+}
+
+#sfx-buddy-panel.sfx-buddy-panel--floating.is-open {
   opacity: 1;
   visibility: visible;
   transform: translateY(0) scale(1);
 }
 
-#sfx-buddy-panel.is-minimized {
-  height: 52px !important;
+#sfx-buddy-panel.sfx-buddy-panel--floating.is-minimized {
+  height: 48px !important;
+  max-height: 48px !important;
 }
 
 #sfx-buddy-panel.is-minimized .sfx-buddy__body,
 #sfx-buddy-panel.is-minimized .sfx-buddy__footer {
   display: none !important;
+}
+
+/* Docked Mode Panel */
+#sfx-buddy-panel.sfx-buddy-panel--docked {
+  position: static !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+  z-index: 10 !important;
+  flex: 1 1 auto;
+}
+
+/* Dock Container */
+.sfx-buddy-dock {
+  position: relative;
+  height: 100%;
+  background: #070c18;
+  border-left: 1px solid rgba(91, 127, 172, 0.25);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+.sfx-dock-resizer {
+  position: absolute;
+  top: 0;
+  left: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 110;
+  background: transparent;
+  transition: background 150ms ease;
+}
+
+.sfx-dock-resizer:hover,
+.sfx-dock-resizer.is-dragging {
+  background: var(--sfx-brand-highlight, #38bdf8);
+}
+
+.sfx-dock-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.sfx-buddy-dock.is-collapsed .sfx-dock-content {
+  display: none !important;
+}
+
+.sfx-dock-collapsed-rail {
+  display: none;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 10px;
+  background: #070c18;
+}
+
+.sfx-buddy-dock.is-collapsed .sfx-dock-collapsed-rail {
+  display: flex !important;
+}
+
+.sfx-dock-expand-btn {
+  background: transparent;
+  border: none;
+  color: #9c9ca4;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 4px;
+  width: 100%;
+  transition: color 140ms ease;
+}
+
+.sfx-dock-expand-btn:hover {
+  color: #38bdf8;
+}
+
+.sfx-dock-vlabel {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font: 600 11px/1 var(--sfx-font, sans-serif);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Layout container styling when docked */
+.sfx-has-docked-buddy {
+  display: flex !important;
+  flex-direction: row !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+.sfx-has-docked-buddy > .sfx-shell {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
 }
 
 /* ==========================================================================
@@ -595,3 +729,158 @@
   opacity: 0.4;
   cursor: default;
 }
+
+/* ==========================================================================
+   10. Settings SFX Buddy Display Section
+   ========================================================================== */
+
+.sfx-buddy-settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sfx-buddy-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.sfx-buddy-mode-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 10px 12px;
+  background: #0d1322;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: left;
+  user-select: none;
+  color: inherit;
+  width: 100%;
+}
+
+.sfx-buddy-mode-card:hover {
+  background: #121b30;
+  border-color: rgba(56, 189, 248, 0.4);
+  transform: translateY(-1px);
+}
+
+.sfx-buddy-mode-card--active {
+  background: rgba(10, 132, 255, 0.12) !important;
+  border-color: var(--sfx-accent, #0a84ff) !important;
+  box-shadow: 0 0 10px rgba(10, 132, 255, 0.2);
+}
+
+.sfx-buddy-mode-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: 8px;
+  color: #7ec8ff;
+  flex: 0 0 auto;
+}
+
+.sfx-buddy-mode-card--active .sfx-buddy-mode-card__icon {
+  background: var(--sfx-brand-gradient, linear-gradient(135deg, #104080 0%, #0a84ff 52%, #38bdf8 100%));
+  color: #ffffff;
+}
+
+.sfx-buddy-mode-card__name {
+  font-size: 11.5px;
+  font-weight: 650;
+  color: #ffffff;
+  margin-bottom: 2px;
+}
+
+.sfx-buddy-mode-card__desc {
+  font-size: 10px;
+  color: #8b949e;
+  line-height: 1.3;
+}
+
+.sfx-buddy-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #0d1322;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+.sfx-buddy-toggle-label {
+  display: flex;
+  flex-direction: column;
+}
+
+.sfx-buddy-toggle-title {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.sfx-buddy-toggle-sub {
+  font-size: 10px;
+  color: #8b949e;
+}
+
+/* Switch UI */
+.sfx-toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+.sfx-toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.sfx-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #232326;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 999px;
+}
+
+.sfx-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #8b949e;
+  transition: 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 50%;
+}
+
+.sfx-toggle-switch input:checked + .sfx-toggle-slider {
+  background: var(--sfx-brand-royal, #0a84ff);
+  border-color: var(--sfx-brand-highlight, #38bdf8);
+}
+
+.sfx-toggle-switch input:checked + .sfx-toggle-slider:before {
+  transform: translateX(16px);
+  background-color: #ffffff;
+}
+

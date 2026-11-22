@@ -118,8 +118,26 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // 4. Generate unique license key
-  const licenseKey = generateLicenseKey();
+  // 4. Product & Entitlement Isolation
+  const cachedOrder = memoryStore.orders.get(razorpay_order_id);
+  const productId = body.product_id || (cachedOrder && cachedOrder.product_id) || 'sfx-composer-bundle';
+  const pIdLower = String(productId).toLowerCase();
+  const defaultName = (pIdLower.includes('library') && !pIdLower.includes('bundle') && !pIdLower.includes('plugin'))
+    ? '7GB Master SFX Library'
+    : ((pIdLower.includes('plugin') || pIdLower.includes('pro')) && !pIdLower.includes('bundle') && !pIdLower.includes('library'))
+      ? 'SFX Composer Pro Plugin'
+      : 'SFX Composer Complete Bundle';
+  const productName = body.product_name || (cachedOrder && cachedOrder.product_name) || defaultName;
+  const pNameLower = String(productName).toLowerCase();
+
+  const isLibOnly = (pIdLower.includes('library') || pNameLower.includes('library')) && !pIdLower.includes('bundle') && !pNameLower.includes('bundle') && !pIdLower.includes('plugin') && !pNameLower.includes('plugin');
+  const isPluginOnly = (pIdLower.includes('plugin') || pNameLower.includes('plugin') || pIdLower.includes('pro')) && !pIdLower.includes('bundle') && !pNameLower.includes('bundle') && !pIdLower.includes('library') && !pNameLower.includes('library');
+
+  const hasPlugin = !isLibOnly;
+  const hasLibrary = !isPluginOnly;
+
+  // Generate unique license key (only if customer purchased plugin or bundle)
+  const licenseKey = hasPlugin ? generateLicenseKey() : null;
 
   // 5. Save order & license state
   memoryStore.processedPayments.add(razorpay_payment_id);
@@ -130,10 +148,10 @@ module.exports = async function handler(req, res) {
     payment_id: razorpay_payment_id,
     email: cleanEmail,
     name: name || '',
-    amount: 199,
+    amount: (body.amount ? body.amount / 100 : 199),
     currency: 'INR',
-    product_id: 'sfx-composer-bundle',
-    product_name: 'SFX Composer Complete Bundle',
+    product_id: productId,
+    product_name: productName,
     payment_status: 'completed',
     created_at: new Date().toISOString()
   });
@@ -141,25 +159,29 @@ module.exports = async function handler(req, res) {
   // Record active product entitlement
   memoryStore.entitlements.set(cleanEmail, {
     email: cleanEmail,
-    product_id: 'sfx-composer-bundle',
-    product_name: 'SFX Composer Complete Bundle',
+    product_id: productId,
+    product_name: productName,
     status: 'active',
     granted_by: 'payment',
     created_at: new Date().toISOString()
   });
 
-  // Record active license
-  memoryStore.licenses.set(razorpay_order_id, {
-    license_key: licenseKey,
-    order_id: razorpay_order_id,
-    payment_id: razorpay_payment_id,
-    email: cleanEmail,
-    name: name || '',
-    amount: 199,
-    currency: 'INR',
-    status: 'active',
-    created_at: new Date().toISOString()
-  });
+  // Record active license if plugin is owned
+  if (hasPlugin) {
+    memoryStore.licenses.set(razorpay_order_id, {
+      license_key: licenseKey,
+      order_id: razorpay_order_id,
+      payment_id: razorpay_payment_id,
+      email: cleanEmail,
+      name: name || '',
+      product_id: productId,
+      product_name: productName,
+      amount: (body.amount ? body.amount / 100 : 199),
+      currency: 'INR',
+      status: 'active',
+      created_at: new Date().toISOString()
+    });
+  }
 
   const driveUrl = process.env.SFX_LIBRARY_DRIVE_URL || 'https://drive.google.com/file/d/1rF1f3KEKSpri1KoZqP8SCv-Q0-NYxvGD/view?usp=sharing';
 
@@ -172,18 +194,18 @@ module.exports = async function handler(req, res) {
     email: cleanEmail,
     order_id: razorpay_order_id,
     payment_id: razorpay_payment_id,
-    amount: 199,
+    amount: (body.amount ? body.amount / 100 : 199),
     currency: 'INR',
     email_delivery: {
       sent: true,
       status: 'sent',
-      info: 'License generated and ready for instant activation.'
+      info: hasPlugin ? 'License generated and ready for instant activation.' : 'Master SFX Library unlocked.'
     },
     downloads: {
       version: 'v2.4.0',
-      zxp_url: '/downloads/sfx-composer-pro-v2.4.0.zxp',
-      zip_url: '/downloads/sfx-composer-pro-v2.4.0.zip',
-      sfx_library_url: driveUrl
+      zxp_url: hasPlugin ? '/downloads/sfx-composer-pro-v2.4.0.zxp' : null,
+      zip_url: hasPlugin ? '/downloads/sfx-composer-pro-v2.4.0.zip' : null,
+      sfx_library_url: hasLibrary ? driveUrl : null
     }
   }));
 };

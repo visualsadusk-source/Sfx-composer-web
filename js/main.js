@@ -501,7 +501,7 @@
     });
   }
 
-  // ── 5. CUSTOMER DASHBOARD & MY LICENSES (SUPABASE PASSWORD AUTH) ──
+  // ── 5. SIMPLIFIED CUSTOMER LICENSE RETRIEVAL & MY LICENSES ──
   function setupCustomerDashboard() {
     var modal = document.getElementById('customer-dashboard-modal');
     var modalClose = document.getElementById('cdm-close');
@@ -518,40 +518,12 @@
     var recentSessionEmail = document.getElementById('cdm-recent-session-email');
     var btnInstantUnlock = document.getElementById('cdm-btn-instant-unlock');
 
-    // Form 1: Email + Password Login
-    var loginForm = document.getElementById('cdm-login-form');
+    // Minimal Lookup Form Elements
+    var lookupForm = document.getElementById('cdm-lookup-form');
     var emailInput = document.getElementById('cdm-email-input');
-    var passwordInput = document.getElementById('cdm-password-input');
-    var btnTogglePassword = document.getElementById('cdm-toggle-password-btn');
-    var iconEye = document.getElementById('cdm-icon-eye');
-    var iconEyeOff = document.getElementById('cdm-icon-eye-off');
-    var btnLogin = document.getElementById('cdm-btn-login');
-    var linkForgotPassword = document.getElementById('cdm-link-forgot-password');
-    var linkToRegister = document.getElementById('cdm-link-to-register');
-
-    // Form 2: Create Account / Set Password (for purchasers setting password)
-    var registerForm = document.getElementById('cdm-register-form');
-    var regEmailInput = document.getElementById('cdm-register-email');
-    var regPasswordInput = document.getElementById('cdm-register-password');
-    var btnToggleRegPassword = document.getElementById('cdm-toggle-reg-password-btn');
-    var iconRegEye = document.getElementById('cdm-icon-reg-eye');
-    var iconRegEyeOff = document.getElementById('cdm-icon-reg-eye-off');
-    var btnRegister = document.getElementById('cdm-btn-register');
-    var linkBackFromRegister = document.getElementById('cdm-link-back-from-register');
-
-    // Form 3: Forgot Password (Reset link)
-    var forgotForm = document.getElementById('cdm-forgot-form');
-    var forgotEmailInput = document.getElementById('cdm-forgot-email');
-    var btnForgot = document.getElementById('cdm-btn-forgot');
-    var linkBackFromForgot = document.getElementById('cdm-link-back-from-forgot');
-
-    // Form 4: Set New Password (Recovery callback)
-    var recoveryForm = document.getElementById('cdm-recovery-form');
-    var recoveryPasswordInput = document.getElementById('cdm-recovery-password');
-    var btnToggleRecPassword = document.getElementById('cdm-toggle-rec-password-btn');
-    var iconRecEye = document.getElementById('cdm-icon-rec-eye');
-    var iconRecEyeOff = document.getElementById('cdm-icon-rec-eye-off');
-    var btnUpdatePassword = document.getElementById('cdm-btn-update-password');
+    var proofContainer = document.getElementById('cdm-proof-container');
+    var proofInput = document.getElementById('cdm-proof-input');
+    var btnLookup = document.getElementById('cdm-btn-lookup');
 
     // Dashboard View Elements
     var authEmailDisplay = document.getElementById('cdm-auth-email-display');
@@ -560,6 +532,7 @@
     var licensesContainer = document.getElementById('cdm-licenses-container');
     var downloadsContainer = document.getElementById('cdm-downloads-container');
     var ordersTbody = document.getElementById('cdm-orders-tbody');
+    var setupGuide = document.getElementById('cdm-setup-guide');
 
     var currentAuthEmail = '';
     var activeCustomerSession = null;
@@ -567,7 +540,7 @@
     // ── EMAIL DELIVERABILITY & VALIDATION ENGINE ──
     function validateEmailDeliverability(rawEmail) {
       if (!rawEmail || typeof rawEmail !== 'string') {
-        return { valid: false, error: 'Please enter your registered email address.' };
+        return { valid: false, error: 'Please enter your registered purchase email address.' };
       }
 
       var email = rawEmail.trim().toLowerCase();
@@ -578,7 +551,7 @@
       }
 
       // 2. Strict RFC 5322 regex validation
-      var emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+      var emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_\x60{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
       if (!emailRegex.test(email)) {
         return { valid: false, error: 'Please enter a valid email address (e.g., editor@studio.com).' };
       }
@@ -648,7 +621,7 @@
       if (blockedDomains.includes(domain)) {
         return {
           valid: false,
-          error: 'Disposable and placeholder email domains are not allowed. Please enter your real email address.'
+          error: 'Disposable and placeholder email domains are not allowed. Please enter your real purchase email address.'
         };
       }
 
@@ -690,7 +663,7 @@
 
       var secs = remainingSeconds;
       btnEl.disabled = true;
-      btnEl.textContent = 'Resend available in ' + secs + 's';
+      btnEl.textContent = 'Retry available in ' + secs + 's';
 
       cooldownTimers[btnEl.id] = setInterval(function () {
         secs--;
@@ -701,53 +674,39 @@
           btnEl.textContent = defaultText;
           if (typeof onComplete === 'function') onComplete();
         } else {
-          btnEl.textContent = 'Resend available in ' + secs + 's';
+          btnEl.textContent = 'Retry available in ' + secs + 's';
         }
       }, 1000);
     }
 
     // ── SUPABASE AUTH ERROR FORMATTER ──
     function formatAuthError(err) {
-      if (!err) return 'An unexpected error occurred. Please try again.';
+      if (!err) return 'No verified purchase was found for this email.';
       var raw = (typeof err === 'string' ? err : err.message || err.error_description || err.msg || '');
       var msg = raw.toLowerCase();
 
-      if (msg.includes('over_email_send_rate_limit') || msg.includes('email rate limit exceeded') || msg.includes('rate limit')) {
-        return 'For your security, email requests are temporarily rate-limited. Please wait a few minutes before requesting another link or check your spam/junk folder.';
+      if (msg.includes('not_paid') || msg.includes('no verified purchase')) {
+        return 'No verified purchase was found for this email.';
+      }
+      if (msg.includes('rate limit') || msg.includes('too many requests') || (err && err.error_code === 'over_email_send_rate_limit')) {
+        return 'Too many requests. Service is temporarily rate-limited. Please wait a minute before searching again.';
       }
       if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
-        return 'Invalid email or password. If you purchased SFX Composer and have not yet set a password, click "Create Account / Set Password" below.';
+        return 'Invalid email or password. If you have not created an account yet, please use Create Account.';
       }
-      if (msg.includes('already registered') || msg.includes('already exists')) {
-        return 'An account with this email already exists. Please sign in with your password or use "Forgot Password?" to reset.';
-      }
-      if (msg.includes('email not confirmed')) {
-        return 'Your email address has not been confirmed yet. Please check your inbox for the confirmation link.';
-      }
-      if (msg.includes('invalid email') || msg.includes('email_address_invalid') || msg.includes('validation_failed')) {
-        return 'Please enter a valid, deliverable email address.';
+      if (msg.includes('user already registered') || msg.includes('already exists')) {
+        return 'An account already exists for this email. Please sign in or use Forgot Password.';
       }
       if (msg.includes('network') || msg.includes('fetch') || msg.includes('failed to fetch')) {
-        return 'Could not connect to authentication service. Please check your internet connection.';
+        return 'Could not connect to verification server. Please check your internet connection.';
       }
-      return raw || 'Authentication error. Please try again.';
+      return raw || 'No verified purchase was found for this email.';
     }
 
-    // Expose deliverability validator globally for unit testing & form validation
+    // Expose deliverability validator globally for unit testing
     window.SFX_VALIDATE_EMAIL = validateEmailDeliverability;
     window.SFX_COOLDOWN_CHECK = getRemainingCooldown;
     window.SFX_FORMAT_AUTH_ERROR = formatAuthError;
-
-    // Initialize client-side Supabase for customer auth
-    var supabaseClient = null;
-    try {
-      if (window.supabase && window.SFX_PAYMENT_SERVICE) {
-        var cfg = window.SFX_PAYMENT_SERVICE.getConfig();
-        supabaseClient = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
-      }
-    } catch (e) {
-      console.warn('Customer portal Supabase client init warning:', e);
-    }
 
     function setAuthStatus(msg, isSuccess) {
       if (!authStatus) return;
@@ -762,14 +721,6 @@
       authStatus.style.border = isSuccess ? '1px solid rgba(48, 209, 88, 0.3)' : '1px solid rgba(255, 69, 58, 0.3)';
     }
 
-    function switchAuthSubView(mode) {
-      setAuthStatus('', true);
-      if (loginForm) loginForm.style.display = (mode === 'login') ? 'flex' : 'none';
-      if (registerForm) registerForm.style.display = (mode === 'register') ? 'flex' : 'none';
-      if (forgotForm) forgotForm.style.display = (mode === 'forgot') ? 'flex' : 'none';
-      if (recoveryForm) recoveryForm.style.display = (mode === 'recovery') ? 'flex' : 'none';
-    }
-
     function showAuthView() {
       if (authView) authView.style.display = 'block';
       if (dashboardView) dashboardView.style.display = 'none';
@@ -780,124 +731,26 @@
       if (dashboardView) dashboardView.style.display = 'flex';
     }
 
-    // Password Show/Hide Toggle Helper
-    function attachPasswordToggle(btn, inputEl, iconEyeEl, iconEyeOffEl) {
-      if (!btn || !inputEl) return;
-      btn.addEventListener('click', function (e) {
-        e.preventDefault();
-        var isPassword = inputEl.type === 'password';
-        inputEl.type = isPassword ? 'text' : 'password';
-        if (iconEyeEl) iconEyeEl.style.display = isPassword ? 'none' : 'block';
-        if (iconEyeOffEl) iconEyeOffEl.style.display = isPassword ? 'block' : 'none';
-      });
-    }
-
-    attachPasswordToggle(btnTogglePassword, passwordInput, iconEye, iconEyeOff);
-    attachPasswordToggle(btnToggleRegPassword, regPasswordInput, iconRegEye, iconRegEyeOff);
-    attachPasswordToggle(btnToggleRecPassword, recoveryPasswordInput, iconRecEye, iconRecEyeOff);
-
-    // Sub-view switch handlers
-    if (linkForgotPassword) {
-      linkForgotPassword.addEventListener('click', function (e) {
-        e.preventDefault();
-        if (forgotEmailInput && emailInput) {
-          forgotEmailInput.value = emailInput.value;
-        }
-        switchAuthSubView('forgot');
-        var targetEmail = (forgotEmailInput?.value || '').trim().toLowerCase();
-        if (targetEmail) {
-          var rem = getRemainingCooldown('forgot', targetEmail);
-          if (rem > 0) {
-            startButtonCooldown(btnForgot, 'SEND PASSWORD RESET LINK', rem);
-            setAuthStatus('A reset link was recently sent. You can request another in ' + rem + 's.', true);
-          }
-        }
-      });
-    }
-
-    if (linkToRegister) {
-      linkToRegister.addEventListener('click', function (e) {
-        e.preventDefault();
-        if (regEmailInput && emailInput) {
-          regEmailInput.value = emailInput.value;
-        }
-        switchAuthSubView('register');
-      });
-    }
-
-    if (linkBackFromRegister) {
-      linkBackFromRegister.addEventListener('click', function (e) {
-        e.preventDefault();
-        switchAuthSubView('login');
-      });
-    }
-
-    if (linkBackFromForgot) {
-      linkBackFromForgot.addEventListener('click', function (e) {
-        e.preventDefault();
-        switchAuthSubView('login');
-      });
-    }
-
     async function checkCurrentSession() {
-      // 1. Check for password recovery hash in URL
-      var hash = window.location.hash || '';
-      if (hash.includes('type=recovery') || hash.includes('reset-password')) {
-        showAuthView();
-        switchAuthSubView('recovery');
-        setAuthStatus('Password recovery session verified. Enter your new password above.', true);
-        return true;
-      }
-
-      // 2. Check active Supabase Auth session
-      if (supabaseClient) {
-        try {
-          var { data: sessData } = await supabaseClient.auth.getSession();
-          if (sessData && sessData.session && sessData.session.user) {
-            await loadVerifiedPortalData(sessData.session.access_token, sessData.session.user.email);
-            return true;
-          }
-        } catch (e) {}
-      }
-
-      // 3. Check local checkout session proof (if customer just completed purchase)
       try {
         var rawSess = localStorage.getItem('sfx_customer_session');
         if (rawSess) {
           var cached = JSON.parse(rawSess);
-          if (cached && cached.email && (cached.order_id || cached.license_key || cached.token)) {
+          if (cached && cached.email && (cached.token || cached.order_id || cached.payment_id)) {
             activeCustomerSession = cached;
             if (recentSessionBanner && recentSessionEmail) {
               recentSessionEmail.textContent = cached.email;
               recentSessionBanner.style.display = 'block';
+            }
+            if (emailInput && !emailInput.value) {
+              emailInput.value = cached.email;
             }
           }
         }
       } catch (e) {}
 
       showAuthView();
-      switchAuthSubView('login');
       return false;
-    }
-
-    // Listen for auth state changes
-    if (supabaseClient) {
-      try {
-        supabaseClient.auth.onAuthStateChange(function (event, session) {
-          if (event === 'PASSWORD_RECOVERY') {
-            if (modal) {
-              modal.classList.add('is-open');
-              document.body.style.overflow = 'hidden';
-            }
-            showAuthView();
-            switchAuthSubView('recovery');
-            setAuthStatus('Password recovery session verified. Enter your new password above.', true);
-          } else if (event === 'SIGNED_OUT') {
-            showAuthView();
-            switchAuthSubView('login');
-          }
-        });
-      } catch (e) {}
     }
 
     async function openDashboard() {
@@ -932,7 +785,13 @@
         this.disabled = true;
         this.textContent = 'Verifying…';
         try {
-          await loadVerifiedPortalData(activeCustomerSession, activeCustomerSession.email);
+          var portal = await window.SFX_PAYMENT_SERVICE.getCustomerPortal({
+            email: activeCustomerSession.email,
+            order_id: activeCustomerSession.order_id,
+            payment_id: activeCustomerSession.payment_id,
+            token: activeCustomerSession.token
+          });
+          await loadVerifiedPortalData(portal, activeCustomerSession.email);
         } catch (err) {
           setAuthStatus('Could not verify recent session: ' + err.message, false);
         } finally {
@@ -942,17 +801,14 @@
       });
     }
 
-    // In-flight submission locks to prevent duplicate network calls
-    var isSubmittingLogin = false;
-    var isSubmittingRegister = false;
-    var isSubmittingForgot = false;
-    var isSubmittingRecovery = false;
+    // In-flight submission lock to prevent duplicate requests
+    var isSubmittingLookup = false;
 
-    // ── 1. EMAIL + PASSWORD LOGIN ──
-    if (loginForm) {
-      loginForm.addEventListener('submit', async function (e) {
+    // ── SUBMIT: FIND MY PURCHASE ──
+    if (lookupForm) {
+      lookupForm.addEventListener('submit', async function (e) {
         e.preventDefault();
-        if (isSubmittingLogin) return;
+        if (isSubmittingLookup) return;
 
         var emailCheck = validateEmailDeliverability(emailInput?.value);
         if (!emailCheck.valid) {
@@ -961,282 +817,129 @@
         }
 
         var email = emailCheck.email;
-        var password = passwordInput?.value || '';
+        var proof = (proofInput?.value || '').trim();
 
-        if (!password) {
-          setAuthStatus('Please enter your account password.', false);
-          return;
+        // Check if we have cached proof for this email from recent session
+        var cachedOrder = '';
+        var cachedPayment = '';
+        var cachedToken = '';
+        if (activeCustomerSession && activeCustomerSession.email === email) {
+          cachedOrder = activeCustomerSession.order_id || '';
+          cachedPayment = activeCustomerSession.payment_id || '';
+          cachedToken = activeCustomerSession.token || '';
         }
 
-        isSubmittingLogin = true;
-        btnLogin.disabled = true;
-        var origBtnText = btnLogin.textContent;
-        btnLogin.textContent = 'Logging In…';
+        isSubmittingLookup = true;
+        btnLookup.disabled = true;
+        var origBtnText = btnLookup.textContent;
+        btnLookup.textContent = 'Finding Purchase…';
         setAuthStatus('', true);
 
         try {
-          if (!supabaseClient) {
-            throw new Error('Authentication client unavailable. Please check your connection.');
+          var payload = { email: email };
+          if (proof) {
+            payload.proof = proof;
+          } else if (cachedOrder && cachedPayment) {
+            payload.order_id = cachedOrder;
+            payload.payment_id = cachedPayment;
+          }
+          if (cachedToken) {
+            payload.token = cachedToken;
           }
 
-          var { data, error } = await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password
-          });
+          var portal = await window.SFX_PAYMENT_SERVICE.getCustomerPortal(payload);
 
-          if (error) {
-            throw error;
-          }
-
-          if (data && data.session && data.session.user) {
-            currentAuthEmail = data.session.user.email;
-            if (passwordInput) passwordInput.value = '';
+          if (portal && portal.requires_verification) {
+            // Verified purchase found, but ownership verification is required on this new device
+            if (proofContainer) proofContainer.style.display = 'flex';
+            if (proofInput) proofInput.focus();
+            btnLookup.textContent = 'VERIFY & ACCESS PURCHASE';
+            setAuthStatus('Verified purchase found for ' + email + '! Enter your Razorpay Order ID or Payment ID (from your receipt) to reveal your license details.', true);
+          } else if (portal && portal.ok && portal.is_paid) {
+            currentAuthEmail = portal.email || email;
+            if (portal.token) {
+              localStorage.setItem('sfx_customer_session', JSON.stringify({
+                email: currentAuthEmail,
+                token: portal.token,
+                order_id: portal.orders?.[0]?.provider_order_id || cachedOrder,
+                payment_id: portal.orders?.[0]?.provider_payment_id || cachedPayment
+              }));
+            }
             setAuthStatus('', true);
-            await loadVerifiedPortalData(data.session.access_token, data.session.user.email);
+            await loadVerifiedPortalData(portal, currentAuthEmail);
           } else {
-            throw new Error('Authentication failed. Please verify your credentials.');
+            setAuthStatus(portal?.message || 'No verified purchase was found for this email.', false);
           }
         } catch (err) {
           setAuthStatus(formatAuthError(err), false);
         } finally {
-          isSubmittingLogin = false;
-          btnLogin.disabled = false;
-          btnLogin.textContent = origBtnText;
-        }
-      });
-    }
-
-    // ── 2. ACCOUNT CREATION & PASSWORD PROVISIONING ──
-    if (registerForm) {
-      registerForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        if (isSubmittingRegister) return;
-
-        var emailCheck = validateEmailDeliverability(regEmailInput?.value);
-        if (!emailCheck.valid) {
-          setAuthStatus(emailCheck.error, false);
-          return;
-        }
-
-        var email = emailCheck.email;
-        var password = regPasswordInput?.value || '';
-
-        if (!password || password.length < 6) {
-          setAuthStatus('Password must be at least 6 characters long.', false);
-          return;
-        }
-
-        // Check registration rate limit cooldown (prevents repeated confirmation email spam)
-        var regCooldown = getRemainingCooldown('register', email);
-        if (regCooldown > 0) {
-          setAuthStatus('Please wait ' + regCooldown + 's before submitting another registration request.', false);
-          startButtonCooldown(btnRegister, 'CREATE ACCOUNT & ACCESS DASHBOARD', regCooldown);
-          return;
-        }
-
-        isSubmittingRegister = true;
-        btnRegister.disabled = true;
-        var origText = btnRegister.textContent;
-        btnRegister.textContent = 'Creating Account…';
-        setAuthStatus('', true);
-
-        try {
-          if (!supabaseClient) throw new Error('Authentication client unavailable.');
-
-          var { data, error } = await supabaseClient.auth.signUp({
-            email: email,
-            password: password
-          });
-
-          if (error) {
-            throw error;
-          }
-
-          // Record send cooldown to prevent duplicate confirmation emails
-          recordEmailSend('register', email);
-          startButtonCooldown(btnRegister, 'CREATE ACCOUNT & ACCESS DASHBOARD', COOLDOWN_SECONDS);
-
-          if (data && data.session && data.session.user) {
-            currentAuthEmail = data.session.user.email;
-            if (regPasswordInput) regPasswordInput.value = '';
-            setAuthStatus('', true);
-            await loadVerifiedPortalData(data.session.access_token, data.session.user.email);
-          } else if (data && data.user) {
-            setAuthStatus('Account created! A confirmation email has been sent to ' + email + '. Check your inbox to confirm, then sign in.', true);
-            if (emailInput) emailInput.value = email;
-            switchAuthSubView('login');
-          } else {
-            throw new Error('Account setup failed. Please try again.');
-          }
-        } catch (err) {
-          setAuthStatus(formatAuthError(err), false);
-        } finally {
-          isSubmittingRegister = false;
-          if (!cooldownTimers[btnRegister.id]) {
-            btnRegister.disabled = false;
-            btnRegister.textContent = origText;
+          isSubmittingLookup = false;
+          btnLookup.disabled = false;
+          if (btnLookup.textContent === 'Finding Purchase…') {
+            btnLookup.textContent = origBtnText;
           }
         }
       });
     }
 
-    // ── 3. FORGOT PASSWORD (PASSWORD RESET LINK WITH COOLDOWN) ──
-    if (forgotForm) {
-      forgotForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        if (isSubmittingForgot) return;
-
-        var emailCheck = validateEmailDeliverability(forgotEmailInput?.value);
-        if (!emailCheck.valid) {
-          setAuthStatus(emailCheck.error, false);
-          return;
-        }
-
-        var email = emailCheck.email;
-
-        // Check persistent 60s cooldown to prevent repeated/burst email requests
-        var cooldown = getRemainingCooldown('forgot', email);
-        if (cooldown > 0) {
-          setAuthStatus('A password reset link was recently requested for this email. Please wait ' + cooldown + 's before requesting another or check your spam/junk folder.', false);
-          startButtonCooldown(btnForgot, 'SEND PASSWORD RESET LINK', cooldown);
-          return;
-        }
-
-        isSubmittingForgot = true;
-        btnForgot.disabled = true;
-        var origText = btnForgot.textContent;
-        btnForgot.textContent = 'Sending Reset Link…';
-        setAuthStatus('', true);
-
-        try {
-          if (!supabaseClient) throw new Error('Authentication client unavailable.');
-
-          var redirectTo = window.location.origin + window.location.pathname;
-          var { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-            redirectTo: redirectTo
-          });
-
-          if (error) throw error;
-
-          // Record send timestamp and initiate visual 60-second cooldown on button
-          recordEmailSend('forgot', email);
-          startButtonCooldown(btnForgot, 'SEND PASSWORD RESET LINK', COOLDOWN_SECONDS);
-
-          setAuthStatus('Password reset link sent! Please check your inbox or spam folder for ' + email + '. You can request another link in 60s if needed.', true);
-        } catch (err) {
-          setAuthStatus(formatAuthError(err), false);
-        } finally {
-          isSubmittingForgot = false;
-          if (!cooldownTimers[btnForgot.id]) {
-            btnForgot.disabled = false;
-            btnForgot.textContent = origText;
-          }
-        }
-      });
-    }
-
-    // ── 4. SET NEW PASSWORD (RECOVERY CALLBACK) ──
-    if (recoveryForm) {
-      recoveryForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        if (isSubmittingRecovery) return;
-
-        var newPassword = recoveryPasswordInput?.value || '';
-
-        if (!newPassword || newPassword.length < 6) {
-          setAuthStatus('Password must be at least 6 characters long.', false);
-          return;
-        }
-
-        isSubmittingRecovery = true;
-        btnUpdatePassword.disabled = true;
-        var origText = btnUpdatePassword.textContent;
-        btnUpdatePassword.textContent = 'Updating Password…';
-        setAuthStatus('', true);
-
-        try {
-          if (!supabaseClient) throw new Error('Authentication client unavailable.');
-
-          var { data, error } = await supabaseClient.auth.updateUser({
-            password: newPassword
-          });
-
-          if (error) throw error;
-
-          setAuthStatus('Password updated successfully! Loading your dashboard…', true);
-          var { data: sessData } = await supabaseClient.auth.getSession();
-          if (sessData && sessData.session) {
-            await loadVerifiedPortalData(sessData.session.access_token, sessData.session.user.email);
-          } else {
-            switchAuthSubView('login');
-          }
-        } catch (err) {
-          setAuthStatus(formatAuthError(err), false);
-        } finally {
-          isSubmittingRecovery = false;
-          btnUpdatePassword.disabled = false;
-          btnUpdatePassword.textContent = origText;
-        }
-      });
-    }
-    // ── 5. SIGN OUT & CLEAR STATE ──
+    // ── SIGN OUT / SWITCH EMAIL ──
     if (btnSignout) {
-      btnSignout.addEventListener('click', async function () {
-        if (supabaseClient) {
-          await supabaseClient.auth.signOut().catch(function () {});
-        }
+      btnSignout.addEventListener('click', function () {
         localStorage.removeItem('sfx_customer_session');
         activeCustomerSession = null;
         currentAuthEmail = '';
         if (recentSessionBanner) recentSessionBanner.style.display = 'none';
         if (emailInput) emailInput.value = '';
-        if (passwordInput) passwordInput.value = '';
-        if (regEmailInput) regEmailInput.value = '';
-        if (regPasswordInput) regPasswordInput.value = '';
-        if (forgotEmailInput) forgotEmailInput.value = '';
-        if (recoveryPasswordInput) recoveryPasswordInput.value = '';
+        if (proofInput) proofInput.value = '';
+        if (proofContainer) proofContainer.style.display = 'none';
+        if (btnLookup) btnLookup.textContent = 'FIND MY PURCHASE';
         setAuthStatus('', true);
-        switchAuthSubView('login');
         showAuthView();
       });
     }
 
-    // Auto-open modal if landing from password recovery link
-    try {
-      var initialHash = window.location.hash || '';
-      if (initialHash.includes('type=recovery') || initialHash.includes('reset-password')) {
-        setTimeout(function () {
-          openDashboard();
-        }, 300);
+    // ── RENDER VERIFIED PORTAL DATA ──
+    async function loadVerifiedPortalData(portalData, emailHint) {
+      var portal = portalData;
+      if (typeof portalData === 'string') {
+        portal = await window.SFX_PAYMENT_SERVICE.getCustomerPortal(portalData);
       }
-    } catch (e) {}
-
-    async function loadVerifiedPortalData(authArg, emailHint) {
-      var portal = await window.SFX_PAYMENT_SERVICE.getCustomerPortal(authArg);
       var email = portal.email || emailHint || 'Customer';
       var isPaid = !!(portal.is_paid || (portal.licenses && portal.licenses.length > 0) || (portal.orders && portal.orders.length > 0));
-      var authToken = typeof authArg === 'string' ? authArg : (authArg && authArg.token ? authArg.token : '');
+      var authToken = portal.token || (activeCustomerSession && activeCustomerSession.token) || '';
 
       if (authEmailDisplay) {
         authEmailDisplay.textContent = email;
       }
+
+      // ── Entitlements: Plugin vs Library vs Bundle ──
+      var hasPlugin = false;
+      var hasLibrary = false;
+
+      if (portal.entitlements) {
+        hasPlugin = !!portal.entitlements.has_plugin;
+        hasLibrary = !!portal.entitlements.has_library;
+      } else {
+        hasPlugin = Array.isArray(portal.licenses) && portal.licenses.length > 0;
+        hasLibrary = !!(portal.downloads && portal.downloads.sfx_library_url);
+      }
+
+      var productName = portal.entitlements?.product_name || 
+        ((hasPlugin && hasLibrary) ? 'SFX Composer Complete Bundle' : (hasPlugin ? 'SFX Composer Plugin' : '7GB Master SFX Library'));
 
       // ── 1. Render Account Entitlement Status Banner ──
       if (statusBanner) {
         statusBanner.style.display = 'block';
         if (!isPaid) {
           statusBanner.innerHTML = 
-            '<div class="sfx-dashboard-card" style="border: 1px solid rgba(255, 159, 10, 0.4); background: rgba(255, 159, 10, 0.05); padding: 16px; margin-bottom: 4px;">' +
+            '<div class="sfx-dashboard-card" style="border: 1px solid rgba(255, 69, 58, 0.4); background: rgba(255, 69, 58, 0.05); padding: 16px; margin-bottom: 4px;">' +
               '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">' +
-                '<span class="sfx-badge-status revoked" style="color: #ff9f0a; border-color: rgba(255, 159, 10, 0.5); background: rgba(255, 159, 10, 0.1);">Account Active — Purchase Required</span>' +
-                '<span style="font-size: 13px; font-weight: 700; color: #fff;">₹199 <span style="font-size: 11px; font-weight: 400; color: var(--sfx-text-muted);">(one-time payment)</span></span>' +
+                '<span class="sfx-badge-status revoked" style="color: #ff453a; border-color: rgba(255, 69, 58, 0.5); background: rgba(255, 69, 58, 0.1);">No Verified Purchase</span>' +
               '</div>' +
-              '<div style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px;">SFX Composer Complete Bundle</div>' +
-              '<p style="font-size: 12px; color: var(--sfx-text-muted); line-height: 1.5; margin: 0 0 14px 0;">' +
-                'Your account is ready. Purchase SFX Composer to unlock your downloads and license.' +
+              '<p style="font-size: 12.5px; color: var(--sfx-text-muted); line-height: 1.5; margin: 0 0 14px 0;">' +
+                'No verified purchase was found for this email address. Please make sure to enter the exact email used during checkout.' +
               '</p>' +
               '<button type="button" id="cdm-btn-upgrade-checkout" class="sfx-site-btn-primary" style="width: 100%; justify-content: center; height: 38px; font-size: 13px; font-weight: 700;">' +
-                '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 6px;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>' +
                 'Purchase SFX Composer (₹199)' +
               '</button>' +
             '</div>';
@@ -1258,8 +961,8 @@
             '<div class="sfx-dashboard-card" style="border: 1px solid rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.05); padding: 14px; margin-bottom: 4px;">' +
               '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
                 '<div>' +
-                  '<div style="font-size: 14px; font-weight: 700; color: #fff;">SFX Composer Complete Bundle</div>' +
-                  '<div style="font-size: 11.5px; color: var(--sfx-text-muted);">₹199 • Lifetime Access • Official License Granted</div>' +
+                  '<div style="font-size: 14px; font-weight: 700; color: #fff;">' + productName + '</div>' +
+                  '<div style="font-size: 11.5px; color: var(--sfx-text-muted);">Verified Purchase • Lifetime Access • Official Order Granted</div>' +
                 '</div>' +
                 '<span class="sfx-badge-status active">Active Lifetime Entitlement</span>' +
               '</div>' +
@@ -1267,16 +970,12 @@
         }
       }
 
-      // ── 2. Render Licenses List ──
+      // ── 2. Render Plugin License (Only if customer purchased plugin) ──
+      // Requirement: If customer purchased only library, do not show plugin license.
       if (licensesContainer) {
         var licenses = portal.licenses || [];
-        if (!isPaid || !licenses.length) {
-          licensesContainer.innerHTML = 
-            '<div class="sfx-dashboard-card" style="text-align: center; padding: 22px; border: 1px dashed var(--sfx-border);">' +
-              '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="var(--sfx-text-muted)" stroke-width="1.5" style="margin: 0 auto 8px; display: block;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>' +
-              '<div style="font-size: 13px; color: #fff; font-weight: 700; margin-bottom: 4px;">No Active License</div>' +
-              '<div style="font-size: 11.5px; color: var(--sfx-text-muted); max-width: 380px; margin: 0 auto;">Complete payment to generate and bind your cryptographically secured AES-256-GCM license key.</div>' +
-            '</div>';
+        if (!isPaid || !hasPlugin || !licenses.length) {
+          licensesContainer.innerHTML = '';
         } else {
           licensesContainer.innerHTML = licenses.map(function (lic) {
             var activeDevs = lic.active_devices || [];
@@ -1335,12 +1034,11 @@
                   '</div>' +
                 '</div>';
             } else {
-              // Legacy Hashed License Notice & Reissue Button
               keyBoxHtml = 
                 '<div style="background: rgba(255, 159, 10, 0.08); border: 1px solid rgba(255, 159, 10, 0.3); border-radius: 8px; padding: 14px; margin: 12px 0;">' +
                   '<div style="color: #ff9f0a; font-weight: 700; font-size: 12.5px; margin-bottom: 4px;">Legacy Hash Security Notice</div>' +
                   '<p style="font-size: 11.5px; color: var(--sfx-text-muted); line-height: 1.5; margin: 0 0 10px 0;">' +
-                    'This license was recorded under our previous one-way cryptographic SHA-256 hash architecture and cannot be mathematically recovered from the hash alone. Click below to securely generate and bind a fresh encrypted key to your account.' +
+                    'Click below to securely generate and bind a fresh encrypted key to your account.' +
                   '</p>' +
                   '<button type="button" class="btn-customer-reissue-key sfx-site-btn-primary" data-id="' + lic.id + '" style="height: 30px; font-size: 11.5px; padding: 0 14px;">' +
                     'Reissue License Key' +
@@ -1351,8 +1049,8 @@
             return '<div class="sfx-dashboard-card" style="margin-bottom: 12px;">' +
               '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
                 '<div>' +
-                  '<div style="font-weight: 700; font-size: 15px; color: #fff;">SFX Composer Pro v2.4 (Universal)</div>' +
-                  '<div style="font-size: 11.5px; color: var(--sfx-text-muted);">Licensed for Premiere Pro &amp; After Effects</div>' +
+                  '<div style="font-weight: 700; font-size: 15px; color: #fff;">SFX Composer Pro (Plugin)</div>' +
+                  '<div style="font-size: 11.5px; color: var(--sfx-text-muted);">License ID: <code style="color:var(--sfx-accent); font-size:11px;">' + (lic.license_id || lic.id) + '</code></div>' +
                 '</div>' +
                 statusBadge +
               '</div>' +
@@ -1361,22 +1059,14 @@
               '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 10px 0; background: rgba(0,0,0,0.25); border: 1px solid var(--sfx-border); border-radius: 6px; padding: 10px 12px; font-size: 11.5px;">' +
                 '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Purchase Date</span><strong>' + purchaseDateStr + '</strong></div>' +
                 '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Payment Status</span>' + paymentStatusStr + '</div>' +
-                '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">License Expiry</span><span style="color: #fff;">' + expiryStr + '</span></div>' +
+                '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">License Activation Status</span>' + workstationStatus + '</div>' +
+                '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Product ID</span><code style="font-size: 10.5px; color: var(--sfx-text);">' + (lic.product_id || 'sfx-composer-bundle') + '</code></div>' +
                 (lic.provider_payment_id ? '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Payment ID</span><code style="font-size: 10.5px; color: var(--sfx-accent);">' + lic.provider_payment_id + '</code></div>' : '') +
-              '</div>' +
-              '<div style="background: rgba(0,0,0,0.4); border: 1px solid var(--sfx-border); padding: 10px 14px; border-radius: 6px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
-                '<div>' +
-                  '<span style="color: var(--sfx-text-muted); font-size: 11px;">Workstation Status: </span>' +
-                  workstationStatus +
-                '</div>' +
-                '<button type="button" class="btn-portal-reset-device sfx-button sfx-button--quiet" data-id="' + lic.id + '" style="height: 24px; font-size: 10.5px; border: 1px solid var(--sfx-border);">' +
-                  'Transfer Workstation' +
-                '</button>' +
               '</div>' +
             '</div>';
           }).join('');
 
-          // Reveal/Hide Key event listener
+          // Reveal/Hide Key listener
           licensesContainer.querySelectorAll('.btn-toggle-portal-key').forEach(function (btn) {
             btn.addEventListener('click', function () {
               var parent = this.closest('.sfx-dashboard-card');
@@ -1393,7 +1083,7 @@
             });
           });
 
-          // Copy key event listener
+          // Copy key listener
           licensesContainer.querySelectorAll('.btn-copy-portal-key').forEach(function (btn) {
             btn.addEventListener('click', function () {
               var key = this.getAttribute('data-key');
@@ -1411,18 +1101,18 @@
             });
           });
 
-          // Customer Reissue Key event listener
+          // Reissue key listener
           licensesContainer.querySelectorAll('.btn-customer-reissue-key').forEach(function (btn) {
             btn.addEventListener('click', async function () {
               var licId = this.getAttribute('data-id');
-              if (confirm('Reissue a new license key for your account? Your previous key will be replaced and secured.')) {
+              if (confirm('Reissue a new license key for your account? Your previous key will be replaced.')) {
                 var origText = this.textContent;
                 this.textContent = 'Reissuing…';
                 this.disabled = true;
                 try {
-                  var res = await window.SFX_PAYMENT_SERVICE.reissueLicenseKeyCustomer(authArg, licId);
+                  var res = await window.SFX_PAYMENT_SERVICE.reissueLicenseKeyCustomer(authToken || portal, licId);
                   alert(res.message || 'License key successfully reissued!');
-                  await loadVerifiedPortalData(authArg, emailHint);
+                  await loadVerifiedPortalData(portal, emailHint);
                 } catch (err) {
                   alert('Error reissuing license key: ' + err.message);
                   this.textContent = origText;
@@ -1431,41 +1121,15 @@
               }
             });
           });
-
-          // Transfer workstation listener
-          licensesContainer.querySelectorAll('.btn-portal-reset-device').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-              alert('To transfer your workstation license: Simply open SFX Composer on your new workstation in Premiere Pro or After Effects, enter your registered email (' + email + ') and license key. The server will automatically rebind your activation slot.');
-            });
-          });
         }
       }
 
-      // ── 3. Render Downloads Container (Locked for Unpaid, Unlocked for Paid) ──
+      // ── 3. Render Downloads (Plugin and/or 7GB Library) ──
+      // Requirement: If customer purchased only plugin, do not show 7GB library download.
+      // If customer purchased only library, do not show plugin license.
       if (downloadsContainer) {
         if (!isPaid) {
-          downloadsContainer.innerHTML = 
-            '<div class="sfx-dashboard-card">' +
-              '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">' +
-                '<div style="font-size: 13px; font-weight: 700; color: #fff;">Download Plugin &amp; SFX Library</div>' +
-                '<span class="sfx-badge-status revoked" style="color: #ff9f0a; border-color: rgba(255, 159, 10, 0.4);">Locked — Purchase Required</span>' +
-              '</div>' +
-              '<div style="font-size: 11.5px; color: var(--sfx-text-muted); margin-bottom: 12px;">Active purchase entitlement is required to download installer packages and sound libraries.</div>' +
-              '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">' +
-                '<button type="button" disabled class="sfx-button sfx-button--quiet" style="height: 38px; border: 1px solid var(--sfx-border); justify-content: center; font-size: 12px; color: var(--sfx-text-muted); opacity: 0.5; cursor: not-allowed; background: #0c0d10;">' +
-                  '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>' +
-                  'Locked — ZXP Installer' +
-                '</button>' +
-                '<button type="button" disabled class="sfx-button sfx-button--quiet" style="height: 38px; border: 1px solid var(--sfx-border); justify-content: center; font-size: 12px; color: var(--sfx-text-muted); opacity: 0.5; cursor: not-allowed; background: #0c0d10;">' +
-                  '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>' +
-                  'Locked — CEP ZIP' +
-                '</button>' +
-              '</div>' +
-              '<button type="button" disabled class="sfx-button" style="height: 38px; width: 100%; border: 1px solid var(--sfx-border); justify-content: center; font-size: 12px; font-weight: 600; color: var(--sfx-text-muted); opacity: 0.5; cursor: not-allowed; background: #0c0d10;">' +
-                '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>' +
-                'Locked — 7GB SFX Library (Purchase Required)' +
-              '</button>' +
-            '</div>';
+          downloadsContainer.innerHTML = '';
         } else {
           var tokenQuery = authToken ? ('&token=' + encodeURIComponent(authToken)) : '';
           var zxpUrl = '/api/download?type=zxp' + tokenQuery;
@@ -1474,14 +1138,17 @@
             ? portal.downloads.sfx_library_url 
             : ('/api/download?type=sfx-library' + tokenQuery);
 
-          downloadsContainer.innerHTML = 
-            '<div class="sfx-dashboard-card">' +
-              '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">' +
-                '<div style="font-size: 13px; font-weight: 700; color: #fff;">Download Plugin &amp; SFX Library</div>' +
-                '<span class="sfx-badge-status active">Unlocked</span>' +
-              '</div>' +
-              '<div style="font-size: 11.5px; color: var(--sfx-text-muted); margin-bottom: 12px;">Compatible with Premiere Pro &amp; After Effects CC 2021 – 2026 (Windows &amp; macOS Apple Silicon / Intel)</div>' +
-              '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">' +
+          var downloadCardsHtml = '<div class="sfx-dashboard-card">';
+          downloadCardsHtml += 
+            '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">' +
+              '<div style="font-size: 13px; font-weight: 700; color: #fff;">' + (hasLibrary ? '7GB Master SFX Library &amp; Downloads' : 'Plugin Downloads') + '</div>' +
+              '<span class="sfx-badge-status active">Unlocked</span>' +
+            '</div>';
+
+          if (hasPlugin) {
+            downloadCardsHtml += 
+              '<div style="font-size: 11.5px; color: var(--sfx-text-muted); margin-bottom: 12px;">SFX Composer Pro Universal Installer: Premiere Pro &amp; After Effects CC 2021 – 2026 (macOS &amp; Windows)</div>' +
+              '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">' +
                 '<a href="' + zxpUrl + '" download class="sfx-button sfx-button--quiet" style="height: 38px; border: 1px solid var(--sfx-border); justify-content: center; font-size: 12px; color: #fff; background: #121418; text-decoration: none;">' +
                   '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>' +
                   'ZXP Installer (.zxp)' +
@@ -1490,16 +1157,30 @@
                   '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>' +
                   'Manual CEP ZIP (.zip)' +
                 '</a>' +
-              '</div>' +
-              '<a href="' + sfxLibUrl + '" id="cdm-sfx-library-btn" target="_blank" rel="noopener noreferrer" class="sfx-button" style="height: 38px; width: 100%; border: 1px solid #10b981; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; background: #059669; text-decoration: none;">' +
+              '</div>';
+          }
+
+          // 7GB SFX Library Button (Shown ONLY if library was purchased)
+          if (hasLibrary) {
+            downloadCardsHtml += 
+              '<div style="font-size: 11.5px; color: var(--sfx-text-muted); margin-bottom: 8px;">Over 4,500+ master cinematic WAV sound effects organized into 18 categories:</div>' +
+              '<a href="' + sfxLibUrl + '" id="cdm-sfx-library-btn" target="_blank" rel="noopener noreferrer" class="sfx-button" style="height: 40px; width: 100%; border: 1px solid #10b981; justify-content: center; font-size: 12.5px; font-weight: 700; color: #fff; background: #059669; text-decoration: none;">' +
                 '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>' +
-                'Download 7GB SFX Library (Google Drive)' +
-              '</a>' +
-            '</div>';
+                'Download 7GB Master SFX Library (Google Drive)' +
+              '</a>';
+          }
+
+          downloadCardsHtml += '</div>';
+          downloadsContainer.innerHTML = downloadCardsHtml;
         }
       }
 
-      // Render Orders
+      // ── 4. Setup Guide Visibility ──
+      if (setupGuide) {
+        setupGuide.style.display = hasPlugin ? 'block' : 'none';
+      }
+
+      // ── 5. Render Orders History ──
       if (ordersTbody) {
         var orders = portal.orders || [];
         if (!orders.length) {
