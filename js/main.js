@@ -1024,16 +1024,28 @@
                     '</div>' +
                   '</div>' +
                 '</div>';
+            } else if (lic.legacy_key) {
+              // Pre-encryption license: key hash exists but cannot be decrypted
+              keyBoxHtml =
+                '<div style="background: rgba(255, 159, 10, 0.08); border: 1px solid rgba(255, 159, 10, 0.3); border-radius: 8px; padding: 14px; margin: 12px 0;">' +
+                  '<div style="color: #ff9f0a; font-weight: 700; font-size: 12.5px; margin-bottom: 6px;">&#9888; License Key Retrieval Required</div>' +
+                  '<p style="font-size: 12px; color: var(--sfx-text-muted); line-height: 1.6; margin: 0 0 10px 0;">' +
+                    'Your purchase is verified. Your license was issued before our encrypted key storage was introduced, ' +
+                    'so the key cannot be automatically displayed here.<br>' +
+                    'Please contact support with your Payment ID and we will send your key within 24 hours.' +
+                  '</p>' +
+                  '<a href="mailto:visualsadusk@gmail.com?subject=License%20Key%20Retrieval%20Request&body=Purchase%20Email%3A%20' + encodeURIComponent(lic.customer_email || currentAuthEmail) + '%0APayment%20ID%3A%20' + encodeURIComponent(lic.provider_payment_id || '') + '" ' +
+                  'style="display: inline-block; height: 32px; line-height: 32px; padding: 0 16px; background: transparent; border: 1px solid rgba(255,159,10,0.5); border-radius: 6px; color: #ff9f0a; font-size: 12px; font-weight: 700; text-decoration: none;">' +
+                    'Email Support to Retrieve Key' +
+                  '</a>' +
+                '</div>';
             } else {
               keyBoxHtml = 
                 '<div style="background: rgba(255, 159, 10, 0.08); border: 1px solid rgba(255, 159, 10, 0.3); border-radius: 8px; padding: 14px; margin: 12px 0;">' +
-                  '<div style="color: #ff9f0a; font-weight: 700; font-size: 12.5px; margin-bottom: 4px;">Legacy Hash Security Notice</div>' +
+                  '<div style="color: #ff9f0a; font-weight: 700; font-size: 12.5px; margin-bottom: 4px;">License Key Unavailable</div>' +
                   '<p style="font-size: 11.5px; color: var(--sfx-text-muted); line-height: 1.5; margin: 0 0 10px 0;">' +
-                    'Click below to securely generate and bind a fresh encrypted key to your account.' +
+                    'Your purchase is verified. Contact support at <a href="mailto:visualsadusk@gmail.com" style="color: var(--sfx-accent);">visualsadusk@gmail.com</a> with your Payment ID to retrieve your key.' +
                   '</p>' +
-                  '<button type="button" class="btn-customer-reissue-key sfx-site-btn-primary" data-id="' + lic.id + '" style="height: 30px; font-size: 11.5px; padding: 0 14px;">' +
-                    'Reissue License Key' +
-                  '</button>' +
                 '</div>';
             }
 
