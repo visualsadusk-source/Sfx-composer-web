@@ -1219,25 +1219,49 @@
   // ── 5. FAQ INTERACTIVE ACCORDION ──
   function setupFaqAccordion() {
     var faqItems = document.querySelectorAll('.faq-item');
-    faqItems.forEach(function (item) {
-      var questionBtn = item.querySelector('.faq-question');
-      if (questionBtn) {
-        questionBtn.addEventListener('click', function () {
-          var isOpen = item.classList.contains('is-open');
+    if (!faqItems.length) return;
 
-          // Close other items for neatness
-          faqItems.forEach(function (other) {
+    faqItems.forEach(function (item, index) {
+      var questionBtn = item.querySelector('.faq-question');
+      if (!questionBtn) return;
+
+      // Click: Toggle question and close siblings
+      questionBtn.addEventListener('click', function () {
+        var isOpen = item.classList.contains('is-open');
+
+        // Close other items (support opening one FAQ at a time)
+        faqItems.forEach(function (other) {
+          if (other !== item) {
             other.classList.remove('is-open');
             var otherBtn = other.querySelector('.faq-question');
             if (otherBtn) otherBtn.setAttribute('aria-expanded', 'false');
-          });
-
-          if (!isOpen) {
-            item.classList.add('is-open');
-            questionBtn.setAttribute('aria-expanded', 'true');
           }
         });
-      }
+
+        // Toggle clicked item
+        if (isOpen) {
+          item.classList.remove('is-open');
+          questionBtn.setAttribute('aria-expanded', 'false');
+        } else {
+          item.classList.add('is-open');
+          questionBtn.setAttribute('aria-expanded', 'true');
+        }
+      });
+
+      // Keyboard Accessibility: ArrowUp and ArrowDown navigate between questions
+      questionBtn.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          var nextIndex = (index + 1) % faqItems.length;
+          var nextBtn = faqItems[nextIndex].querySelector('.faq-question');
+          if (nextBtn) nextBtn.focus();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          var prevIndex = (index - 1 + faqItems.length) % faqItems.length;
+          var prevBtn = faqItems[prevIndex].querySelector('.faq-question');
+          if (prevBtn) prevBtn.focus();
+        }
+      });
     });
   }
 
