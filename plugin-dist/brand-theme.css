@@ -368,3 +368,105 @@ input[type="search"]:focus {
   color: #ffd60a !important;
   fill: #ffd60a !important;
 }
+
+
+/* ==========================================================================
+   8. Connect with SFX Composer — Social Media Cards
+   ========================================================================== */
+
+.sfx-social-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.sfx-social-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #0d1527;
+  border: 1px solid rgba(91, 127, 172, 0.28);
+  border-radius: 9px;
+  color: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+  font: inherit;
+  width: 100%;
+  box-sizing: border-box;
+  transition: background 150ms ease, border-color 150ms ease, box-shadow 150ms ease, transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sfx-social-card:hover {
+  background: #111e38;
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 10px rgba(10, 132, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.sfx-social-card:active {
+  transform: translateY(0);
+}
+
+.sfx-social-card__icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.sfx-social-card__icon--discord {
+  background: rgba(88, 101, 242, 0.15);
+  color: #7289da;
+  border: 1px solid rgba(88, 101, 242, 0.3);
+}
+
+.sfx-social-card__icon--instagram {
+  background: linear-gradient(135deg, rgba(225, 48, 108, 0.15) 0%, rgba(253, 29, 29, 0.15) 50%, rgba(245, 96, 64, 0.15) 100%);
+  color: #f67280;
+  border: 1px solid rgba(225, 48, 108, 0.3);
+}
+
+.sfx-social-card__icon--youtube {
+  background: rgba(255, 0, 0, 0.12);
+  color: #ff4444;
+  border: 1px solid rgba(255, 0, 0, 0.25);
+}
+
+.sfx-social-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sfx-social-card__name {
+  font-size: 12.5px;
+  font-weight: 650;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.sfx-social-card__handle {
+  font-size: 11px;
+  color: var(--sfx-brand-highlight-soft, #7ec8ff);
+}
+
+.sfx-social-card__arrow {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 14px;
+  font-weight: 600;
+  transition: transform 140ms ease, color 140ms ease;
+  flex: 0 0 auto;
+}
+
+.sfx-social-card:hover .sfx-social-card__arrow {
+  color: #ffffff;
+  transform: translate(2px, -2px);
+}

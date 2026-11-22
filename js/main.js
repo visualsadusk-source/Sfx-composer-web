@@ -564,6 +564,180 @@
     var currentAuthEmail = '';
     var activeCustomerSession = null;
 
+    // ── EMAIL DELIVERABILITY & VALIDATION ENGINE ──
+    function validateEmailDeliverability(rawEmail) {
+      if (!rawEmail || typeof rawEmail !== 'string') {
+        return { valid: false, error: 'Please enter your registered email address.' };
+      }
+
+      var email = rawEmail.trim().toLowerCase();
+
+      // 1. Minimum & Maximum Length
+      if (email.length < 5 || email.length > 254) {
+        return { valid: false, error: 'Email address must be between 5 and 254 characters.' };
+      }
+
+      // 2. Strict RFC 5322 regex validation
+      var emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+      if (!emailRegex.test(email)) {
+        return { valid: false, error: 'Please enter a valid email address (e.g., editor@studio.com).' };
+      }
+
+      var parts = email.split('@');
+      if (parts.length !== 2) {
+        return { valid: false, error: 'Email address must contain exactly one "@" symbol.' };
+      }
+
+      var user = parts[0];
+      var domain = parts[1];
+
+      // 3. Domain validation
+      if (!domain.includes('.')) {
+        return { valid: false, error: 'Domain must include a valid extension (e.g. .com, .org, .net).' };
+      }
+
+      if (domain.startsWith('.') || domain.endsWith('.') || domain.startsWith('-') || domain.endsWith('-')) {
+        return { valid: false, error: 'Domain name contains invalid leading or trailing characters.' };
+      }
+
+      if (domain.includes('..')) {
+        return { valid: false, error: 'Domain name cannot contain consecutive dots.' };
+      }
+
+      var domainParts = domain.split('.');
+      var tld = domainParts[domainParts.length - 1];
+      if (tld.length < 2 || !/^[a-z]+$/.test(tld)) {
+        return { valid: false, error: 'Email has an invalid domain extension (.' + tld + ').' };
+      }
+
+      // 4. Common Typo Detection (prevents high-frequency accidental bounces)
+      var typoMap = {
+        'gnail.com': 'gmail.com',
+        'gmai.com': 'gmail.com',
+        'gamil.com': 'gmail.com',
+        'gmial.com': 'gmail.com',
+        'hotmial.com': 'hotmail.com',
+        'hotmai.com': 'hotmail.com',
+        'yaho.com': 'yahoo.com',
+        'yahooo.com': 'yahoo.com',
+        'outlok.com': 'outlook.com',
+        'outloo.com': 'outlook.com',
+        'icld.com': 'icloud.com'
+      };
+      if (typoMap[domain]) {
+        return {
+          valid: false,
+          error: 'Did you mean ' + user + '@' + typoMap[domain] + '? Please verify your email spelling.'
+        };
+      }
+
+      // 5. Block known disposable, dummy, and fabricated test domains
+      var blockedDomains = [
+        'example.com',
+        'example.org',
+        'example.net',
+        'test.com',
+        'tempmail.com',
+        '10minutemail.com',
+        'mailinator.com',
+        'guerrillamail.com',
+        'throwawaymail.com',
+        'fake.com',
+        'fakemail.com'
+      ];
+      if (blockedDomains.includes(domain)) {
+        return {
+          valid: false,
+          error: 'Disposable and placeholder email domains are not allowed. Please enter your real email address.'
+        };
+      }
+
+      return { valid: true, email: email };
+    }
+
+    // ── RESEND COOLDOWNS & RATE LIMITING ENGINE ──
+    var COOLDOWN_SECONDS = 60;
+    var cooldownTimers = {};
+
+    function getCooldownKey(action, email) {
+      return 'sfx_cooldown_' + action + '_' + (email ? encodeURIComponent(email) : 'global');
+    }
+
+    function getRemainingCooldown(action, email) {
+      try {
+        var key = getCooldownKey(action, email);
+        var lastSent = parseInt(localStorage.getItem(key) || '0', 10);
+        if (!lastSent) return 0;
+        var elapsed = Math.floor((Date.now() - lastSent) / 1000);
+        return elapsed < COOLDOWN_SECONDS ? (COOLDOWN_SECONDS - elapsed) : 0;
+      } catch (e) {
+        return 0;
+      }
+    }
+
+    function recordEmailSend(action, email) {
+      try {
+        var key = getCooldownKey(action, email);
+        localStorage.setItem(key, String(Date.now()));
+      } catch (e) {}
+    }
+
+    function startButtonCooldown(btnEl, defaultText, remainingSeconds, onComplete) {
+      if (!btnEl) return;
+      if (cooldownTimers[btnEl.id]) {
+        clearInterval(cooldownTimers[btnEl.id]);
+      }
+
+      var secs = remainingSeconds;
+      btnEl.disabled = true;
+      btnEl.textContent = 'Resend available in ' + secs + 's';
+
+      cooldownTimers[btnEl.id] = setInterval(function () {
+        secs--;
+        if (secs <= 0) {
+          clearInterval(cooldownTimers[btnEl.id]);
+          delete cooldownTimers[btnEl.id];
+          btnEl.disabled = false;
+          btnEl.textContent = defaultText;
+          if (typeof onComplete === 'function') onComplete();
+        } else {
+          btnEl.textContent = 'Resend available in ' + secs + 's';
+        }
+      }, 1000);
+    }
+
+    // ── SUPABASE AUTH ERROR FORMATTER ──
+    function formatAuthError(err) {
+      if (!err) return 'An unexpected error occurred. Please try again.';
+      var raw = (typeof err === 'string' ? err : err.message || err.error_description || err.msg || '');
+      var msg = raw.toLowerCase();
+
+      if (msg.includes('over_email_send_rate_limit') || msg.includes('email rate limit exceeded') || msg.includes('rate limit')) {
+        return 'For your security, email requests are temporarily rate-limited. Please wait a few minutes before requesting another link or check your spam/junk folder.';
+      }
+      if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
+        return 'Invalid email or password. If you purchased SFX Composer and have not yet set a password, click "Create Account / Set Password" below.';
+      }
+      if (msg.includes('already registered') || msg.includes('already exists')) {
+        return 'An account with this email already exists. Please sign in with your password or use "Forgot Password?" to reset.';
+      }
+      if (msg.includes('email not confirmed')) {
+        return 'Your email address has not been confirmed yet. Please check your inbox for the confirmation link.';
+      }
+      if (msg.includes('invalid email') || msg.includes('email_address_invalid') || msg.includes('validation_failed')) {
+        return 'Please enter a valid, deliverable email address.';
+      }
+      if (msg.includes('network') || msg.includes('fetch') || msg.includes('failed to fetch')) {
+        return 'Could not connect to authentication service. Please check your internet connection.';
+      }
+      return raw || 'Authentication error. Please try again.';
+    }
+
+    // Expose deliverability validator globally for unit testing & form validation
+    window.SFX_VALIDATE_EMAIL = validateEmailDeliverability;
+    window.SFX_COOLDOWN_CHECK = getRemainingCooldown;
+    window.SFX_FORMAT_AUTH_ERROR = formatAuthError;
+
     // Initialize client-side Supabase for customer auth
     var supabaseClient = null;
     try {
@@ -630,6 +804,14 @@
           forgotEmailInput.value = emailInput.value;
         }
         switchAuthSubView('forgot');
+        var targetEmail = (forgotEmailInput?.value || '').trim().toLowerCase();
+        if (targetEmail) {
+          var rem = getRemainingCooldown('forgot', targetEmail);
+          if (rem > 0) {
+            startButtonCooldown(btnForgot, 'SEND PASSWORD RESET LINK', rem);
+            setAuthStatus('A reset link was recently sent. You can request another in ' + rem + 's.', true);
+          }
+        }
       });
     }
 
@@ -760,22 +942,33 @@
       });
     }
 
+    // In-flight submission locks to prevent duplicate network calls
+    var isSubmittingLogin = false;
+    var isSubmittingRegister = false;
+    var isSubmittingForgot = false;
+    var isSubmittingRecovery = false;
+
     // ── 1. EMAIL + PASSWORD LOGIN ──
     if (loginForm) {
       loginForm.addEventListener('submit', async function (e) {
         e.preventDefault();
-        var email = (emailInput?.value || '').trim().toLowerCase();
-        var password = passwordInput?.value || '';
+        if (isSubmittingLogin) return;
 
-        if (!email) {
-          setAuthStatus('Please enter your registered email address.', false);
+        var emailCheck = validateEmailDeliverability(emailInput?.value);
+        if (!emailCheck.valid) {
+          setAuthStatus(emailCheck.error, false);
           return;
         }
+
+        var email = emailCheck.email;
+        var password = passwordInput?.value || '';
+
         if (!password) {
           setAuthStatus('Please enter your account password.', false);
           return;
         }
 
+        isSubmittingLogin = true;
         btnLogin.disabled = true;
         var origBtnText = btnLogin.textContent;
         btnLogin.textContent = 'Logging In…';
@@ -792,9 +985,6 @@
           });
 
           if (error) {
-            if (error.message.includes('Invalid login credentials')) {
-              throw new Error('Invalid email or password. If you purchased SFX Composer and have not yet set a password, click "Create Account / Set Password" below.');
-            }
             throw error;
           }
 
@@ -807,8 +997,9 @@
             throw new Error('Authentication failed. Please verify your credentials.');
           }
         } catch (err) {
-          setAuthStatus(err.message || 'Login failed', false);
+          setAuthStatus(formatAuthError(err), false);
         } finally {
+          isSubmittingLogin = false;
           btnLogin.disabled = false;
           btnLogin.textContent = origBtnText;
         }
@@ -819,18 +1010,31 @@
     if (registerForm) {
       registerForm.addEventListener('submit', async function (e) {
         e.preventDefault();
-        var email = (regEmailInput?.value || '').trim().toLowerCase();
-        var password = regPasswordInput?.value || '';
+        if (isSubmittingRegister) return;
 
-        if (!email) {
-          setAuthStatus('Please enter your registered purchase email address.', false);
+        var emailCheck = validateEmailDeliverability(regEmailInput?.value);
+        if (!emailCheck.valid) {
+          setAuthStatus(emailCheck.error, false);
           return;
         }
+
+        var email = emailCheck.email;
+        var password = regPasswordInput?.value || '';
+
         if (!password || password.length < 6) {
           setAuthStatus('Password must be at least 6 characters long.', false);
           return;
         }
 
+        // Check registration rate limit cooldown (prevents repeated confirmation email spam)
+        var regCooldown = getRemainingCooldown('register', email);
+        if (regCooldown > 0) {
+          setAuthStatus('Please wait ' + regCooldown + 's before submitting another registration request.', false);
+          startButtonCooldown(btnRegister, 'CREATE ACCOUNT & ACCESS DASHBOARD', regCooldown);
+          return;
+        }
+
+        isSubmittingRegister = true;
         btnRegister.disabled = true;
         var origText = btnRegister.textContent;
         btnRegister.textContent = 'Creating Account…';
@@ -845,11 +1049,12 @@
           });
 
           if (error) {
-            if (error.message.includes('already registered') || error.message.includes('already exists')) {
-              throw new Error('An account with this email already exists. Please sign in or use "Forgot Password?" to reset.');
-            }
             throw error;
           }
+
+          // Record send cooldown to prevent duplicate confirmation emails
+          recordEmailSend('register', email);
+          startButtonCooldown(btnRegister, 'CREATE ACCOUNT & ACCESS DASHBOARD', COOLDOWN_SECONDS);
 
           if (data && data.session && data.session.user) {
             currentAuthEmail = data.session.user.email;
@@ -864,25 +1069,40 @@
             throw new Error('Account setup failed. Please try again.');
           }
         } catch (err) {
-          setAuthStatus(err.message || 'Account creation failed', false);
+          setAuthStatus(formatAuthError(err), false);
         } finally {
-          btnRegister.disabled = false;
-          btnRegister.textContent = origText;
+          isSubmittingRegister = false;
+          if (!cooldownTimers[btnRegister.id]) {
+            btnRegister.disabled = false;
+            btnRegister.textContent = origText;
+          }
         }
       });
     }
 
-    // ── 3. FORGOT PASSWORD (PASSWORD RESET LINK) ──
+    // ── 3. FORGOT PASSWORD (PASSWORD RESET LINK WITH COOLDOWN) ──
     if (forgotForm) {
       forgotForm.addEventListener('submit', async function (e) {
         e.preventDefault();
-        var email = (forgotEmailInput?.value || '').trim().toLowerCase();
+        if (isSubmittingForgot) return;
 
-        if (!email) {
-          setAuthStatus('Please enter your registered purchase email address.', false);
+        var emailCheck = validateEmailDeliverability(forgotEmailInput?.value);
+        if (!emailCheck.valid) {
+          setAuthStatus(emailCheck.error, false);
           return;
         }
 
+        var email = emailCheck.email;
+
+        // Check persistent 60s cooldown to prevent repeated/burst email requests
+        var cooldown = getRemainingCooldown('forgot', email);
+        if (cooldown > 0) {
+          setAuthStatus('A password reset link was recently requested for this email. Please wait ' + cooldown + 's before requesting another or check your spam/junk folder.', false);
+          startButtonCooldown(btnForgot, 'SEND PASSWORD RESET LINK', cooldown);
+          return;
+        }
+
+        isSubmittingForgot = true;
         btnForgot.disabled = true;
         var origText = btnForgot.textContent;
         btnForgot.textContent = 'Sending Reset Link…';
@@ -898,12 +1118,19 @@
 
           if (error) throw error;
 
-          setAuthStatus('Password reset link sent! Please check your inbox or spam folder for ' + email + '.', true);
+          // Record send timestamp and initiate visual 60-second cooldown on button
+          recordEmailSend('forgot', email);
+          startButtonCooldown(btnForgot, 'SEND PASSWORD RESET LINK', COOLDOWN_SECONDS);
+
+          setAuthStatus('Password reset link sent! Please check your inbox or spam folder for ' + email + '. You can request another link in 60s if needed.', true);
         } catch (err) {
-          setAuthStatus('Could not send reset link: ' + (err.message || 'Error occurred'), false);
+          setAuthStatus(formatAuthError(err), false);
         } finally {
-          btnForgot.disabled = false;
-          btnForgot.textContent = origText;
+          isSubmittingForgot = false;
+          if (!cooldownTimers[btnForgot.id]) {
+            btnForgot.disabled = false;
+            btnForgot.textContent = origText;
+          }
         }
       });
     }
@@ -912,6 +1139,8 @@
     if (recoveryForm) {
       recoveryForm.addEventListener('submit', async function (e) {
         e.preventDefault();
+        if (isSubmittingRecovery) return;
+
         var newPassword = recoveryPasswordInput?.value || '';
 
         if (!newPassword || newPassword.length < 6) {
@@ -919,6 +1148,7 @@
           return;
         }
 
+        isSubmittingRecovery = true;
         btnUpdatePassword.disabled = true;
         var origText = btnUpdatePassword.textContent;
         btnUpdatePassword.textContent = 'Updating Password…';
@@ -941,14 +1171,14 @@
             switchAuthSubView('login');
           }
         } catch (err) {
-          setAuthStatus('Password update error: ' + (err.message || 'Error occurred'), false);
+          setAuthStatus(formatAuthError(err), false);
         } finally {
+          isSubmittingRecovery = false;
           btnUpdatePassword.disabled = false;
           btnUpdatePassword.textContent = origText;
         }
       });
     }
-
     // ── 5. SIGN OUT & CLEAR STATE ──
     if (btnSignout) {
       btnSignout.addEventListener('click', async function () {
