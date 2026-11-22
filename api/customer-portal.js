@@ -195,109 +195,74 @@ module.exports = async function handler(req, res) {
 
   const targetEmail = cleanReqEmail || authEmail;
 
-  // 4. Query Trusted Records (memoryStore and Supabase database)
-  let matchedOrders = [];
-  let foundLicenseRows = [];
+  // 4. STRICT PURCHASE VERIFICATION
+  let verifiedPaymentOrder = null;
 
-  // A. Check memoryStore purchases & licenses
   if (paymentRef) {
-    // Check for mismatch against another customer in memoryStore
+    // 4A. Check memoryStore purchases & licenses
     const memPurByPayment = memoryStore.purchases.get(paymentRef);
-    if (memPurByPayment && memPurByPayment.email !== targetEmail) {
-      res.statusCode = 403;
-      res.setHeader('Content-Type', 'application/json');
-      return res.end(JSON.stringify({
-        ok: false,
-        code: 'FORBIDDEN',
-        is_paid: false,
-        message: 'No verified purchase was found matching these details. Please check your purchase email and Razorpay Payment ID.'
-      }));
+    if (memPurByPayment) {
+      if (memPurByPayment.email !== targetEmail) {
+        res.statusCode = 403;
+        res.setHeader('Content-Type', 'application/json');
+        return res.end(JSON.stringify({
+          ok: false,
+          code: 'FORBIDDEN',
+          is_paid: false,
+          message: 'No verified purchase was found matching these details. Please check your purchase email and Razorpay Payment ID.'
+        }));
+      }
+      verifiedPaymentOrder = {
+        id: memPurByPayment.order_id,
+        provider_order_id: memPurByPayment.order_id,
+        provider_payment_id: memPurByPayment.payment_id || paymentRef,
+        amount: memPurByPayment.amount || 199,
+        currency: memPurByPayment.currency || 'INR',
+        product_id: memPurByPayment.product_id || 'sfx-composer-bundle',
+        product_name: memPurByPayment.product_name || 'SFX Composer Complete Bundle',
+        payment_status: memPurByPayment.payment_status || 'completed',
+        created_at: memPurByPayment.created_at
+      };
     }
 
     const memLicByOrder = memoryStore.licenses.get(paymentRef);
-    if (memLicByOrder && memLicByOrder.email !== targetEmail) {
-      res.statusCode = 403;
-      res.setHeader('Content-Type', 'application/json');
-      return res.end(JSON.stringify({
-        ok: false,
-        code: 'FORBIDDEN',
-        is_paid: false,
-        message: 'No verified purchase was found matching these details. Please check your purchase email and Razorpay Payment ID.'
-      }));
-    }
-
-    // Match memory purchases
-    for (const [pId, pur] of memoryStore.purchases.entries()) {
-      if (pur.email === targetEmail && (pur.payment_id === paymentRef || pur.order_id === paymentRef || pId === paymentRef)) {
-        matchedOrders.push({
-          id: pur.order_id,
-          provider_order_id: pur.order_id,
-          provider_payment_id: pur.payment_id || pId,
-          amount: pur.amount || 199,
-          currency: pur.currency || 'INR',
-          product_id: pur.product_id || 'sfx-composer-bundle',
-          product_name: pur.product_name || 'SFX Composer Complete Bundle',
-          payment_status: pur.payment_status || 'completed',
-          created_at: pur.created_at
-        });
+    if (memLicByOrder) {
+      if (memLicByOrder.email !== targetEmail) {
+        res.statusCode = 403;
+        res.setHeader('Content-Type', 'application/json');
+        return res.end(JSON.stringify({
+          ok: false,
+          code: 'FORBIDDEN',
+          is_paid: false,
+          message: 'No verified purchase was found matching these details. Please check your purchase email and Razorpay Payment ID.'
+        }));
+      }
+      if (!verifiedPaymentOrder) {
+        verifiedPaymentOrder = {
+          id: memLicByOrder.order_id || paymentRef,
+          provider_order_id: memLicByOrder.order_id || paymentRef,
+          provider_payment_id: memLicByOrder.payment_id || paymentRef,
+          amount: memLicByOrder.amount || 199,
+          currency: memLicByOrder.currency || 'INR',
+          product_id: memLicByOrder.product_id || 'sfx-composer-bundle',
+          product_name: memLicByOrder.product_name || 'SFX Composer Complete Bundle',
+          payment_status: memLicByOrder.status === 'revoked' ? 'refunded' : 'completed',
+          created_at: memLicByOrder.created_at
+        };
       }
     }
 
-    // Match memory licenses
-    for (const [oId, lic] of memoryStore.licenses.entries()) {
-      if (lic.email === targetEmail && (lic.payment_id === paymentRef || lic.order_id === paymentRef || oId === paymentRef)) {
-        foundLicenseRows.push(lic);
-        if (!matchedOrders.some(o => o.provider_order_id === (lic.order_id || oId))) {
-          matchedOrders.push({
-            id: oId,
-            provider_order_id: lic.order_id || oId,
-            provider_payment_id: lic.payment_id,
-            amount: lic.amount || 199,
-            currency: lic.currency || 'INR',
-            product_id: lic.product_id || 'sfx-composer-bundle',
-            product_name: lic.product_name || 'SFX Composer Complete Bundle',
-            payment_status: lic.status === 'revoked' ? 'refunded' : 'completed',
-            created_at: lic.created_at
-          });
-        }
-      }
-    }
-  } else if (authEmail) {
-    // Authenticated session lookup
-    for (const [pId, pur] of memoryStore.purchases.entries()) {
-      if (pur.email === targetEmail) {
-        matchedOrders.push({
-          id: pur.order_id,
-          provider_order_id: pur.order_id,
-          provider_payment_id: pur.payment_id || pId,
-          amount: pur.amount || 199,
-          currency: pur.currency || 'INR',
-          product_id: pur.product_id || 'sfx-composer-bundle',
-          product_name: pur.product_name || 'SFX Composer Complete Bundle',
-          payment_status: pur.payment_status || 'completed',
-          created_at: pur.created_at
-        });
-      }
-    }
-    for (const [oId, lic] of memoryStore.licenses.entries()) {
-      if (lic.email === targetEmail) {
-        foundLicenseRows.push(lic);
-      }
-    }
-  }
-
-  // B. Check Supabase Database
-  try {
-    if (paymentRef) {
-      // First check if paymentRef exists for a DIFFERENT email (cross-customer mismatch)
-      const crossRes = await fetch(`${SUPABASE_URL}/rest/v1/payment_orders?select=customer_email,payment_status&or=(provider_payment_id.eq.${encodeURIComponent(paymentRef)},provider_order_id.eq.${encodeURIComponent(paymentRef)})`, {
+    // 4B. Check Supabase Database for Payment ID
+    try {
+      // Check if paymentRef exists for ANY email (cross-customer mismatch detection)
+      const crossRes = await fetch(`${SUPABASE_URL}/rest/v1/payment_orders?select=id,customer_email,payment_status,provider_payment_id,provider_order_id,license_id,amount,currency,created_at&or=(provider_payment_id.eq.${encodeURIComponent(paymentRef)},provider_order_id.eq.${encodeURIComponent(paymentRef)})&limit=5`, {
         headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` }
       });
       if (crossRes.ok) {
         const crossRows = await crossRes.json();
         if (Array.isArray(crossRows) && crossRows.length > 0) {
-          const hasOwner = crossRows.some(r => r.customer_email.trim().toLowerCase() === targetEmail);
-          if (!hasOwner) {
+          const isOwner = crossRows.some(r => r.customer_email.trim().toLowerCase() === targetEmail);
+          if (!isOwner) {
             res.statusCode = 403;
             res.setHeader('Content-Type', 'application/json');
             return res.end(JSON.stringify({
@@ -307,109 +272,138 @@ module.exports = async function handler(req, res) {
               message: 'No verified purchase was found matching these details. Please check your purchase email and Razorpay Payment ID.'
             }));
           }
+          verifiedPaymentOrder = crossRows.find(r => r.customer_email.trim().toLowerCase() === targetEmail) || crossRows[0];
         }
       }
-
-      // Query database for targetEmail + paymentRef
-      const ordRes = await fetch(`${SUPABASE_URL}/rest/v1/payment_orders?select=*&customer_email=eq.${encodeURIComponent(targetEmail)}&or=(provider_payment_id.eq.${encodeURIComponent(paymentRef)},provider_order_id.eq.${encodeURIComponent(paymentRef)})&order=created_at.desc`, {
-        headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` }
-      });
-      if (ordRes.ok) {
-        const dbOrders = await ordRes.json();
-        if (Array.isArray(dbOrders)) {
-          matchedOrders = matchedOrders.concat(dbOrders);
-        }
-      }
-
-      // Query database licenses
-      const licRes = await fetch(`${SUPABASE_URL}/rest/v1/licenses?select=*,customers!inner(email)&customers.email=eq.${encodeURIComponent(targetEmail)}&order=created_at.desc`, {
-        headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` }
-      });
-      if (licRes.ok) {
-        const dbLicenses = await licRes.json();
-        if (Array.isArray(dbLicenses)) {
-          foundLicenseRows = foundLicenseRows.concat(dbLicenses);
-        }
-      }
-    } else if (authEmail) {
-      const ordRes = await fetch(`${SUPABASE_URL}/rest/v1/payment_orders?select=*&customer_email=eq.${encodeURIComponent(targetEmail)}&payment_status=eq.completed&order=created_at.desc`, {
-        headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` }
-      });
-      if (ordRes.ok) {
-        const dbOrders = await ordRes.json();
-        if (Array.isArray(dbOrders)) matchedOrders = matchedOrders.concat(dbOrders);
-      }
-      const licRes = await fetch(`${SUPABASE_URL}/rest/v1/licenses?select=*,customers!inner(email)&customers.email=eq.${encodeURIComponent(targetEmail)}&order=created_at.desc`, {
-        headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` }
-      });
-      if (licRes.ok) {
-        const dbLicenses = await licRes.json();
-        if (Array.isArray(dbLicenses)) foundLicenseRows = foundLicenseRows.concat(dbLicenses);
-      }
+    } catch (err) {
+      console.warn('Database verification error:', err.message);
     }
-  } catch (err) {
-    console.warn('Database verification error:', err.message);
-  }
 
-  // 5. Verification: Check matched transaction existence
-  if (!matchedOrders.length && !foundLicenseRows.length) {
+    // 4C. If paymentRef was not found in memoryStore or Supabase, REJECT IMMEDIATELY
+    if (!verifiedPaymentOrder) {
+      res.statusCode = 403;
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify({
+        ok: false,
+        code: 'NOT_PAID',
+        is_paid: false,
+        email: targetEmail,
+        message: 'No verified purchase was found matching these details. Please check your purchase email and Razorpay Payment ID.'
+      }));
+    }
+
+    // 4D. Strict status gating on the verified order
+    const pStatus = (verifiedPaymentOrder.payment_status || '').toLowerCase();
+    if (pStatus === 'refunded' || pStatus === 'revoked') {
+      res.statusCode = 403;
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify({
+        ok: false,
+        code: 'REFUNDED',
+        is_paid: false,
+        email: targetEmail,
+        message: 'This purchase has been refunded or revoked. Access to licenses and downloads is disabled.'
+      }));
+    }
+    if (pStatus === 'failed' || pStatus === 'cancelled') {
+      res.statusCode = 403;
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify({
+        ok: false,
+        code: 'PAYMENT_FAILED',
+        is_paid: false,
+        email: targetEmail,
+        message: 'Payment for this order was not completed. No active license found.'
+      }));
+    }
+    if (pStatus === 'pending' || pStatus === 'created') {
+      res.statusCode = 403;
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify({
+        ok: false,
+        code: 'PAYMENT_PENDING',
+        is_paid: false,
+        email: targetEmail,
+        message: 'Payment for this order is pending confirmation. Please check back shortly.'
+      }));
+    }
+    if (pStatus !== 'completed' && pStatus !== 'captured' && pStatus !== 'paid') {
+      res.statusCode = 403;
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify({
+        ok: false,
+        code: 'NOT_PAID',
+        is_paid: false,
+        email: targetEmail,
+        message: 'No verified purchase was found matching these details. Please check your purchase email and Razorpay Payment ID.'
+      }));
+    }
+  } else if (!authEmail && !isAdmin) {
     res.statusCode = 403;
     res.setHeader('Content-Type', 'application/json');
     return res.end(JSON.stringify({
       ok: false,
       code: 'NOT_PAID',
       is_paid: false,
-      email: targetEmail,
-      message: 'No verified purchase was found matching these details. Please check your purchase email and Razorpay Payment ID.'
+      message: 'Both purchase email and Razorpay Payment ID are required.'
     }));
   }
 
-  // 6. Verification: Check payment status (unpaid, failed, pending, refunded)
-  // Check if order is refunded
-  const isRefunded = matchedOrders.some(o => o.payment_status === 'refunded' || o.payment_status === 'revoked') ||
-    foundLicenseRows.some(l => l.status === 'revoked');
-  if (isRefunded) {
-    res.statusCode = 403;
-    res.setHeader('Content-Type', 'application/json');
-    return res.end(JSON.stringify({
-      ok: false,
-      code: 'REFUNDED',
-      is_paid: false,
-      email: targetEmail,
-      message: 'This purchase has been refunded or revoked. Access to licenses and downloads is disabled.'
-    }));
+  // 5. Query All Completed Orders and Active Licenses for Verified Customer
+  // Business Model: Customer may purchase unlimited licenses with the same email.
+  // Each valid purchase gets its own license key, and all are displayed on this verified customer's dashboard.
+  let completedOrders = [];
+  let foundLicenseRows = [];
+
+  // 5A. MemoryStore
+  for (const [pId, pur] of memoryStore.purchases.entries()) {
+    if (pur.email === targetEmail && (pur.payment_status === 'completed' || pur.payment_status === 'captured' || pur.payment_status === 'paid')) {
+      completedOrders.push({
+        id: pur.order_id,
+        provider_order_id: pur.order_id,
+        provider_payment_id: pur.payment_id || pId,
+        amount: pur.amount || 199,
+        currency: pur.currency || 'INR',
+        product_id: pur.product_id || 'sfx-composer-bundle',
+        product_name: pur.product_name || 'SFX Composer Complete Bundle',
+        payment_status: 'completed',
+        license_id: pur.license_id || null,
+        created_at: pur.created_at
+      });
+    }
+  }
+  for (const [oId, lic] of memoryStore.licenses.entries()) {
+    if (lic.email === targetEmail && lic.status !== 'revoked') {
+      foundLicenseRows.push(lic);
+    }
   }
 
-  // Check if order is failed
-  const isFailed = matchedOrders.some(o => o.payment_status === 'failed' || o.payment_status === 'cancelled');
-  if (isFailed && !matchedOrders.some(o => o.payment_status === 'completed' || o.payment_status === 'captured')) {
-    res.statusCode = 403;
-    res.setHeader('Content-Type', 'application/json');
-    return res.end(JSON.stringify({
-      ok: false,
-      code: 'PAYMENT_FAILED',
-      is_paid: false,
-      email: targetEmail,
-      message: 'Payment for this order was not completed. No active license found.'
-    }));
+  // 5B. Supabase Database
+  try {
+    const ordRes = await fetch(`${SUPABASE_URL}/rest/v1/payment_orders?select=*&customer_email=eq.${encodeURIComponent(targetEmail)}&payment_status=in.(completed,captured,paid)&order=created_at.asc`, {
+      headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` }
+    });
+    if (ordRes.ok) {
+      const dbOrders = await ordRes.json();
+      if (Array.isArray(dbOrders)) {
+        completedOrders = completedOrders.concat(dbOrders);
+      }
+    }
+
+    const licRes = await fetch(`${SUPABASE_URL}/rest/v1/licenses?select=*,customers!inner(email)&customers.email=eq.${encodeURIComponent(targetEmail)}&status=eq.active&order=created_at.asc`, {
+      headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` }
+    });
+    if (licRes.ok) {
+      const dbLicenses = await licRes.json();
+      if (Array.isArray(dbLicenses)) {
+        foundLicenseRows = foundLicenseRows.concat(dbLicenses);
+      }
+    }
+  } catch (err) {
+    console.warn('Database customer query error:', err.message);
   }
 
-  // Check if order is pending / created
-  const isPending = matchedOrders.some(o => o.payment_status === 'pending' || o.payment_status === 'created');
-  if (isPending && !matchedOrders.some(o => o.payment_status === 'completed' || o.payment_status === 'captured')) {
-    res.statusCode = 403;
-    res.setHeader('Content-Type', 'application/json');
-    return res.end(JSON.stringify({
-      ok: false,
-      code: 'PAYMENT_PENDING',
-      is_paid: false,
-      email: targetEmail,
-      message: 'Payment for this order is pending confirmation. Please check back shortly.'
-    }));
-  }
-
-  // Filter only completed / captured orders
-  const completedOrders = matchedOrders.filter(o => o.payment_status === 'completed' || o.payment_status === 'captured');
+  // Ensure customer has at least one verified purchase or license
   if (!completedOrders.length && !foundLicenseRows.length) {
     res.statusCode = 403;
     res.setHeader('Content-Type', 'application/json');
@@ -492,33 +486,36 @@ module.exports = async function handler(req, res) {
 
   if (hasPlugin) {
     for (const lic of foundLicenseRows) {
-      const lId = lic.id || lic.license_id || 'SFX-LIC-' + Math.random().toString(36).substring(2, 9);
-      if (processedLicIds.has(lId)) continue;
+      const lId = lic.id || lic.license_id;
+      if (!lId || processedLicIds.has(lId)) continue;
       processedLicIds.add(lId);
 
       let decryptedKey = lic.license_key || null;
       if (!decryptedKey && lic.encrypted_license_key) {
         decryptedKey = decryptLicenseKey(lic.encrypted_license_key);
       }
+      const isLegacy = !decryptedKey && !lic.encrypted_license_key && !!lic.license_key_hash;
 
-      const matchingOrder = completedOrders.find(o => o.license_id === lId || o.provider_order_id === lic.provider_order_id) || completedOrders[0] || {};
+      // Link each license to its specific payment order
+      const matchingOrder = completedOrders.find(o => o.license_id === lId || o.provider_order_id === lic.provider_order_id);
 
       licensesList.push({
         id: lId,
         license_id: lId,
         license_key: decryptedKey,
         has_encrypted_key: !!(lic.encrypted_license_key || decryptedKey),
-        product_id: lic.product_id || 'sfx-composer-pro',
+        legacy_key: isLegacy,
+        product_id: lic.product_id || (matchingOrder && matchingOrder.product_id) || 'sfx-composer-pro',
         product_name: 'SFX Composer Pro v2.4 (Universal)',
         status: lic.status || 'active',
         license_type: lic.license_type || 'lifetime',
-        created_at: lic.created_at || matchingOrder.created_at || new Date().toISOString(),
-        purchase_date: matchingOrder.created_at || lic.created_at || new Date().toISOString(),
-        provider_order_id: matchingOrder.provider_order_id || lic.order_id || '',
-        provider_payment_id: matchingOrder.provider_payment_id || lic.payment_id || paymentRef || '',
-        payment_status: 'completed',
-        payment_amount: matchingOrder.amount || 199,
-        payment_currency: matchingOrder.currency || 'INR',
+        created_at: lic.created_at || (matchingOrder && matchingOrder.created_at) || new Date().toISOString(),
+        purchase_date: (matchingOrder && matchingOrder.created_at) || lic.created_at || new Date().toISOString(),
+        provider_order_id: (matchingOrder && matchingOrder.provider_order_id) || lic.order_id || '',
+        provider_payment_id: (matchingOrder && matchingOrder.provider_payment_id) || (paymentRef && completedOrders.length === 1 ? paymentRef : ''),
+        payment_status: matchingOrder ? 'completed' : 'complimentary',
+        payment_amount: (matchingOrder && matchingOrder.amount) || (matchingOrder ? 199 : 0),
+        payment_currency: (matchingOrder && matchingOrder.currency) || 'INR',
         max_devices: lic.max_devices || 1,
         active_devices: lic.active_devices || []
       });

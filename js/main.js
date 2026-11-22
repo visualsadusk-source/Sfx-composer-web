@@ -757,6 +757,7 @@
             }
             if (paymentInput && !paymentInput.value && cached.payment_id) {
               paymentInput.value = cached.payment_id;
+              paymentInput.dataset.autofilled = 'true';
             }
           }
         }
@@ -814,6 +815,22 @@
       });
     }
 
+    // Invalidate cached session if customer types a different email address
+    if (emailInput) {
+      emailInput.addEventListener('input', function () {
+        var cleanVal = (this.value || '').trim().toLowerCase();
+        if (activeCustomerSession && activeCustomerSession.email && activeCustomerSession.email.toLowerCase() !== cleanVal) {
+          activeCustomerSession = null;
+          localStorage.removeItem('sfx_customer_session');
+          if (recentSessionBanner) recentSessionBanner.style.display = 'none';
+          if (paymentInput && paymentInput.dataset.autofilled === 'true') {
+            paymentInput.value = '';
+            delete paymentInput.dataset.autofilled;
+          }
+        }
+      });
+    }
+
     // In-flight submission lock to prevent duplicate requests
     var isSubmittingLookup = false;
 
@@ -838,6 +855,11 @@
           return;
         }
 
+        // Reset previous dashboard DOM elements to prevent stale/cross-customer view
+        if (licensesContainer) licensesContainer.innerHTML = '';
+        if (statusBanner) statusBanner.innerHTML = '';
+        if (authEmailDisplay) authEmailDisplay.textContent = '';
+
         isSubmittingLookup = true;
         btnLookup.disabled = true;
         var origBtnText = btnLookup.textContent;
@@ -860,9 +882,15 @@
             setAuthStatus('', true);
             await loadVerifiedPortalData(portal, currentAuthEmail);
           } else {
+            if (licensesContainer) licensesContainer.innerHTML = '';
+            if (statusBanner) statusBanner.innerHTML = '';
+            if (authEmailDisplay) authEmailDisplay.textContent = '';
             setAuthStatus(portal?.message || 'No verified purchase was found matching these details.', false);
           }
         } catch (err) {
+          if (licensesContainer) licensesContainer.innerHTML = '';
+          if (statusBanner) statusBanner.innerHTML = '';
+          if (authEmailDisplay) authEmailDisplay.textContent = '';
           setAuthStatus(formatAuthError(err), false);
         } finally {
           isSubmittingLookup = false;
@@ -880,10 +908,16 @@
         currentAuthEmail = '';
         if (recentSessionBanner) recentSessionBanner.style.display = 'none';
         if (emailInput) emailInput.value = '';
-        if (paymentInput) paymentInput.value = '';
+        if (paymentInput) {
+          paymentInput.value = '';
+          delete paymentInput.dataset.autofilled;
+        }
         if (proofInput) proofInput.value = '';
         if (proofContainer) proofContainer.style.display = 'none';
         if (btnLookup) btnLookup.textContent = 'FIND MY LICENSE';
+        if (licensesContainer) licensesContainer.innerHTML = '';
+        if (statusBanner) statusBanner.innerHTML = '';
+        if (authEmailDisplay) authEmailDisplay.textContent = '';
         setAuthStatus('', true);
         showAuthView();
       });
@@ -891,6 +925,9 @@
 
     // ── RENDER VERIFIED PORTAL DATA ──
     async function loadVerifiedPortalData(portalData, emailHint) {
+      if (licensesContainer) licensesContainer.innerHTML = '';
+      if (statusBanner) statusBanner.innerHTML = '';
+
       var portal = portalData;
       if (typeof portalData === 'string') {
         portal = await window.SFX_PAYMENT_SERVICE.getCustomerPortal(portalData);
