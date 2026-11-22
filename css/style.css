@@ -334,28 +334,35 @@ img, svg {
 .sfx-site-main-content {
   margin-left: var(--sidebar-w);
   width: calc(100% - var(--sidebar-w));
+  min-width: 0;
   box-sizing: border-box;
   min-height: 100vh;
   height: auto;
   padding: 0 32px 50px;
-  max-width: 1400px;
+  padding-inline: clamp(16px, 3vw, 40px);
   position: relative;
   overflow-x: hidden;
   overflow-y: visible;
 }
 
-/* ── Hero Section ── */
+/* ── Hero Section (True Responsive Center Alignment) ── */
 .sfx-site-hero {
   padding: 28px 0 20px;
+  width: min(100%, 1200px);
+  margin-inline: auto;
+  padding-inline: clamp(16px, 2.5vw, 32px);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .sfx-site-hero-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 4px 12px;
   background: linear-gradient(135deg, rgba(29, 104, 255, 0.15) 0%, rgba(13, 34, 84, 0.28) 100%);
@@ -364,18 +371,26 @@ img, svg {
   font-size: 11.5px;
   font-weight: 600;
   color: #93c5fd;
+  margin-inline: auto;
   margin-bottom: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  text-align: center;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .sfx-site-hero-headline {
+  width: 100%;
   font-size: clamp(32px, 4.8vw, 54px);
   font-weight: 750;
   line-height: 1.1;
   letter-spacing: -0.03em;
   color: var(--sfx-text);
+  margin-inline: auto;
   margin-bottom: 10px;
   max-width: 840px;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 .sfx-site-hero-headline .blue-highlight {
@@ -387,28 +402,69 @@ img, svg {
   animation: sfxGradientShift 14s ease infinite;
 }
 
-
 .sfx-hero-waveform-container {
+  width: 100%;
+  max-width: 800px;
+  height: 44px;
+  margin-inline: auto;
+  margin-bottom: 14px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   mask-image: linear-gradient(to right, transparent 0%, black 14%, black 65%, transparent 100%);
   -webkit-mask-image: linear-gradient(to right, transparent 0%, black 14%, black 65%, transparent 100%);
   pointer-events: auto;
+  box-sizing: border-box;
+}
+
+#hero-waveform-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  margin-inline: auto;
 }
 
 .sfx-site-hero-sub {
+  width: 100%;
   font-size: clamp(15px, 1.8vw, 17px);
   color: var(--sfx-text-muted);
   max-width: 650px;
+  margin-inline: auto;
   margin-bottom: 16px;
   line-height: 1.5;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 .sfx-site-hero-actions {
+  width: 100%;
+  max-width: 900px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   flex-wrap: wrap;
+  margin-inline: auto;
   margin-bottom: 14px;
+  box-sizing: border-box;
+}
+
+.sfx-hero-bundle-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--sfx-text-muted);
+  background: var(--sfx-surface-raised);
+  border: 1px solid var(--sfx-border);
+  padding: 5px 16px;
+  border-radius: 999px;
+  margin-inline: auto;
+  margin-bottom: 16px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* ── Official SFX Composer Brand Symbol & Atmospheric Beam ── */
@@ -616,7 +672,9 @@ img, svg {
   width: 100%;
   max-width: 1120px;
   margin: 0 auto 16px auto;
+  margin-inline: auto;
   z-index: 2;
+  box-sizing: border-box;
 }
 
 /* Ambient Blue Lighting Glow behind Hero Visual */
@@ -1421,6 +1479,11 @@ img, svg {
 /* ── WEBSITE FEATURE SECTION ── */
 .sfx-site-section {
   padding: 36px 0;
+}
+.sfx-site-section {
+  width: min(100%, 1200px);
+  margin-inline: auto;
+  box-sizing: border-box;
 }
 
 .sfx-site-sec-head {
