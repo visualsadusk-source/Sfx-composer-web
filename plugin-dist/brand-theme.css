@@ -84,14 +84,17 @@
   color: #ffffff;
 }
 
-.sfx-hm__btn[aria-pressed='true'] {
+.sfx-hm__btn[aria-pressed='true'],
+.sfx-hm__btn.is-active {
   background: var(--sfx-brand-gradient) !important;
   border-color: rgba(126, 200, 255, 0.45) !important;
   color: #ffffff !important;
+  opacity: 1 !important;
   box-shadow: 0 2px 8px rgba(10, 132, 255, 0.35), 0 0 1px rgba(126, 200, 255, 0.6) !important;
 }
 
-.sfx-hm__btn[aria-pressed='true']:hover {
+.sfx-hm__btn[aria-pressed='true']:hover,
+.sfx-hm__btn.is-active:hover {
   background: var(--sfx-brand-gradient-hover) !important;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(10, 132, 255, 0.45) !important;

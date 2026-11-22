@@ -24,26 +24,32 @@
   font: 600 11px/1 var(--sfx-font, -apple-system, 'Segoe UI', system-ui, sans-serif);
   cursor: pointer;
   white-space: nowrap;
+  opacity: 1;
+  visibility: visible;
   transition: background 150ms ease, border-color 150ms ease, box-shadow 150ms ease, color 150ms ease, transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .sfx-hm__btn:hover:not(:disabled) {
   background: rgba(16, 64, 128, 0.18);
   border-color: rgba(91, 127, 172, 0.35);
+  color: #ffffff;
 }
 .sfx-hm__btn:disabled {
-  opacity: 0.4;
-  cursor: default;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
-.sfx-hm__btn[aria-pressed='true'] {
-  background: var(--sfx-brand-gradient, linear-gradient(135deg, #104080 0%, #0a84ff 52%, #38bdf8 100%));
-  border-color: rgba(126, 200, 255, 0.45);
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(10, 132, 255, 0.35), 0 0 1px rgba(126, 200, 255, 0.6);
+.sfx-hm__btn[aria-pressed='true'],
+.sfx-hm__btn.is-active {
+  background: var(--sfx-brand-gradient, linear-gradient(135deg, #104080 0%, #0a84ff 52%, #38bdf8 100%)) !important;
+  border-color: rgba(126, 200, 255, 0.45) !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  box-shadow: 0 2px 8px rgba(10, 132, 255, 0.35), 0 0 1px rgba(126, 200, 255, 0.6) !important;
 }
-.sfx-hm__btn[aria-pressed='true']:hover {
-  background: var(--sfx-brand-gradient-hover, linear-gradient(135deg, #144e99 0%, #2094ff 52%, #56c8ff 100%));
+.sfx-hm__btn[aria-pressed='true']:hover,
+.sfx-hm__btn.is-active:hover {
+  background: var(--sfx-brand-gradient-hover, linear-gradient(135deg, #144e99 0%, #2094ff 52%, #56c8ff 100%)) !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(10, 132, 255, 0.45);
+  box-shadow: 0 4px 12px rgba(10, 132, 255, 0.45) !important;
 }
 .sfx-hm__btn svg {
   width: 13px;

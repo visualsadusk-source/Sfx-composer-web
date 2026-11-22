@@ -15,6 +15,13 @@
   font-family: var(--sfx-font, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif);
 }
 
+#sfx-ai-assistant.is-open {
+  display: flex !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
 #sfx-ai-assistant__toggle {
   display: none; /* header menu owns navigation */
 }
@@ -23,7 +30,7 @@ html.sfx-has-header-menu #sfx-ai-assistant__toggle {
   display: none !important;
 }
 
-/* Full content overlay — same pattern as #sfx-browser */
+/* Full content overlay - same pattern as #sfx-browser */
 #sfx-ai-assistant__panel {
   position: absolute;
   top: 0;
@@ -39,10 +46,15 @@ html.sfx-has-header-menu #sfx-ai-assistant__toggle {
   box-sizing: border-box;
   pointer-events: auto;
   overflow: hidden;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 #sfx-ai-assistant__panel.is-open {
-  display: flex;
+  display: flex !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 #sfx-ai-assistant__panel *,

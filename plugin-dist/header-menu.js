@@ -55,6 +55,7 @@
       b.className = 'sfx-hm__btn';
       b.title = tool.title;
       b.setAttribute('aria-pressed', 'false');
+      b.setAttribute('data-tool', tool.id);
       b.innerHTML = tool.icon + '<span></span>';
       b.lastChild.textContent = tool.label;
       b.addEventListener('click', function (event) {
@@ -71,26 +72,47 @@
     TOOLS.forEach(function (tool) {
       if (tool.id === id) target = tool.api();
     });
-    if (!target) return; // that tool's script isn't ready (yet)
-    var opening = !target.isOpen();
+    if (!target) {
+      // If module is still loading, retry after short wait
+      setTimeout(function () {
+        TOOLS.forEach(function (tool) {
+          if (tool.id === id) target = tool.api();
+        });
+        if (target && typeof target.setOpen === 'function') {
+          activate(id);
+        }
+      }, 150);
+      return;
+    }
+    var opening = typeof target.isOpen === 'function' ? !target.isOpen() : true;
     // One tool at a time: close the others first.
     TOOLS.forEach(function (tool) {
       if (tool.id === id) return;
       var other = tool.api();
-      if (other && other.isOpen()) other.setOpen(false);
+      if (other && typeof other.setOpen === 'function' && typeof other.isOpen === 'function' && other.isOpen()) {
+        try { other.setOpen(false); } catch (e) {}
+      }
     });
-    target.setOpen(opening);
+    if (typeof target.setOpen === 'function') {
+      target.setOpen(opening);
+    }
     refresh();
   }
 
   function refresh() {
     TOOLS.forEach(function (tool) {
       var api = tool.api();
-      var open = !!(api && api.isOpen());
+      var open = !!(api && typeof api.isOpen === 'function' && api.isOpen());
       var btn = buttons[tool.id];
       if (!btn) return;
       btn.setAttribute('aria-pressed', open ? 'true' : 'false');
-      btn.disabled = !api;
+      // Keep buttons fully responsive and at 100% opacity
+      btn.disabled = false;
+      if (open) {
+        btn.classList.add('is-active');
+      } else {
+        btn.classList.remove('is-active');
+      }
     });
   }
 
@@ -134,8 +156,17 @@
         }).observe(document.body, { childList: true, subtree: true });
         window.addEventListener('resize', attach);
         window.addEventListener('sfx-license-changed', refresh);
+        window.addEventListener('sfx-ai-assistant-ready', refresh);
+        window.addEventListener('sfx-browser-tab-ready', refresh);
+        window.addEventListener('sfx-bgm-flow-ready', refresh);
+        window.addEventListener('sfx-scene-designer-ready', refresh);
+        window.addEventListener('sfx-audio-tools-ready', refresh);
+        window.addEventListener('sfx-buddy-ready', refresh);
         document.addEventListener('click', function () {
           setTimeout(refresh, 0);
+        });
+        [100, 300, 600, 1200, 2500, 5000].forEach(function (delay) {
+          setTimeout(refresh, delay);
         });
         return;
       }

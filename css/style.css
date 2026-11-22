@@ -1041,12 +1041,16 @@ img, svg {
 /* Overlay Active Class */
 .sfx-plugin-viewport #sfx-audio-tools.is-open,
 .sfx-plugin-viewport #sfx-ai-assistant.is-open,
+.sfx-plugin-viewport #sfx-ai-assistant__panel.is-open,
 .sfx-plugin-viewport #sfx-browser.is-open,
 .sfx-plugin-viewport #sfx-bgm-flow.is-open,
 .sfx-plugin-viewport #sfx-scene-designer.is-open,
 .sfx-plugin-viewport #sfx-analytics.is-open,
 .sfx-plugin-viewport #sfx-settings-drawer.is-open {
   display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
 
 /* Ensure all back buttons are clickable and visually sharp */
@@ -1980,8 +1984,12 @@ img, svg {
   pointer-events: auto !important;
 }
 
-.sfx-plugin-viewport #sfx-ai-assistant.is-open {
+.sfx-plugin-viewport #sfx-ai-assistant.is-open,
+.sfx-plugin-viewport #sfx-ai-assistant__panel.is-open {
   display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
 
 .sfx-ai-header {

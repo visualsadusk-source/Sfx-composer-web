@@ -166,6 +166,7 @@
 
     document.querySelectorAll('.sfx-hm__btn').forEach(function (btn) {
       btn.setAttribute('aria-pressed', 'false');
+      btn.classList.remove('is-active');
     });
 
     // Open target
@@ -174,7 +175,10 @@
       state.currentTool = toolId;
 
       var activeBtn = document.querySelector('.sfx-hm__btn[data-tool="' + toolId + '"]');
-      if (activeBtn) activeBtn.setAttribute('aria-pressed', 'true');
+      if (activeBtn) {
+        activeBtn.setAttribute('aria-pressed', 'true');
+        activeBtn.classList.add('is-active');
+      }
 
       // Sync top showcase chips
       var chips = document.querySelectorAll('.sfx-demo-chip');
@@ -223,6 +227,7 @@
     });
     document.querySelectorAll('.sfx-hm__btn').forEach(function (btn) {
       btn.setAttribute('aria-pressed', 'false');
+      btn.classList.remove('is-active');
     });
     state.currentTool = null;
 
