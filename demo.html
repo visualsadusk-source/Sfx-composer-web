@@ -192,29 +192,30 @@
           </div>
 
           <div class="sfx-host-title">
-            SFX Composer — Window &gt; Extensions &gt; SFX Composer
+            SFX Composer
           </div>
 
           <!-- Interactive Dual-Host Switcher -->
           <div class="sfx-host-switcher" role="radiogroup" aria-label="Host application">
-            <button type="button" class="sfx-host-btn is-active" id="btn-host-ppro" title="Simulate Adobe Premiere Pro environment">
+            <button type="button" class="sfx-host-btn is-active" id="btn-host-ppro" title="Active Host: Adobe Premiere Pro CC 2024 (Sequence Connected)">
               <span class="sfx-host-badge sfx-host-badge--pr">Pr</span>
-              <span>Premiere Pro CC 2024</span>
+              <span>Premiere Pro</span>
             </button>
-            <button type="button" class="sfx-host-btn" id="btn-host-ae" title="Simulate Adobe After Effects environment">
+            <button type="button" class="sfx-host-btn" id="btn-host-ae" title="Switch Host: Adobe After Effects CC 2024">
               <span class="sfx-host-badge sfx-host-badge--ae">Ae</span>
-              <span>After Effects CC 2024</span>
+              <span>After Effects</span>
             </button>
           </div>
 
           <!-- Dynamic Active Sequence/Comp Pill -->
-          <div class="sfx-host-env-pill" id="sfx-host-env-pill">
-            ● Sequence: angela bathroom • Playhead: 01:19:496 @ 23.976 fps
+          <div class="sfx-host-env-pill" id="sfx-host-env-pill" title="Playhead: 01:19:496 @ 23.976 fps • 48000 Hz Stereo">
+            ● Sequence: angela bathroom
           </div>
 
-          <button type="button" class="sfx-button sfx-button--primary sfx-demo-buy-btn sfx-buy-trigger" style="height: 24px; padding: 0 10px; font-size: 11px; margin-left: 8px; font-weight: 600; text-decoration: none;">
-            Unlock Pro (₹199)
-          </button>
+          <div class="sfx-host-status" style="margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: var(--sfx-text-muted);" title="Adobe CEP Bridge Active">
+            <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #30d158; box-shadow: 0 0 6px rgba(48,209,88,0.5);"></span>
+            <span>Bridge Active</span>
+          </div>
         </div>
 
         <!-- PLUGIN SHELL -->
@@ -306,61 +307,61 @@
                   <div class="sfx-sidebar__heading">CATEGORIES</div>
                   <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="whoosh">
                     <span class="sfx-cat__hit">
-                      <span class="sfx-cat__name">🔘 Button &amp; Hits</span>
+                      <span class="sfx-cat__name"><span class="sfx-cat__icon-dot"></span>Button &amp; Hits</span>
                       <span class="sfx-cat__count">97</span>
                     </span>
                   </button>
                   <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="whoosh">
                     <span class="sfx-cat__hit">
-                      <span class="sfx-cat__name">⏱️ Countdown</span>
+                      <span class="sfx-cat__name"><span class="sfx-cat__icon-dot"></span>Countdown</span>
                       <span class="sfx-cat__count">33</span>
                     </span>
                   </button>
                   <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="whoosh">
                     <span class="sfx-cat__hit">
-                      <span class="sfx-cat__name">👟 Foley Movements</span>
+                      <span class="sfx-cat__name"><span class="sfx-cat__icon-dot"></span>Foley Movements</span>
                       <span class="sfx-cat__count">31</span>
                     </span>
                   </button>
                   <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="transitions">
                     <span class="sfx-cat__hit">
-                      <span class="sfx-cat__name">⚡ Glitch &amp; Zap</span>
+                      <span class="sfx-cat__name"><span class="sfx-cat__icon-dot"></span>Glitch &amp; Zap</span>
                       <span class="sfx-cat__count">49</span>
                     </span>
                   </button>
                   <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="ui">
                     <span class="sfx-cat__hit">
-                      <span class="sfx-cat__name">👤 Human Voice</span>
+                      <span class="sfx-cat__name"><span class="sfx-cat__icon-dot"></span>Human Voice</span>
                       <span class="sfx-cat__count">13</span>
                     </span>
                   </button>
                   <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="impacts">
                     <span class="sfx-cat__hit">
-                      <span class="sfx-cat__name">💥 Impacts &amp; Booms</span>
+                      <span class="sfx-cat__name"><span class="sfx-cat__icon-dot"></span>Impacts &amp; Booms</span>
                       <span class="sfx-cat__count">22</span>
                     </span>
                   </button>
                   <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="music">
                     <span class="sfx-cat__hit">
-                      <span class="sfx-cat__name">🎵 Music &amp; Beds</span>
+                      <span class="sfx-cat__name"><span class="sfx-cat__icon-dot"></span>Music &amp; Beds</span>
                       <span class="sfx-cat__count">387</span>
                     </span>
                   </button>
                   <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="transitions">
                     <span class="sfx-cat__hit">
-                      <span class="sfx-cat__name">🌊 Transitions &amp; Sweeps</span>
+                      <span class="sfx-cat__name"><span class="sfx-cat__icon-dot"></span>Transitions &amp; Sweeps</span>
                       <span class="sfx-cat__count">102</span>
                     </span>
                   </button>
                   <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="ui">
                     <span class="sfx-cat__hit">
-                      <span class="sfx-cat__name">⌨️ Typing &amp; Keystrokes</span>
+                      <span class="sfx-cat__name"><span class="sfx-cat__icon-dot"></span>Typing &amp; Keystrokes</span>
                       <span class="sfx-cat__count">53</span>
                     </span>
                   </button>
                   <button type="button" class="sfx-cat sfx-sidebar-cat-btn" data-category="ambience">
                     <span class="sfx-cat__hit">
-                      <span class="sfx-cat__name">🌫️ Ambience &amp; Drones</span>
+                      <span class="sfx-cat__name"><span class="sfx-cat__icon-dot"></span>Ambience &amp; Drones</span>
                       <span class="sfx-cat__count">120</span>
                     </span>
                   </button>
@@ -405,7 +406,7 @@
                 <!-- Active Sound Trim / Waveform Preview Tray -->
                 <div class="sfx-trim" id="sfx-trim-tray">
                   <div class="sfx-trim__head">
-                    <span class="sfx-trim__name" id="sfx-trim-name">_Whoosh 20</span>
+                    <span class="sfx-trim__name" id="sfx-trim-name">Cinematic Whoosh</span>
                     <span class="sfx-trim__length" id="sfx-trim-length">4.43s</span>
                     <span class="sfx-trim__hint">Space to play · I and O to mark · Esc to close</span>
                     <button type="button" class="sfx-iconbutton sfx-trim__close" id="sfx-trim-close" title="Hide Trim Tray">✕</button>

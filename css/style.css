@@ -4113,9 +4113,9 @@ img, svg {
 .sfx-trim {
   background: #070a0f !important;
   border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-  height: 110px !important;
-  min-height: 110px !important;
-  max-height: 110px !important;
+  height: 118px !important;
+  min-height: 118px !important;
+  max-height: 118px !important;
   padding: 6px 12px 8px !important;
 }
 
@@ -4158,4 +4158,24 @@ img, svg {
 .sfx-statusbar__time {
   font-size: 10px !important;
   color: #64748b !important;
+}
+
+/* Sidebar Sleek Category Dot */
+.sfx-cat__icon-dot {
+  width: 5px !important;
+  height: 5px !important;
+  border-radius: 50% !important;
+  background: #475569 !important;
+  margin-right: 7px !important;
+  flex-shrink: 0 !important;
+  transition: all 0.12s ease !important;
+}
+
+.sfx-cat:hover .sfx-cat__icon-dot {
+  background: #94a3b8 !important;
+}
+
+.sfx-cat.sfx-cat--on .sfx-cat__icon-dot {
+  background: #0066FF !important;
+  box-shadow: 0 0 6px rgba(0, 102, 255, 0.6) !important;
 }

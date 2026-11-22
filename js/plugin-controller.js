@@ -428,8 +428,7 @@
         '<div class="sfx-row__main">' +
           '<div class="sfx-row__name">' + (sound.name.replace(/^_+/, '').replace(/^sfx_/i, '')) + '</div>' +
           '<div class="sfx-row__meta">' +
-            '<span class="sfx-tag">' + sound.cat + '</span>' +
-            (sound.tags ? sound.tags.slice(0, 2).map(function (t) { return '<span class="sfx-tag" style="opacity: 0.7;">#' + t + '</span>'; }).join('') : '') +
+            '<span class="sfx-tag">' + (sound.subcat || sound.cat) + '</span>' +
           '</div>' +
         '</div>' +
 
@@ -758,7 +757,7 @@
     state.trimIn = 0.0;
     state.trimOut = sound.duration;
 
-    if (nameEl) nameEl.textContent = sound.name;
+    if (nameEl) nameEl.textContent = sound.name.replace(/^_+/, '').replace(/^sfx_/i, '');
     if (lenEl) lenEl.textContent = sound.duration.toFixed(2) + 's';
     if (readout) readout.textContent = 'In: 0.00s • Out: ' + sound.duration.toFixed(2) + 's (' + sound.duration.toFixed(2) + 's)';
 
