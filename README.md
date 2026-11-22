@@ -116,4 +116,4 @@ Double click `index.html` to open directly in Google Chrome, Microsoft Edge, Fir
 ---
 
 ## 📧 Support
-For extension questions and customer support, contact: [visualsadusk@gmail.com](mailto:visualsadusk@gmail.com).
+For extension questions and customer support, contact: [sfxcomposer@gmail.com](mailto:sfxcomposer@gmail.com).

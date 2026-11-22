@@ -27,7 +27,7 @@ function parseSender(senderConfig?: string): { name: string; email: string } {
   const raw = (senderConfig || Deno.env.get('EMAIL_FROM') || '').trim();
   if (!raw) {
     // Default to the confirmed administrator email
-    return { name: 'SFX Composer', email: 'visualsadusk@gmail.com' };
+    return { name: 'SFX Composer', email: 'sfxcomposer@gmail.com' };
   }
 
   const match = raw.match(/^(.*?)\s*<([^>]+)>$/);
@@ -231,7 +231,7 @@ export async function sendLicenseEmailBrevo(params: SendLicenseEmailParams): Pro
       </tr>
       <tr>
         <td class="footer">
-          Need support or assistance? Contact our engineering team at <a href="mailto:support@sfxcomposer.com">support@sfxcomposer.com</a> or <a href="mailto:visualsadusk@gmail.com">visualsadusk@gmail.com</a>.<br/>
+          Need support or assistance? Contact our engineering team at <a href="mailto:support@sfxcomposer.com">support@sfxcomposer.com</a> or <a href="mailto:sfxcomposer@gmail.com">sfxcomposer@gmail.com</a>.<br/>
           &copy; 2026 SFX Composer. All rights reserved.
         </td>
       </tr>
@@ -267,7 +267,7 @@ INSTALLATION & ACTIVATION:
 4. Enter registered email (${cleanEmail}) and license key: ${params.licenseKey}
 5. Click Activate License.
 
-Support: support@sfxcomposer.com / visualsadusk@gmail.com
+Support: support@sfxcomposer.com / sfxcomposer@gmail.com
 (C) 2026 SFX Composer. All rights reserved.
   `.trim();
 

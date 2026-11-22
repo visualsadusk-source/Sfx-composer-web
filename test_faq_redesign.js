@@ -53,7 +53,7 @@ expectedQuestions.forEach((q, i) => {
   assert.ok(indexHtml.includes(q), `Missing Question ${i + 1}: "${q}"`);
 });
 
-assert.ok(indexHtml.includes('directly at <a href="mailto:visualsadusk@gmail.com" style="color: var(--sfx-accent); text-decoration: underline;">visualsadusk@gmail.com</a>'), 'Must preserve exact contact email markup in Question 6');
+assert.ok(indexHtml.includes('directly at <a href="mailto:sfxcomposer@gmail.com" style="color: var(--sfx-accent); text-decoration: underline;">sfxcomposer@gmail.com</a>'), 'Must preserve exact contact email markup in Question 6');
 assert.ok(indexHtml.includes('https://discord.gg/zrvYJeq9W'), 'Must preserve Discord link in Question 6');
 assert.ok(indexHtml.includes('7GB Master SFX Library'), 'Must preserve 7GB library claim');
 assert.ok(indexHtml.includes('CC 2021 through CC 2026'), 'Must preserve Premiere/AE versions');
