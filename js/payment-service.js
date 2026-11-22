@@ -156,21 +156,45 @@
         body = authArg;
       }
 
-      var res = await fetch(CONFIG.FUNCTIONS_URL + '/customer-portal', {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(body)
-      });
+      var endpoints = [];
+      if (window.SFX_API_URL) {
+        endpoints.push(String(window.SFX_API_URL).replace(/\/$/, '') + '/customer-portal');
+      }
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname.includes('github.io')) {
+        endpoints.push('/api/customer-portal');
+      }
+      endpoints.push(CONFIG.FUNCTIONS_URL + '/customer-portal');
 
-      var data = await res.json().catch(function () {
-        return { ok: false, message: 'Failed to retrieve customer data' };
-      });
+      var lastError = null;
+      for (var i = 0; i < endpoints.length; i++) {
+        var url = endpoints[i];
+        try {
+          var res = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(body)
+          });
 
-      if (!res.ok || !data.ok) {
-        throw new Error(data.message || 'Failed to retrieve portal data');
+          var data = await res.json().catch(function () {
+            return { ok: false, message: 'Failed to retrieve customer data' };
+          });
+
+          if (res.ok && data.ok) {
+            return data;
+          } else if (data.requires_verification) {
+            return data;
+          } else if (res.status === 404 && i < endpoints.length - 1) {
+            continue;
+          } else {
+            throw new Error(data.message || 'Failed to retrieve portal data');
+          }
+        } catch (err) {
+          lastError = err;
+          if (i < endpoints.length - 1) continue;
+        }
       }
 
-      return data;
+      throw lastError || new Error('Failed to retrieve customer portal data');
     },
 
     // ── 4. Admin API: Create / Issue License ──

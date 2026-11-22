@@ -37,6 +37,7 @@ const apiHandlers = {
   '/api/payment-webhook': require('./api/payment-webhook'),
   '/api/download': require('./api/download'),
   '/api/refund': require('./api/refund'),
+  '/api/customer-portal': require('./api/customer-portal'),
   '/api/health': require('./api/health')
 };
 

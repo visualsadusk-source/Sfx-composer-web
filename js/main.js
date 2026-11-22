@@ -518,40 +518,12 @@
     var recentSessionEmail = document.getElementById('cdm-recent-session-email');
     var btnInstantUnlock = document.getElementById('cdm-btn-instant-unlock');
 
-    // Form 1: Email + Password Login
-    var loginForm = document.getElementById('cdm-login-form');
+    // Simplified Lookup Form
+    var lookupForm = document.getElementById('cdm-lookup-form');
     var emailInput = document.getElementById('cdm-email-input');
-    var passwordInput = document.getElementById('cdm-password-input');
-    var btnTogglePassword = document.getElementById('cdm-toggle-password-btn');
-    var iconEye = document.getElementById('cdm-icon-eye');
-    var iconEyeOff = document.getElementById('cdm-icon-eye-off');
-    var btnLogin = document.getElementById('cdm-btn-login');
-    var linkForgotPassword = document.getElementById('cdm-link-forgot-password');
-    var linkToRegister = document.getElementById('cdm-link-to-register');
-
-    // Form 2: Create Account / Set Password (for purchasers setting password)
-    var registerForm = document.getElementById('cdm-register-form');
-    var regEmailInput = document.getElementById('cdm-register-email');
-    var regPasswordInput = document.getElementById('cdm-register-password');
-    var btnToggleRegPassword = document.getElementById('cdm-toggle-reg-password-btn');
-    var iconRegEye = document.getElementById('cdm-icon-reg-eye');
-    var iconRegEyeOff = document.getElementById('cdm-icon-reg-eye-off');
-    var btnRegister = document.getElementById('cdm-btn-register');
-    var linkBackFromRegister = document.getElementById('cdm-link-back-from-register');
-
-    // Form 3: Forgot Password (Reset link)
-    var forgotForm = document.getElementById('cdm-forgot-form');
-    var forgotEmailInput = document.getElementById('cdm-forgot-email');
-    var btnForgot = document.getElementById('cdm-btn-forgot');
-    var linkBackFromForgot = document.getElementById('cdm-link-back-from-forgot');
-
-    // Form 4: Set New Password (Recovery callback)
-    var recoveryForm = document.getElementById('cdm-recovery-form');
-    var recoveryPasswordInput = document.getElementById('cdm-recovery-password');
-    var btnToggleRecPassword = document.getElementById('cdm-toggle-rec-password-btn');
-    var iconRecEye = document.getElementById('cdm-icon-rec-eye');
-    var iconRecEyeOff = document.getElementById('cdm-icon-rec-eye-off');
-    var btnUpdatePassword = document.getElementById('cdm-btn-update-password');
+    var btnFindLicense = document.getElementById('cdm-btn-find-license');
+    var verificationBox = document.getElementById('cdm-ownership-verification-box');
+    var verifyProofInput = document.getElementById('cdm-verify-proof');
 
     // Dashboard View Elements
     var authEmailDisplay = document.getElementById('cdm-auth-email-display');
@@ -564,15 +536,18 @@
     var currentAuthEmail = '';
     var activeCustomerSession = null;
 
-    // Initialize client-side Supabase for customer auth
-    var supabaseClient = null;
-    try {
-      if (window.supabase && window.SFX_PAYMENT_SERVICE) {
-        var cfg = window.SFX_PAYMENT_SERVICE.getConfig();
-        supabaseClient = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
-      }
-    } catch (e) {
-      console.warn('Customer portal Supabase client init warning:', e);
+    function getStoredSession() {
+      try {
+        var raw = localStorage.getItem('sfx_customer_session');
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return null;
+    }
+
+    function saveStoredSession(data) {
+      try {
+        localStorage.setItem('sfx_customer_session', JSON.stringify(data));
+      } catch (e) {}
     }
 
     function setAuthStatus(msg, isSuccess) {
@@ -588,14 +563,6 @@
       authStatus.style.border = isSuccess ? '1px solid rgba(48, 209, 88, 0.3)' : '1px solid rgba(255, 69, 58, 0.3)';
     }
 
-    function switchAuthSubView(mode) {
-      setAuthStatus('', true);
-      if (loginForm) loginForm.style.display = (mode === 'login') ? 'flex' : 'none';
-      if (registerForm) registerForm.style.display = (mode === 'register') ? 'flex' : 'none';
-      if (forgotForm) forgotForm.style.display = (mode === 'forgot') ? 'flex' : 'none';
-      if (recoveryForm) recoveryForm.style.display = (mode === 'recovery') ? 'flex' : 'none';
-    }
-
     function showAuthView() {
       if (authView) authView.style.display = 'block';
       if (dashboardView) dashboardView.style.display = 'none';
@@ -606,116 +573,20 @@
       if (dashboardView) dashboardView.style.display = 'flex';
     }
 
-    // Password Show/Hide Toggle Helper
-    function attachPasswordToggle(btn, inputEl, iconEyeEl, iconEyeOffEl) {
-      if (!btn || !inputEl) return;
-      btn.addEventListener('click', function (e) {
-        e.preventDefault();
-        var isPassword = inputEl.type === 'password';
-        inputEl.type = isPassword ? 'text' : 'password';
-        if (iconEyeEl) iconEyeEl.style.display = isPassword ? 'none' : 'block';
-        if (iconEyeOffEl) iconEyeOffEl.style.display = isPassword ? 'block' : 'none';
-      });
-    }
-
-    attachPasswordToggle(btnTogglePassword, passwordInput, iconEye, iconEyeOff);
-    attachPasswordToggle(btnToggleRegPassword, regPasswordInput, iconRegEye, iconRegEyeOff);
-    attachPasswordToggle(btnToggleRecPassword, recoveryPasswordInput, iconRecEye, iconRecEyeOff);
-
-    // Sub-view switch handlers
-    if (linkForgotPassword) {
-      linkForgotPassword.addEventListener('click', function (e) {
-        e.preventDefault();
-        if (forgotEmailInput && emailInput) {
-          forgotEmailInput.value = emailInput.value;
-        }
-        switchAuthSubView('forgot');
-      });
-    }
-
-    if (linkToRegister) {
-      linkToRegister.addEventListener('click', function (e) {
-        e.preventDefault();
-        if (regEmailInput && emailInput) {
-          regEmailInput.value = emailInput.value;
-        }
-        switchAuthSubView('register');
-      });
-    }
-
-    if (linkBackFromRegister) {
-      linkBackFromRegister.addEventListener('click', function (e) {
-        e.preventDefault();
-        switchAuthSubView('login');
-      });
-    }
-
-    if (linkBackFromForgot) {
-      linkBackFromForgot.addEventListener('click', function (e) {
-        e.preventDefault();
-        switchAuthSubView('login');
-      });
-    }
-
     async function checkCurrentSession() {
-      // 1. Check for password recovery hash in URL
-      var hash = window.location.hash || '';
-      if (hash.includes('type=recovery') || hash.includes('reset-password')) {
-        showAuthView();
-        switchAuthSubView('recovery');
-        setAuthStatus('Password recovery session verified. Enter your new password above.', true);
-        return true;
-      }
-
-      // 2. Check active Supabase Auth session
-      if (supabaseClient) {
-        try {
-          var { data: sessData } = await supabaseClient.auth.getSession();
-          if (sessData && sessData.session && sessData.session.user) {
-            await loadVerifiedPortalData(sessData.session.access_token, sessData.session.user.email);
-            return true;
-          }
-        } catch (e) {}
-      }
-
-      // 3. Check local checkout session proof (if customer just completed purchase)
-      try {
-        var rawSess = localStorage.getItem('sfx_customer_session');
-        if (rawSess) {
-          var cached = JSON.parse(rawSess);
-          if (cached && cached.email && (cached.order_id || cached.license_key)) {
-            activeCustomerSession = cached;
-            if (recentSessionBanner && recentSessionEmail) {
-              recentSessionEmail.textContent = cached.email;
-              recentSessionBanner.style.display = 'block';
-            }
-          }
+      var stored = getStoredSession();
+      if (stored && stored.email && (stored.order_id || stored.token || stored.license_key)) {
+        activeCustomerSession = stored;
+        if (recentSessionBanner && recentSessionEmail) {
+          recentSessionEmail.textContent = stored.email;
+          recentSessionBanner.style.display = 'block';
         }
-      } catch (e) {}
-
+        if (emailInput && !emailInput.value) {
+          emailInput.value = stored.email;
+        }
+      }
       showAuthView();
-      switchAuthSubView('login');
       return false;
-    }
-
-    // Listen for auth state changes
-    if (supabaseClient) {
-      try {
-        supabaseClient.auth.onAuthStateChange(function (event, session) {
-          if (event === 'PASSWORD_RECOVERY') {
-            if (modal) {
-              modal.classList.add('is-open');
-              document.body.style.overflow = 'hidden';
-            }
-            showAuthView();
-            switchAuthSubView('recovery');
-            setAuthStatus('Password recovery session verified. Enter your new password above.', true);
-          } else if (event === 'SIGNED_OUT') {
-            showAuthView();
-            switchAuthSubView('login');
-          }
-        });
-      } catch (e) {}
     }
 
     async function openDashboard() {
@@ -750,7 +621,19 @@
         this.disabled = true;
         this.textContent = 'Verifying…';
         try {
-          await loadVerifiedPortalData(activeCustomerSession, activeCustomerSession.email);
+          var res = await window.SFX_PAYMENT_SERVICE.getCustomerPortal({
+            email: activeCustomerSession.email,
+            order_id: activeCustomerSession.order_id,
+            payment_id: activeCustomerSession.payment_id,
+            token: activeCustomerSession.token
+          });
+          if (res && res.is_paid && res.verified) {
+            await loadVerifiedPortalData(res, activeCustomerSession.email);
+            showDashboardView();
+            setAuthStatus('', true);
+          } else {
+            throw new Error(res.message || 'Could not verify recent session.');
+          }
         } catch (err) {
           setAuthStatus('Could not verify recent session: ' + err.message, false);
         } finally {
@@ -760,226 +643,93 @@
       });
     }
 
-    // ── 1. EMAIL + PASSWORD LOGIN ──
-    if (loginForm) {
-      loginForm.addEventListener('submit', async function (e) {
+    // ── LICENSE LOOKUP SUBMIT HANDLER (Find My License) ──
+    if (lookupForm) {
+      lookupForm.addEventListener('submit', async function (e) {
         e.preventDefault();
         var email = (emailInput?.value || '').trim().toLowerCase();
-        var password = passwordInput?.value || '';
-
-        if (!email) {
-          setAuthStatus('Please enter your registered email address.', false);
-          return;
-        }
-        if (!password) {
-          setAuthStatus('Please enter your account password.', false);
-          return;
-        }
-
-        btnLogin.disabled = true;
-        var origBtnText = btnLogin.textContent;
-        btnLogin.textContent = 'Logging In…';
-        setAuthStatus('', true);
-
-        try {
-          if (!supabaseClient) {
-            throw new Error('Authentication client unavailable. Please check your connection.');
-          }
-
-          var { data, error } = await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password
-          });
-
-          if (error) {
-            if (error.message.includes('Invalid login credentials')) {
-              throw new Error('Invalid email or password. If you purchased SFX Composer and have not yet set a password, click "Create Account / Set Password" below.');
-            }
-            throw error;
-          }
-
-          if (data && data.session && data.session.user) {
-            currentAuthEmail = data.session.user.email;
-            if (passwordInput) passwordInput.value = '';
-            setAuthStatus('', true);
-            await loadVerifiedPortalData(data.session.access_token, data.session.user.email);
-          } else {
-            throw new Error('Authentication failed. Please verify your credentials.');
-          }
-        } catch (err) {
-          setAuthStatus(err.message || 'Login failed', false);
-        } finally {
-          btnLogin.disabled = false;
-          btnLogin.textContent = origBtnText;
-        }
-      });
-    }
-
-    // ── 2. ACCOUNT CREATION & PASSWORD PROVISIONING ──
-    if (registerForm) {
-      registerForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        var email = (regEmailInput?.value || '').trim().toLowerCase();
-        var password = regPasswordInput?.value || '';
-
-        if (!email) {
-          setAuthStatus('Please enter your registered purchase email address.', false);
-          return;
-        }
-        if (!password || password.length < 6) {
-          setAuthStatus('Password must be at least 6 characters long.', false);
-          return;
-        }
-
-        btnRegister.disabled = true;
-        var origText = btnRegister.textContent;
-        btnRegister.textContent = 'Creating Account…';
-        setAuthStatus('', true);
-
-        try {
-          if (!supabaseClient) throw new Error('Authentication client unavailable.');
-
-          var { data, error } = await supabaseClient.auth.signUp({
-            email: email,
-            password: password
-          });
-
-          if (error) {
-            if (error.message.includes('already registered') || error.message.includes('already exists')) {
-              throw new Error('An account with this email already exists. Please sign in or use "Forgot Password?" to reset.');
-            }
-            throw error;
-          }
-
-          if (data && data.session && data.session.user) {
-            currentAuthEmail = data.session.user.email;
-            if (regPasswordInput) regPasswordInput.value = '';
-            setAuthStatus('', true);
-            await loadVerifiedPortalData(data.session.access_token, data.session.user.email);
-          } else if (data && data.user) {
-            setAuthStatus('Account created! A confirmation email has been sent to ' + email + '. Check your inbox to confirm, then sign in.', true);
-            if (emailInput) emailInput.value = email;
-            switchAuthSubView('login');
-          } else {
-            throw new Error('Account setup failed. Please try again.');
-          }
-        } catch (err) {
-          setAuthStatus(err.message || 'Account creation failed', false);
-        } finally {
-          btnRegister.disabled = false;
-          btnRegister.textContent = origText;
-        }
-      });
-    }
-
-    // ── 3. FORGOT PASSWORD (PASSWORD RESET LINK) ──
-    if (forgotForm) {
-      forgotForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        var email = (forgotEmailInput?.value || '').trim().toLowerCase();
+        var proof = (verifyProofInput?.value || '').trim();
 
         if (!email) {
           setAuthStatus('Please enter your registered purchase email address.', false);
           return;
         }
 
-        btnForgot.disabled = true;
-        var origText = btnForgot.textContent;
-        btnForgot.textContent = 'Sending Reset Link…';
+        if (btnFindLicense) {
+          btnFindLicense.disabled = true;
+          var origBtnText = btnFindLicense.textContent;
+          btnFindLicense.textContent = 'Finding License…';
+        }
         setAuthStatus('', true);
 
         try {
-          if (!supabaseClient) throw new Error('Authentication client unavailable.');
+          var payload = { email: email };
+          var stored = getStoredSession();
 
-          var redirectTo = window.location.origin + window.location.pathname;
-          var { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-            redirectTo: redirectTo
-          });
+          if (proof) {
+            payload.proof = proof;
+          } else if (stored && stored.email && stored.email.toLowerCase() === email) {
+            if (stored.order_id) payload.order_id = stored.order_id;
+            if (stored.payment_id) payload.payment_id = stored.payment_id;
+            if (stored.token) payload.token = stored.token;
+          }
 
-          if (error) throw error;
+          var result = await window.SFX_PAYMENT_SERVICE.getCustomerPortal(payload);
 
-          setAuthStatus('Password reset link sent! Please check your inbox or spam folder for ' + email + '.', true);
-        } catch (err) {
-          setAuthStatus('Could not send reset link: ' + (err.message || 'Error occurred'), false);
-        } finally {
-          btnForgot.disabled = false;
-          btnForgot.textContent = origText;
-        }
-      });
-    }
+          // If paid customer found, but ownership proof needed on this device
+          if (result.requires_verification) {
+            if (verificationBox) verificationBox.style.display = 'flex';
+            if (verifyProofInput) verifyProofInput.focus();
+            if (btnFindLicense) btnFindLicense.textContent = 'VERIFY & UNLOCK LICENSE';
+            setAuthStatus(result.message || 'Verified purchase found! Please enter your Razorpay Order ID or Payment ID to unlock your license.', true);
+            return;
+          }
 
-    // ── 4. SET NEW PASSWORD (RECOVERY CALLBACK) ──
-    if (recoveryForm) {
-      recoveryForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        var newPassword = recoveryPasswordInput?.value || '';
-
-        if (!newPassword || newPassword.length < 6) {
-          setAuthStatus('Password must be at least 6 characters long.', false);
-          return;
-        }
-
-        btnUpdatePassword.disabled = true;
-        var origText = btnUpdatePassword.textContent;
-        btnUpdatePassword.textContent = 'Updating Password…';
-        setAuthStatus('', true);
-
-        try {
-          if (!supabaseClient) throw new Error('Authentication client unavailable.');
-
-          var { data, error } = await supabaseClient.auth.updateUser({
-            password: newPassword
-          });
-
-          if (error) throw error;
-
-          setAuthStatus('Password updated successfully! Loading your dashboard…', true);
-          var { data: sessData } = await supabaseClient.auth.getSession();
-          if (sessData && sessData.session) {
-            await loadVerifiedPortalData(sessData.session.access_token, sessData.session.user.email);
+          // If ownership verified & paid
+          if (result && result.is_paid && result.verified) {
+            currentAuthEmail = result.email || email;
+            saveStoredSession({
+              email: currentAuthEmail,
+              token: result.token,
+              order_id: result.licenses && result.licenses[0] ? result.licenses[0].provider_order_id : '',
+              payment_id: result.licenses && result.licenses[0] ? result.licenses[0].provider_payment_id : '',
+              license_key: result.licenses && result.licenses[0] ? result.licenses[0].license_key : ''
+            });
+            await loadVerifiedPortalData(result, currentAuthEmail);
+            showDashboardView();
+            setAuthStatus('', true);
+            if (verificationBox) verificationBox.style.display = 'none';
           } else {
-            switchAuthSubView('login');
+            throw new Error(result.message || 'No verified purchase found for this email address.');
           }
         } catch (err) {
-          setAuthStatus('Password update error: ' + (err.message || 'Error occurred'), false);
+          setAuthStatus(err.message || 'No verified purchase found for this email address.', false);
         } finally {
-          btnUpdatePassword.disabled = false;
-          btnUpdatePassword.textContent = origText;
+          if (btnFindLicense) {
+            btnFindLicense.disabled = false;
+            if (btnFindLicense.textContent === 'Finding License…') {
+              btnFindLicense.textContent = origBtnText;
+            }
+          }
         }
       });
     }
 
-    // ── 5. SIGN OUT & CLEAR STATE ──
+    // ── SIGN OUT / SWITCH EMAIL ──
     if (btnSignout) {
-      btnSignout.addEventListener('click', async function () {
-        if (supabaseClient) {
-          await supabaseClient.auth.signOut().catch(function () {});
-        }
+      btnSignout.addEventListener('click', function () {
         localStorage.removeItem('sfx_customer_session');
         activeCustomerSession = null;
         currentAuthEmail = '';
         if (recentSessionBanner) recentSessionBanner.style.display = 'none';
         if (emailInput) emailInput.value = '';
-        if (passwordInput) passwordInput.value = '';
-        if (regEmailInput) regEmailInput.value = '';
-        if (regPasswordInput) regPasswordInput.value = '';
-        if (forgotEmailInput) forgotEmailInput.value = '';
-        if (recoveryPasswordInput) recoveryPasswordInput.value = '';
+        if (verifyProofInput) verifyProofInput.value = '';
+        if (verificationBox) verificationBox.style.display = 'none';
+        if (btnFindLicense) btnFindLicense.textContent = 'FIND MY LICENSE';
         setAuthStatus('', true);
-        switchAuthSubView('login');
         showAuthView();
       });
     }
-
-    // Auto-open modal if landing from password recovery link
-    try {
-      var initialHash = window.location.hash || '';
-      if (initialHash.includes('type=recovery') || initialHash.includes('reset-password')) {
-        setTimeout(function () {
-          openDashboard();
-        }, 300);
-      }
-    } catch (e) {}
 
     async function loadVerifiedPortalData(authArg, emailHint) {
       var portal = await window.SFX_PAYMENT_SERVICE.getCustomerPortal(authArg);
@@ -1129,9 +879,11 @@
               keyBoxHtml +
               '<!-- License Metadata Grid -->' +
               '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 10px 0; background: rgba(0,0,0,0.25); border: 1px solid var(--sfx-border); border-radius: 6px; padding: 10px 12px; font-size: 11.5px;">' +
+                '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">License ID</span><code style="font-size: 10.5px; color: var(--sfx-accent); font-weight: 700;">' + (lic.license_id || lic.id) + '</code></div>' +
                 '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Purchase Date</span><strong>' + purchaseDateStr + '</strong></div>' +
                 '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Payment Status</span>' + paymentStatusStr + '</div>' +
-                '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">License Expiry</span><span style="color: #fff;">' + expiryStr + '</span></div>' +
+                '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Product ID</span><span style="color: #fff;">' + (lic.product_id || 'sfx-composer-bundle') + '</span></div>' +
+                (lic.provider_order_id ? '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Order ID</span><code style="font-size: 10.5px; color: #93c5fd;">' + lic.provider_order_id + '</code></div>' : '') +
                 (lic.provider_payment_id ? '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Payment ID</span><code style="font-size: 10.5px; color: var(--sfx-accent);">' + lic.provider_payment_id + '</code></div>' : '') +
               '</div>' +
               '<div style="background: rgba(0,0,0,0.4); border: 1px solid var(--sfx-border); padding: 10px 14px; border-radius: 6px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
