@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SFX Composer</title>
+    <!--
+      No Content-Security-Policy meta tag.
+
+      CEP applies its own policy, and a meta CSP here can only ever be more
+      restrictive than that. A policy that blocks the bundle produces a black
+      panel with nothing in the console the user can reach, which is
+      indistinguishable from every other startup failure — so the tag was
+      removed rather than debugged. If one is added back later, it has to be
+      tested inside a real host, not reasoned about.
+    -->
+    <style>
+      /* Enough styling for the failure screen below to be readable before the
+         bundle — which carries the real stylesheet — has run. */
+      /*
+        Layout for all three; colour for the document only.
+        
+        `#root` deliberately does NOT get `color` or `background`. It is an id
+        selector, so it outranks every rule in the real stylesheet — which is
+        entirely class-based by design — and anything inside the app that
+        inherits its colour is pinned to the literal below, whatever theme is
+        applied.
+        
+        That went unnoticed for a long time because #e8e8e8 is close enough to
+        the dark theme's text that nothing looked wrong. Adding a light theme
+        made it obvious: card names stayed pale grey on white while every
+        element that names a token explicitly turned dark.
+      */
+      html,
+      body,
+      #root {
+        height: 100%;
+        margin: 0;
+      }
+
+      html,
+      body {
+        background: #1e1e1e;
+        color: #e8e8e8;
+        font: 13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      }
+      #sfx-boot-error {
+        padding: 24px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      #sfx-boot-error h1 {
+        margin: 0 0 12px;
+        font-size: 15px;
+      }
+      #sfx-boot-error pre {
+        margin: 12px 0 0;
+        padding: 8px;
+        max-height: 60vh;
+        overflow: auto;
+        background: #161616;
+        border: 1px solid #3a3a3a;
+        border-radius: 4px;
+        font: 11px/1.4 ui-monospace, Menlo, Consolas, monospace;
+        color: #ff6b6b;
+      }
+    </style>
+    <script>
+      /*
+       * Startup failure reporter.
+       *
+       * Installed before the bundle so it catches errors thrown while the
+       * bundle's own modules are evaluating — a point at which nothing inside
+       * the application exists yet, including its React error boundary.
+       *
+       * Without this, any such failure renders as a black rectangle inside the
+       * host application. There is no console the user can open, no error
+       * dialog, and no way to tell "the script did not load" apart from "the
+       * script threw on line one". This turns all of that into text somebody
+       * can read out over the phone.
+       */
+      (function () {
+        var reported = false;
+        var armed = true;
+
+        /*
+         * This reporter is for *startup* failures only, and disarming it is not
+         * a nicety.
+         *
+         * Errors thrown inside React event handlers are not caught by React —
+         * they escape to `window.onerror`. While this listener stayed armed for
+         * the whole session, that meant one throw in one click handler replaced
+         * the entire running panel with "SFX Composer failed to start", discarding
+         * the user's search, selection and scroll position. A link that fails
+         * to open is a small problem; losing the panel over it is not.
+         *
+         * After the first successful render, `main.tsx` calls `disarm()` and
+         * later errors are left to React's error boundary (for render failures)
+         * and the console (for everything else).
+         */
+        window.__sfxBootReporter = {
+          disarm: function () {
+            armed = false;
+          },
+        };
+
+        function report(title, detail) {
+          if (reported || !armed) return;
+          reported = true;
+
+          var root = document.getElementById('root');
+          if (!root) {
+            root = document.createElement('div');
+            root.id = 'root';
+            document.body.appendChild(root);
+          }
+
+          var box = document.createElement('div');
+          box.id = 'sfx-boot-error';
+
+          var heading = document.createElement('h1');
+          heading.textContent = title;
+          box.appendChild(heading);
+
+          var hint = document.createElement('div');
+          hint.textContent =
+            'SFX Composer could not start. Your project has not been changed. ' +
+            'Please send the details below with a bug report.';
+          box.appendChild(hint);
+
+          var pre = document.createElement('pre');
+          pre.textContent = detail;
+          box.appendChild(pre);
+
+          root.innerHTML = '';
+          root.appendChild(box);
+        }
+
+        window.addEventListener('error', function (event) {
+          var error = event.error;
+          var detail = error && error.stack ? error.stack : String(event.message || event.type);
+          if (event.filename) {
+            detail += '\n\nat ' + event.filename + ':' + event.lineno + ':' + event.colno;
+          }
+          report('SFX Composer failed to start', detail);
+        });
+
+        window.addEventListener('unhandledrejection', function (event) {
+          var reason = event.reason;
+          report(
+            'SFX Composer failed to start',
+            reason && reason.stack ? reason.stack : String(reason),
+          );
+        });
+
+        /*
+         * Nothing mounted after a grace period.
+         *
+         * Covers the silent cases: a script that never loaded at all, or one
+         * that loaded and did nothing. Neither raises an error event, so a
+         * timeout is the only way to notice.
+         */
+        window.addEventListener('load', function () {
+          setTimeout(function () {
+            if (!armed) return;
+            var stillPlaceholder = document.getElementById('sfx-boot-placeholder') !== null;
+            var root = document.getElementById('root');
+            if (stillPlaceholder || (root && root.childNodes.length === 0)) {
+              report(
+                'SFX Composer did not load',
+                'The panel script loaded but React never rendered.\n\n' +
+                  'Open the CEP debugger (Premiere: http://localhost:8092, ' +
+                  'After Effects: http://localhost:8093) and check the Console ' +
+                  'tab — the underlying error is reported there.',
+              );
+            }
+          }, 4000);
+        });
+      })();
+    </script>
+    <script defer src="./assets/index-DZrtWpoP.js"></script>
+    <script defer src="./debug-log.js"></script>
+    <script defer src="./local-ai-manager.js"></script>
+    <link rel="stylesheet" href="./local-ai-setup.css" />
+    <script defer src="./local-ai-setup.js"></script>
+    <link rel="stylesheet" href="./ai-assistant.css" />
+    <link rel="stylesheet" href="./browser-tab.css" />
+    <link rel="stylesheet" href="./header-menu.css" />
+    <link rel="stylesheet" href="./analytics.css" />
+    <link rel="stylesheet" href="./scene-designer.css" />
+    <link rel="stylesheet" href="./audio-tools.css" />
+    <link rel="stylesheet" href="./essential-sound.css" />
+    <link rel="stylesheet" href="./license-ui.css" />
+  </head>
+  <body>
+    <!--
+      The placeholder is deliberate.
+
+      An empty #root is ambiguous: it looks identical whether the script never
+      ran, ran and threw, or ran and rendered nothing. Seeding it with visible
+      text collapses those three cases — whatever is on screen when the panel
+      settles tells you exactly how far the boot got, with no debugger.
+
+      React replaces this on its first successful render.
+    -->
+    <div id="root">
+      <div id="sfx-boot-placeholder" style="padding: 24px; color: #9a9a9a">
+        Starting SFX Composer…
+      </div>
+    </div>
+    <script defer src="./ai-providers.js"></script>
+    <script defer src="./ai-assistant.js"></script>
+    <script defer src="./browser-companion-client.js"></script>
+    <script defer src="./browser-tab.js"></script>
+    <script defer src="./browser-downloads.js"></script>
+    <script defer src="./browser-view.js"></script>
+    <script defer src="./analytics.js"></script>
+    <script defer src="./timeline-control.js"></script>
+    <script defer src="./scene-designer.js"></script>
+    <script defer src="./audio-tools.js"></script>
+    <script defer src="./essential-sound.js"></script>
+    <script defer src="./supabase-service.js"></script>
+    <script defer src="./license-manager.js"></script>
+    <script defer src="./license-ui.js"></script>
+    <script defer src="./header-menu.js"></script>
+  </body>
+</html>

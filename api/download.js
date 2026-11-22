@@ -28,6 +28,18 @@ async function verifySupabaseToken(token) {
     return { email: 'admin@sfxcomposer.com', is_admin: true, id: 'admin-service-role' };
   }
 
+  // Check customer portal verified session token (sfx_token_BASE64)
+  if (token.startsWith('sfx_token_')) {
+    try {
+      const jsonStr = Buffer.from(token.substring('sfx_token_'.length), 'base64').toString('utf8');
+      const payload = JSON.parse(jsonStr);
+      if (payload && payload.email && payload.exp && payload.exp > Date.now()) {
+        return { email: payload.email, payment_id: payload.payment_id, id: payload.payment_id || payload.email };
+      }
+    } catch (e) {}
+    return null;
+  }
+
   try {
     const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
       headers: {
@@ -44,13 +56,26 @@ async function verifySupabaseToken(token) {
   }
 }
 
-async function checkEntitlement(email) {
+async function checkEntitlement(email, user) {
   const cleanEmail = email.trim().toLowerCase();
 
   // 1. Check in-memory store for recent verified purchases in this session
   for (const [orderId, lic] of memoryStore.licenses.entries()) {
     if (lic.email === cleanEmail && lic.status === 'active') {
       return { has_access: true, reason: 'verified_active_license' };
+    }
+  }
+
+  if (user && user.payment_id) {
+    for (const [orderId, lic] of memoryStore.licenses.entries()) {
+      if (lic.payment_id === user.payment_id || lic.provider_payment_id === user.payment_id) {
+        return { has_access: true, reason: 'verified_active_license_by_payment' };
+      }
+    }
+    for (const [orderId, ord] of memoryStore.orders.entries()) {
+      if ((ord.payment_id === user.payment_id || orderId === user.payment_id) && ord.status === 'completed') {
+        return { has_access: true, reason: 'verified_order_by_payment' };
+      }
     }
   }
 
@@ -111,12 +136,12 @@ module.exports = async function handler(req, res) {
     token = tokenParam.trim();
   }
 
-  // Also check if request comes from a static direct file path like /downloads/sfx-composer-pro-v2.4.0.zxp
+  // Also check if request comes from a static direct file path like /downloads/sfx-composer-pro-v2.2.0.zxp
   let requestedFile = '';
   if (url.pathname.includes('.zxp') || reqType === 'zxp') {
-    requestedFile = 'sfx-composer-pro-v2.4.0.zxp';
+    requestedFile = url.pathname.includes('v2.4.0') ? 'sfx-composer-pro-v2.4.0.zxp' : 'sfx-composer-pro-v2.2.0.zxp';
   } else if (url.pathname.includes('.zip') || reqType === 'zip') {
-    requestedFile = 'sfx-composer-pro-v2.4.0.zip';
+    requestedFile = url.pathname.includes('v2.4.0') ? 'sfx-composer-pro-v2.4.0.zip' : 'sfx-composer-pro-v2.2.0.zip';
   } else if (reqType === 'sfx-library') {
     requestedFile = 'sfx-library';
   }
@@ -162,7 +187,7 @@ module.exports = async function handler(req, res) {
   const userEmail = (user.email || '').trim().toLowerCase();
 
   // 3. Purchase Entitlement Check
-  const entitlement = await checkEntitlement(userEmail);
+  const entitlement = await checkEntitlement(userEmail, user);
 
   if (!entitlement.has_access) {
     logAudit({
@@ -211,8 +236,13 @@ module.exports = async function handler(req, res) {
   }
 
   // Action B: Stream Binary Plugin Installers (.zxp or .zip)
-  if (requestedFile === 'sfx-composer-pro-v2.4.0.zxp' || requestedFile === 'sfx-composer-pro-v2.4.0.zip') {
-    const filePath = path.join(__dirname, '..', 'downloads', requestedFile);
+  if (requestedFile.endsWith('.zxp') || requestedFile.endsWith('.zip')) {
+    let filePath = path.join(__dirname, '..', 'downloads', requestedFile);
+    if (!fs.existsSync(filePath)) {
+      // Fallback to canonical v2.2.0 files
+      const canonicalName = requestedFile.endsWith('.zxp') ? 'sfx-composer-pro-v2.2.0.zxp' : 'sfx-composer-pro-v2.2.0.zip';
+      filePath = path.join(__dirname, '..', 'downloads', canonicalName);
+    }
     if (!fs.existsSync(filePath)) {
       res.statusCode = 404;
       res.setHeader('Content-Type', 'application/json');

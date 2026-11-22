@@ -3,242 +3,146 @@
  * 
  * Visual Identity:
  * - Official SFX Composer bot squircle avatar
- * - Signature royal-cyan blue gradient (--sfx-brand-gradient)
- * - Pro dark/black foundation (#000000 / #060a14 / #0a1122)
- * - Minimal, premium, friendly, and non-distracting
+ * - Professional SFX Composer dark/black foundation (#0a0b10 / #0e0f16 / #101118)
+ * - Muted accents & clean blue contrast matching brand palette
+ * - Minimal, premium, and distraction-free
  */
 
 /* ==========================================================================
-   1. Floating Trigger Button (Bottom-Right Pill) - Compact & Non-Blocking
+   1. Floating Trigger Button (Bottom-Right Circle) - Compact & Non-Blocking
    ========================================================================== */
 
 #sfx-buddy-launcher {
   position: fixed;
-  bottom: 34px;
+  bottom: 24px;
   right: 16px;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  max-width: 38px !important;
+  max-height: 38px !important;
+  padding: 0 !important;
+  margin: 0 !important;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 28px;
-  padding: 0 10px 0 5px;
-  background: #081024;
-  border: 1px solid rgba(56, 189, 248, 0.28);
-  border-radius: 999px;
+  justify-content: center;
+  background: #090a0f !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 50% !important;
   color: #ffffff;
-  font: 600 11px/1 var(--sfx-font, -apple-system, 'Segoe UI', system-ui, sans-serif);
   cursor: pointer;
-  z-index: 9980;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55), 0 0 8px rgba(10, 132, 255, 0.2);
+  z-index: 999990 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65), 0 0 10px rgba(10, 132, 255, 0.22);
   transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease, background 140ms ease;
   user-select: none;
-}
-
-#sfx-buddy-launcher:hover {
-  transform: translateY(-1px);
-  background: #0c1a38;
-  border-color: rgba(56, 189, 248, 0.55);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65), 0 0 12px rgba(56, 189, 248, 0.3);
-}
-
-#sfx-buddy-launcher:active {
-  transform: translateY(0);
-}
-
-.sfx-buddy-launcher__avatar {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  object-fit: cover;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-}
-
-.sfx-buddy-launcher__dot {
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--sfx-brand-highlight, #38bdf8);
-  box-shadow: 0 0 5px rgba(56, 189, 248, 0.85);
-}
-
-.sfx-buddy-launcher__label {
-  font-weight: 600;
-  font-size: 11px;
-  letter-spacing: -0.01em;
-  color: #f0f6fc;
-}
-
-.sfx-buddy-launcher__chevron {
-  color: #8fa0be;
-  transition: transform 140ms ease;
-  margin-left: 1px;
-}
-
-#sfx-buddy-launcher:hover .sfx-buddy-launcher__chevron {
-  color: #ffffff;
-}
-
-/* ==========================================================================
-   2. Main Assistant Panel Container (Floating & Docked)
-   ========================================================================== */
-
-#sfx-buddy-panel {
-  display: flex;
-  flex-direction: column;
-  background: #070c18;
-  overflow: hidden;
-}
-
-/* Floating Mode Panel */
-#sfx-buddy-panel.sfx-buddy-panel--floating {
-  position: fixed;
-  bottom: 76px;
-  right: 16px;
-  width: 380px;
-  max-width: calc(100vw - 32px);
-  height: 540px;
-  max-height: calc(100vh - 120px);
-  border: 1px solid rgba(91, 127, 172, 0.32);
-  border-radius: 12px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(10, 132, 255, 0.18);
-  z-index: 9985;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(12px) scale(0.98);
-  transition: opacity 160ms ease, transform 160ms cubic-bezier(0.16, 1, 0.3, 1), visibility 160ms;
-}
-
-#sfx-buddy-panel.sfx-buddy-panel--floating.is-open {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0) scale(1);
-}
-
-#sfx-buddy-panel.sfx-buddy-panel--floating.is-minimized {
-  height: 48px !important;
-  max-height: 48px !important;
-}
-
-#sfx-buddy-panel.is-minimized .sfx-buddy__body,
-#sfx-buddy-panel.is-minimized .sfx-buddy__footer {
-  display: none !important;
-}
-
-/* Docked Mode Panel */
-#sfx-buddy-panel.sfx-buddy-panel--docked {
-  position: static !important;
-  width: 100% !important;
-  height: 100% !important;
-  max-width: none !important;
-  max-height: none !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  transform: none !important;
-  z-index: 10 !important;
-  flex: 1 1 auto;
-}
-
-/* Dock Container */
-.sfx-buddy-dock {
-  position: relative;
-  height: 100%;
-  background: #070c18;
-  border-left: 1px solid rgba(91, 127, 172, 0.25);
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  z-index: 100;
+  outline: none;
   box-sizing: border-box;
 }
 
-.sfx-dock-resizer {
+#sfx-buddy-launcher.is-disabled,
+#sfx-buddy-launcher[hidden],
+#sfx-buddy-launcher[style*="display: none"],
+.sfx-buddy-launcher.is-disabled,
+#sfx-buddy-panel.is-disabled {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
+
+#sfx-buddy-launcher:hover {
+  transform: translateY(-1px) scale(1.03);
+  background: #0d111a !important;
+  border-color: rgba(56, 189, 248, 0.5) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.75), 0 0 14px rgba(56, 189, 248, 0.35);
+}
+
+#sfx-buddy-launcher:active {
+  transform: translateY(0) scale(0.98);
+}
+
+#sfx-buddy-launcher.is-active {
+  border-color: rgba(56, 189, 248, 0.6) !important;
+  background: #0d1322 !important;
+  box-shadow: 0 0 14px rgba(10, 132, 255, 0.35);
+}
+
+.sfx-buddy-launcher__avatar {
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 5px;
+  object-fit: cover;
+  pointer-events: none;
+  display: block;
+}
+
+.sfx-buddy-launcher__dot {
   position: absolute;
-  top: 0;
-  left: -3px;
-  width: 6px;
-  height: 100%;
-  cursor: col-resize;
-  z-index: 110;
-  background: transparent;
-  transition: background 150ms ease;
-}
-
-.sfx-dock-resizer:hover,
-.sfx-dock-resizer.is-dragging {
+  bottom: 2px;
+  right: 2px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
   background: var(--sfx-brand-highlight, #38bdf8);
+  border: 1.5px solid #090a0f;
+  box-shadow: 0 0 5px rgba(56, 189, 248, 0.85);
+  pointer-events: none;
 }
 
-.sfx-dock-content {
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-}
-
-.sfx-buddy-dock.is-collapsed .sfx-dock-content {
+/* Explicitly hide any residual labels or chevrons */
+.sfx-buddy-launcher__label,
+.sfx-buddy-launcher__chevron,
+#sfx-buddy-launcher .sfx-buddy-launcher__label,
+#sfx-buddy-launcher .sfx-buddy-launcher__chevron {
   display: none !important;
 }
 
-.sfx-dock-collapsed-rail {
-  display: none;
-  width: 100%;
-  height: 100%;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 10px;
-  background: #070c18;
-}
+/* ==========================================================================
+   2. Main Assistant Panel Container
+   ========================================================================== */
 
-.sfx-buddy-dock.is-collapsed .sfx-dock-collapsed-rail {
-  display: flex !important;
-}
-
-.sfx-dock-expand-btn {
-  background: transparent;
-  border: none;
-  color: #9c9ca4;
-  cursor: pointer;
+#sfx-buddy-panel {
+  position: fixed;
+  bottom: 74px;
+  right: 16px;
+  width: 350px;
+  max-width: calc(100vw - 32px);
+  height: 480px;
+  max-height: calc(100vh - 110px);
+  background: #0a0b10;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.85), 0 0 20px rgba(10, 132, 255, 0.12);
+  z-index: 999995 !important;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 4px;
-  width: 100%;
-  transition: color 140ms ease;
+  overflow: hidden;
+  box-sizing: border-box;
+  transition: opacity 160ms ease, transform 160ms cubic-bezier(0.16, 1, 0.3, 1), visibility 160ms;
 }
 
-.sfx-dock-expand-btn:hover {
-  color: #38bdf8;
+/* Closed state — hidden completely */
+#sfx-buddy-panel:not(.is-open) {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transform: translateY(10px) scale(0.98);
 }
 
-.sfx-dock-vlabel {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font: 600 11px/1 var(--sfx-font, sans-serif);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-/* Layout container styling when docked */
-.sfx-has-docked-buddy {
+/* Open state — visible and interactive */
+#sfx-buddy-panel.is-open {
   display: flex !important;
-  flex-direction: row !important;
-  width: 100% !important;
-  height: 100% !important;
-  overflow: hidden !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: translateY(0) scale(1);
 }
 
-.sfx-has-docked-buddy > .sfx-shell {
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  height: 100% !important;
-  overflow: hidden !important;
+/* Never collapse to a broken 48px sliver */
+#sfx-buddy-panel.is-minimized {
+  display: none !important;
 }
 
 /* ==========================================================================
@@ -249,46 +153,179 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 52px;
+  height: 46px;
   padding: 0 12px;
-  background: linear-gradient(180deg, #0d1933 0%, #070c18 100%);
-  border-bottom: 1px solid rgba(91, 127, 172, 0.22);
-  flex: 0 0 auto;
+  background: #101118;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex: 0 0 46px;
   user-select: none;
+  box-sizing: border-box;
 }
 
 .sfx-buddy__identity {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   min-width: 0;
 }
 
 .sfx-buddy__avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
   object-fit: cover;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 6px rgba(10, 132, 255, 0.25);
   flex: 0 0 auto;
 }
 
 .sfx-buddy__title-wrap {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
 }
 
 .sfx-buddy__name {
-  font: 700 13px/1.2 var(--sfx-font, -apple-system, sans-serif);
+  font: 700 13px/1.2 var(--sfx-font, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
   color: #ffffff;
   letter-spacing: -0.01em;
 }
 
-.sfx-buddy__subtitle {
-  font: 500 10px/1 var(--sfx-font, -apple-system, sans-serif);
-  color: var(--sfx-brand-highlight-soft, #7ec8ff);
-  opacity: 0.9;
+.sfx-buddy__status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  font: 500 10px/1 var(--sfx-font, sans-serif);
+  color: #8b949e;
+}
+
+.sfx-buddy__status-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #8b949e;
+  flex: 0 0 auto;
+}
+
+.sfx-buddy__status-dot.is-ready,
+.sfx-buddy__status-dot.is-online,
+.sfx-buddy__status-dot.is-ollama {
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.85);
+}
+
+.sfx-buddy__status-dot.is-offline {
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.85);
+}
+
+.sfx-buddy__status-dot.is-checking {
+  background: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.85);
+  animation: sfxBuddyPulse 1.2s infinite;
+}
+
+@keyframes sfxBuddyPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.sfx-buddy__header-retry-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: #38bdf8;
+  font: 600 9.5px/1 var(--sfx-font, sans-serif);
+  padding: 1px 5px;
+  cursor: pointer;
+  margin-left: 3px;
+  transition: all 120ms ease;
+}
+.sfx-buddy__header-retry-btn:hover {
+  background: rgba(56, 189, 248, 0.2);
+  color: #ffffff;
+}
+
+/* Settings Drawer inside panel */
+.sfx-buddy__settings-drawer {
+  background: #0d0f17;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: sfxBuddyFadeIn 140ms ease;
+  user-select: none;
+}
+.sfx-buddy__settings-title {
+  font: 700 11px/1 var(--sfx-font, sans-serif);
+  color: #38bdf8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+.sfx-buddy__settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sfx-buddy__settings-field label {
+  font: 500 10.5px/1 var(--sfx-font, sans-serif);
+  color: #94a3b8;
+}
+.sfx-buddy__settings-field input,
+.sfx-buddy__settings-field select {
+  background: #050609;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  color: #ffffff;
+  padding: 5px 8px;
+  font: 450 11.5px/1.4 var(--sfx-font, sans-serif);
+  outline: none;
+}
+.sfx-buddy__settings-field input:focus,
+.sfx-buddy__settings-field select:focus {
+  border-color: #0a84ff;
+}
+.sfx-buddy__settings-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.sfx-buddy__cfg-save-btn {
+  background: #0a84ff;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: 5px;
+  color: #ffffff;
+  font: 600 11px/1 var(--sfx-font, sans-serif);
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+.sfx-buddy__cfg-save-btn:hover {
+  background: #0070e0;
+}
+.sfx-buddy__cfg-cancel-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 5px;
+  color: #94a3b8;
+  font: 500 11px/1 var(--sfx-font, sans-serif);
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.sfx-buddy__cfg-cancel-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sfx-buddy__status-text {
+  letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
 .sfx-buddy__controls {
@@ -305,11 +342,10 @@
   justify-content: center;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 6px;
-  color: #9c9ca4;
+  border-radius: 5px;
+  color: #8b949e;
   cursor: pointer;
   transition: all 140ms ease;
-  font-size: 13px;
   padding: 0;
 }
 
@@ -318,67 +354,13 @@
   color: #ffffff;
 }
 
-.sfx-buddy__icon-btn--danger:hover {
-  background: rgba(239, 68, 68, 0.18);
+.sfx-buddy__icon-btn--close:hover {
+  background: rgba(239, 68, 68, 0.15);
   color: #f87171;
 }
 
 /* ==========================================================================
-   4. Daily Sound Design Tip Card
-   ========================================================================== */
-
-.sfx-buddy__tip-card {
-  position: relative;
-  margin: 10px 12px 6px;
-  padding: 10px 12px;
-  background: linear-gradient(135deg, rgba(16, 64, 128, 0.28) 0%, rgba(8, 16, 36, 0.75) 100%);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  border-left: 3px solid var(--sfx-brand-highlight, #38bdf8);
-  border-radius: 8px;
-  flex: 0 0 auto;
-}
-
-.sfx-buddy__tip-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
-
-.sfx-buddy__tip-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font: 700 10px/1 var(--sfx-font, sans-serif);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--sfx-brand-highlight, #38bdf8);
-}
-
-.sfx-buddy__tip-cycle-btn {
-  background: transparent;
-  border: none;
-  color: #7d9ec4;
-  font: 600 10px/1 var(--sfx-font, sans-serif);
-  cursor: pointer;
-  padding: 2px 4px;
-  border-radius: 4px;
-  transition: all 140ms ease;
-}
-
-.sfx-buddy__tip-cycle-btn:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.sfx-buddy__tip-text {
-  font: 450 11.5px/1.4 var(--sfx-font, sans-serif);
-  color: #d1d5db;
-  margin: 0;
-}
-
-/* ==========================================================================
-   5. Message Stream
+   4. Message Body & Stream
    ========================================================================== */
 
 .sfx-buddy__body {
@@ -386,18 +368,19 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
+  background: #0a0b10;
+  overflow: hidden;
 }
 
 .sfx-buddy__messages {
   flex: 1 1 auto;
   overflow-y: auto;
-  padding: 10px 12px;
+  padding: 12px 12px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* Scrollbar styling */
 .sfx-buddy__messages::-webkit-scrollbar {
   width: 5px;
 }
@@ -405,22 +388,22 @@
   background: transparent;
 }
 .sfx-buddy__messages::-webkit-scrollbar-thumb {
-  background: rgba(91, 127, 172, 0.3);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 4px;
 }
 .sfx-buddy__messages::-webkit-scrollbar-thumb:hover {
-  background: rgba(91, 127, 172, 0.5);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .sfx-buddy__msg {
   display: flex;
   flex-direction: column;
   max-width: 88%;
-  animation: sfxBuddyFadeIn 180ms ease forwards;
+  animation: sfxBuddyFadeIn 160ms ease forwards;
 }
 
 @keyframes sfxBuddyFadeIn {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -433,24 +416,25 @@
 }
 
 .sfx-buddy__bubble {
-  padding: 9px 12px;
-  font: 450 12px/1.45 var(--sfx-font, sans-serif);
+  padding: 8px 12px;
+  font: 450 12px/1.45 var(--sfx-font, -apple-system, BlinkMacSystemFont, sans-serif);
   word-break: break-word;
 }
 
 .sfx-buddy__msg--user .sfx-buddy__bubble {
-  background: var(--sfx-brand-gradient, linear-gradient(135deg, #104080 0%, #0a84ff 52%, #38bdf8 100%));
+  background: #111a2e;
   color: #ffffff;
-  border-radius: 12px 12px 3px 12px;
-  box-shadow: 0 2px 8px rgba(10, 132, 255, 0.28);
+  border: 1px solid rgba(10, 132, 255, 0.35);
+  border-radius: 12px 12px 2px 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .sfx-buddy__msg--buddy .sfx-buddy__bubble {
-  background: #0d1527;
-  color: #e2e8f0;
-  border: 1px solid rgba(91, 127, 172, 0.25);
-  border-radius: 12px 12px 12px 3px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  background: #12141c;
+  color: #e6edf3;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px 12px 12px 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
 .sfx-buddy__bubble p {
@@ -473,20 +457,256 @@
   color: #ffffff;
 }
 
+/* Empty State / Prompt Suggestions */
+.sfx-buddy__empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px 14px;
+  margin: auto 0;
+  user-select: none;
+  animation: sfxBuddyFadeIn 160ms ease;
+}
+.sfx-buddy__empty-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #111420;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 12px rgba(10, 132, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.sfx-buddy__empty-avatar img {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.sfx-buddy__empty-title {
+  font: 700 14px/1.2 var(--sfx-font, sans-serif);
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+.sfx-buddy__empty-desc {
+  font: 450 11.5px/1.45 var(--sfx-font, sans-serif);
+  color: #8b949e;
+  max-width: 290px;
+  margin-bottom: 14px;
+}
+.sfx-buddy__suggestions-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+.sfx-buddy__suggestion-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  background: #12141c;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 7px;
+  color: #d1d5db;
+  font: 500 11.5px/1.2 var(--sfx-font, sans-serif);
+  cursor: pointer;
+  text-align: left;
+  transition: all 120ms ease;
+}
+.sfx-buddy__suggestion-btn:hover {
+  background: #171a26;
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+.sfx-buddy__suggestion-icon {
+  font-size: 13px;
+  flex: 0 0 auto;
+}
+.sfx-buddy__suggestion-text {
+  flex: 1 1 auto;
+}
+
+/* Streaming Cursor */
+.sfx-buddy__streaming-cursor {
+  display: inline-block;
+  color: #38bdf8;
+  animation: sfxBuddyBlink 800ms infinite;
+  margin-left: 2px;
+}
+@keyframes sfxBuddyBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Message Actions Bar (Copy / Retry) */
+.sfx-buddy__msg-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding-left: 4px;
+}
+.sfx-buddy__msg-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font: 500 10.5px/1 var(--sfx-font, sans-serif);
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 4px;
+  transition: all 120ms ease;
+}
+.sfx-buddy__msg-action-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Offline Notice & Error Box */
+.sfx-buddy__offline-notice {
+  font: 600 11px/1.3 var(--sfx-font, sans-serif);
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 6px;
+  padding: 5px 8px;
+  margin-bottom: 6px;
+}
+
+.sfx-buddy__error-box {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.sfx-buddy__error-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 600 11.5px/1 var(--sfx-font, sans-serif);
+  color: #f87171;
+  margin-bottom: 5px;
+}
+.sfx-buddy__retry-btn {
+  background: #ef4444;
+  border: none;
+  border-radius: 4px;
+  color: #ffffff;
+  font: 600 10.5px/1 var(--sfx-font, sans-serif);
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+.sfx-buddy__retry-btn:hover {
+  background: #dc2626;
+}
+
+/* Confirmation Box */
+.sfx-buddy__confirm-box {
+  background: #111422;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-top: 6px;
+}
+.sfx-buddy__confirm-title {
+  font: 700 10.5px/1 var(--sfx-font, sans-serif);
+  color: #38bdf8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.sfx-buddy__confirm-body {
+  font: 450 11.5px/1.35 var(--sfx-font, sans-serif);
+  color: #e2e8f0;
+  margin-bottom: 6px;
+}
+.sfx-buddy__confirm-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sfx-buddy__confirm-btn {
+  border-radius: 4px;
+  font: 600 10.5px/1 var(--sfx-font, sans-serif);
+  padding: 5px 9px;
+  cursor: pointer;
+  border: none;
+}
+.sfx-buddy__confirm-btn--yes {
+  background: #0a84ff;
+  color: #ffffff;
+}
+.sfx-buddy__confirm-btn--yes:hover {
+  background: #0070e0;
+}
+.sfx-buddy__confirm-btn--no {
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.sfx-buddy__confirm-btn--no:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+/* Typing Indicator */
+.sfx-buddy__typing {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 12px;
+  background: #12141c;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  margin: 0 12px 6px;
+}
+
+.sfx-buddy__typing-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #8b949e;
+  animation: sfxBuddyBounce 1.2s infinite ease-in-out;
+}
+
+.sfx-buddy__typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.sfx-buddy__typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes sfxBuddyBounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-3px); opacity: 1; }
+}
+
 /* ==========================================================================
-   6. Sound Discovery Action Cards
+   5. Sound Discovery Action Cards
    ========================================================================== */
 
-.sfx-buddy__sound-card {
-  margin-top: 8px;
+.sfx-buddy__sound-card,
+.sfx-buddy-card {
+  margin-top: 6px;
   padding: 8px 10px;
-  background: #0f1c34;
-  border: 1px solid rgba(56, 189, 248, 0.28);
+  background: #141722;
+  border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .sfx-buddy__sound-header {
@@ -507,8 +727,8 @@
 
 .sfx-buddy__sound-meta {
   font: 500 10px/1 var(--sfx-font-mono, monospace);
-  color: var(--sfx-brand-highlight-soft, #7ec8ff);
-  background: rgba(16, 64, 128, 0.4);
+  color: #7ec8ff;
+  background: rgba(10, 132, 255, 0.15);
   padding: 2px 6px;
   border-radius: 4px;
   flex: 0 0 auto;
@@ -525,12 +745,13 @@
   align-items: center;
   gap: 4px;
   height: 24px;
-  padding: 0 9px;
+  padding: 0 8px;
   border-radius: 5px;
   font: 600 11px/1 var(--sfx-font, sans-serif);
   cursor: pointer;
   transition: all 140ms ease;
   user-select: none;
+  border: none;
 }
 
 .sfx-buddy__action-btn--preview {
@@ -543,99 +764,51 @@
   border-color: rgba(255, 255, 255, 0.3);
 }
 .sfx-buddy__action-btn--preview.is-playing {
-  background: var(--sfx-brand-royal, #0a84ff);
+  background: #0a84ff;
   border-color: transparent;
   color: #ffffff;
 }
 
 .sfx-buddy__action-btn--place {
-  background: var(--sfx-brand-gradient, linear-gradient(135deg, #104080 0%, #0a84ff 52%, #38bdf8 100%));
-  border: 1px solid rgba(126, 200, 255, 0.35);
+  background: #0a84ff;
+  border: 1px solid rgba(56, 189, 248, 0.35);
   color: #ffffff;
 }
 .sfx-buddy__action-btn--place:hover {
-  background: var(--sfx-brand-gradient-hover);
-  box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+  background: #0070e0;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.35);
 }
 
-/* ==========================================================================
-   7. Timeline Confirmation Card
-   ========================================================================== */
-
-.sfx-buddy__confirm-box {
-  margin-top: 8px;
-  padding: 9px 11px;
-  background: #111a2f;
-  border: 1px solid rgba(251, 191, 36, 0.4);
-  border-left: 3px solid #fbbf24;
-  border-radius: 8px;
+.sfx-buddy__action-btn--copy {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #8b949e;
 }
-
-.sfx-buddy__confirm-title {
-  font: 700 11px/1 var(--sfx-font, sans-serif);
-  color: #fbbf24;
-  margin-bottom: 4px;
-}
-
-.sfx-buddy__confirm-body {
-  font: 450 11.5px/1.3 var(--sfx-font, sans-serif);
-  color: #e5e7eb;
-  margin-bottom: 8px;
-}
-
-.sfx-buddy__confirm-btns {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.sfx-buddy__confirm-btn {
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 5px;
-  font: 600 11px/1 var(--sfx-font, sans-serif);
-  cursor: pointer;
-  border: none;
-  transition: all 140ms ease;
-}
-
-.sfx-buddy__confirm-btn--yes {
-  background: #10b981;
-  color: #ffffff;
-}
-.sfx-buddy__confirm-btn--yes:hover {
-  background: #059669;
-}
-
-.sfx-buddy__confirm-btn--no {
-  background: rgba(255, 255, 255, 0.1);
-  color: #9ca3af;
-}
-.sfx-buddy__confirm-btn--no:hover {
-  background: rgba(255, 255, 255, 0.18);
+.sfx-buddy__action-btn--copy:hover {
+  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
 }
 
 /* ==========================================================================
-   8. Suggested Prompt Chips Bar
+   6. Suggested Prompt Chips Bar
    ========================================================================== */
 
 .sfx-buddy__chips-bar {
-  padding: 6px 12px;
+  padding: 6px 10px;
   display: flex;
   align-items: center;
   gap: 5px;
   overflow-x: auto;
   flex: 0 0 auto;
-  border-top: 1px solid rgba(91, 127, 172, 0.15);
-  background: rgba(6, 11, 22, 0.85);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: #0c0d14;
 }
 
 .sfx-buddy__chips-bar::-webkit-scrollbar {
   height: 3px;
 }
 .sfx-buddy__chips-bar::-webkit-scrollbar-thumb {
-  background: rgba(91, 127, 172, 0.25);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 2px;
 }
 
@@ -644,32 +817,32 @@
   align-items: center;
   white-space: nowrap;
   height: 24px;
-  padding: 0 9px;
+  padding: 0 10px;
   border-radius: 999px;
-  background: rgba(16, 64, 128, 0.16);
-  border: 1px solid rgba(91, 127, 172, 0.32);
-  color: #cdd9e5;
-  font: 550 11px/1 var(--sfx-font, sans-serif);
+  background: #161822;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #c9d1d9;
+  font: 500 11px/1 var(--sfx-font, sans-serif);
   cursor: pointer;
   transition: all 140ms ease;
   user-select: none;
 }
 
 .sfx-buddy__chip:hover {
-  background: rgba(16, 64, 128, 0.32);
-  border-color: var(--sfx-brand-highlight, #38bdf8);
+  background: #1e2230;
+  border-color: rgba(56, 189, 248, 0.4);
   color: #ffffff;
   transform: translateY(-1px);
 }
 
 /* ==========================================================================
-   9. Chat Input Bar
+   7. Chat Input Bar
    ========================================================================== */
 
 .sfx-buddy__footer {
-  padding: 8px 12px 12px;
-  background: #070c18;
-  border-top: 1px solid rgba(91, 127, 172, 0.18);
+  padding: 8px 12px 10px;
+  background: #0e1017;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   flex: 0 0 auto;
 }
 
@@ -677,16 +850,16 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #0d1527;
-  border: 1px solid rgba(91, 127, 172, 0.32);
+  background: #07080c;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
-  padding: 3px 4px 3px 10px;
+  padding: 4px 6px 4px 10px;
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
 .sfx-buddy__input-wrap:focus-within {
-  border-color: var(--sfx-brand-royal, #0a84ff);
-  box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.25), 0 0 8px rgba(56, 189, 248, 0.2);
+  border-color: #0a84ff;
+  box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.25);
 }
 
 .sfx-buddy__input {
@@ -697,6 +870,8 @@
   font: 450 12px/1.4 var(--sfx-font, sans-serif);
   outline: none;
   min-width: 0;
+  resize: none;
+  max-height: 72px;
 }
 
 .sfx-buddy__input::placeholder {
@@ -707,8 +882,8 @@
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  background: var(--sfx-brand-gradient, linear-gradient(135deg, #104080 0%, #0a84ff 52%, #38bdf8 100%));
-  border: 1px solid rgba(126, 200, 255, 0.3);
+  background: #0a84ff;
+  border: none;
   color: #ffffff;
   display: inline-flex;
   align-items: center;
@@ -720,18 +895,96 @@
 }
 
 .sfx-buddy__send-btn:hover:not(:disabled) {
-  background: var(--sfx-brand-gradient-hover);
+  background: #0070e0;
   box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
-  transform: scale(1.04);
+}
+
+.sfx-buddy__send-btn.is-stopping {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+}
+.sfx-buddy__send-btn.is-stopping:hover {
+  background: #dc2626 !important;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5) !important;
 }
 
 .sfx-buddy__send-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: default;
 }
 
+.sfx-buddy__footer-hint {
+  font-size: 10px;
+  color: #6e7681;
+  text-align: center;
+  margin-top: 4px;
+}
+
 /* ==========================================================================
-   10. Settings SFX Buddy Display Section
+   8. Daily Sound Design Tip Card (Inside Chat ONLY - Never Floating Unsolicited)
+   ========================================================================== */
+
+/* Remove any unsolicited floating tip card that is not inside the panel */
+body > .sfx-buddy__tip-card,
+.sfx-library-wrap > .sfx-buddy__tip-card,
+#sfx-buddy-tip-card:not(#sfx-buddy-panel *) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.sfx-buddy__tip-card {
+  position: relative;
+  margin: 6px 0;
+  padding: 9px 11px;
+  background: #121724;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-left: 3px solid #38bdf8;
+  border-radius: 8px;
+  flex: 0 0 auto;
+}
+
+.sfx-buddy__tip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.sfx-buddy__tip-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font: 700 10px/1 var(--sfx-font, sans-serif);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #38bdf8;
+}
+
+.sfx-buddy__tip-cycle-btn {
+  background: transparent;
+  border: none;
+  color: #8fa0be;
+  font: 600 10px/1 var(--sfx-font, sans-serif);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 140ms ease;
+}
+
+.sfx-buddy__tip-cycle-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sfx-buddy__tip-text {
+  font: 450 11.5px/1.4 var(--sfx-font, sans-serif);
+  color: #d1d5db;
+  margin: 0;
+}
+
+/* ==========================================================================
+   9. Settings SFX Buddy Display Section (Settings Tab)
    ========================================================================== */
 
 .sfx-buddy-settings-section {
@@ -790,7 +1043,7 @@
 }
 
 .sfx-buddy-mode-card--active .sfx-buddy-mode-card__icon {
-  background: var(--sfx-brand-gradient, linear-gradient(135deg, #104080 0%, #0a84ff 52%, #38bdf8 100%));
+  background: linear-gradient(135deg, #104080 0%, #0a84ff 52%, #38bdf8 100%);
   color: #ffffff;
 }
 
@@ -834,7 +1087,6 @@
   color: #8b949e;
 }
 
-/* Switch UI */
 .sfx-toggle-switch {
   position: relative;
   display: inline-block;
@@ -875,8 +1127,8 @@
 }
 
 .sfx-toggle-switch input:checked + .sfx-toggle-slider {
-  background: var(--sfx-brand-royal, #0a84ff);
-  border-color: var(--sfx-brand-highlight, #38bdf8);
+  background: #0a84ff;
+  border-color: #38bdf8;
 }
 
 .sfx-toggle-switch input:checked + .sfx-toggle-slider:before {
@@ -884,3 +1136,140 @@
   background-color: #ffffff;
 }
 
+/* ==========================================================================
+   10. Real Internet Web Search & Source Link Chips
+   ========================================================================== */
+
+.sfx-buddy__search-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  line-height: 1.3;
+  user-select: none;
+  animation: sfx-buddy-fade-in 180ms ease;
+}
+
+.sfx-buddy__search-status.is-searching {
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  color: #7dd3fc;
+}
+
+.sfx-buddy__search-status.is-done {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #6ee7b7;
+}
+
+.sfx-buddy__search-status.is-error {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
+}
+
+.sfx-buddy__search-spinner {
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid rgba(56, 189, 248, 0.3);
+  border-top-color: #38bdf8;
+  border-radius: 50%;
+  display: inline-block;
+  animation: sfx-buddy-spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes sfx-buddy-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes sfx-buddy-fade-in {
+  from { opacity: 0; transform: translateY(-2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sfx-buddy__sources-panel {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: rgba(10, 15, 26, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+.sfx-buddy__sources-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 6px;
+}
+
+.sfx-buddy__sources-header svg {
+  color: #38bdf8;
+}
+
+.sfx-buddy__sources-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sfx-buddy__source-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 6px;
+  color: #e2e8f0;
+  text-decoration: none;
+  font-size: 11px;
+  transition: all 120ms ease;
+  cursor: pointer;
+}
+
+.sfx-buddy__source-chip:hover {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+  transform: translateX(2px);
+}
+
+.sfx-buddy__source-domain {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.14);
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.sfx-buddy__source-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.25;
+}
+
+.sfx-buddy__source-ext-icon {
+  opacity: 0.4;
+  flex-shrink: 0;
+  color: currentColor;
+  transition: opacity 120ms ease;
+}
+
+.sfx-buddy__source-chip:hover .sfx-buddy__source-ext-icon {
+  opacity: 1;
+}

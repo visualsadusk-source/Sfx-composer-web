@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SFX Composer — Licensing Admin Dashboard</title>
+  <style>
+    :root {
+      --bg: #09090c;
+      --card-bg: #121216;
+      --card-border: #212127;
+      --accent: #0a84ff;
+      --accent-hover: #0071e3;
+      --text: #f0f0f4;
+      --text-muted: #8c8c98;
+      --danger: #ff453a;
+      --danger-bg: rgba(255, 69, 58, 0.12);
+      --success: #30d158;
+      --success-bg: rgba(48, 209, 88, 0.12);
+      --warning: #ffd60a;
+      --warning-bg: rgba(255, 214, 10, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      padding: 32px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .admin-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .admin-title h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .admin-badge {
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    /* Auth Bar */
+    .auth-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .auth-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.03em;
+    }
+
+    .auth-pill.authenticated {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid rgba(48, 209, 88, 0.3);
+    }
+
+    .auth-pill.not-authenticated {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid rgba(255, 69, 58, 0.3);
+    }
+
+    .auth-bar input {
+      background: #060608;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      color: #fff;
+      padding: 6px 10px;
+      font-size: 12px;
+      outline: none;
+    }
+
+    .auth-bar input:focus {
+      border-color: var(--accent);
+    }
+
+    /* Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .metric-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 16px;
+    }
+
+    .search-box {
+      flex: 1;
+      max-width: 380px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      height: 38px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      color: #fff;
+      padding: 0 12px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: #1c1c22;
+      border-color: var(--card-border);
+      color: #ccc;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #25252c;
+      color: #fff;
+    }
+
+    .btn-sm {
+      height: 30px;
+      padding: 0 10px;
+      font-size: 11px;
+    }
+
+    .btn-danger-sm {
+      background: var(--danger-bg);
+      border-color: rgba(255, 69, 58, 0.3);
+      color: var(--danger);
+    }
+
+    .btn-danger-sm:hover:not(:disabled) {
+      background: rgba(255, 69, 58, 0.25);
+    }
+
+    .btn-warning-sm {
+      background: var(--warning-bg);
+      border-color: rgba(255, 214, 10, 0.3);
+      color: var(--warning);
+    }
+
+    .btn-warning-sm:hover:not(:disabled) {
+      background: rgba(255, 214, 10, 0.25);
+    }
+
+    /* Table */
+    .table-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background: #0e0e12;
+      padding: 12px 16px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #1a1a20;
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-active { background: var(--success-bg); color: var(--success); border: 1px solid rgba(48,209,88,0.3); }
+    .badge-revoked { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(255,69,58,0.3); }
+    .badge-expired { background: var(--warning-bg); color: var(--warning); border: 1px solid rgba(255,214,10,0.3); }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      padding: 20px;
+    }
+
+    .modal-backdrop.is-open { display: flex; }
+
+    .modal {
+      width: 100%;
+      max-width: 480px;
+      background: #111115;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+      padding: 24px;
+    }
+
+    .modal h2 { margin: 0 0 8px; font-size: 18px; }
+    .modal p { margin: 0 0 20px; color: var(--text-muted); font-size: 12px; }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      height: 38px;
+      background: #08080a;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 0 10px;
+      color: #fff;
+      font: inherit;
+      outline: none;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--accent);
+    }
+
+    .key-display-box {
+      background: #050507;
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      margin: 16px 0;
+    }
+
+    .key-display-text {
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.08em;
+    }
+
+    .alert-banner {
+      background: rgba(10, 132, 255, 0.1);
+      border: 1px solid rgba(10, 132, 255, 0.3);
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #a0cfff;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="admin-header">
+      <div class="admin-title">
+        <h1>SFX Composer Licensing Portal</h1>
+        <span class="admin-badge">ADMIN</span>
+      </div>
+      <div>
+        <span style="font-size: 11px; color: var(--text-muted); margin-right: 12px;">Endpoint: Edge Functions</span>
+      </div>
+    </div>
+
+    <!-- Admin Authentication Bar (Unauthenticated State) -->
+    <div class="auth-bar" id="auth-login-box">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="auth-pill not-authenticated">Locked</span>
+        <span style="font-size: 12px; color: var(--text-muted);">Admin Sign-In:</span>
+      </div>
+      <div style="display: flex; gap: 8px; flex: 1; justify-content: flex-end; align-items: center; flex-wrap: wrap;">
+        <input type="email" id="admin-email" placeholder="Admin Email (e.g. sfxcomposertest@gmail.com)" style="width: 250px;" />
+        <input type="password" id="admin-password" placeholder="Password (or leave empty for OTP)" style="width: 210px;" />
+        <button type="button" class="btn btn-primary btn-sm" id="btn-admin-login">Sign In</button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-send-otp">Send Code (OTP)</button>
+      </div>
+    </div>
+
+    <!-- Admin Status Bar (Authenticated State) -->
+    <div class="auth-bar" id="auth-status-box" style="display: none;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="auth-pill authenticated">● Authorized Admin</span>
+        <span style="font-size: 12px; color: #fff;">Signed in as: <strong id="admin-user-display">—</strong></span>
+        <span style="font-size: 11px; color: var(--text-muted); background: #181820; padding: 2px 8px; border-radius: 4px; border: 1px solid var(--card-border);">wyjazmiihwjlrkggeeez</span>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-refresh">↻ Refresh Data</button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-admin-logout">Sign Out</button>
+      </div>
+    </div>
+
+    <!-- Security Information Notice -->
+    <div class="alert-banner">
+      <span>🔒 <strong>Zero-Trust Architecture:</strong> All license generation and administrative commands execute inside server-side Edge Functions. The Service Role Key is never exposed in browser memory, network requests, or source code.</span>
+    </div>
+
+    <!-- Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Total Licenses</div>
+        <div class="metric-value" id="val-total">—</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Active Activations</div>
+        <div class="metric-value" id="val-active" style="color: var(--success);">—</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Unused Licenses</div>
+        <div class="metric-value" id="val-unused">—</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Revoked</div>
+        <div class="metric-value" id="val-revoked" style="color: var(--danger);">—</div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Search customer email..." />
+      </div>
+      <div>
+        <button type="button" class="btn btn-primary" id="btn-issue-modal" disabled>+ Issue New License</button>
+      </div>
+    </div>
+
+    <!-- Licenses Table -->
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Customer Email</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Active Device (1/1)</th>
+            <th>Created</th>
+            <th style="text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr>
+            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 36px;">
+              Please sign in with your administrator account above to load licenses.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- OTP Verification Modal -->
+  <div class="modal-backdrop" id="modal-otp">
+    <div class="modal">
+      <h2>Enter Admin Verification Code</h2>
+      <p id="otp-modal-description">We sent a 6-digit confirmation code to your email.</p>
+      <form id="form-otp" onsubmit="return false;">
+        <div class="form-group">
+          <label for="admin-otp-input">6-Digit Code</label>
+          <input type="text" id="admin-otp-input" placeholder="123456" maxlength="8" required style="letter-spacing: 0.2em; font-size: 18px; text-align: center;" />
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-otp">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-verify-otp">Verify & Sign In</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Issue License Modal -->
+  <div class="modal-backdrop" id="modal-issue">
+    <div class="modal">
+      <h2>Issue New License</h2>
+      <p>Generate a unique 1-installation license key for a customer.</p>
+
+      <form id="form-issue" onsubmit="return false;">
+        <div class="form-group">
+          <label for="new-email">Customer Email Address</label>
+          <input type="email" id="new-email" required placeholder="name@studio.com" />
+        </div>
+        <div class="form-group">
+          <label for="new-type">License Type</label>
+          <select id="new-type">
+            <option value="pro">Pro (Standard Studio)</option>
+            <option value="personal">Personal / Creator</option>
+            <option value="commercial">Commercial Enterprise</option>
+            <option value="lifetime">Lifetime License</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="new-expiry">Duration</label>
+          <select id="new-expiry">
+            <option value="never">Never Expires (Perpetual)</option>
+            <option value="1y">1 Year Subscription</option>
+            <option value="2y">2 Years</option>
+          </select>
+        </div>
+        <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="new-send-email" checked style="width: auto; height: auto;" />
+          <label for="new-send-email" style="margin: 0; font-weight: normal; text-transform: none;">Send license key email to customer (via Resend if configured)</label>
+        </div>
+
+        <div id="issued-key-wrap" style="display: none;">
+          <div class="key-display-box">
+            <div style="font-size: 11px; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; font-weight: 700;">Generated License Key (Display Once)</div>
+            <div class="key-display-text" id="display-key">SFX-XXXX-XXXX-XXXX-XXXX</div>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-copy-key" style="margin-top: 10px;">📋 Copy Key to Clipboard</button>
+          </div>
+          <div style="background: rgba(255, 214, 10, 0.1); border: 1px solid rgba(255, 214, 10, 0.3); border-radius: 6px; padding: 10px; font-size: 11px; color: #ffd60a; margin: 10px 0;">
+            ⚠️ <strong>Security Notice:</strong> This license key will NEVER be shown again. Supabase stores only a secure SHA-256 hash. Deliver this key to the customer now.
+          </div>
+          <p style="color: var(--success); text-align: center; font-size: 12px;" id="email-status-text">✓ License stored in Supabase database.</p>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-issue">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-do-issue">Generate & Issue</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="./license-admin.js"></script>
+</body>
+</html>

@@ -128,7 +128,7 @@ async function runTestSuite() {
     assert.strictEqual(dlJson.code, 'UNAUTHENTICATED');
 
     // 2. Direct static download attempt
-    const staticRes = await fetch(`${SERVER_URL}/downloads/sfx-composer-pro-v2.4.0.zxp`);
+    const staticRes = await fetch(`${SERVER_URL}/downloads/sfx-composer-pro-v2.2.0.zxp`);
     assert.strictEqual(staticRes.status, 401, 'Unauthenticated /downloads/*.zxp must return 401');
 
     // 3. Customer portal without token
@@ -185,7 +185,7 @@ async function runTestSuite() {
     const indexHtml = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
     assert.ok(indexHtml.includes('id="cdm-account-status-banner"'), 'index.html must contain cdm-account-status-banner');
     assert.ok(indexHtml.includes('id="cdm-downloads-container"'), 'index.html must contain cdm-downloads-container');
-    assert.ok(!indexHtml.includes('href="/downloads/sfx-composer-pro-v2.4.0.zxp" download class="sfx-button'), 'No static download links inside dashboard');
+    assert.ok(!indexHtml.includes('href="/downloads/sfx-composer-pro-v2.2.0.zxp" download class="sfx-button'), 'No static download links inside dashboard');
 
     console.log('  ✓ Test B PASSED: Authenticated unpaid user has locked downloads (HTTP 403) and no licenses');
     passedCount++;
@@ -264,19 +264,19 @@ async function runTestSuite() {
   console.log('\n[TEST E] Direct File Path Protection');
   try {
     // Direct URL to .zxp
-    const directZxp = await fetch(`${SERVER_URL}/downloads/sfx-composer-pro-v2.4.0.zxp`);
+    const directZxp = await fetch(`${SERVER_URL}/downloads/sfx-composer-pro-v2.2.0.zxp`);
     assert.strictEqual(directZxp.status, 401, 'Direct /downloads/ access without auth must return 401');
 
     // Direct URL to .zip
-    const directZip = await fetch(`${SERVER_URL}/downloads/sfx-composer-pro-v2.4.0.zip`);
+    const directZip = await fetch(`${SERVER_URL}/downloads/sfx-composer-pro-v2.2.0.zip`);
     assert.strictEqual(directZip.status, 401, 'Direct /downloads/ access without auth must return 401');
 
     // Direct URL with invalid token
-    const directBogus = await fetch(`${SERVER_URL}/downloads/sfx-composer-pro-v2.4.0.zxp?token=bogus_token_12345`);
+    const directBogus = await fetch(`${SERVER_URL}/downloads/sfx-composer-pro-v2.2.0.zxp?token=bogus_token_12345`);
     assert.strictEqual(directBogus.status, 401, 'Direct /downloads/ access with invalid token must return 401');
 
     // Direct URL with unpaid valid token
-    const directUnpaid = await fetch(`${SERVER_URL}/downloads/sfx-composer-pro-v2.4.0.zxp?token=${encodeURIComponent(unpaidToken)}`);
+    const directUnpaid = await fetch(`${SERVER_URL}/downloads/sfx-composer-pro-v2.2.0.zxp?token=${encodeURIComponent(unpaidToken)}`);
     assert.strictEqual(directUnpaid.status, 403, 'Direct /downloads/ access with unpaid token must return 403');
 
     console.log('  ✓ Test E PASSED: Direct URL paths are strictly gated by server gateway (HTTP 401 / 403)');

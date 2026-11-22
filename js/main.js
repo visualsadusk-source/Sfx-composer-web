@@ -1069,9 +1069,9 @@
                   '</div>' +
                   '<p style="font-size: 12px; color: var(--sfx-text-muted); line-height: 1.6; margin: 0 0 10px 0;">' +
                     'A valid purchase record exists for this order, but no encrypted license key was generated in the database.<br>' +
-                    'Please contact support at <a href="mailto:visualsadusk@gmail.com" style="color: var(--sfx-accent);">visualsadusk@gmail.com</a> with your Payment ID (<code>' + (lic.provider_payment_id || 'receipt') + '</code>) to receive your official key.' +
+                    'Please contact support at <a href="mailto:sfxcomposer@gmail.com" style="color: var(--sfx-accent);">sfxcomposer@gmail.com</a> with your Payment ID (<code>' + (lic.provider_payment_id || 'receipt') + '</code>) to receive your official key.' +
                   '</p>' +
-                  '<a href="mailto:visualsadusk@gmail.com?subject=License%20Key%20Issue%20Request%20-%20Payment%20' + encodeURIComponent(lic.provider_payment_id || '') + '&body=Hello%20SFX%20Composer%20Support%2C%0A%0AMy%20verified%20purchase%20email%20is%3A%20' + encodeURIComponent(lic.customer_email || currentAuthEmail) + '%0APayment%20ID%3A%20' + encodeURIComponent(lic.provider_payment_id || '') + '%0AOrder%20ID%3A%20' + encodeURIComponent(lic.provider_order_id || '') + '%0ALicense%20ID%3A%20' + encodeURIComponent(lic.id || '') + '%0A%0APlease%20issue%20my%20license%20key.%20Thank%20you!" ' +
+                  '<a href="mailto:sfxcomposer@gmail.com?subject=License%20Key%20Issue%20Request%20-%20Payment%20' + encodeURIComponent(lic.provider_payment_id || '') + '&body=Hello%20SFX%20Composer%20Support%2C%0A%0AMy%20verified%20purchase%20email%20is%3A%20' + encodeURIComponent(lic.customer_email || currentAuthEmail) + '%0APayment%20ID%3A%20' + encodeURIComponent(lic.provider_payment_id || '') + '%0AOrder%20ID%3A%20' + encodeURIComponent(lic.provider_order_id || '') + '%0ALicense%20ID%3A%20' + encodeURIComponent(lic.id || '') + '%0A%0APlease%20issue%20my%20license%20key.%20Thank%20you!" ' +
                   'style="display: inline-block; height: 32px; line-height: 32px; padding: 0 16px; background: rgba(255,69,58,0.15); border: 1px solid rgba(255,69,58,0.5); border-radius: 6px; color: #ff453a; font-size: 12px; font-weight: 700; text-decoration: none;">' +
                     'Request License Key from Support' +
                   '</a>' +
@@ -1093,6 +1093,7 @@
                 '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Payment Status</span>' + paymentStatusStr + '</div>' +
                 '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Activation Status</span>' + workstationStatus + '</div>' +
                 '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Product Name</span><span style="font-size: 11.5px; color: #fff; font-weight: 600;">SFX Composer Pro</span></div>' +
+                '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Product ID</span><code style="font-size: 10.5px; color: var(--sfx-accent);">' + (lic.product_id || 'sfx-composer-pro') + '</code></div>' +
                 (lic.provider_payment_id ? '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Payment ID</span><code style="font-size: 10.5px; color: var(--sfx-accent);">' + lic.provider_payment_id + '</code></div>' : '') +
               '</div>' +
             '</div>';

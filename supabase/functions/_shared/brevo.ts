@@ -68,8 +68,8 @@ export async function sendLicenseEmailBrevo(params: SendLicenseEmailParams): Pro
   const sender = parseSender();
   const recipientName = (params.toName || '').trim() || cleanEmail.split('@')[0];
   const baseUrl = (Deno.env.get('APP_BASE_URL') || 'https://wyjazmiihwjlrkggeeez.supabase.co').replace(/\/+$/, '');
-  const zxpDownloadUrl = `${baseUrl}/downloads/sfx-composer-pro-v2.4.0.zxp`;
-  const zipDownloadUrl = `${baseUrl}/downloads/sfx-composer-pro-v2.4.0.zip`;
+  const zxpDownloadUrl = `${baseUrl}/downloads/sfx-composer-pro-v2.2.0.zxp`;
+  const zipDownloadUrl = `${baseUrl}/downloads/sfx-composer-pro-v2.2.0.zip`;
   const sfxLibraryDriveUrl = (Deno.env.get('SFX_LIBRARY_DRIVE_URL') || 'https://drive.google.com/file/d/1rF1f3KEKSpri1KoZqP8SCv-Q0-NYxvGD/view?usp=sharing').trim();
   const licenseTypeLabel = (params.licenseType || 'lifetime').toUpperCase();
   const isResendNotice = params.isResend ? '<div style="background: rgba(255, 159, 10, 0.15); border: 1px solid #ff9f0a; color: #ff9f0a; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.05em;">Duplicate / Requested Copy</div>' : '';

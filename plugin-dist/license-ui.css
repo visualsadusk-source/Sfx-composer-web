@@ -1,0 +1,428 @@
+/* SFX Composer — Professional License Activation System Styles
+   Pure dark/black background, SFX blue accents (#0a84ff), Apple/Adobe premium styling */
+
+/* ── Modal / Mandatory Gate Backdrop ── */
+#sfx-license-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 20px;
+  box-sizing: border-box;
+  animation: sfxLicFadeIn 0.2s ease-out;
+}
+
+#sfx-license-overlay.is-open {
+  display: flex;
+}
+
+/* Mandatory First-Launch Gate Mode */
+#sfx-license-overlay.is-gate {
+  background: #08080b;
+  display: flex !important;
+  pointer-events: auto !important;
+}
+
+#sfx-license-overlay.is-gate #sfx-lic-close {
+  display: none !important;
+}
+
+body.sfx-gated #root {
+  pointer-events: none !important;
+  user-select: none !important;
+  filter: blur(8px);
+  opacity: 0.2;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+@keyframes sfxLicFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes sfxLicSlideUp {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Modal Card ── */
+.sfx-lic__card {
+  width: 100%;
+  max-width: 440px;
+  background: #0e0e11;
+  border: 1px solid #232328;
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  color: #e8e8ec;
+  font: 13px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  overflow: hidden;
+  animation: sfxLicSlideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Card Header ── */
+.sfx-lic__header {
+  padding: 28px 24px 18px;
+  text-align: center;
+  position: relative;
+  border-bottom: 1px solid #1a1a1f;
+  background: linear-gradient(180deg, rgba(20, 20, 26, 0.7) 0%, rgba(14, 14, 17, 0) 100%);
+}
+
+.sfx-lic__close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #8c8c94;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.sfx-lic__close-btn:hover {
+  background: #1c1c22;
+  color: #ffffff;
+}
+
+.sfx-lic__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #133256 0%, #0a1b2e 100%);
+  border: 1px solid rgba(10, 132, 255, 0.4);
+  box-shadow: 0 8px 24px rgba(10, 132, 255, 0.25);
+  margin-bottom: 14px;
+  color: #0a84ff;
+}
+
+.sfx-lic__logo svg {
+  width: 28px;
+  height: 28px;
+}
+
+.sfx-lic__title {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+
+.sfx-lic__subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: #8c8c96;
+}
+
+/* ── Card Body ── */
+.sfx-lic__body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Status Banners ── */
+.sfx-lic__banner {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  display: none;
+}
+
+.sfx-lic__banner.is-visible {
+  display: flex;
+}
+
+.sfx-lic__banner--error {
+  background: rgba(255, 69, 58, 0.12);
+  border: 1px solid rgba(255, 69, 58, 0.35);
+  color: #ff6b6b;
+}
+
+.sfx-lic__banner--success {
+  background: rgba(48, 209, 88, 0.12);
+  border: 1px solid rgba(48, 209, 88, 0.35);
+  color: #30d158;
+}
+
+.sfx-lic__banner--warning {
+  background: rgba(255, 214, 10, 0.12);
+  border: 1px solid rgba(255, 214, 10, 0.35);
+  color: #ffd60a;
+}
+
+.sfx-lic__banner--info {
+  background: rgba(10, 132, 255, 0.12);
+  border: 1px solid rgba(10, 132, 255, 0.35);
+  color: #7ec8ff;
+}
+
+.sfx-lic__banner-icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.sfx-lic__banner-content {
+  flex: 1 1 auto;
+}
+
+.sfx-lic__banner-title {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+/* ── Form Controls ── */
+.sfx-lic__form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sfx-lic__label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9c9ca6;
+}
+
+.sfx-lic__input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sfx-lic__input {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  background: #070709;
+  border: 1px solid #232328;
+  border-radius: 8px;
+  color: #ffffff;
+  font: 13px/1 inherit;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.15s ease;
+}
+
+.sfx-lic__input:focus {
+  border-color: #0a84ff;
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+  background: #09090c;
+}
+
+.sfx-lic__input::placeholder {
+  color: #55555e;
+}
+
+.sfx-lic__input--key {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  padding-right: 40px;
+}
+
+.sfx-lic__eye-btn {
+  position: absolute;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #72727a;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sfx-lic__eye-btn:hover {
+  color: #e8e8ec;
+}
+
+.sfx-lic__eye-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ── Action Buttons ── */
+.sfx-lic__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font: 600 13px/1 inherit;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.sfx-lic__btn--primary {
+  background: #0a84ff;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(10, 132, 255, 0.35);
+}
+
+.sfx-lic__btn--primary:hover:not(:disabled) {
+  background: #0071e3;
+  box-shadow: 0 6px 18px rgba(10, 132, 255, 0.45);
+}
+
+.sfx-lic__btn--primary:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.sfx-lic__btn--primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sfx-lic__btn--secondary {
+  background: #18181c;
+  border-color: #2e2e34;
+  color: #c8c8d0;
+}
+
+.sfx-lic__btn--secondary:hover:not(:disabled) {
+  background: #202026;
+  border-color: #3e3e46;
+  color: #ffffff;
+}
+
+.sfx-lic__btn--danger {
+  background: rgba(255, 69, 58, 0.15);
+  border-color: rgba(255, 69, 58, 0.35);
+  color: #ff6b6b;
+}
+
+.sfx-lic__btn--danger:hover:not(:disabled) {
+  background: rgba(255, 69, 58, 0.25);
+  border-color: rgba(255, 69, 58, 0.5);
+  color: #ffffff;
+}
+
+/* Spinner */
+.sfx-lic__spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: sfxLicSpin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes sfxLicSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Card Footer ── */
+.sfx-lic__footer {
+  padding: 14px 24px 20px;
+  border-top: 1px solid #1a1a1f;
+  background: #09090b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+}
+
+.sfx-lic__link {
+  color: #0a84ff;
+  text-decoration: none;
+  transition: color 0.15s ease;
+  cursor: pointer;
+}
+
+.sfx-lic__link:hover {
+  color: #3d9bff;
+  text-decoration: underline;
+}
+
+/* ── Settings → License & Activation Section ── */
+.sfx-license-section {
+  border-top: 1px solid #232328;
+  padding-top: 18px;
+  margin-top: 18px;
+}
+
+.sfx-license-card {
+  background: #101014;
+  border: 1px solid #232328;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sfx-license-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.sfx-license-label {
+  color: #8c8c96;
+}
+
+.sfx-license-val {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.sfx-license-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.sfx-license-badge--active {
+  background: rgba(48, 209, 88, 0.15);
+  color: #30d158;
+  border: 1px solid rgba(48, 209, 88, 0.35);
+}
+
+.sfx-license-badge--inactive {
+  background: rgba(255, 69, 58, 0.15);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 69, 58, 0.35);
+}

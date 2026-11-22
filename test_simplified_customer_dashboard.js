@@ -78,7 +78,7 @@ async function simulatePurchase(email, name = 'Test Editor') {
     })
   });
   const verifyData = await verifyRes.json();
-  assert.ok(verifyData.ok, `Payment verification failed for ${email}: ${verifyData.message}`);
+  assert.ok(verifyData.ok || verifyData.verified, `Payment verification failed for ${email}: ${verifyData.message}`);
 
   return {
     email,

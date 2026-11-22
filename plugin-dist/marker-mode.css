@@ -3,10 +3,10 @@
 */
 
 #sfx-marker-mode {
-  position: absolute;
+  position: fixed;
   left: 8px;
   bottom: 44px; /* sits just above the AI SFX button */
-  z-index: 20;
+  z-index: 999997;
   font-family: var(--sfx-font, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif);
 }
 

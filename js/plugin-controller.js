@@ -1902,6 +1902,111 @@
 
     // Initial sync
     setTimeout(syncBuddySettingsUI, 300);
+
+    // ── Direct License System (v8.0 Engine Simulation) ──
+    var btnOpenLicModal = document.getElementById('btn-open-license-modal');
+    var btnDemoDeactivate = document.getElementById('btn-demo-deactivate');
+    var licOverlay = document.getElementById('sfx-license-overlay');
+    var licCloseBtn = document.getElementById('sfx-lic-close');
+    var licEyeBtn = document.getElementById('sfx-lic-eye');
+    var licKeyInput = document.getElementById('sfx-lic-key');
+    var licEmailInput = document.getElementById('sfx-lic-email');
+    var licForm = document.getElementById('sfx-lic-form');
+    var licBtn = document.getElementById('sfx-lic-btn');
+    var licBtnText = document.getElementById('sfx-lic-btn-text');
+    var licBanner = document.getElementById('sfx-lic-banner');
+    var licBannerTitle = document.getElementById('sfx-lic-banner-title');
+    var licBannerMsg = document.getElementById('sfx-lic-banner-msg');
+    var licBadge = document.getElementById('sfx-demo-lic-badge');
+
+    if (btnOpenLicModal && licOverlay) {
+      btnOpenLicModal.addEventListener('click', function (e) {
+        e.stopPropagation();
+        licOverlay.style.display = 'flex';
+        licOverlay.classList.add('is-open');
+        licOverlay.classList.remove('is-gate');
+      });
+    }
+
+    if (licCloseBtn && licOverlay) {
+      licCloseBtn.addEventListener('click', function () {
+        licOverlay.classList.remove('is-open', 'is-gate');
+        licOverlay.style.display = 'none';
+      });
+    }
+
+    if (licEyeBtn && licKeyInput) {
+      licEyeBtn.addEventListener('click', function () {
+        var isPwd = licKeyInput.type === 'password';
+        licKeyInput.type = isPwd ? 'text' : 'password';
+      });
+    }
+
+    if (btnDemoDeactivate) {
+      btnDemoDeactivate.addEventListener('click', function () {
+        if (confirm('Simulate deactivating SFX Composer on this machine? This tests the mandatory first-launch gate.')) {
+          if (licBadge) {
+            licBadge.className = 'sfx-license-badge sfx-license-badge--inactive';
+            licBadge.innerHTML = 'Inactive';
+          }
+          if (licOverlay) {
+            licOverlay.style.display = 'flex';
+            licOverlay.classList.add('is-open');
+            if (licBanner && licBannerTitle && licBannerMsg) {
+              licBanner.style.display = 'flex';
+              licBanner.className = 'sfx-lic__banner sfx-lic__banner--warning';
+              licBannerTitle.textContent = 'Workstation Deactivated';
+              licBannerMsg.textContent = 'This machine was deactivated. Enter your registered email and key to reactivate.';
+            }
+          }
+        }
+      });
+    }
+
+    if (licForm && licBtn) {
+      licForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var email = (licEmailInput ? licEmailInput.value : '').trim();
+        var key = (licKeyInput ? licKeyInput.value : '').trim();
+
+        if (!email || !key) {
+          if (licBanner && licBannerTitle && licBannerMsg) {
+            licBanner.style.display = 'flex';
+            licBanner.className = 'sfx-lic__banner sfx-lic__banner--error';
+            licBannerTitle.textContent = 'Missing Credentials';
+            licBannerMsg.textContent = 'Please provide both your registered email and license key.';
+          }
+          return;
+        }
+
+        licBtn.disabled = true;
+        if (licBtnText) licBtnText.innerHTML = '<span class="sfx-lic__spinner"></span> Verifying with Supabase…';
+
+        setTimeout(function () {
+          licBtn.disabled = false;
+          if (licBtnText) licBtnText.textContent = 'Verify & Activate';
+
+          if (licBanner && licBannerTitle && licBannerMsg) {
+            licBanner.style.display = 'flex';
+            licBanner.className = 'sfx-lic__banner sfx-lic__banner--success';
+            licBannerTitle.textContent = 'Direct Activation Verified ✓';
+            licBannerMsg.textContent = 'Workstation hardware bound successfully. Lifetime access unlocked.';
+          }
+
+          if (licBadge) {
+            licBadge.className = 'sfx-license-badge sfx-license-badge--active';
+            licBadge.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Active';
+          }
+
+          setTimeout(function () {
+            if (licOverlay) {
+              licOverlay.classList.remove('is-open', 'is-gate');
+              licOverlay.style.display = 'none';
+            }
+          }, 1400);
+        }, 800);
+      });
+    }
   }
 
   // ── 15. MODULE SHOWCASE CONTROLLER ──

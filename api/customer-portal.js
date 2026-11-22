@@ -512,7 +512,7 @@ module.exports = async function handler(req, res) {
     }
 
     for (const lic of foundLicenseRows) {
-      const lId = lic.id || lic.license_id;
+      const lId = lic.id || lic.license_id || ('lic_' + (lic.order_id || lic.payment_id || 'active'));
       if (!lId || processedLicIds.has(lId)) continue;
       processedLicIds.add(lId);
 
@@ -524,7 +524,7 @@ module.exports = async function handler(req, res) {
       const isMissingEncryptedKey = !decryptedKey;
 
       // Link each license to its specific payment order
-      const matchingOrder = completedOrders.find(o => o.license_id === lId || o.provider_order_id === lic.provider_order_id);
+      const matchingOrder = completedOrders.find(o => o.license_id === lId || o.provider_order_id === (lic.provider_order_id || lic.order_id) || o.provider_payment_id === (lic.provider_payment_id || lic.payment_id));
 
       licensesList.push({
         id: lId,
@@ -585,8 +585,8 @@ module.exports = async function handler(req, res) {
       has_library: hasLibrary,
       product_id: (hasPlugin && hasLibrary) ? 'sfx-composer-bundle' : (hasPlugin ? 'sfx-composer-plugin' : 'sfx-library'),
       product_name: productName,
-      zxp_url: hasPlugin ? `/downloads/sfx-composer-pro-v2.4.0.zxp?token=${encodeURIComponent(sessionToken)}` : null,
-      zip_url: hasPlugin ? `/downloads/sfx-composer-pro-v2.4.0.zip?token=${encodeURIComponent(sessionToken)}` : null,
+      zxp_url: hasPlugin ? `/downloads/sfx-composer-pro-v2.2.0.zxp?token=${encodeURIComponent(sessionToken)}` : null,
+      zip_url: hasPlugin ? `/downloads/sfx-composer-pro-v2.2.0.zip?token=${encodeURIComponent(sessionToken)}` : null,
       sfx_library_url: hasLibrary ? driveUrl : null
     }
   }));

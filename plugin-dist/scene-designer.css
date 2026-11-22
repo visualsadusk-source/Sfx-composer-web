@@ -1,24 +1,23 @@
 /* Scene Sound Designer — matches SFX Composer dark panel language */
 
 #sfx-scene-designer.sfx-sd {
-  position: absolute;
+  position: fixed;
   left: 0;
-  top: 46px;
+  top: 0;
   right: 0;
   bottom: 0;
-  z-index: 25;
+  z-index: 999990;
   display: none;
   flex-direction: column;
   background: var(--sfx-bg, #121214);
   color: var(--sfx-text, #e8e8e8);
   font: 12px/1.45 var(--sfx-font, -apple-system, 'Segoe UI', system-ui, sans-serif);
-  pointer-events: auto;
 }
 #sfx-scene-designer.sfx-sd.is-open {
   display: flex;
 }
 html.sfx-has-header-menu #sfx-scene-designer.sfx-sd {
-  top: 46px;
+  top: var(--sfx-hm-bottom, 0px);
 }
 
 .sfx-sd__header {

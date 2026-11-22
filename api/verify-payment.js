@@ -109,9 +109,9 @@ module.exports = async function handler(req, res) {
         payment_id: razorpay_payment_id,
         already_processed: true,
         downloads: {
-          version: 'v2.4.0',
-          zxp_url: '/downloads/sfx-composer-pro-v2.4.0.zxp',
-          zip_url: '/downloads/sfx-composer-pro-v2.4.0.zip',
+          version: 'v2.2.0',
+          zxp_url: '/downloads/sfx-composer-pro-v2.2.0.zxp',
+          zip_url: '/downloads/sfx-composer-pro-v2.2.0.zip',
           sfx_library_url: process.env.SFX_LIBRARY_DRIVE_URL || 'https://drive.google.com/file/d/1rF1f3KEKSpri1KoZqP8SCv-Q0-NYxvGD/view?usp=sharing'
         }
       }));
@@ -167,8 +167,11 @@ module.exports = async function handler(req, res) {
   });
 
   // Record active license if plugin is owned
+  const licenseId = 'lic_' + razorpay_order_id.replace(/^order_/, '');
   if (hasPlugin) {
     memoryStore.licenses.set(razorpay_order_id, {
+      id: licenseId,
+      license_id: licenseId,
       license_key: licenseKey,
       order_id: razorpay_order_id,
       payment_id: razorpay_payment_id,
@@ -202,9 +205,9 @@ module.exports = async function handler(req, res) {
       info: hasPlugin ? 'License generated and ready for instant activation.' : 'Master SFX Library unlocked.'
     },
     downloads: {
-      version: 'v2.4.0',
-      zxp_url: hasPlugin ? '/downloads/sfx-composer-pro-v2.4.0.zxp' : null,
-      zip_url: hasPlugin ? '/downloads/sfx-composer-pro-v2.4.0.zip' : null,
+      version: 'v2.2.0',
+      zxp_url: hasPlugin ? '/downloads/sfx-composer-pro-v2.2.0.zxp' : null,
+      zip_url: hasPlugin ? '/downloads/sfx-composer-pro-v2.2.0.zip' : null,
       sfx_library_url: hasLibrary ? driveUrl : null
     }
   }));

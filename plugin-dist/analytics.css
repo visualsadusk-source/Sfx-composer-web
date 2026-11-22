@@ -4,18 +4,17 @@
 */
 
 #sfx-analytics.sfx-an {
-  position: absolute;
+  position: fixed;
   left: 0;
-  top: 46px;
+  top: 0;
   right: 0;
   bottom: 0;
-  z-index: 25;
+  z-index: 999990;
   display: none;
   flex-direction: column;
   background: var(--sfx-bg, #121214);
   color: var(--sfx-text, #e8e8e8);
   font: 12px/1.45 var(--sfx-font, -apple-system, 'Segoe UI', system-ui, sans-serif);
-  pointer-events: auto;
 }
 
 #sfx-analytics.sfx-an.is-open {
@@ -23,7 +22,7 @@
 }
 
 html.sfx-has-header-menu #sfx-analytics.sfx-an {
-  top: 46px;
+  top: var(--sfx-hm-bottom, 0px);
 }
 
 .sfx-an__header {

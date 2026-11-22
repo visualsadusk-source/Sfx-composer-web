@@ -234,9 +234,9 @@ Deno.serve(async (req: Request) => {
       license_id: orderData.license_id,
       email_delivery: emailStatus,
       downloads: {
-        version: 'v2.4.0',
-        zxp_url: '/downloads/sfx-composer-pro-v2.4.0.zxp',
-        zip_url: '/downloads/sfx-composer-pro-v2.4.0.zip',
+        version: 'v2.2.0',
+        zxp_url: '/downloads/sfx-composer-pro-v2.2.0.zxp',
+        zip_url: '/downloads/sfx-composer-pro-v2.2.0.zip',
         sfx_library_url: (Deno.env.get('SFX_LIBRARY_DRIVE_URL') || 'https://drive.google.com/file/d/1rF1f3KEKSpri1KoZqP8SCv-Q0-NYxvGD/view?usp=sharing').trim()
       }
     }), {
