@@ -1,0 +1,370 @@
+/*
+ * SFX Composer — Official Brand Design System & Theme Stylesheet
+ * 
+ * Palette extracted from the official SFX Composer brand identity:
+ * - Deep Navy Blue:        #060d1b / #081024 / #0d1b33
+ * - Rich Royal Blue:       #104080 / #0a84ff / #0d62d6
+ * - Soft Steel Blue:       #4a70a2 / #5b7fac / #6a8cb3
+ * - Light Blue Highlights: #7ec8ff / #9cd5ff / #38bdf8
+ * - White Contrast:        #ffffff
+ * 
+ * Foundation: Premium dark UI (#000000 / #0e0e12) optimized for Premiere Pro & After Effects.
+ * Transitions: GPU-accelerated (transform, opacity, box-shadow) under 200ms.
+ */
+
+:root {
+  /* Official Brand Palette Tokens */
+  --sfx-brand-navy-dark: #060d1b;
+  --sfx-brand-navy: #081024;
+  --sfx-brand-navy-surface: #0d1b33;
+  --sfx-brand-royal-deep: #104080;
+  --sfx-brand-royal: #0a84ff;
+  --sfx-brand-royal-hover: #1f90ff;
+  --sfx-brand-royal-active: #0958b8;
+  --sfx-brand-steel-dark: #3a5c88;
+  --sfx-brand-steel: #5b7fac;
+  --sfx-brand-steel-light: #7d9ec4;
+  --sfx-brand-highlight: #38bdf8;
+  --sfx-brand-highlight-soft: #7ec8ff;
+  --sfx-brand-white: #ffffff;
+
+  /* Official Brand Gradients */
+  --sfx-brand-gradient: linear-gradient(135deg, #104080 0%, #0a84ff 52%, #38bdf8 100%);
+  --sfx-brand-gradient-hover: linear-gradient(135deg, #144e99 0%, #2094ff 52%, #56c8ff 100%);
+  --sfx-brand-gradient-active: linear-gradient(135deg, #0d366d 0%, #086fd6 52%, #22abed 100%);
+  --sfx-brand-gradient-subtle: linear-gradient(135deg, rgba(16, 64, 128, 0.4) 0%, rgba(10, 132, 255, 0.2) 60%, rgba(56, 189, 248, 0.12) 100%);
+  --sfx-brand-gradient-surface: linear-gradient(180deg, rgba(16, 64, 128, 0.12) 0%, rgba(8, 16, 36, 0.3) 100%);
+  --sfx-brand-gradient-border: linear-gradient(135deg, rgba(91, 127, 172, 0.5) 0%, rgba(10, 132, 255, 0.4) 50%, rgba(56, 189, 248, 0.6) 100%);
+
+  /* Brand Elevation & Glow */
+  --sfx-brand-glow: 0 0 12px rgba(10, 132, 255, 0.25);
+  --sfx-brand-glow-lg: 0 0 20px rgba(56, 189, 248, 0.22);
+  --sfx-brand-glow-focus: 0 0 0 2px rgba(10, 132, 255, 0.35), 0 0 10px rgba(56, 189, 248, 0.25);
+  --sfx-brand-border-subtle: rgba(91, 127, 172, 0.22);
+  --sfx-brand-border-active: rgba(126, 200, 255, 0.45);
+
+  /* Overrides for core theme variables */
+  --sfx-accent: #0a84ff;
+  --sfx-accent-hover: #1f90ff;
+  --sfx-accent-active: #0958b8;
+  --sfx-text-on-accent: #ffffff;
+  --sfx-waveform-played: #38bdf8;
+}
+
+/* ==========================================================================
+   1. Header Mark & Shell Branding
+   ========================================================================== */
+
+.sfx-shell__mark {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), 0 0 8px rgba(10, 132, 255, 0.25);
+  -webkit-user-drag: none;
+  user-select: none;
+  opacity: 1;
+  transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 180ms ease, filter 180ms ease;
+}
+
+.sfx-shell__header:hover .sfx-shell__mark {
+  transform: scale(1.08);
+  box-shadow: 0 3px 10px rgba(10, 132, 255, 0.4), 0 0 12px rgba(56, 189, 248, 0.3);
+  filter: brightness(1.06);
+}
+
+/* Header toolbar buttons with brand gradient */
+.sfx-hm__btn {
+  transition: background 150ms ease, border-color 150ms ease, box-shadow 150ms ease, color 150ms ease, transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sfx-hm__btn:hover:not(:disabled) {
+  background: rgba(16, 64, 128, 0.18);
+  border-color: rgba(91, 127, 172, 0.35);
+  color: #ffffff;
+}
+
+.sfx-hm__btn[aria-pressed='true'] {
+  background: var(--sfx-brand-gradient) !important;
+  border-color: rgba(126, 200, 255, 0.45) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(10, 132, 255, 0.35), 0 0 1px rgba(126, 200, 255, 0.6) !important;
+}
+
+.sfx-hm__btn[aria-pressed='true']:hover {
+  background: var(--sfx-brand-gradient-hover) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(10, 132, 255, 0.45) !important;
+}
+
+/* ==========================================================================
+   2. Sound Library
+   ========================================================================== */
+
+/* Active category pill */
+.sfx-cat--on {
+  background: var(--sfx-brand-gradient-subtle) !important;
+  border-left: 2px solid var(--sfx-brand-highlight) !important;
+  color: #ffffff !important;
+}
+
+.sfx-cat--on .sfx-cat__icon {
+  color: var(--sfx-brand-highlight);
+}
+
+.sfx-cat--on .sfx-cat__count {
+  background: rgba(16, 64, 128, 0.35);
+  color: var(--sfx-brand-highlight-soft);
+}
+
+/* Category transition */
+.sfx-cat {
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.sfx-cat:hover:not(.sfx-cat--on) {
+  background: rgba(16, 64, 128, 0.14);
+}
+
+/* Primary buttons with brand gradient */
+.sfx-button:not(.sfx-button--quiet) {
+  background: var(--sfx-brand-gradient);
+  color: #ffffff;
+  border: 1px solid rgba(126, 200, 255, 0.3);
+  box-shadow: 0 2px 6px rgba(10, 132, 255, 0.25);
+  transition: background 150ms ease, box-shadow 150ms ease, transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sfx-button:not(.sfx-button--quiet):hover:not(:disabled) {
+  background: var(--sfx-brand-gradient-hover);
+  box-shadow: 0 4px 12px rgba(10, 132, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.sfx-button:not(.sfx-button--quiet):active:not(:disabled) {
+  background: var(--sfx-brand-gradient-active);
+  transform: translateY(0);
+}
+
+/* Selected row in sound library */
+.sfx-row--selected,
+.sfx-table__row--selected {
+  background: rgba(10, 132, 255, 0.12) !important;
+  border-left: 2px solid var(--sfx-brand-royal) !important;
+}
+
+/* Input focus states */
+.sfx-input:focus,
+.sfx-select:focus,
+input[type="text"]:focus,
+input[type="search"]:focus {
+  outline: none !important;
+  border-color: var(--sfx-brand-royal) !important;
+  box-shadow: var(--sfx-brand-glow-focus) !important;
+}
+
+/* ==========================================================================
+   3. BGM Flow Module
+   ========================================================================== */
+
+/* Mode buttons */
+.sfx-bf__mode-btn {
+  transition: all 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sfx-bf__mode-btn:hover:not(.is-active) {
+  background: rgba(16, 64, 128, 0.16);
+  border-color: rgba(91, 127, 172, 0.35);
+  color: #ffffff;
+}
+
+.sfx-bf__mode-btn.is-active {
+  background: var(--sfx-brand-gradient) !important;
+  border-color: rgba(126, 200, 255, 0.45) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(10, 132, 255, 0.32) !important;
+}
+
+/* Selected style card */
+.sfx-bf__style-card {
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.sfx-bf__style-card:hover {
+  border-color: rgba(91, 127, 172, 0.4);
+  transform: translateY(-1px);
+}
+
+.sfx-bf__style-card.is-selected {
+  border-color: var(--sfx-brand-highlight) !important;
+  background: var(--sfx-brand-gradient-subtle) !important;
+  box-shadow: 0 0 12px rgba(10, 132, 255, 0.22) !important;
+}
+
+.sfx-bf__style-card.is-selected .sfx-bf__style-name {
+  color: #ffffff !important;
+}
+
+/* BGM Flow action buttons */
+.sfx-bf__btn-primary {
+  background: var(--sfx-brand-gradient) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(126, 200, 255, 0.35) !important;
+  box-shadow: 0 2px 8px rgba(10, 132, 255, 0.3) !important;
+  transition: background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.sfx-bf__btn-primary:hover:not(:disabled) {
+  background: var(--sfx-brand-gradient-hover) !important;
+  box-shadow: 0 4px 14px rgba(10, 132, 255, 0.45) !important;
+  transform: translateY(-1px);
+}
+
+/* Slider thumb accent */
+.sfx-bf__slider::-webkit-slider-thumb {
+  background: var(--sfx-brand-highlight) !important;
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.5) !important;
+}
+
+/* ==========================================================================
+   4. AI SFX Assistant Module
+   ========================================================================== */
+
+/* User chat bubble */
+.sfx-ai__msg--user {
+  background: var(--sfx-brand-gradient) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(10, 132, 255, 0.25) !important;
+  border: 1px solid rgba(126, 200, 255, 0.25);
+}
+
+/* Send button */
+.sfx-ai__send-btn {
+  background: var(--sfx-brand-gradient) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(126, 200, 255, 0.35) !important;
+  box-shadow: 0 2px 6px rgba(10, 132, 255, 0.25);
+  transition: background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.sfx-ai__send-btn:hover:not(:disabled) {
+  background: var(--sfx-brand-gradient-hover) !important;
+  box-shadow: 0 3px 10px rgba(56, 189, 248, 0.38) !important;
+  transform: translateY(-1px);
+}
+
+/* Prompt suggestion chips */
+.sfx-ai__chip {
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.sfx-ai__chip:hover {
+  background: rgba(16, 64, 128, 0.22) !important;
+  border-color: rgba(56, 189, 248, 0.45) !important;
+  color: #ffffff !important;
+}
+
+/* Status indicator badge */
+.sfx-ai__status-badge {
+  background: rgba(16, 64, 128, 0.28) !important;
+  border: 1px solid rgba(56, 189, 248, 0.32) !important;
+  color: var(--sfx-brand-highlight) !important;
+}
+
+/* ==========================================================================
+   5. Audio Tools Studio Module
+   ========================================================================== */
+
+.sfx-au__tab {
+  transition: all 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sfx-au__tab:hover:not(.is-active) {
+  background: rgba(16, 64, 128, 0.16);
+  border-color: rgba(91, 127, 172, 0.35);
+  color: #ffffff;
+}
+
+.sfx-au__tab.is-active {
+  background: var(--sfx-brand-gradient) !important;
+  border-color: rgba(126, 200, 255, 0.45) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(10, 132, 255, 0.32) !important;
+}
+
+/* Sliders active track & thumb */
+.sfx-au__slider::-webkit-slider-thumb {
+  background: var(--sfx-brand-royal) !important;
+  border: 2px solid var(--sfx-brand-highlight) !important;
+  box-shadow: 0 0 6px rgba(10, 132, 255, 0.4) !important;
+}
+
+/* ==========================================================================
+   6. Scene AI Designer Module
+   ========================================================================== */
+
+.sfx-sc__btn-primary {
+  background: var(--sfx-brand-gradient) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(126, 200, 255, 0.35) !important;
+  box-shadow: 0 2px 8px rgba(10, 132, 255, 0.3) !important;
+  transition: background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.sfx-sc__btn-primary:hover:not(:disabled) {
+  background: var(--sfx-brand-gradient-hover) !important;
+  box-shadow: 0 4px 14px rgba(10, 132, 255, 0.45) !important;
+  transform: translateY(-1px);
+}
+
+.sfx-sc__card.is-selected {
+  border-color: var(--sfx-brand-highlight) !important;
+  background: var(--sfx-brand-gradient-subtle) !important;
+  box-shadow: 0 0 10px rgba(10, 132, 255, 0.2) !important;
+}
+
+/* ==========================================================================
+   7. Analytics Dashboard Module
+   ========================================================================== */
+
+/* Top gradient accent for key stat cards */
+.sfx-an__card--hero,
+.sfx-an__card:first-child {
+  position: relative;
+  overflow: hidden;
+}
+
+.sfx-an__card--hero::before,
+.sfx-an__card:first-child::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--sfx-brand-gradient);
+}
+
+/* Period filter button */
+.sfx-an__filter-btn {
+  transition: all 150ms ease;
+}
+
+.sfx-an__filter-btn:hover:not(.is-active) {
+  background: rgba(16, 64, 128, 0.16);
+  color: #ffffff;
+}
+
+.sfx-an__filter-btn.is-active {
+  background: var(--sfx-brand-gradient) !important;
+  border-color: rgba(126, 200, 255, 0.45) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(10, 132, 255, 0.32) !important;
+}
+
+/* Favorite star yellow preserved */
+.sfx-an__fav-btn.is-favourited svg,
+.sfx-cat__icon--star svg {
+  color: #ffd60a !important;
+  fill: #ffd60a !important;
+}

@@ -611,6 +611,13 @@
       });
     }
 
+    document.querySelectorAll('.open-customer-dashboard-link').forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        openDashboard();
+      });
+    });
+
     if (modalClose) modalClose.addEventListener('click', closeDashboard);
     if (modalBackdrop) modalBackdrop.addEventListener('click', closeDashboard);
 
