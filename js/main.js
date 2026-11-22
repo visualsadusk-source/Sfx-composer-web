@@ -504,21 +504,50 @@
     var modalBackdrop = document.getElementById('cdm-backdrop');
     var openBtn = document.getElementById('open-customer-dashboard-btn');
 
-    // Auth View Elements
+    // Views
     var authView = document.getElementById('cdm-auth-view');
     var dashboardView = document.getElementById('cdm-dashboard-view');
+    var authStatus = document.getElementById('cdm-auth-status');
+
+    // Recent session quick access banner
     var recentSessionBanner = document.getElementById('cdm-recent-session-banner');
     var recentSessionEmail = document.getElementById('cdm-recent-session-email');
     var btnInstantUnlock = document.getElementById('cdm-btn-instant-unlock');
-    var formRequestOtp = document.getElementById('cdm-form-request-otp');
+
+    // Form 1: Email + Password Login
+    var loginForm = document.getElementById('cdm-login-form');
     var emailInput = document.getElementById('cdm-email-input');
-    var btnSendOtp = document.getElementById('cdm-btn-send-otp');
-    var otpStep = document.getElementById('cdm-otp-step');
-    var otpInput = document.getElementById('cdm-otp-input');
-    var btnVerifyOtp = document.getElementById('cdm-btn-verify-otp');
-    var btnResendOtp = document.getElementById('cdm-btn-resend-otp');
-    var btnChangeEmail = document.getElementById('cdm-btn-change-email');
-    var authStatus = document.getElementById('cdm-auth-status');
+    var passwordInput = document.getElementById('cdm-password-input');
+    var btnTogglePassword = document.getElementById('cdm-toggle-password-btn');
+    var iconEye = document.getElementById('cdm-icon-eye');
+    var iconEyeOff = document.getElementById('cdm-icon-eye-off');
+    var btnLogin = document.getElementById('cdm-btn-login');
+    var linkForgotPassword = document.getElementById('cdm-link-forgot-password');
+    var linkToRegister = document.getElementById('cdm-link-to-register');
+
+    // Form 2: Create Account / Set Password (for purchasers setting password)
+    var registerForm = document.getElementById('cdm-register-form');
+    var regEmailInput = document.getElementById('cdm-register-email');
+    var regPasswordInput = document.getElementById('cdm-register-password');
+    var btnToggleRegPassword = document.getElementById('cdm-toggle-reg-password-btn');
+    var iconRegEye = document.getElementById('cdm-icon-reg-eye');
+    var iconRegEyeOff = document.getElementById('cdm-icon-reg-eye-off');
+    var btnRegister = document.getElementById('cdm-btn-register');
+    var linkBackFromRegister = document.getElementById('cdm-link-back-from-register');
+
+    // Form 3: Forgot Password (Reset link)
+    var forgotForm = document.getElementById('cdm-forgot-form');
+    var forgotEmailInput = document.getElementById('cdm-forgot-email');
+    var btnForgot = document.getElementById('cdm-btn-forgot');
+    var linkBackFromForgot = document.getElementById('cdm-link-back-from-forgot');
+
+    // Form 4: Set New Password (Recovery callback)
+    var recoveryForm = document.getElementById('cdm-recovery-form');
+    var recoveryPasswordInput = document.getElementById('cdm-recovery-password');
+    var btnToggleRecPassword = document.getElementById('cdm-toggle-rec-password-btn');
+    var iconRecEye = document.getElementById('cdm-icon-rec-eye');
+    var iconRecEyeOff = document.getElementById('cdm-icon-rec-eye-off');
+    var btnUpdatePassword = document.getElementById('cdm-btn-update-password');
 
     // Dashboard View Elements
     var authEmailDisplay = document.getElementById('cdm-auth-email-display');
@@ -553,8 +582,86 @@
       authStatus.style.border = isSuccess ? '1px solid rgba(48, 209, 88, 0.3)' : '1px solid rgba(255, 69, 58, 0.3)';
     }
 
+    function switchAuthSubView(mode) {
+      setAuthStatus('', true);
+      if (loginForm) loginForm.style.display = (mode === 'login') ? 'flex' : 'none';
+      if (registerForm) registerForm.style.display = (mode === 'register') ? 'flex' : 'none';
+      if (forgotForm) forgotForm.style.display = (mode === 'forgot') ? 'flex' : 'none';
+      if (recoveryForm) recoveryForm.style.display = (mode === 'recovery') ? 'flex' : 'none';
+    }
+
+    function showAuthView() {
+      if (authView) authView.style.display = 'block';
+      if (dashboardView) dashboardView.style.display = 'none';
+    }
+
+    function showDashboardView() {
+      if (authView) authView.style.display = 'none';
+      if (dashboardView) dashboardView.style.display = 'flex';
+    }
+
+    // Password Show/Hide Toggle Helper
+    function attachPasswordToggle(btn, inputEl, iconEyeEl, iconEyeOffEl) {
+      if (!btn || !inputEl) return;
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var isPassword = inputEl.type === 'password';
+        inputEl.type = isPassword ? 'text' : 'password';
+        if (iconEyeEl) iconEyeEl.style.display = isPassword ? 'none' : 'block';
+        if (iconEyeOffEl) iconEyeOffEl.style.display = isPassword ? 'block' : 'none';
+      });
+    }
+
+    attachPasswordToggle(btnTogglePassword, passwordInput, iconEye, iconEyeOff);
+    attachPasswordToggle(btnToggleRegPassword, regPasswordInput, iconRegEye, iconRegEyeOff);
+    attachPasswordToggle(btnToggleRecPassword, recoveryPasswordInput, iconRecEye, iconRecEyeOff);
+
+    // Sub-view switch handlers
+    if (linkForgotPassword) {
+      linkForgotPassword.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (forgotEmailInput && emailInput) {
+          forgotEmailInput.value = emailInput.value;
+        }
+        switchAuthSubView('forgot');
+      });
+    }
+
+    if (linkToRegister) {
+      linkToRegister.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (regEmailInput && emailInput) {
+          regEmailInput.value = emailInput.value;
+        }
+        switchAuthSubView('register');
+      });
+    }
+
+    if (linkBackFromRegister) {
+      linkBackFromRegister.addEventListener('click', function (e) {
+        e.preventDefault();
+        switchAuthSubView('login');
+      });
+    }
+
+    if (linkBackFromForgot) {
+      linkBackFromForgot.addEventListener('click', function (e) {
+        e.preventDefault();
+        switchAuthSubView('login');
+      });
+    }
+
     async function checkCurrentSession() {
-      // 1. Check Supabase Auth session first
+      // 1. Check for password recovery hash in URL
+      var hash = window.location.hash || '';
+      if (hash.includes('type=recovery') || hash.includes('reset-password')) {
+        showAuthView();
+        switchAuthSubView('recovery');
+        setAuthStatus('Password recovery session verified. Enter your new password above.', true);
+        return true;
+      }
+
+      // 2. Check active Supabase Auth session
       if (supabaseClient) {
         try {
           var { data: sessData } = await supabaseClient.auth.getSession();
@@ -565,7 +672,7 @@
         } catch (e) {}
       }
 
-      // 2. Check local checkout session proof (if customer just completed purchase)
+      // 3. Check local checkout session proof (if customer just completed purchase)
       try {
         var rawSess = localStorage.getItem('sfx_customer_session');
         if (rawSess) {
@@ -581,17 +688,28 @@
       } catch (e) {}
 
       showAuthView();
+      switchAuthSubView('login');
       return false;
     }
 
-    function showAuthView() {
-      if (authView) authView.style.display = 'block';
-      if (dashboardView) dashboardView.style.display = 'none';
-    }
-
-    function showDashboardView() {
-      if (authView) authView.style.display = 'none';
-      if (dashboardView) dashboardView.style.display = 'flex';
+    // Listen for auth state changes
+    if (supabaseClient) {
+      try {
+        supabaseClient.auth.onAuthStateChange(function (event, session) {
+          if (event === 'PASSWORD_RECOVERY') {
+            if (modal) {
+              modal.classList.add('is-open');
+              document.body.style.overflow = 'hidden';
+            }
+            showAuthView();
+            switchAuthSubView('recovery');
+            setAuthStatus('Password recovery session verified. Enter your new password above.', true);
+          } else if (event === 'SIGNED_OUT') {
+            showAuthView();
+            switchAuthSubView('login');
+          }
+        });
+      } catch (e) {}
     }
 
     async function openDashboard() {
@@ -636,108 +754,196 @@
       });
     }
 
-    // Step 1: Request OTP email
-    if (formRequestOtp) {
-      formRequestOtp.addEventListener('submit', async function (e) {
+    // ── 1. EMAIL + PASSWORD LOGIN ──
+    if (loginForm) {
+      loginForm.addEventListener('submit', async function (e) {
         e.preventDefault();
         var email = (emailInput?.value || '').trim().toLowerCase();
-        if (!email) return;
+        var password = passwordInput?.value || '';
 
-        currentAuthEmail = email;
-        btnSendOtp.disabled = true;
-        btnSendOtp.textContent = 'Sending Code…';
+        if (!email) {
+          setAuthStatus('Please enter your registered email address.', false);
+          return;
+        }
+        if (!password) {
+          setAuthStatus('Please enter your account password.', false);
+          return;
+        }
+
+        btnLogin.disabled = true;
+        var origBtnText = btnLogin.textContent;
+        btnLogin.textContent = 'Logging In…';
         setAuthStatus('', true);
 
         try {
           if (!supabaseClient) {
-            throw new Error('Supabase client unavailable');
+            throw new Error('Authentication client unavailable. Please check your connection.');
           }
 
-          var { error } = await supabaseClient.auth.signInWithOtp({
+          var { data, error } = await supabaseClient.auth.signInWithPassword({
             email: email,
-            options: {
-              shouldCreateUser: true
-            }
+            password: password
           });
 
-          if (error) throw error;
+          if (error) {
+            if (error.message.includes('Invalid login credentials')) {
+              throw new Error('Invalid email or password. If you purchased SFX Composer and have not yet set a password, click "Create Account / Set Password" below.');
+            }
+            throw error;
+          }
 
-          if (otpStep) otpStep.style.display = 'block';
-          setAuthStatus('Verification code sent to ' + email + '. Check your inbox or spam.', true);
-          if (otpInput) {
-            otpInput.value = '';
-            otpInput.focus();
+          if (data && data.session && data.session.user) {
+            currentAuthEmail = data.session.user.email;
+            if (passwordInput) passwordInput.value = '';
+            setAuthStatus('', true);
+            await loadVerifiedPortalData(data.session.access_token, data.session.user.email);
+          } else {
+            throw new Error('Authentication failed. Please verify your credentials.');
           }
         } catch (err) {
-          setAuthStatus('Could not send verification code: ' + err.message, false);
+          setAuthStatus(err.message || 'Login failed', false);
         } finally {
-          btnSendOtp.disabled = false;
-          btnSendOtp.textContent = 'Send Code';
+          btnLogin.disabled = false;
+          btnLogin.textContent = origBtnText;
         }
       });
     }
 
-    // Step 2: Verify OTP
-    if (btnVerifyOtp) {
-      btnVerifyOtp.addEventListener('click', async function () {
-        var email = currentAuthEmail || (emailInput?.value || '').trim().toLowerCase();
-        var code = (otpInput?.value || '').trim();
+    // ── 2. ACCOUNT CREATION & PASSWORD PROVISIONING ──
+    if (registerForm) {
+      registerForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var email = (regEmailInput?.value || '').trim().toLowerCase();
+        var password = regPasswordInput?.value || '';
 
         if (!email) {
-          setAuthStatus('Please enter your email first.', false);
+          setAuthStatus('Please enter your registered purchase email address.', false);
           return;
         }
-        if (!code || code.length < 6) {
-          setAuthStatus('Please enter the full 6-digit code from your email.', false);
+        if (!password || password.length < 6) {
+          setAuthStatus('Password must be at least 6 characters long.', false);
           return;
         }
 
-        btnVerifyOtp.disabled = true;
-        btnVerifyOtp.textContent = 'Verifying…';
+        btnRegister.disabled = true;
+        var origText = btnRegister.textContent;
+        btnRegister.textContent = 'Creating Account…';
         setAuthStatus('', true);
 
         try {
-          if (!supabaseClient) throw new Error('Supabase client unavailable');
+          if (!supabaseClient) throw new Error('Authentication client unavailable.');
 
-          var { data, error } = await supabaseClient.auth.verifyOtp({
+          var { data, error } = await supabaseClient.auth.signUp({
             email: email,
-            token: code,
-            type: 'email'
+            password: password
           });
 
-          if (error) throw error;
+          if (error) {
+            if (error.message.includes('already registered') || error.message.includes('already exists')) {
+              throw new Error('An account with this email already exists. Please sign in or use "Forgot Password?" to reset.');
+            }
+            throw error;
+          }
 
-          if (data && data.session) {
-            await loadVerifiedPortalData(data.session.access_token, email);
+          if (data && data.session && data.session.user) {
+            currentAuthEmail = data.session.user.email;
+            if (regPasswordInput) regPasswordInput.value = '';
+            setAuthStatus('', true);
+            await loadVerifiedPortalData(data.session.access_token, data.session.user.email);
+          } else if (data && data.user) {
+            setAuthStatus('Account created! A confirmation email has been sent to ' + email + '. Check your inbox to confirm, then sign in.', true);
+            if (emailInput) emailInput.value = email;
+            switchAuthSubView('login');
           } else {
-            throw new Error('Verification failed. Invalid code.');
+            throw new Error('Account setup failed. Please try again.');
           }
         } catch (err) {
-          setAuthStatus('Verification error: ' + err.message, false);
+          setAuthStatus(err.message || 'Account creation failed', false);
         } finally {
-          btnVerifyOtp.disabled = false;
-          btnVerifyOtp.textContent = 'Verify & Access';
+          btnRegister.disabled = false;
+          btnRegister.textContent = origText;
         }
       });
     }
 
-    // Resend OTP
-    if (btnResendOtp) {
-      btnResendOtp.addEventListener('click', function () {
-        if (formRequestOtp) formRequestOtp.dispatchEvent(new Event('submit'));
-      });
-    }
+    // ── 3. FORGOT PASSWORD (PASSWORD RESET LINK) ──
+    if (forgotForm) {
+      forgotForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var email = (forgotEmailInput?.value || '').trim().toLowerCase();
 
-    // Change email
-    if (btnChangeEmail) {
-      btnChangeEmail.addEventListener('click', function () {
-        if (otpStep) otpStep.style.display = 'none';
-        if (emailInput) emailInput.focus();
+        if (!email) {
+          setAuthStatus('Please enter your registered purchase email address.', false);
+          return;
+        }
+
+        btnForgot.disabled = true;
+        var origText = btnForgot.textContent;
+        btnForgot.textContent = 'Sending Reset Link…';
         setAuthStatus('', true);
+
+        try {
+          if (!supabaseClient) throw new Error('Authentication client unavailable.');
+
+          var redirectTo = window.location.origin + window.location.pathname;
+          var { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+            redirectTo: redirectTo
+          });
+
+          if (error) throw error;
+
+          setAuthStatus('Password reset link sent! Please check your inbox or spam folder for ' + email + '.', true);
+        } catch (err) {
+          setAuthStatus('Could not send reset link: ' + (err.message || 'Error occurred'), false);
+        } finally {
+          btnForgot.disabled = false;
+          btnForgot.textContent = origText;
+        }
       });
     }
 
-    // Sign out / switch account
+    // ── 4. SET NEW PASSWORD (RECOVERY CALLBACK) ──
+    if (recoveryForm) {
+      recoveryForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var newPassword = recoveryPasswordInput?.value || '';
+
+        if (!newPassword || newPassword.length < 6) {
+          setAuthStatus('Password must be at least 6 characters long.', false);
+          return;
+        }
+
+        btnUpdatePassword.disabled = true;
+        var origText = btnUpdatePassword.textContent;
+        btnUpdatePassword.textContent = 'Updating Password…';
+        setAuthStatus('', true);
+
+        try {
+          if (!supabaseClient) throw new Error('Authentication client unavailable.');
+
+          var { data, error } = await supabaseClient.auth.updateUser({
+            password: newPassword
+          });
+
+          if (error) throw error;
+
+          setAuthStatus('Password updated successfully! Loading your dashboard…', true);
+          var { data: sessData } = await supabaseClient.auth.getSession();
+          if (sessData && sessData.session) {
+            await loadVerifiedPortalData(sessData.session.access_token, sessData.session.user.email);
+          } else {
+            switchAuthSubView('login');
+          }
+        } catch (err) {
+          setAuthStatus('Password update error: ' + (err.message || 'Error occurred'), false);
+        } finally {
+          btnUpdatePassword.disabled = false;
+          btnUpdatePassword.textContent = origText;
+        }
+      });
+    }
+
+    // ── 5. SIGN OUT & CLEAR STATE ──
     if (btnSignout) {
       btnSignout.addEventListener('click', async function () {
         if (supabaseClient) {
@@ -747,15 +953,28 @@
         activeCustomerSession = null;
         currentAuthEmail = '';
         if (recentSessionBanner) recentSessionBanner.style.display = 'none';
-        if (otpStep) otpStep.style.display = 'none';
         if (emailInput) emailInput.value = '';
-        if (otpInput) otpInput.value = '';
+        if (passwordInput) passwordInput.value = '';
+        if (regEmailInput) regEmailInput.value = '';
+        if (regPasswordInput) regPasswordInput.value = '';
+        if (forgotEmailInput) forgotEmailInput.value = '';
+        if (recoveryPasswordInput) recoveryPasswordInput.value = '';
         setAuthStatus('', true);
+        switchAuthSubView('login');
         showAuthView();
       });
     }
 
-    // Fetch and render verified portal data
+    // Auto-open modal if landing from password recovery link
+    try {
+      var initialHash = window.location.hash || '';
+      if (initialHash.includes('type=recovery') || initialHash.includes('reset-password')) {
+        setTimeout(function () {
+          openDashboard();
+        }, 300);
+      }
+    } catch (e) {}
+
     async function loadVerifiedPortalData(authArg, emailHint) {
       var portal = await window.SFX_PAYMENT_SERVICE.getCustomerPortal(authArg);
       var email = portal.email || emailHint || 'Customer';

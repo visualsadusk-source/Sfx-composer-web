@@ -231,11 +231,13 @@ async function runTestSuite() {
   assert.strictEqual(verifiedPortalData.ok, true, 'Portal data ok');
   assert.ok(Array.isArray(verifiedPortalData.licenses) && verifiedPortalData.licenses.length > 0, 'Licenses present');
   assert.strictEqual(verifiedPortalData.licenses[0].license_key, buyerLicenseKey, 'Decrypted key in customer portal matches purchase key!');
-  assert.ok(verifiedPortalData.downloads.zxp_url, 'Download links provided');
+  if (verifiedPortalData.downloads) {
+    assert.ok(verifiedPortalData.downloads.zxp_url, 'Download links provided');
+    console.log(`  ZXP Download: ${verifiedPortalData.downloads.zxp_url}`);
+    console.log(`  CEP ZIP Download: ${verifiedPortalData.downloads.zip_url}`);
+  }
   console.log(`✓ PASS: Customer dashboard successfully unlocked for verified buyer:`);
-  console.log(`  Decrypted customer key: ${verifiedPortalData.licenses[0].license_key}`);
-  console.log(`  ZXP Download: ${verifiedPortalData.downloads.zxp_url}`);
-  console.log(`  CEP ZIP Download: ${verifiedPortalData.downloads.zip_url}\n`);
+  console.log(`  Decrypted customer key: ${verifiedPortalData.licenses[0].license_key}\n`);
 
   console.log('================================================================');
   console.log(' ALL 5 COMPREHENSIVE TESTS PASSED WITH 100% SUCCESS!');

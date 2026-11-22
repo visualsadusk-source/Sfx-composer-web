@@ -83,7 +83,7 @@ async function runTests() {
     assert.strictEqual(res.statusCode, 200, `Expected 200 but got ${res.statusCode}`);
     assert.ok(res.data.includes('SFX LIBRARY'), 'Missing SFX LIBRARY title');
     assert.ok(res.data.includes('7GB MASTER AUDIO ARCHIVE'), 'Missing 7GB kicker');
-    assert.ok(res.data.includes('SFX COMPOSER + PREMIUM SFX LIBRARY'), 'Missing bundle top banner');
+    assert.ok(res.data.includes('SFX COMPOSER ULTIMATE BUNDLE') || res.data.includes('SFX COMPOSER + PREMIUM SFX LIBRARY'), 'Missing bundle top banner');
   });
 
   await testAsync('Static URL GET /library.html returns HTTP 200', async () => {

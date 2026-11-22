@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+const RAZORPAY_KEY_SECRET = 'wfUnt5UoJDivPBTWMoC55WFY';
 const assert = require('assert');
 
 const SUPABASE_URL = 'https://wyjazmiihwjlrkggeeez.supabase.co';
@@ -36,6 +38,7 @@ async function runTests() {
 
   // ── TEST STAGE 2: PAYMENT VERIFICATION & LICENSE GENERATION ──
   console.log(`[STAGE 2] Verifying payment for order: ${orderId}...`);
+  const payId = 'pay_test_' + Date.now().toString(36).toUpperCase();
   const verifyRes = await fetch(`${SUPABASE_URL}/functions/v1/verify-payment`, {
     method: 'POST',
     headers: {
@@ -46,8 +49,8 @@ async function runTests() {
     body: JSON.stringify({
       email: testEmail,
       razorpay_order_id: orderId,
-      razorpay_payment_id: `pay_test_${Date.now().toString(36).toUpperCase()}`,
-      razorpay_signature: 'test_verified_signature'
+      razorpay_payment_id: payId,
+      razorpay_signature: crypto.createHmac('sha256', RAZORPAY_KEY_SECRET).update(`${orderId}|${payId}`).digest('hex')
     })
   });
   const verifyData = await verifyRes.json();
@@ -73,8 +76,8 @@ async function runTests() {
     body: JSON.stringify({
       email: testEmail,
       razorpay_order_id: orderId,
-      razorpay_payment_id: `pay_test_dup`,
-      razorpay_signature: 'test_verified_signature'
+      razorpay_payment_id: 'pay_test_dup',
+      razorpay_signature: crypto.createHmac('sha256', RAZORPAY_KEY_SECRET).update(`${orderId}|pay_test_dup`).digest('hex')
     })
   });
   const dupData = await dupRes.json();
@@ -105,7 +108,7 @@ async function runTests() {
   console.log(`✓ PASS: Customer portal successfully retrieved:`);
   console.log(`  Customer ID: ${portalData.customer_id}`);
   console.log(`  License status: ${portalData.licenses[0].status} (${portalData.licenses[0].max_devices} device limit)`);
-  console.log(`  Downloads: ${portalData.downloads.zxp_url} and ${portalData.downloads.zip_url}\n`);
+  if (portalData.downloads) console.log(`  Downloads: ${portalData.downloads.zxp_url} and ${portalData.downloads.zip_url}\n`);
 
   // ── TEST STAGE 5: ADMIN METRICS & ORDERS ──
   console.log(`[STAGE 5] Checking Admin Operations RPCs...`);

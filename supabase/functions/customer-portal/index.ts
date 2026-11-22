@@ -21,21 +21,23 @@ Deno.serve(async (req: Request) => {
 
   try {
     let authEmail: string | null = null;
+    let authUserId: string | null = null;
     const authHeader = req.headers.get('Authorization') || '';
     const body = await req.json().catch(() => ({}));
 
-    // 1. Check for Supabase Auth JWT Bearer Token
+    // 1. Check for Supabase Auth JWT Bearer Token (Issued on Email + Password Login)
     if (authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7).trim();
       if (token && token !== Deno.env.get('SUPABASE_ANON_KEY')) {
         const { data: userData, error: userError } = await supabase.auth.getUser(token);
         if (!userError && userData?.user?.email) {
           authEmail = userData.user.email.trim().toLowerCase();
+          authUserId = userData.user.id;
         }
       }
     }
 
-    // 2. Alternatively check for verified purchase proof in body
+    // 2. Alternatively check for verified purchase proof in body (from instant post-checkout session)
     if (!authEmail && body.email && body.order_id && body.payment_id) {
       const { data: orderRow } = await supabase
         .from('payment_orders')
@@ -54,11 +56,29 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({
         ok: false,
         code: 'UNAUTHENTICATED',
-        message: 'Email verification required. Please sign in with OTP verification to access your licenses.'
+        message: 'Authentication required. Please sign in with your email and password to access your licenses.'
       }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
+    }
+
+    // Link authenticated auth.users ID with customer and license records for seamless ownership
+    if (authUserId && authEmail) {
+      try {
+        await supabase.rpc('sfx_link_auth_user', {
+          p_email: authEmail,
+          p_user_id: authUserId
+        });
+      } catch (_e) {
+        try {
+          await supabase
+            .from('customers')
+            .update({ auth_user_id: authUserId })
+            .ilike('email', authEmail)
+            .is('auth_user_id', null);
+        } catch (_err) {}
+      }
     }
 
     // 3. Strict Customer Ownership Check
