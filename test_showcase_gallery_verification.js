@@ -26,8 +26,7 @@ async function verifyShowcaseGallery() {
     { name: 'sfx-ai-assistant.png', expectedSize: 289306, section: 'AI SFX Assistant' },
     { name: 'sfx-bgm-flow-transitions.png', expectedSize: 165898, section: 'BGM Flow' },
     { name: 'sfx-scene-ai-timeline.png', expectedSize: 157027, section: 'Scene AI' },
-    { name: 'sfx-audio-tools-essential-sound.png', expectedSize: 291263, section: 'Audio Tools' },
-    { name: 'sfx-settings-workspace.png', expectedSize: 146527, section: 'Settings' }
+    { name: 'sfx-audio-tools-essential-sound.png', expectedSize: 291263, section: 'Audio Tools' }
   ];
 
   for (const item of screenshots) {
@@ -52,16 +51,15 @@ async function verifyShowcaseGallery() {
   assert.ok(!html.includes('id="btn-view-tour"'), 'Tour toggle button #btn-view-tour must be completely removed');
   pass('Horizontal numbered strip and duplicate carousel are completely removed');
 
-  // ── TEST 3: ALL 7 DEDICATED FEATURE SECTIONS IN OVERVIEW PRESERVED (ANALYTICS REMOVED) ──
-  console.log('\n--- TEST GROUP 3: ALL 7 FEATURE SECTIONS PRESERVED IN OVERVIEW ---');
+  // ── TEST 3: ALL 6 DEDICATED FEATURE SECTIONS IN OVERVIEW PRESERVED ──
+  console.log('\n--- TEST GROUP 3: ALL 6 FEATURE SECTIONS PRESERVED IN OVERVIEW ---');
   const sections = [
     { id: 'gallery-overview', kicker: 'SECTION 01 — OVERVIEW', title: 'Meet SFX Composer', img: 'sfx-overview-main.png' },
     { id: 'gallery-browser', kicker: 'SECTION 02 — SOUND BROWSER', title: 'Explore Your Sound Library', img: 'sfx-browser-pixabay.png' },
     { id: 'gallery-ai', kicker: 'SECTION 03 — AI SFX ASSISTANT', title: 'Your AI-Powered Sound Assistant', img: 'sfx-ai-assistant.png' },
     { id: 'gallery-bgm', kicker: 'SECTION 04 — BGM FLOW', title: 'Intelligent Background Music Control', img: 'sfx-bgm-flow-transitions.png' },
     { id: 'gallery-scene-ai', kicker: 'SECTION 05 — SCENE AI', title: 'Intelligent AI Timeline Control', img: 'sfx-scene-ai-timeline.png' },
-    { id: 'gallery-audio-tools', kicker: 'SECTION 06 — AUDIO TOOLS', title: 'Essential Sound Studio', img: 'sfx-audio-tools-essential-sound.png' },
-    { id: 'gallery-settings', kicker: 'SECTION 07 — SETTINGS', title: 'Customize Your Workspace', img: 'sfx-settings-workspace.png' }
+    { id: 'gallery-audio-tools', kicker: 'SECTION 06 — AUDIO TOOLS', title: 'Essential Sound Studio', img: 'sfx-audio-tools-essential-sound.png' }
   ];
 
   for (const s of sections) {
@@ -72,14 +70,20 @@ async function verifyShowcaseGallery() {
     pass(`Section verified: ${s.kicker} (${s.title})`);
   }
 
-  // ── TEST 4: VERIFY COMPLETE REMOVAL OF SECTION 05 — ANALYTICS ──
-  console.log('\n--- TEST GROUP 4: VERIFY CLEAN REMOVAL OF SECTION 05 — ANALYTICS ---');
+  // ── TEST 4: VERIFY COMPLETE REMOVAL OF SECTION 05 — ANALYTICS & SECTION 07 — SETTINGS ──
+  console.log('\n--- TEST GROUP 4: VERIFY CLEAN REMOVAL OF ANALYTICS & SETTINGS SHOWCASES ---');
   assert.ok(!html.includes('id="gallery-analytics"'), 'Section #gallery-analytics must be completely removed');
   assert.ok(!html.includes('Understand Your Audio Workflow'), 'Heading "Understand Your Audio Workflow" must be completely removed');
   assert.ok(!html.includes('100% Private On-Device Tracking'), 'Analytics feature badges must be completely removed');
   assert.ok(!html.includes('Advanced Usage Analytics Dashboard'), 'Analytics caption and dashboard title must be completely removed');
   assert.ok(!html.includes('7 of 11'), 'Analytics counter "7 of 11" must be completely removed');
-  pass('Section 05 — Analytics is cleanly and completely removed with no traces left behind');
+  assert.ok(!html.includes('id="gallery-settings"'), 'Section #gallery-settings must be completely removed');
+  assert.ok(!html.includes('Customize Your Workspace'), 'Heading "Customize Your Workspace" must be completely removed');
+  assert.ok(!html.includes('User Profile &amp; Custom Avatar') && !html.includes('User Profile & Custom Avatar'), 'Settings feature badges must be completely removed');
+  assert.ok(!html.includes('Profile, Accent Colors, Library Folders &amp; Appearance') && !html.includes('Profile, Accent Colors, Library Folders & Appearance'), 'Settings caption and title must be completely removed');
+  assert.ok(!html.includes('9 of 9'), 'Counter "9 of 9" must be completely removed');
+  assert.ok(!html.includes('of 9'), 'All old "of 9" counters must be completely removed');
+  pass('Section 05 — Analytics and Section 07 — Settings are cleanly and completely removed with no traces left behind');
 
   // ── TEST 5: SIDEBAR NAVIGATION INTACT ──
   console.log('\n--- TEST GROUP 5: SIDEBAR NAVIGATION INTACT ---');

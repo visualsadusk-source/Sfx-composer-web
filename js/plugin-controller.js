@@ -426,7 +426,7 @@
         '</button>' +
 
         '<div class="sfx-row__main">' +
-          '<div class="sfx-row__name">' + sound.name + '</div>' +
+          '<div class="sfx-row__name">' + (sound.name.replace(/^_+/, '').replace(/^sfx_/i, '')) + '</div>' +
           '<div class="sfx-row__meta">' +
             '<span class="sfx-tag">' + sound.cat + '</span>' +
             (sound.tags ? sound.tags.slice(0, 2).map(function (t) { return '<span class="sfx-tag" style="opacity: 0.7;">#' + t + '</span>'; }).join('') : '') +
@@ -2018,13 +2018,6 @@
         badge: 'Screenshot 08 · Essential Sound Studio',
         title: '3-Column Workstation & Essential Sound DSP Rack',
         desc: 'Pro-grade workstation layout: Left sound browser filtering categories, Center high-resolution waveform editor (with 0:00.00 / 0:02.67 timecode, 48000 Hz, 2 ch display), and Right Essential Sound DSP rack with Peak (-2.4 dB) and RMS (-23.0 dB) meters, Gain/Normalize, Fades, EQ, Dynamics Compress, and Character controls.'
-      },
-      {
-        id: 9,
-        src: 'assets/images/sfx-settings-workspace.png',
-        badge: 'Screenshot 09 · Workspace Preferences',
-        title: 'Profile, Accent Colors, Library Folders & Appearance',
-        desc: 'Full settings view displaying User Profile with picture upload, 6 accent color swatches, Library Folders management with folder rescan (17,111 sounds indexed), Appearance themes selector (Studio Dark, Ultra Dark, Light), Playback preview volume slider (80%), License verification ("All features are unlocked"), Diagnostics logging, and About credits.'
       }
     ];
 

@@ -118,13 +118,27 @@
 
       for (var l = 0; l < lines; l++) {
         ctx.beginPath();
-        var alpha = l === 0 ? 0.9 : (l === 1 ? 0.45 : 0.25);
-        ctx.strokeStyle = l === 0 ? '#35EA86' : 'rgba(53, 234, 134, ' + alpha + ')';
-        ctx.lineWidth = l === 0 ? 2.5 : 1.5;
+        var baseAlpha = l === 0 ? 1.0 : (l === 1 ? 0.35 : 0.18);
+
+        // Horizontal gradient across width providing wide, soft feathered edges
+        // Left fade: 0% -> 20%
+        // Center: 20% -> 58% pure/strong
+        // Right fade: 58% -> 100% wide gradual dissolve into black background
+        var grad = ctx.createLinearGradient(0, 0, width, 0);
+        grad.addColorStop(0.0, 'rgba(255, 255, 255, 0)');
+        grad.addColorStop(0.10, 'rgba(255, 255, 255, ' + (baseAlpha * 0.5) + ')');
+        grad.addColorStop(0.20, 'rgba(255, 255, 255, ' + baseAlpha + ')');
+        grad.addColorStop(0.58, 'rgba(255, 255, 255, ' + baseAlpha + ')');
+        grad.addColorStop(0.75, 'rgba(255, 255, 255, ' + (baseAlpha * 0.55) + ')');
+        grad.addColorStop(0.88, 'rgba(255, 255, 255, ' + (baseAlpha * 0.2) + ')');
+        grad.addColorStop(1.0, 'rgba(255, 255, 255, 0)');
+
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = l === 0 ? 2.2 : 1.2;
 
         if (l === 0) {
-          ctx.shadowColor = '#35EA86';
-          ctx.shadowBlur = 12;
+          ctx.shadowColor = 'rgba(255, 255, 255, 0.4)';
+          ctx.shadowBlur = 4;
         } else {
           ctx.shadowBlur = 0;
         }

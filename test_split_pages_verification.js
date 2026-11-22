@@ -115,20 +115,20 @@ async function verifySplitPages() {
   assert.ok(screenshotsHtml.includes('href="screenshots.html" class="sfx-site-nav-link is-active"'), 'Product Images must be active in sidebar on screenshots.html');
   assert.ok(screenshotsHtml.includes('Product Images'), 'Sidebar must display "Product Images" label');
 
-  // Grouped feature sections (Analytics removed)
+  // Grouped feature sections (Analytics & Settings removed)
   const gallerySections = [
     'gallery-overview',
     'gallery-browser',
     'gallery-ai',
     'gallery-bgm',
     'gallery-scene-ai',
-    'gallery-audio-tools',
-    'gallery-settings'
+    'gallery-audio-tools'
   ];
   for (const sId of gallerySections) {
     assert.ok(screenshotsHtml.includes(`id="${sId}"`), `Section #${sId} must exist on screenshots.html`);
   }
   assert.ok(!screenshotsHtml.includes('id="gallery-analytics"'), 'Section #gallery-analytics must be cleanly removed');
+  assert.ok(!screenshotsHtml.includes('id="gallery-settings"'), 'Section #gallery-settings must be cleanly removed');
 
   const scStart = screenshotsHtml.indexOf('id="gallery-scene-ai"');
   const scEnd = screenshotsHtml.indexOf('</section>', scStart);

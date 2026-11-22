@@ -43,33 +43,31 @@ async function testAnalyticsRemoval() {
   assert.ok(bgmIdx !== -1, 'BGM Flow section exists');
   assert.ok(sceneAiIdx !== -1, 'Scene AI section exists');
   assert.ok(audioToolsIdx !== -1, 'Audio Tools section exists');
-  assert.ok(settingsIdx !== -1, 'Settings section exists');
+  assert.strictEqual(settingsIdx, -1, 'Settings section does not exist');
 
   assert.ok(bgmIdx < sceneAiIdx, 'BGM Flow precedes Scene AI');
   assert.ok(sceneAiIdx < audioToolsIdx, 'Scene AI precedes Audio Tools');
-  assert.ok(audioToolsIdx < settingsIdx, 'Audio Tools precedes Settings');
 
   assert.ok(html.includes('SECTION 05 — SCENE AI'), 'Scene AI is renumbered to SECTION 05');
   assert.ok(html.includes('SECTION 06 — AUDIO TOOLS'), 'Audio Tools is renumbered to SECTION 06');
-  assert.ok(html.includes('SECTION 07 — SETTINGS'), 'Settings is renumbered to SECTION 07');
-  pass('Sections cleanly renumbered: 05 Scene AI -> 06 Audio Tools -> 07 Settings');
+  pass('Sections cleanly numbered: 05 Scene AI -> 06 Audio Tools');
 
-  // 3. Screenshot Badges and Lightbox Indices (9 Total)
-  console.log('\n--- TEST GROUP 3: TOTAL SCREENSHOT COUNT (9 TOTAL) ---');
-  assert.ok(html.includes('1 of 9'), 'First card displays "1 of 9"');
-  assert.ok(html.includes('7 of 9'), 'Scene AI card displays "7 of 9"');
-  assert.ok(html.includes('8 of 9'), 'Audio Tools card displays "8 of 9"');
-  assert.ok(html.includes('9 of 9'), 'Settings card displays "9 of 9"');
-  assert.ok(html.includes('Screenshot 1 of 9'), 'Lightbox counter badge initialized to "Screenshot 1 of 9"');
-  pass('All screenshot counter badges cleanly updated to 9 total');
+  // 3. Screenshot Badges and Lightbox Indices (8 Total)
+  console.log('\n--- TEST GROUP 3: TOTAL SCREENSHOT COUNT (8 TOTAL) ---');
+  assert.ok(html.includes('1 of 8'), 'First card displays "1 of 8"');
+  assert.ok(html.includes('7 of 8'), 'Scene AI card displays "7 of 8"');
+  assert.ok(html.includes('8 of 8'), 'Audio Tools card displays "8 of 8"');
+  assert.ok(!html.includes('of 9'), 'No cards display "of 9"');
+  assert.ok(html.includes('Screenshot 1 of 8'), 'Lightbox counter badge initialized to "Screenshot 1 of 8"');
+  pass('All screenshot counter badges cleanly updated to 8 total');
 
   // 4. Lightbox Javascript in plugin-controller.js
   console.log('\n--- TEST GROUP 4: LIGHTBOX INTEGRATION ---');
   const js = fs.readFileSync(path.join(__dirname, 'js', 'plugin-controller.js'), 'utf8');
   assert.ok(!js.includes('sfx-composer-analytics-dashboard.png'), 'GALLERY_ITEMS does not contain analytics dashboard image');
-  assert.ok(!js.includes('id: 11'), 'GALLERY_ITEMS no longer has item 11 (max is now 9)');
-  assert.ok(js.includes('id: 9'), 'GALLERY_ITEMS has 9 items');
-  pass('GALLERY_ITEMS array in plugin-controller.js contains exactly 9 items');
+  assert.ok(!js.includes('id: 9'), 'GALLERY_ITEMS no longer has item 9 (max is now 8)');
+  assert.ok(js.includes('id: 8'), 'GALLERY_ITEMS has 8 items');
+  pass('GALLERY_ITEMS array in plugin-controller.js contains exactly 8 items');
 
   // 5. Plugin Functionality Preservation
   console.log('\n--- TEST GROUP 5: PLUGIN CODE INTEGRITY ---');
