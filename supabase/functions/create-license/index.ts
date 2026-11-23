@@ -1,7 +1,6 @@
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import { verifyAdminRequest } from '../_shared/auth.ts';
 import { generateLicenseKey, sha256, encryptLicenseKey } from '../_shared/crypto.ts';
-import { sendLicenseEmailBrevo } from '../_shared/brevo.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 Deno.serve(async (req: Request) => {
@@ -94,33 +93,6 @@ Deno.serve(async (req: Request) => {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
-    }
-
-    // Optional email dispatch via Brevo
-    let emailStatus = { sent: false, status: 'skipped', info: 'Email dispatch disabled by request' };
-    if (send_email) {
-      const delivery = await sendLicenseEmailBrevo({
-        toEmail: cleanEmail,
-        toName: name || '',
-        licenseKey: rawKey,
-        licenseType: license_type || 'lifetime',
-        isResend: false
-      });
-
-      if (delivery.success) {
-        emailStatus = {
-          sent: true,
-          status: 'sent',
-          messageId: delivery.messageId,
-          info: `Email successfully delivered via Brevo (Message ID: ${delivery.messageId})`
-        };
-      } else {
-        emailStatus = {
-          sent: false,
-          status: 'failed',
-          info: `Brevo dispatch failed: ${delivery.error}`
-        };
-      }
     }
 
     // Return the plaintext key

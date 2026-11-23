@@ -1,7 +1,6 @@
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import { verifyAdminRequest } from '../_shared/auth.ts';
 import { decryptLicenseKey, encryptLicenseKey, generateLicenseKey, sha256 } from '../_shared/crypto.ts';
-import { sendLicenseEmailBrevo } from '../_shared/brevo.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 Deno.serve(async (req: Request) => {
@@ -265,16 +264,6 @@ Deno.serve(async (req: Request) => {
         p_metadata: { reason: reason || 'Admin reissued key' }
       });
 
-      // Optionally send email via Brevo
-      if (send_email && custEmail) {
-        sendLicenseEmailBrevo({
-          toEmail: custEmail,
-          licenseKey: newKey,
-          licenseType: licRow.license_type || 'lifetime',
-          isResend: true
-        }).catch(err => console.warn('Brevo email dispatch warning on reissue:', err));
-      }
-
       return new Response(JSON.stringify({
         ok: true,
         license_id: license_id,
@@ -300,109 +289,12 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // ── ACTION: Resend License Email via Brevo ──
+    // ── ACTION: Resend License Email (Disabled - 100% Web Portal Delivery) ──
     if (action === 'resend_email') {
-      const { order_id, license_id } = body;
-      let targetOrder: any = null;
-      let targetLic: any = null;
-      let targetEmail: string = '';
-      let plaintextKey: string | null = null;
-
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      if (order_id) {
-        if (isUuid.test(order_id)) {
-          const { data: ord } = await supabase
-            .from('payment_orders')
-            .select('*')
-            .or(`id.eq.${order_id},provider_order_id.eq.${order_id}`)
-            .maybeSingle();
-          targetOrder = ord;
-        } else {
-          const { data: ord } = await supabase
-            .from('payment_orders')
-            .select('*')
-            .eq('provider_order_id', order_id)
-            .maybeSingle();
-          targetOrder = ord;
-        }
-      } else if (license_id) {
-        const { data: ord } = await supabase
-          .from('payment_orders')
-          .select('*')
-          .eq('license_id', license_id)
-          .maybeSingle();
-        targetOrder = ord;
-      }
-
-      const licId = targetOrder?.license_id || license_id;
-      if (licId) {
-        const { data: lic } = await supabase
-          .from('licenses')
-          .select('*, customers(email)')
-          .eq('id', licId)
-          .single();
-        targetLic = lic;
-      }
-
-      if (targetOrder?.customer_email) {
-        targetEmail = targetOrder.customer_email.trim().toLowerCase();
-      } else if (targetLic?.customers?.email) {
-        targetEmail = targetLic.customers.email.trim().toLowerCase();
-      }
-
-      if (targetLic?.encrypted_license_key) {
-        plaintextKey = await decryptLicenseKey(targetLic.encrypted_license_key);
-      }
-
-      if (!targetEmail || !plaintextKey) {
-        return new Response(JSON.stringify({
-          ok: false,
-          message: 'Unable to recover customer email or decrypted license key for this record'
-        }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      const emailRes = await sendLicenseEmailBrevo({
-        toEmail: targetEmail,
-        toName: targetOrder?.customer_name || '',
-        licenseKey: plaintextKey,
-        licenseType: targetLic?.license_type || 'lifetime',
-        orderId: targetOrder?.provider_order_id || '',
-        paymentId: targetOrder?.provider_payment_id || '',
-        amount: targetOrder?.amount || 199,
-        currency: targetOrder?.currency || 'INR',
-        isResend: true
-      });
-
-      if (targetOrder?.provider_order_id) {
-        await supabase.rpc('sfx_update_order_email_delivery', {
-          p_provider_order_id: targetOrder.provider_order_id,
-          p_status: emailRes.success ? 'sent' : 'failed',
-          p_message_id: emailRes.messageId || null,
-          p_error: emailRes.error || null
-        });
-      }
-
-      await supabase.rpc('sfx_log_license_audit', {
-        p_admin_email: adminEmail,
-        p_action: 'resend_email',
-        p_license_id: targetLic?.id || null,
-        p_customer_email: targetEmail,
-        p_ip_address: clientIp,
-        p_user_agent: userAgent,
-        p_metadata: { success: emailRes.success, message_id: emailRes.messageId }
-      });
-
       return new Response(JSON.stringify({
-        ok: emailRes.success,
-        status: emailRes.success ? 'sent' : 'failed',
-        message_id: emailRes.messageId || null,
-        error: emailRes.error || null,
-        message: emailRes.success
-          ? `License email successfully re-sent via Brevo (Message ID: ${emailRes.messageId})`
-          : `Brevo dispatch failed: ${emailRes.error}`
+        ok: false,
+        status: 'disabled',
+        message: 'Email delivery has been decommissioned. Customer fulfillment and license access are handled entirely through the website My License & Downloads portal.'
       }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

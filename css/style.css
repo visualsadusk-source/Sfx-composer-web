@@ -409,7 +409,7 @@ img, svg {
 
 .sfx-site-hero-headline {
   width: 100%;
-  font-size: clamp(32px, 4.8vw, 54px);
+  font-size: clamp(28px, 4.2vw, 46px);
   font-weight: 750;
   line-height: 1.1;
   letter-spacing: -0.03em;
@@ -803,6 +803,14 @@ img, svg {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+}
+
+.sfx-main-hero-picture {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sfx-main-hero-img {
@@ -1730,12 +1738,14 @@ img, svg {
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
-.sfx-badge-status.active {
+.sfx-badge-status.active,
+.sfx-badge-status.paid {
   background: rgba(48, 209, 88, 0.14);
   color: var(--sfx-positive);
   border: 1px solid rgba(48, 209, 88, 0.3);
 }
-.sfx-badge-status.revoked {
+.sfx-badge-status.revoked,
+.sfx-badge-status.failed {
   background: rgba(255, 69, 58, 0.14);
   color: var(--sfx-critical);
   border: 1px solid rgba(255, 69, 58, 0.3);
@@ -3237,14 +3247,17 @@ img, svg {
   justify-content: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
+.sfx-dest-preview-graphic img,
 .sfx-dest-preview-graphic--gallery img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: top center;
-  transition: transform 0.35s ease;
-  opacity: 0.88;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+  opacity: 0.90;
+  display: block;
 }
+.sfx-dest-card:hover .sfx-dest-preview-graphic img,
 .sfx-dest-card:hover .sfx-dest-preview-graphic--gallery img {
   transform: scale(1.03);
   opacity: 1;
@@ -4288,12 +4301,12 @@ img, svg {
 
 .sfx-footer-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1.2fr;
-  gap: 32px;
+  grid-template-columns: 1.8fr 1fr 1fr 1fr 1.2fr;
+  gap: 28px;
   margin-bottom: 24px;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 1024px) {
   .sfx-footer-grid {
     grid-template-columns: 1fr 1fr;
     gap: 24px;

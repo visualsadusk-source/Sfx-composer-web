@@ -88,6 +88,29 @@ module.exports = async function handler(req, res) {
       created_at: new Date().toISOString()
     });
 
+    // Synchronize pending order to Supabase payment_orders
+    try {
+      const SUPABASE_URL = process.env.SUPABASE_URL || 'https://wyjazmiihwjlrkggeeez.supabase.co';
+      const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5NTE3MzExNCwiZXhwIjoyMTEwNzQ5MTE0fQ.Y6GbsUSzkh4b-Uze1JiLSie6PEb8SfG6xg36P4SPrNA';
+      await fetch(`${SUPABASE_URL}/rest/v1/rpc/sfx_record_payment_order`, {
+        method: 'POST',
+        headers: {
+          'apikey': SERVICE_KEY,
+          'Authorization': `Bearer ${SERVICE_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          p_customer_email: email,
+          p_payment_provider: 'razorpay',
+          p_provider_order_id: orderData.id,
+          p_amount: (amountPaise / 100),
+          p_currency: currency
+        })
+      });
+    } catch (dbErr) {
+      console.warn('Database note recording pending order:', dbErr.message);
+    }
+
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
     return res.end(JSON.stringify({

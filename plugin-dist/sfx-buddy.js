@@ -1173,6 +1173,94 @@
       .replace(/'/g, '&#39;');
   }
 
+  // --- MARKDOWN & TEXT FORMATTING ENGINE ---
+  function renderMarkdown(text) {
+    if (!text) return '';
+    var raw = String(text);
+
+    // 1. Extract fenced code blocks (```lang ... ```)
+    var codeBlocks = [];
+    raw = raw.replace(/```([a-zA-Z0-9_\-\.]*)\r?\n([\s\S]*?)```/g, function (match, lang, code) {
+      var placeholder = '@@@SFX_CODEBLOCK_' + codeBlocks.length + '@@@';
+      var headerHtml = lang ? '<div class="sfx-buddy__code-header"><span class="sfx-buddy__code-lang">' + escapeHtml(lang) + '</span></div>' : '';
+      codeBlocks.push(
+        '<pre class="sfx-buddy__code-block">' + headerHtml + '<code>' + escapeHtml(code.trim()) + '</code></pre>'
+      );
+      return placeholder;
+    });
+
+    // 2. Extract inline code (`code`)
+    var inlineCodes = [];
+    raw = raw.replace(/`([^`\r\n]+)`/g, function (match, code) {
+      var placeholder = '@@@SFX_INLINE_' + inlineCodes.length + '@@@';
+      inlineCodes.push('<code class="sfx-buddy__inline-code">' + escapeHtml(code) + '</code>');
+      return placeholder;
+    });
+
+    // 3. Escape all remaining HTML characters
+    var escaped = escapeHtml(raw);
+
+    // 4. Bold and Italic formatting
+    escaped = escaped.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    escaped = escaped.replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
+
+    // 5. Autolink URLs [text](url)
+    escaped = escaped.replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+    // 6. Split into lines and structure into paragraphs and lists
+    var lines = escaped.split(/\r?\n/);
+    var out = [];
+    var inList = null; // 'ul' | 'ol' | null
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      var trimmed = line.trim();
+
+      var ulMatch = trimmed.match(/^[-*•]\s+(.*)$/);
+      var olMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
+
+      if (ulMatch) {
+        if (inList !== 'ul') {
+          if (inList) out.push('</' + inList + '>');
+          out.push('<ul class="sfx-buddy__list">');
+          inList = 'ul';
+        }
+        out.push('<li>' + ulMatch[1] + '</li>');
+      } else if (olMatch) {
+        if (inList !== 'ol') {
+          if (inList) out.push('</' + inList + '>');
+          out.push('<ol class="sfx-buddy__list">');
+          inList = 'ol';
+        }
+        out.push('<li>' + olMatch[2] + '</li>');
+      } else {
+        if (inList) {
+          out.push('</' + inList + '>');
+          inList = null;
+        }
+        if (trimmed.length > 0) {
+          out.push('<p>' + trimmed + '</p>');
+        }
+      }
+    }
+    if (inList) {
+      out.push('</' + inList + '>');
+    }
+
+    var result = out.join('');
+
+    // Restore inline code
+    for (var j = 0; j < inlineCodes.length; j++) {
+      result = result.replace('@@@SFX_INLINE_' + j + '@@@', inlineCodes[j]);
+    }
+    // Restore code blocks
+    for (var k = 0; k < codeBlocks.length; k++) {
+      result = result.replace('@@@SFX_CODEBLOCK_' + k + '@@@', codeBlocks[k]);
+    }
+
+    return result || ('<p>' + escapeHtml(text).replace(/\n/g, '<br/>') + '</p>');
+  }
+
   function scrollChat() {
     if (messagesEl) {
       messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -1194,28 +1282,20 @@
         '<div class="sfx-buddy__empty-avatar">' +
           '<img src="./assets/mark-128.png" alt="SFX Buddy" onerror="this.src=\'assets/brand/mark-128.png\';" />' +
         '</div>' +
-        '<div class="sfx-buddy__empty-title">SFX Buddy</div>' +
-        '<div class="sfx-buddy__empty-desc">Your dedicated AI assistant for SFX Composer. Ask anything about plugin features, audio tools, timeline placement, or finding sounds.</div>' +
+        '<div class="sfx-buddy__empty-title">Hey, I\'m SFX Buddy.</div>' +
+        '<div class="sfx-buddy__empty-desc">Your sound design companion. Ask me about SFX Composer, discover sounds from your library, or get help with your editing workflow.</div>' +
         '<div class="sfx-buddy__suggestions-grid">' +
-          '<button type="button" class="sfx-buddy__suggestion-btn" data-query="What is BGM Flow?">' +
-            '<span class="sfx-buddy__suggestion-icon">🎵</span>' +
-            '<span class="sfx-buddy__suggestion-text">What is BGM Flow?</span>' +
+          '<button type="button" class="sfx-buddy__suggestion-btn" data-query="Find cinematic sound effects">' +
+            '<span class="sfx-buddy__suggestion-icon">🎬</span>' +
+            '<span class="sfx-buddy__suggestion-text">Find cinematic sound effects</span>' +
           '</button>' +
-          '<button type="button" class="sfx-buddy__suggestion-btn" data-query="Find a cinematic whoosh">' +
-            '<span class="sfx-buddy__suggestion-icon">💨</span>' +
-            '<span class="sfx-buddy__suggestion-text">Find a cinematic whoosh</span>' +
+          '<button type="button" class="sfx-buddy__suggestion-btn" data-query="Help me understand SFX Composer">' +
+            '<span class="sfx-buddy__suggestion-icon">💡</span>' +
+            '<span class="sfx-buddy__suggestion-text">Help me understand SFX Composer</span>' +
           '</button>' +
-          '<button type="button" class="sfx-buddy__suggestion-btn" data-query="How do Audio Tools work?">' +
-            '<span class="sfx-buddy__suggestion-icon">🎛️</span>' +
-            '<span class="sfx-buddy__suggestion-text">How do Audio Tools work?</span>' +
-          '</button>' +
-          '<button type="button" class="sfx-buddy__suggestion-btn" data-query="How do I place sounds on the timeline?">' +
-            '<span class="sfx-buddy__suggestion-icon">⏱️</span>' +
-            '<span class="sfx-buddy__suggestion-text">How do I place sounds on timeline?</span>' +
-          '</button>' +
-          '<button type="button" class="sfx-buddy__suggestion-btn" data-query="Suggest sounds for an action scene">' +
-            '<span class="sfx-buddy__suggestion-icon">💥</span>' +
-            '<span class="sfx-buddy__suggestion-text">Suggest sounds for an action scene</span>' +
+          '<button type="button" class="sfx-buddy__suggestion-btn" data-query="Suggest sounds for my scene">' +
+            '<span class="sfx-buddy__suggestion-icon">🎧</span>' +
+            '<span class="sfx-buddy__suggestion-text">Suggest sounds for my scene</span>' +
           '</button>' +
         '</div>' +
       '</div>';
@@ -1318,7 +1398,7 @@
           '</div>' +
         '</div>';
     } else {
-      bubble.innerHTML = msg.html || ('<p>' + escapeHtml(msg.text).replace(/\n/g, '<br/>') + '</p>');
+      bubble.innerHTML = msg.html || renderMarkdown(msg.text);
     }
 
     wrap.appendChild(bubble);
@@ -1383,9 +1463,12 @@
         var folderStr = card.relativeFolder || card.category || 'SFX';
 
         cardEl.innerHTML =
-          '<div class="sfx-buddy__sound-header">' +
-            '<span class="sfx-buddy__sound-title" title="' + escapeHtml(card.name) + '">' + escapeHtml(card.name) + '</span>' +
-            '<span class="sfx-buddy__sound-meta">' + escapeHtml(folderStr) + ' • ' + durStr + '</span>' +
+          '<div class="sfx-buddy__sound-info">' +
+            '<div class="sfx-buddy__sound-title-row">' +
+              '<span class="sfx-buddy__sound-title" title="' + escapeHtml(card.name) + '">' + escapeHtml(card.name) + '</span>' +
+              '<span class="sfx-buddy__sound-meta">' + escapeHtml(durStr) + '</span>' +
+            '</div>' +
+            '<div class="sfx-buddy__sound-category" title="' + escapeHtml(folderStr) + '">' + escapeHtml(folderStr) + '</div>' +
           '</div>' +
           '<div class="sfx-buddy__sound-actions">' +
             '<button type="button" class="sfx-buddy__action-btn sfx-buddy__action-btn--preview" title="Preview sound">' +
@@ -1547,21 +1630,21 @@
           setGeneratingState(false);
           if (intent.isDateTime) {
             assistantMsg.text = "The current system date and time is: " + currentDateTimeStr;
-            assistantMsg.html = statusBannerHtml + '<p>' + escapeHtml(assistantMsg.text) + '</p>';
+            assistantMsg.html = statusBannerHtml + renderMarkdown(assistantMsg.text);
           } else if (assistantMsg.webSources.length > 0) {
             var summary = "Ollama is currently offline at " + getOllamaBase() + ", but web search retrieved the following live results for \"" + intent.cleanSearchQuery + "\":\n\n";
             assistantMsg.webSources.forEach(function (s, i) {
               summary += (i + 1) + ". " + s.title + " (" + s.url + ")\n   " + s.snippet + "\n\n";
             });
             assistantMsg.text = summary.trim();
-            assistantMsg.html = statusBannerHtml + '<p>' + escapeHtml(assistantMsg.text).replace(/\n/g, '<br/>') + '</p>';
+            assistantMsg.html = statusBannerHtml + renderMarkdown(assistantMsg.text);
           } else {
             var kbAnswer = getKnowledgeBaseAnswer(query);
             if (kbAnswer) {
               assistantMsg.text = "Ollama is currently offline at " + getOllamaBase() + ", but here is the official SFX Composer documentation for your query:\n\n" + kbAnswer;
               assistantMsg.html = statusBannerHtml +
                 '<div class="sfx-buddy__offline-notice">⚠️ <strong>Ollama Offline</strong> — Displaying built-in SFX Composer documentation:</div>' +
-                '<p>' + escapeHtml(kbAnswer).replace(/\n/g, '<br/>') + '</p>';
+                renderMarkdown(kbAnswer);
             } else {
               assistantMsg.error = true;
               assistantMsg.text = "Cannot connect to Ollama at " + getOllamaBase() + ". Please start Ollama locally (`ollama run " + (state.settings.model || 'llama3.2') + "`) and click Retry.";
@@ -1590,14 +1673,14 @@
           function onToken(accumulated) {
             assistantMsg.text = accumulated;
             if (bubbleEl) {
-              bubbleEl.innerHTML = statusBannerHtml + '<p>' + escapeHtml(accumulated).replace(/\n/g, '<br/>') + '<span class="sfx-buddy__streaming-cursor">▊</span></p>';
+              bubbleEl.innerHTML = statusBannerHtml + renderMarkdown(accumulated) + '<span class="sfx-buddy__streaming-cursor">▊</span>';
               scrollChat();
             }
           },
           function onComplete(finalText) {
             setGeneratingState(false);
             assistantMsg.text = finalText;
-            assistantMsg.html = statusBannerHtml + '<p>' + escapeHtml(finalText).replace(/\n/g, '<br/>') + '</p>';
+            assistantMsg.html = statusBannerHtml + renderMarkdown(finalText);
             if (bubbleEl) {
               bubbleEl.innerHTML = assistantMsg.html;
             }
@@ -1622,7 +1705,7 @@
               assistantMsg.text = "Ollama connection failed (" + (err.message || 'Offline') + "). Showing built-in SFX Composer reference:\n\n" + kbAnswer;
               assistantMsg.html = statusBannerHtml +
                 '<div class="sfx-buddy__offline-notice">⚠️ <strong>Ollama Disconnected</strong> — Showing built-in SFX Composer knowledge:</div>' +
-                '<p>' + escapeHtml(kbAnswer).replace(/\n/g, '<br/>') + '</p>';
+                renderMarkdown(kbAnswer);
             } else {
               assistantMsg.error = true;
               assistantMsg.text = "Ollama connection error: " + (err.message || 'Server unreachable at ' + getOllamaBase()) + ". Please make sure Ollama is running and click Retry.";
@@ -1672,6 +1755,7 @@
     var text = inputEl.value.trim();
     if (!text) return;
     inputEl.value = '';
+    inputEl.style.height = 'auto';
     handleUserQuery(text);
   }
 
@@ -1992,7 +2076,7 @@
 
           '<div class="sfx-buddy__footer">' +
             '<div class="sfx-buddy__input-wrap">' +
-              '<textarea class="sfx-buddy__input" id="sfx-buddy-input" rows="1" placeholder="Ask about features, audio tools, or scene sounds..."></textarea>' +
+              '<textarea class="sfx-buddy__input" id="sfx-buddy-input" rows="1" placeholder="Ask Buddy about sounds, features or your scene..."></textarea>' +
               '<button type="button" class="sfx-buddy__send-btn" id="sfx-buddy-send-btn" title="Send message">' +
                 '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>' +
               '</button>' +
@@ -2082,11 +2166,21 @@
     }
 
     if (inputEl) {
+      var autoResize = function () {
+        inputEl.style.height = 'auto';
+        var scrollH = inputEl.scrollHeight;
+        var maxH = 110;
+        var newH = Math.min(maxH, Math.max(30, scrollH));
+        inputEl.style.height = newH + 'px';
+      };
+      inputEl.addEventListener('input', autoResize);
+
       inputEl.onkeydown = function (e) {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
           e.stopPropagation();
           submitInput();
+          inputEl.style.height = 'auto';
         }
         e.stopPropagation();
       };

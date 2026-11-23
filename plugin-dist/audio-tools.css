@@ -557,6 +557,438 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
   .sfx-au__row { grid-template-columns: 60px 1fr 42px; }
 }
 
+/* ==========================================================================
+   AI AUDIO ENHANCE ENGINE STYLES
+   Professional Audio DSP & Neural Enhancement Layout
+   ========================================================================== */
+
+/* Header Mode Tabs Switcher */
+.sfx-au__mode-tabs {
+  display: inline-flex;
+  align-items: center;
+  background: #08090C;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+  margin-left: 8px;
+}
+
+.sfx-au__mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: #9299A6;
+  font: 600 11px/1 inherit;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.sfx-au__mode-btn:hover {
+  color: #F5F7FA;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sfx-au__mode-btn.is-active {
+  background: #168BFF;
+  color: #FFFFFF;
+}
+
+.sfx-au__mode-btn--enhance svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* AI Audio Enhance Center Workspace */
+.sfx-au__enh-center {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background: #08090C;
+  min-width: 0;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* Audio Source & Clip Info Bar */
+.sfx-au__enh-source-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  background: #111318;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.sfx-au__enh-source-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.sfx-au__enh-source-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #F5F7FA;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sfx-au__enh-source-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #9299A6;
+  flex-wrap: wrap;
+}
+
+.sfx-au__enh-source-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Dual Waveform Stack */
+.sfx-au__dual-wave {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-height: 220px;
+}
+
+.sfx-au__enh-wave-box {
+  background: #0e0e12;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sfx-au__enh-wave-box.is-active-ab {
+  border-color: rgba(22, 139, 255, 0.55);
+  box-shadow: 0 0 10px rgba(22, 139, 255, 0.12);
+}
+
+.sfx-au__enh-wave-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: #111318;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 11px;
+}
+
+.sfx-au__enh-wave-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.sfx-au__enh-wave-tag.orig {
+  background: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.sfx-au__enh-wave-tag.enh {
+  background: rgba(22, 139, 255, 0.15);
+  color: #168BFF;
+  border: 1px solid rgba(22, 139, 255, 0.35);
+}
+
+.sfx-au__enh-wave-metrics {
+  font-size: 10.5px;
+  color: #9299A6;
+  font-family: monospace;
+}
+
+.sfx-au__enh-wave-canvas {
+  width: 100%;
+  height: 95px;
+  display: block;
+  background: #08090C;
+  cursor: crosshair;
+}
+
+.sfx-au__enh-placeholder {
+  height: 95px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 11.5px;
+  background: #08090C;
+}
+
+.sfx-au__enh-placeholder svg {
+  width: 20px;
+  height: 20px;
+  color: #168BFF;
+  opacity: 0.6;
+}
+
+/* Transport & A/B Switcher Bar */
+.sfx-au__enh-transport {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #111318;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.sfx-au__enh-transport-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sfx-au__ab-toggle {
+  display: inline-flex;
+  align-items: center;
+  background: #08090C;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.sfx-au__ab-label {
+  font-size: 10.5px;
+  color: #9299A6;
+  font-weight: 600;
+  padding-left: 6px;
+}
+
+.sfx-au__ab-btn {
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #9299A6;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.sfx-au__ab-btn:hover {
+  color: #F5F7FA;
+}
+
+.sfx-au__ab-btn.is-active {
+  background: #168BFF;
+  color: #FFFFFF;
+}
+
+/* Enhancement Progress Banner */
+.sfx-au__enh-progress {
+  padding: 10px 14px;
+  background: #111318;
+  border: 1px solid rgba(22, 139, 255, 0.35);
+  border-radius: 6px;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sfx-au__enh-progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #F5F7FA;
+}
+
+.sfx-au__enh-progress-bar {
+  height: 6px;
+  background: #08090C;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.sfx-au__enh-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #168BFF, #38bdf8);
+  transition: width 0.25s ease;
+}
+
+/* Audio Metrics Row */
+.sfx-au__enh-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.sfx-au__metric-card {
+  padding: 8px 10px;
+  background: #111318;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  text-align: center;
+}
+
+.sfx-au__metric-title {
+  font-size: 10px;
+  color: #9299A6;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sfx-au__metric-val {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #F5F7FA;
+  font-family: monospace;
+}
+
+.sfx-au__metric-val.positive {
+  color: #10B981;
+}
+
+/* Right Panel: Enhancement Engine Controls */
+.sfx-au__enh-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #111318;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sfx-au__enh-head {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sfx-au__enh-engine-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  padding: 2px 7px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #10B981;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.sfx-au__enh-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sfx-au__enh-sec {
+  background: #08090C;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.sfx-au__enh-sec-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #F5F7FA;
+  margin-bottom: 4px;
+}
+
+.sfx-au__enh-sec-desc {
+  font-size: 10px;
+  color: #9299A6;
+  margin-top: 3px;
+  line-height: 1.35;
+}
+
+.sfx-au__btn--enhance {
+  background: #168BFF !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  height: 32px !important;
+  font-size: 12px !important;
+  border-color: #168BFF !important;
+}
+
+.sfx-au__btn--enhance:hover {
+  background: #2695FF !important;
+}
+
+.sfx-au__btn--apply {
+  background: #10B981 !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  border-color: #10B981 !important;
+}
+
+.sfx-au__btn--apply:hover {
+  background: #059669 !important;
+}
+
+.sfx-au__btn--ai-banner {
+  background: rgba(22, 139, 255, 0.12);
+  border: 1px solid rgba(22, 139, 255, 0.35);
+  color: #168BFF;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+  margin: 8px 0;
+  transition: all 0.14s ease;
+}
+
+.sfx-au__btn--ai-banner:hover {
+  background: #168BFF;
+  color: #FFFFFF;
+}
+
+
 /* Scrollbar */
 .sfx-au__lib-results::-webkit-scrollbar,
 .sfx-au__es-body::-webkit-scrollbar {

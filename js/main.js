@@ -20,9 +20,9 @@
 
   // ── 1. FIXED LEFT VERTICAL NAVIGATION & MOBILE DRAWER ──
   function setupLeftNav() {
-    var navLinks = document.querySelectorAll('.sfx-nav-link');
+    var navLinks = document.querySelectorAll('.sfx-site-nav-link, .sfx-nav-link');
     var sections = document.querySelectorAll('section[id]');
-    var mobileToggle = document.getElementById('mobile-nav-toggle');
+    var mobileToggle = document.getElementById('mobile-nav-toggle') || document.getElementById('sfx-site-hamburger');
     var navSidebar = document.getElementById('sfx-left-nav');
     var navOverlay = document.getElementById('sfx-nav-overlay');
 
@@ -61,9 +61,10 @@
           if (entry.isIntersecting) {
             var id = entry.target.getAttribute('id');
             navLinks.forEach(function (link) {
-              if (link.getAttribute('href') === '#' + id) {
+              var href = link.getAttribute('href');
+              if (href === '#' + id || href === 'index.html#' + id) {
                 link.classList.add('is-active');
-              } else {
+              } else if (href && (href.startsWith('#') || href.startsWith('index.html#'))) {
                 link.classList.remove('is-active');
               }
             });
@@ -378,7 +379,7 @@
             amount: orderData.amount,
             currency: orderData.currency || 'INR',
             name: 'SFX Composer',
-            description: 'SFX Composer Ultimate Bundle (Plugin + 7GB SFX Library)',
+            description: 'SFX Composer Ultimate Bundle (Software + 7GB SFX Library)',
             image: 'assets/brand/mark-128.png',
             order_id: orderData.order_id,
             prefill: {
@@ -449,13 +450,8 @@
       if (successEmailDisp) successEmailDisp.textContent = result.email;
       if (successPayIdDisp) successPayIdDisp.textContent = result.payment_id;
       if (successEmailStatusDisp) {
-        if (result.email_delivery && result.email_delivery.sent) {
-          successEmailStatusDisp.textContent = '✓ Delivered to Inbox';
-          successEmailStatusDisp.style.color = 'var(--sfx-positive)';
-        } else {
-          successEmailStatusDisp.textContent = result.email_delivery?.info || 'Delivery queued';
-          successEmailStatusDisp.style.color = 'var(--sfx-caution)';
-        }
+        successEmailStatusDisp.textContent = 'Instant Website Access Active';
+        successEmailStatusDisp.style.color = 'var(--sfx-positive)';
       }
 
       // Deliver 7GB SFX Library Google Drive Link securely post-verification
@@ -755,8 +751,9 @@
             if (emailInput && !emailInput.value) {
               emailInput.value = cached.email;
             }
-            if (paymentInput && !paymentInput.value && cached.payment_id) {
-              paymentInput.value = cached.payment_id;
+            var bestPaymentRef = cached.payment_id || cached.order_id || '';
+            if (paymentInput && !paymentInput.value && bestPaymentRef) {
+              paymentInput.value = bestPaymentRef;
               paymentInput.dataset.autofilled = 'true';
             }
           }
@@ -782,11 +779,23 @@
       }
     }
 
-    if (openBtn) {
-      openBtn.addEventListener('click', function (e) {
+    // Attach click listeners to all dashboard triggers
+    var dashboardTriggers = document.querySelectorAll('.open-customer-dashboard-link, .open-customer-dashboard-trigger, #open-customer-dashboard-btn, [id^="open-customer-dashboard-footer-btn"], a[href="#customer-dashboard"]');
+    dashboardTriggers.forEach(function (trigger) {
+      trigger.addEventListener('click', function (e) {
         e.preventDefault();
         openDashboard();
       });
+    });
+
+    window.addEventListener('hashchange', function () {
+      if (window.location.hash === '#customer-dashboard') {
+        openDashboard();
+      }
+    });
+
+    if (window.location.hash === '#customer-dashboard') {
+      openDashboard();
     }
 
     if (modalClose) modalClose.addEventListener('click', closeDashboard);
@@ -799,10 +808,11 @@
         this.disabled = true;
         this.textContent = 'Verifying…';
         try {
+          var paymentRef = activeCustomerSession.payment_id || activeCustomerSession.order_id || (paymentInput ? paymentInput.value.trim() : '');
           var portal = await window.SFX_PAYMENT_SERVICE.getCustomerPortal({
             email: activeCustomerSession.email,
             order_id: activeCustomerSession.order_id,
-            payment_id: activeCustomerSession.payment_id,
+            payment_id: paymentRef,
             token: activeCustomerSession.token
           });
           await loadVerifiedPortalData(portal, activeCustomerSession.email);
@@ -953,7 +963,7 @@
       }
 
       var productName = portal.entitlements?.product_name || 
-        ((hasPlugin && hasLibrary) ? 'SFX Composer Complete Bundle' : (hasPlugin ? 'SFX Composer Plugin' : '7GB Master SFX Library'));
+        ((hasPlugin && hasLibrary) ? 'SFX Composer Complete Bundle' : (hasPlugin ? 'SFX Composer Pro Software' : '7GB Master SFX Library'));
 
       // ── 1. Render Account Entitlement Status Banner ──
       if (statusBanner) {
@@ -1183,21 +1193,21 @@
           var downloadCardsHtml = '<div class="sfx-dashboard-card">';
           downloadCardsHtml += 
             '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">' +
-              '<div style="font-size: 13px; font-weight: 700; color: #fff;">' + (hasLibrary ? '7GB Master SFX Library &amp; Downloads' : 'Plugin Downloads') + '</div>' +
+              '<div style="font-size: 13px; font-weight: 700; color: #fff;">' + (hasLibrary ? '7GB Master SFX Library &amp; Downloads' : 'Software Downloads') + '</div>' +
               '<span class="sfx-badge-status active">Unlocked</span>' +
             '</div>';
 
           if (hasPlugin) {
             downloadCardsHtml += 
-              '<div style="font-size: 11.5px; color: var(--sfx-text-muted); margin-bottom: 12px;">SFX Composer Pro Universal Installer: Premiere Pro &amp; After Effects CC 2021 – 2026 (macOS &amp; Windows)</div>' +
+              '<div style="font-size: 11.5px; color: var(--sfx-text-muted); margin-bottom: 12px;">SFX Composer Pro Software Package: Windows 10/11 &amp; macOS 11+ (Intel &amp; Apple Silicon)</div>' +
               '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">' +
                 '<a href="' + zxpUrl + '" download class="sfx-button sfx-button--quiet" style="height: 38px; border: 1px solid var(--sfx-border); justify-content: center; font-size: 12px; color: #fff; background: #121418; text-decoration: none;">' +
                   '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>' +
-                  'ZXP Installer (.zxp)' +
+                  'Software Installer (.zxp)' +
                 '</a>' +
                 '<a href="' + zipUrl + '" download class="sfx-button sfx-button--quiet" style="height: 38px; border: 1px solid var(--sfx-border); justify-content: center; font-size: 12px; color: #fff; background: #121418; text-decoration: none;">' +
                   '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>' +
-                  'Manual CEP ZIP (.zip)' +
+                  'Standalone Package (.zip)' +
                 '</a>' +
               '</div>';
           }
@@ -1230,9 +1240,10 @@
         } else {
           ordersTbody.innerHTML = orders.map(function (ord) {
             var date = new Date(ord.created_at).toLocaleDateString();
-            var badge = ord.payment_status === 'completed'
+            var ordStatus = (ord.payment_status || '').toLowerCase();
+            var badge = (ordStatus === 'completed' || ordStatus === 'paid')
               ? '<span class="sfx-badge-status active">Paid</span>'
-              : '<span class="sfx-badge-status revoked" style="color:#ff9f0a; border-color:#ff9f0a;">Pending</span>';
+              : (ordStatus === 'failed' ? '<span class="sfx-badge-status revoked">Failed</span>' : '<span class="sfx-badge-status pending">Pending</span>');
 
             return '<tr>' +
               '<td><code style="font-size:11px;">' + (ord.provider_order_id || '—') + '</code></td>' +
@@ -1364,7 +1375,8 @@
     }
 
     filterBtns.forEach(function (btn) {
-      btn.addEventListener('click', function () {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
         filterBtns.forEach(function (b) { b.classList.remove('is-active'); });
         this.classList.add('is-active');
         currentCategory = this.getAttribute('data-filter') || 'all';
@@ -1372,14 +1384,74 @@
       });
     });
 
-    // Expand/Collapse folder card on click
+    // Expand/Collapse folder card on click (card or header)
     folderCards.forEach(function (card) {
-      var head = card.querySelector('.sfx-folder-card-head');
-      if (head) {
-        head.addEventListener('click', function () {
-          card.classList.toggle('is-expanded');
+      card.addEventListener('click', function (e) {
+        if (e.target.closest('a, button, input')) return;
+        card.classList.toggle('is-expanded');
+      });
+    });
+  }
+
+  // ── 9. RAZORPAY COMPLIANCE & LEGAL POLICY MODALS ──
+  (function initComplianceModals() {
+    function openModal(modalId) {
+      var modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.add('is-open');
+        document.body.classList.add('sfx-modal-open');
+      }
+    }
+
+    function closeModal(modal) {
+      if (modal) {
+        modal.classList.remove('is-open');
+        if (!document.querySelector('.sfx-modal.is-open')) {
+          document.body.classList.remove('sfx-modal-open');
+        }
+      }
+    }
+
+    // Trigger buttons and links
+    var triggers = document.querySelectorAll('[data-open-modal], a[href="#terms"], a[href="#privacy"], a[href="#refund"], a[href="#install-guide"]');
+    triggers.forEach(function (trig) {
+      trig.addEventListener('click', function (e) {
+        var modalId = trig.getAttribute('data-open-modal');
+        if (!modalId) {
+          var href = trig.getAttribute('href');
+          if (href === '#terms') modalId = 'terms-modal';
+          else if (href === '#privacy') modalId = 'privacy-modal';
+          else if (href === '#refund') modalId = 'refund-modal';
+          else if (href === '#install-guide') modalId = 'install-guide-modal';
+        }
+        if (modalId && document.getElementById(modalId)) {
+          e.preventDefault();
+          openModal(modalId);
+        }
+      });
+    });
+
+    // Close buttons & backdrops for compliance modals
+    ['terms-modal', 'privacy-modal', 'refund-modal', 'install-guide-modal'].forEach(function (id) {
+      var m = document.getElementById(id);
+      if (m) {
+        var closeBtn = m.querySelector('.sfx-modal-close');
+        var backdrop = m.querySelector('.sfx-modal-backdrop');
+        if (closeBtn) closeBtn.addEventListener('click', function () { closeModal(m); });
+        if (backdrop) backdrop.addEventListener('click', function () { closeModal(m); });
+      }
+    });
+
+    // Global escape key handler
+    window.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        ['terms-modal', 'privacy-modal', 'refund-modal', 'install-guide-modal'].forEach(function (id) {
+          var m = document.getElementById(id);
+          if (m && m.classList.contains('is-open')) {
+            closeModal(m);
+          }
         });
       }
     });
-  }
+  })();
 })();

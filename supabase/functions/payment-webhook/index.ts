@@ -1,6 +1,5 @@
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import { generateLicenseKey, sha256, encryptLicenseKey } from '../_shared/crypto.ts';
-import { sendLicenseEmailBrevo } from '../_shared/brevo.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 async function verifyWebhookSignature(rawBody: string, signature: string, secret: string): Promise<boolean> {
@@ -101,27 +100,6 @@ Deno.serve(async (req: Request) => {
 
         if (compError) {
           console.error('Error in webhook complete order:', compError);
-        } else if (!compData.already_processed) {
-          // Send automatic license email via Brevo
-          const emailRes = await sendLicenseEmailBrevo({
-            toEmail: cleanEmail,
-            toName: customerName,
-            licenseKey: rawKey,
-            licenseType: 'lifetime',
-            orderId: orderId,
-            paymentId: paymentId,
-            amount: 199,
-            currency: 'INR',
-            isResend: false
-          });
-
-          // Update order status with Brevo message ID
-          await supabase.rpc('sfx_update_order_email_delivery', {
-            p_provider_order_id: orderId,
-            p_status: emailRes.success ? 'sent' : 'failed',
-            p_message_id: emailRes.messageId || null,
-            p_error: emailRes.error || null
-          });
         }
       }
     }

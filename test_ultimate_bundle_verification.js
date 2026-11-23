@@ -3,7 +3,7 @@
  * Comprehensive automated verification suite for:
  * 1. SFX Composer Ultimate Bundle (Plugin + 7GB SFX Library) for ₹199
  * 2. Dedicated SFX Library page (/library & /library.html) with all 20 folder categories
- * 3. Secure fulfillment (Google Drive delivery link via server/checkout verification & Brevo email)
+ * 3. Secure fulfillment (Google Drive delivery link via server/checkout verification & website dashboard)
  * 4. Navigation tabs and modals consistency across index.html, demo.html, screenshots.html, and library.html
  */
 
@@ -174,11 +174,10 @@ async function runTests() {
     assert.ok(fn.includes('SFX_LIBRARY_DRIVE_URL'), 'verify-payment missing SFX_LIBRARY_DRIVE_URL lookup');
   });
 
-  test('brevo.ts includes Product 1 and Product 2 in customer confirmation email', () => {
-    const brevo = fs.readFileSync(path.join(ROOT_DIR, 'supabase', 'functions', '_shared', 'brevo.ts'), 'utf8');
-    assert.ok(brevo.includes('SFX Composer Ultimate Bundle'), 'brevo.ts missing Ultimate Bundle title');
-    assert.ok(brevo.includes('7GB Master SFX Library') || brevo.includes('7GB MASTER SOUND EFFECTS LIBRARY'), 'brevo.ts missing 7GB SFX Library header');
-    assert.ok(brevo.includes('sfxLibraryDriveUrl'), 'brevo.ts missing sfxLibraryDriveUrl variable');
+  test('Web dashboard delivers Product 1 and Product 2 instantly upon verified purchase', () => {
+    const vp = fs.readFileSync(path.join(ROOT_DIR, 'api', 'verify-payment.js'), 'utf8');
+    assert.ok(vp.includes('mode: \'web_dashboard\''), 'verify-payment.js missing web_dashboard delivery mode');
+    assert.ok(vp.includes('sfx_library_url'), 'verify-payment.js missing sfx_library_url');
   });
 
   test('customer-portal Edge Function returns sfx_library_url', () => {

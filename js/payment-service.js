@@ -204,11 +204,9 @@
       var payload = {};
       if (typeof params === 'string') {
         payload.email = params;
-        payload.send_email = true;
         payload.max_devices = 1;
       } else if (params && typeof params === 'object') {
         payload.email = params.email;
-        payload.send_email = params.send_email !== undefined ? params.send_email : true;
         payload.max_devices = params.max_devices || 1;
         payload.expires_at = params.expires_at || null;
         payload.license_type = params.license_type || 'lifetime';
@@ -240,12 +238,11 @@
       return data;
     },
 
-    issueComplimentaryLicense: async function (authToken, email, type, expiryArg, sendEmail) {
+    issueComplimentaryLicense: async function (authToken, email, type, expiryArg) {
       return await this.createLicense(authToken, {
         email: email,
         license_type: type || 'lifetime',
-        expires_at: expiryArg || null,
-        send_email: !!sendEmail
+        expires_at: expiryArg || null
       });
     },
 
@@ -477,23 +474,6 @@
       var data = await res.json().catch(function () { return { ok: false }; });
       if (!res.ok || !data.ok) throw new Error(data.message || 'Failed to fetch audit logs');
       return data.logs || [];
-    },
-
-    resendLicenseEmail: async function (authToken, orderIdOrLicenseId) {
-      var res = await fetch(CONFIG.FUNCTIONS_URL + '/admin-licenses', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + authToken
-        },
-        body: JSON.stringify({
-          action: 'resend_email',
-          order_id: orderIdOrLicenseId
-        })
-      });
-      var data = await res.json().catch(function () { return { ok: false, message: 'Invalid response from email service' }; });
-      if (!res.ok || !data.ok) throw new Error(data.message || 'Failed to resend license email');
-      return data;
     }
   };
 

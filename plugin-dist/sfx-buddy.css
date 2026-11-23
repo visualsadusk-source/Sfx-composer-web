@@ -1,12 +1,31 @@
 /*
- * SFX Buddy — In-Plugin AI Sound Design Companion for SFX Composer
+ * SFX Buddy — Premium AI Sound Design Companion for SFX Composer
  * 
- * Visual Identity:
- * - Official SFX Composer bot squircle avatar
- * - Professional SFX Composer dark/black foundation (#0a0b10 / #0e0f16 / #101118)
- * - Muted accents & clean blue contrast matching brand palette
- * - Minimal, premium, and distraction-free
+ * Visual Architecture & Styling Tokens:
+ * - Background: Deep black (#08090C)
+ * - Panels & Surfaces: Subtle dark charcoal (#111318)
+ * - Primary Text: White (#F5F7FA)
+ * - Secondary Text: Muted grey (#9299A6)
+ * - Accent: Restrained electric blue (#168BFF)
+ * - Borders: Very subtle dark grey (rgba(255, 255, 255, 0.08) / #1E222B)
+ * - Clean, distraction-free desktop audio production application aesthetic
  */
+
+:root {
+  --sfx-buddy-bg: #08090C;
+  --sfx-buddy-surface: #111318;
+  --sfx-buddy-card-bg: #111318;
+  --sfx-buddy-card-hover: #141720;
+  --sfx-buddy-border: rgba(255, 255, 255, 0.08);
+  --sfx-buddy-border-subtle: #1E222B;
+  --sfx-buddy-text-primary: #F5F7FA;
+  --sfx-buddy-text-muted: #9299A6;
+  --sfx-buddy-accent: #168BFF;
+  --sfx-buddy-accent-hover: #2B96FF;
+  --sfx-buddy-accent-active: #0D7CE8;
+  --sfx-buddy-user-bubble: #141b29;
+  --sfx-buddy-user-border: rgba(22, 139, 255, 0.28);
+}
 
 /* ==========================================================================
    1. Floating Trigger Button (Bottom-Right Circle) - Compact & Non-Blocking
@@ -27,13 +46,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #090a0f !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  background: #08090C !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
   border-radius: 50% !important;
-  color: #ffffff;
+  color: #F5F7FA;
   cursor: pointer;
   z-index: 999990 !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65), 0 0 10px rgba(10, 132, 255, 0.22);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7);
   transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease, background 140ms ease;
   user-select: none;
   outline: none;
@@ -53,9 +72,9 @@
 
 #sfx-buddy-launcher:hover {
   transform: translateY(-1px) scale(1.03);
-  background: #0d111a !important;
-  border-color: rgba(56, 189, 248, 0.5) !important;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.75), 0 0 14px rgba(56, 189, 248, 0.35);
+  background: #111318 !important;
+  border-color: #168BFF !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.8), 0 0 10px rgba(22, 139, 255, 0.25);
 }
 
 #sfx-buddy-launcher:active {
@@ -63,9 +82,9 @@
 }
 
 #sfx-buddy-launcher.is-active {
-  border-color: rgba(56, 189, 248, 0.6) !important;
-  background: #0d1322 !important;
-  box-shadow: 0 0 14px rgba(10, 132, 255, 0.35);
+  border-color: #168BFF !important;
+  background: #111318 !important;
+  box-shadow: 0 0 12px rgba(22, 139, 255, 0.3);
 }
 
 .sfx-buddy-launcher__avatar {
@@ -84,9 +103,8 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--sfx-brand-highlight, #38bdf8);
-  border: 1.5px solid #090a0f;
-  box-shadow: 0 0 5px rgba(56, 189, 248, 0.85);
+  background: #168BFF;
+  border: 1.5px solid #08090C;
   pointer-events: none;
 }
 
@@ -108,12 +126,12 @@
   right: 16px;
   width: 350px;
   max-width: calc(100vw - 32px);
-  height: 480px;
+  height: 490px;
   max-height: calc(100vh - 110px);
-  background: #0a0b10;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #08090C;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.85), 0 0 20px rgba(10, 132, 255, 0.12);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.85);
   z-index: 999995 !important;
   display: flex;
   flex-direction: column;
@@ -122,7 +140,7 @@
   transition: opacity 160ms ease, transform 160ms cubic-bezier(0.16, 1, 0.3, 1), visibility 160ms;
 }
 
-/* Closed state — hidden completely */
+/* Closed state — hidden completely and non-blocking */
 #sfx-buddy-panel:not(.is-open) {
   display: none !important;
   opacity: 0 !important;
@@ -153,11 +171,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 46px;
+  height: 44px;
   padding: 0 12px;
-  background: #101118;
+  background: #111318;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  flex: 0 0 46px;
+  flex: 0 0 44px;
   user-select: none;
   box-sizing: border-box;
 }
@@ -186,7 +204,7 @@
 
 .sfx-buddy__name {
   font: 700 13px/1.2 var(--sfx-font, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
-  color: #ffffff;
+  color: #F5F7FA;
   letter-spacing: -0.01em;
 }
 
@@ -195,18 +213,18 @@
   align-items: center;
   gap: 5px;
   padding: 2px 7px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 999px;
   font: 500 10px/1 var(--sfx-font, sans-serif);
-  color: #8b949e;
+  color: #9299A6;
 }
 
 .sfx-buddy__status-dot {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #8b949e;
+  background: #9299A6;
   flex: 0 0 auto;
 }
 
@@ -214,17 +232,14 @@
 .sfx-buddy__status-dot.is-online,
 .sfx-buddy__status-dot.is-ollama {
   background: #10b981;
-  box-shadow: 0 0 6px rgba(16, 185, 129, 0.85);
 }
 
 .sfx-buddy__status-dot.is-offline {
   background: #ef4444;
-  box-shadow: 0 0 6px rgba(239, 68, 68, 0.85);
 }
 
 .sfx-buddy__status-dot.is-checking {
   background: #f59e0b;
-  box-shadow: 0 0 6px rgba(245, 158, 11, 0.85);
   animation: sfxBuddyPulse 1.2s infinite;
 }
 
@@ -234,10 +249,10 @@
 }
 
 .sfx-buddy__header-retry-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(22, 139, 255, 0.12);
+  border: 1px solid rgba(22, 139, 255, 0.3);
   border-radius: 4px;
-  color: #38bdf8;
+  color: #168BFF;
   font: 600 9.5px/1 var(--sfx-font, sans-serif);
   padding: 1px 5px;
   cursor: pointer;
@@ -245,14 +260,14 @@
   transition: all 120ms ease;
 }
 .sfx-buddy__header-retry-btn:hover {
-  background: rgba(56, 189, 248, 0.2);
-  color: #ffffff;
+  background: rgba(22, 139, 255, 0.25);
+  color: #FFFFFF;
 }
 
 /* Settings Drawer inside panel */
 .sfx-buddy__settings-drawer {
-  background: #0d0f17;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: #111318;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding: 12px;
   display: flex;
   flex-direction: column;
@@ -262,7 +277,7 @@
 }
 .sfx-buddy__settings-title {
   font: 700 11px/1 var(--sfx-font, sans-serif);
-  color: #38bdf8;
+  color: #168BFF;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin-bottom: 2px;
@@ -274,21 +289,21 @@
 }
 .sfx-buddy__settings-field label {
   font: 500 10.5px/1 var(--sfx-font, sans-serif);
-  color: #94a3b8;
+  color: #9299A6;
 }
 .sfx-buddy__settings-field input,
 .sfx-buddy__settings-field select {
-  background: #050609;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #08090C;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 6px;
-  color: #ffffff;
+  color: #F5F7FA;
   padding: 5px 8px;
   font: 450 11.5px/1.4 var(--sfx-font, sans-serif);
   outline: none;
 }
 .sfx-buddy__settings-field input:focus,
 .sfx-buddy__settings-field select:focus {
-  border-color: #0a84ff;
+  border-color: #168BFF;
 }
 .sfx-buddy__settings-actions {
   display: flex;
@@ -297,29 +312,29 @@
   margin-top: 4px;
 }
 .sfx-buddy__cfg-save-btn {
-  background: #0a84ff;
-  border: 1px solid rgba(56, 189, 248, 0.4);
+  background: #168BFF;
+  border: 1px solid rgba(22, 139, 255, 0.4);
   border-radius: 5px;
-  color: #ffffff;
+  color: #FFFFFF;
   font: 600 11px/1 var(--sfx-font, sans-serif);
   padding: 6px 12px;
   cursor: pointer;
   transition: all 120ms ease;
 }
 .sfx-buddy__cfg-save-btn:hover {
-  background: #0070e0;
+  background: #2B96FF;
 }
 .sfx-buddy__cfg-cancel-btn {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 5px;
-  color: #94a3b8;
+  color: #9299A6;
   font: 500 11px/1 var(--sfx-font, sans-serif);
   padding: 6px 10px;
   cursor: pointer;
 }
 .sfx-buddy__cfg-cancel-btn:hover {
-  color: #ffffff;
+  color: #F5F7FA;
   background: rgba(255, 255, 255, 0.06);
 }
 
@@ -343,15 +358,15 @@
   background: transparent;
   border: 1px solid transparent;
   border-radius: 5px;
-  color: #8b949e;
+  color: #9299A6;
   cursor: pointer;
   transition: all 140ms ease;
   padding: 0;
 }
 
 .sfx-buddy__icon-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+  color: #F5F7FA;
 }
 
 .sfx-buddy__icon-btn--close:hover {
@@ -368,7 +383,7 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: #0a0b10;
+  background: #08090C;
   overflow: hidden;
 }
 
@@ -388,11 +403,11 @@
   background: transparent;
 }
 .sfx-buddy__messages::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 4px;
 }
 .sfx-buddy__messages::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .sfx-buddy__msg {
@@ -417,23 +432,23 @@
 
 .sfx-buddy__bubble {
   padding: 8px 12px;
-  font: 450 12px/1.45 var(--sfx-font, -apple-system, BlinkMacSystemFont, sans-serif);
+  font: 450 12px/1.5 var(--sfx-font, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
   word-break: break-word;
 }
 
 .sfx-buddy__msg--user .sfx-buddy__bubble {
-  background: #111a2e;
-  color: #ffffff;
-  border: 1px solid rgba(10, 132, 255, 0.35);
-  border-radius: 12px 12px 2px 12px;
+  background: #141b29;
+  color: #F5F7FA;
+  border: 1px solid rgba(22, 139, 255, 0.28);
+  border-radius: 12px 12px 3px 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .sfx-buddy__msg--buddy .sfx-buddy__bubble {
-  background: #12141c;
-  color: #e6edf3;
+  background: #111318;
+  color: #F5F7FA;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px 12px 12px 2px;
+  border-radius: 12px 12px 12px 3px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
@@ -444,17 +459,64 @@
   margin-bottom: 0;
 }
 
-.sfx-buddy__bubble ul {
-  margin: 4px 0;
+.sfx-buddy__bubble strong {
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.sfx-buddy__bubble a {
+  color: #168BFF;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.sfx-buddy__bubble a:hover {
+  color: #2B96FF;
+}
+
+.sfx-buddy__list {
+  margin: 4px 0 6px 0;
   padding-left: 18px;
 }
-
-.sfx-buddy__bubble li {
+.sfx-buddy__list li {
   margin-bottom: 3px;
+  color: #F5F7FA;
 }
 
-.sfx-buddy__bubble strong {
-  color: #ffffff;
+.sfx-buddy__code-block {
+  background: #08090C;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  margin: 6px 0;
+  padding: 8px 10px;
+  overflow-x: auto;
+  font: 450 11px/1.4 var(--sfx-font-mono, 'SF Mono', Menlo, Consolas, monospace);
+  color: #F5F7FA;
+}
+.sfx-buddy__code-block code {
+  font-family: inherit;
+  color: inherit;
+  background: transparent;
+  padding: 0;
+}
+.sfx-buddy__code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font: 600 9px/1 var(--sfx-font, sans-serif);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9299A6;
+}
+.sfx-buddy__inline-code {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1px 4px;
+  border-radius: 4px;
+  font: 500 11px var(--sfx-font-mono, monospace);
+  color: #168BFF;
 }
 
 /* Empty State / Prompt Suggestions */
@@ -464,7 +526,7 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 20px 14px;
+  padding: 24px 16px;
   margin: auto 0;
   user-select: none;
   animation: sfxBuddyFadeIn 160ms ease;
@@ -473,13 +535,13 @@
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: #111420;
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 12px rgba(10, 132, 255, 0.15);
+  background: #111318;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .sfx-buddy__empty-avatar img {
   width: 28px;
@@ -488,15 +550,16 @@
   object-fit: cover;
 }
 .sfx-buddy__empty-title {
-  font: 700 14px/1.2 var(--sfx-font, sans-serif);
-  color: #ffffff;
+  font: 700 15px/1.2 var(--sfx-font, sans-serif);
+  color: #F5F7FA;
   margin-bottom: 6px;
+  letter-spacing: -0.01em;
 }
 .sfx-buddy__empty-desc {
   font: 450 11.5px/1.45 var(--sfx-font, sans-serif);
-  color: #8b949e;
+  color: #9299A6;
   max-width: 290px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 .sfx-buddy__suggestions-grid {
   display: flex;
@@ -509,20 +572,20 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 7px 10px;
-  background: #12141c;
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  padding: 8px 10px;
+  background: #111318;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 7px;
-  color: #d1d5db;
+  color: #F5F7FA;
   font: 500 11.5px/1.2 var(--sfx-font, sans-serif);
   cursor: pointer;
   text-align: left;
   transition: all 120ms ease;
 }
 .sfx-buddy__suggestion-btn:hover {
-  background: #171a26;
-  border-color: rgba(56, 189, 248, 0.4);
-  color: #ffffff;
+  background: #161A24;
+  border-color: rgba(22, 139, 255, 0.4);
+  color: #FFFFFF;
   transform: translateY(-1px);
 }
 .sfx-buddy__suggestion-icon {
@@ -536,7 +599,7 @@
 /* Streaming Cursor */
 .sfx-buddy__streaming-cursor {
   display: inline-block;
-  color: #38bdf8;
+  color: #168BFF;
   animation: sfxBuddyBlink 800ms infinite;
   margin-left: 2px;
 }
@@ -559,32 +622,32 @@
   gap: 4px;
   background: transparent;
   border: none;
-  color: #64748b;
+  color: #9299A6;
   font: 500 10.5px/1 var(--sfx-font, sans-serif);
   cursor: pointer;
-  padding: 2px 5px;
+  padding: 2px 6px;
   border-radius: 4px;
   transition: all 120ms ease;
 }
 .sfx-buddy__msg-action-btn:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
+  color: #F5F7FA;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 /* Offline Notice & Error Box */
 .sfx-buddy__offline-notice {
   font: 600 11px/1.3 var(--sfx-font, sans-serif);
   color: #f59e0b;
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.22);
   border-radius: 6px;
   padding: 5px 8px;
   margin-bottom: 6px;
 }
 
 .sfx-buddy__error-box {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
   border-radius: 8px;
   padding: 8px 10px;
 }
@@ -600,7 +663,7 @@
   background: #ef4444;
   border: none;
   border-radius: 4px;
-  color: #ffffff;
+  color: #FFFFFF;
   font: 600 10.5px/1 var(--sfx-font, sans-serif);
   padding: 4px 8px;
   cursor: pointer;
@@ -612,22 +675,22 @@
 
 /* Confirmation Box */
 .sfx-buddy__confirm-box {
-  background: #111422;
-  border: 1px solid rgba(56, 189, 248, 0.3);
+  background: #111318;
+  border: 1px solid rgba(22, 139, 255, 0.3);
   border-radius: 6px;
   padding: 8px 10px;
   margin-top: 6px;
 }
 .sfx-buddy__confirm-title {
   font: 700 10.5px/1 var(--sfx-font, sans-serif);
-  color: #38bdf8;
+  color: #168BFF;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin-bottom: 4px;
 }
 .sfx-buddy__confirm-body {
   font: 450 11.5px/1.35 var(--sfx-font, sans-serif);
-  color: #e2e8f0;
+  color: #F5F7FA;
   margin-bottom: 6px;
 }
 .sfx-buddy__confirm-btns {
@@ -643,20 +706,20 @@
   border: none;
 }
 .sfx-buddy__confirm-btn--yes {
-  background: #0a84ff;
-  color: #ffffff;
+  background: #168BFF;
+  color: #FFFFFF;
 }
 .sfx-buddy__confirm-btn--yes:hover {
-  background: #0070e0;
+  background: #2B96FF;
 }
 .sfx-buddy__confirm-btn--no {
   background: rgba(255, 255, 255, 0.08);
-  color: #94a3b8;
+  color: #9299A6;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 .sfx-buddy__confirm-btn--no:hover {
   background: rgba(255, 255, 255, 0.14);
-  color: #ffffff;
+  color: #FFFFFF;
 }
 
 /* Typing Indicator */
@@ -666,7 +729,7 @@
   align-items: center;
   gap: 4px;
   padding: 7px 12px;
-  background: #12141c;
+  background: #111318;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   margin: 0 12px 6px;
@@ -676,7 +739,7 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #8b949e;
+  background: #9299A6;
   animation: sfxBuddyBounce 1.2s infinite ease-in-out;
 }
 
@@ -693,51 +756,79 @@
 }
 
 /* ==========================================================================
-   5. Sound Discovery Action Cards
+   5. Sound Discovery Action Cards (Compact Horizontal Pro Asset Rows)
    ========================================================================== */
 
 .sfx-buddy__sound-card,
 .sfx-buddy-card {
-  margin-top: 6px;
+  margin-top: 8px;
   padding: 8px 10px;
-  background: #141722;
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: #111318;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
-
-.sfx-buddy__sound-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.sfx-buddy__sound-card:hover,
+.sfx-buddy-card:hover {
+  border-color: rgba(22, 139, 255, 0.35);
+  background: #141720;
+}
+
+.sfx-buddy__sound-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 auto;
+  gap: 2px;
+}
+
+.sfx-buddy__sound-header,
+.sfx-buddy__sound-title-row {
+  display: flex;
+  align-items: center;
   gap: 6px;
+  min-width: 0;
 }
 
 .sfx-buddy__sound-title {
-  font: 600 12px/1.2 var(--sfx-font, sans-serif);
-  color: #ffffff;
+  font: 600 11.5px/1.2 var(--sfx-font, sans-serif);
+  color: #F5F7FA;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1 1 auto;
+  min-width: 0;
 }
 
 .sfx-buddy__sound-meta {
-  font: 500 10px/1 var(--sfx-font-mono, monospace);
-  color: #7ec8ff;
-  background: rgba(10, 132, 255, 0.15);
-  padding: 2px 6px;
+  font: 500 9.5px/1 var(--sfx-font-mono, monospace);
+  color: #9299A6;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1.5px 5px;
   border-radius: 4px;
   flex: 0 0 auto;
+}
+
+.sfx-buddy__sound-category {
+  font: 450 10px/1.2 var(--sfx-font, sans-serif);
+  color: #9299A6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sfx-buddy__sound-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
+  flex: 0 0 auto;
 }
 
 .sfx-buddy__action-btn {
@@ -747,46 +838,47 @@
   height: 24px;
   padding: 0 8px;
   border-radius: 5px;
-  font: 600 11px/1 var(--sfx-font, sans-serif);
+  font: 600 10.5px/1 var(--sfx-font, sans-serif);
   cursor: pointer;
-  transition: all 140ms ease;
+  transition: all 120ms ease;
   user-select: none;
   border: none;
+  white-space: nowrap;
 }
 
 .sfx-buddy__action-btn--preview {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #F5F7FA;
 }
 .sfx-buddy__action-btn--preview:hover {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
 }
 .sfx-buddy__action-btn--preview.is-playing {
-  background: #0a84ff;
-  border-color: transparent;
-  color: #ffffff;
+  background: #168BFF;
+  border-color: #168BFF;
+  color: #FFFFFF;
 }
 
 .sfx-buddy__action-btn--place {
-  background: #0a84ff;
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  color: #ffffff;
+  background: #168BFF;
+  border: 1px solid rgba(22, 139, 255, 0.4);
+  color: #FFFFFF;
 }
 .sfx-buddy__action-btn--place:hover {
-  background: #0070e0;
-  box-shadow: 0 0 8px rgba(56, 189, 248, 0.35);
+  background: #2B96FF;
+  box-shadow: 0 0 10px rgba(22, 139, 255, 0.35);
 }
 
 .sfx-buddy__action-btn--copy {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #8b949e;
+  color: #9299A6;
 }
 .sfx-buddy__action-btn--copy:hover {
   background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
+  color: #F5F7FA;
 }
 
 /* ==========================================================================
@@ -801,14 +893,14 @@
   overflow-x: auto;
   flex: 0 0 auto;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
-  background: #0c0d14;
+  background: #08090C;
 }
 
 .sfx-buddy__chips-bar::-webkit-scrollbar {
   height: 3px;
 }
 .sfx-buddy__chips-bar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 2px;
 }
 
@@ -819,9 +911,9 @@
   height: 24px;
   padding: 0 10px;
   border-radius: 999px;
-  background: #161822;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #c9d1d9;
+  background: #111318;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #F5F7FA;
   font: 500 11px/1 var(--sfx-font, sans-serif);
   cursor: pointer;
   transition: all 140ms ease;
@@ -829,9 +921,9 @@
 }
 
 .sfx-buddy__chip:hover {
-  background: #1e2230;
-  border-color: rgba(56, 189, 248, 0.4);
-  color: #ffffff;
+  background: #161A24;
+  border-color: rgba(22, 139, 255, 0.4);
+  color: #FFFFFF;
   transform: translateY(-1px);
 }
 
@@ -841,7 +933,7 @@
 
 .sfx-buddy__footer {
   padding: 8px 12px 10px;
-  background: #0e1017;
+  background: #111318;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   flex: 0 0 auto;
 }
@@ -850,7 +942,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #07080c;
+  background: #08090C;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
   padding: 4px 6px 4px 10px;
@@ -858,33 +950,33 @@
 }
 
 .sfx-buddy__input-wrap:focus-within {
-  border-color: #0a84ff;
-  box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.25);
+  border-color: #168BFF;
+  box-shadow: 0 0 0 2px rgba(22, 139, 255, 0.2);
 }
 
 .sfx-buddy__input {
   flex: 1 1 auto;
   border: none;
   background: transparent;
-  color: #ffffff;
+  color: #F5F7FA;
   font: 450 12px/1.4 var(--sfx-font, sans-serif);
   outline: none;
   min-width: 0;
   resize: none;
-  max-height: 72px;
+  max-height: 110px;
 }
 
 .sfx-buddy__input::placeholder {
-  color: #64748b;
+  color: #64748B;
 }
 
 .sfx-buddy__send-btn {
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  background: #0a84ff;
+  background: #168BFF;
   border: none;
-  color: #ffffff;
+  color: #FFFFFF;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -895,13 +987,17 @@
 }
 
 .sfx-buddy__send-btn:hover:not(:disabled) {
-  background: #0070e0;
-  box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+  background: #2B96FF;
+  box-shadow: 0 0 10px rgba(22, 139, 255, 0.35);
+}
+
+.sfx-buddy__send-btn:active:not(:disabled) {
+  background: #0D7CE8;
 }
 
 .sfx-buddy__send-btn.is-stopping {
   background: #ef4444 !important;
-  color: #ffffff !important;
+  color: #FFFFFF !important;
 }
 .sfx-buddy__send-btn.is-stopping:hover {
   background: #dc2626 !important;
@@ -915,7 +1011,7 @@
 
 .sfx-buddy__footer-hint {
   font-size: 10px;
-  color: #6e7681;
+  color: #64748B;
   text-align: center;
   margin-top: 4px;
 }
@@ -924,7 +1020,6 @@
    8. Daily Sound Design Tip Card (Inside Chat ONLY - Never Floating Unsolicited)
    ========================================================================== */
 
-/* Remove any unsolicited floating tip card that is not inside the panel */
 body > .sfx-buddy__tip-card,
 .sfx-library-wrap > .sfx-buddy__tip-card,
 #sfx-buddy-tip-card:not(#sfx-buddy-panel *) {
@@ -937,9 +1032,9 @@ body > .sfx-buddy__tip-card,
   position: relative;
   margin: 6px 0;
   padding: 9px 11px;
-  background: #121724;
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  border-left: 3px solid #38bdf8;
+  background: #111318;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid #168BFF;
   border-radius: 8px;
   flex: 0 0 auto;
 }
@@ -958,13 +1053,13 @@ body > .sfx-buddy__tip-card,
   font: 700 10px/1 var(--sfx-font, sans-serif);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #38bdf8;
+  color: #168BFF;
 }
 
 .sfx-buddy__tip-cycle-btn {
   background: transparent;
   border: none;
-  color: #8fa0be;
+  color: #9299A6;
   font: 600 10px/1 var(--sfx-font, sans-serif);
   cursor: pointer;
   padding: 2px 4px;
@@ -973,13 +1068,13 @@ body > .sfx-buddy__tip-card,
 }
 
 .sfx-buddy__tip-cycle-btn:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
+  color: #F5F7FA;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .sfx-buddy__tip-text {
   font: 450 11.5px/1.4 var(--sfx-font, sans-serif);
-  color: #d1d5db;
+  color: #F5F7FA;
   margin: 0;
 }
 
@@ -1006,7 +1101,7 @@ body > .sfx-buddy__tip-card,
   flex-direction: column;
   align-items: flex-start;
   padding: 10px 12px;
-  background: #0d1322;
+  background: #111318;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   cursor: pointer;
@@ -1018,15 +1113,15 @@ body > .sfx-buddy__tip-card,
 }
 
 .sfx-buddy-mode-card:hover {
-  background: #121b30;
-  border-color: rgba(56, 189, 248, 0.4);
+  background: #141720;
+  border-color: rgba(22, 139, 255, 0.35);
   transform: translateY(-1px);
 }
 
 .sfx-buddy-mode-card--active {
-  background: rgba(10, 132, 255, 0.12) !important;
-  border-color: var(--sfx-accent, #0a84ff) !important;
-  box-shadow: 0 0 10px rgba(10, 132, 255, 0.2);
+  background: rgba(22, 139, 255, 0.1) !important;
+  border-color: #168BFF !important;
+  box-shadow: 0 0 10px rgba(22, 139, 255, 0.2);
 }
 
 .sfx-buddy-mode-card__icon {
@@ -1038,25 +1133,25 @@ body > .sfx-buddy__tip-card,
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.05);
   margin-bottom: 8px;
-  color: #7ec8ff;
+  color: #168BFF;
   flex: 0 0 auto;
 }
 
 .sfx-buddy-mode-card--active .sfx-buddy-mode-card__icon {
-  background: linear-gradient(135deg, #104080 0%, #0a84ff 52%, #38bdf8 100%);
-  color: #ffffff;
+  background: #168BFF;
+  color: #FFFFFF;
 }
 
 .sfx-buddy-mode-card__name {
   font-size: 11.5px;
   font-weight: 650;
-  color: #ffffff;
+  color: #F5F7FA;
   margin-bottom: 2px;
 }
 
 .sfx-buddy-mode-card__desc {
   font-size: 10px;
-  color: #8b949e;
+  color: #9299A6;
   line-height: 1.3;
 }
 
@@ -1065,7 +1160,7 @@ body > .sfx-buddy__tip-card,
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  background: #0d1322;
+  background: #111318;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   margin-bottom: 6px;
@@ -1079,12 +1174,12 @@ body > .sfx-buddy__tip-card,
 .sfx-buddy-toggle-title {
   font-size: 11.5px;
   font-weight: 600;
-  color: #ffffff;
+  color: #F5F7FA;
 }
 
 .sfx-buddy-toggle-sub {
   font-size: 10px;
-  color: #8b949e;
+  color: #9299A6;
 }
 
 .sfx-toggle-switch {
@@ -1121,19 +1216,19 @@ body > .sfx-buddy__tip-card,
   width: 14px;
   left: 2px;
   bottom: 2px;
-  background-color: #8b949e;
+  background-color: #9299A6;
   transition: 160ms cubic-bezier(0.16, 1, 0.3, 1);
   border-radius: 50%;
 }
 
 .sfx-toggle-switch input:checked + .sfx-toggle-slider {
-  background: #0a84ff;
-  border-color: #38bdf8;
+  background: #168BFF;
+  border-color: #168BFF;
 }
 
 .sfx-toggle-switch input:checked + .sfx-toggle-slider:before {
   transform: translateX(16px);
-  background-color: #ffffff;
+  background-color: #FFFFFF;
 }
 
 /* ==========================================================================
@@ -1155,9 +1250,9 @@ body > .sfx-buddy__tip-card,
 }
 
 .sfx-buddy__search-status.is-searching {
-  background: rgba(56, 189, 248, 0.08);
-  border: 1px solid rgba(56, 189, 248, 0.28);
-  color: #7dd3fc;
+  background: rgba(22, 139, 255, 0.08);
+  border: 1px solid rgba(22, 139, 255, 0.25);
+  color: #7ec8ff;
 }
 
 .sfx-buddy__search-status.is-done {
@@ -1175,8 +1270,8 @@ body > .sfx-buddy__tip-card,
 .sfx-buddy__search-spinner {
   width: 11px;
   height: 11px;
-  border: 1.5px solid rgba(56, 189, 248, 0.3);
-  border-top-color: #38bdf8;
+  border: 1.5px solid rgba(22, 139, 255, 0.3);
+  border-top-color: #168BFF;
   border-radius: 50%;
   display: inline-block;
   animation: sfx-buddy-spin 0.75s linear infinite;
@@ -1195,8 +1290,8 @@ body > .sfx-buddy__tip-card,
 .sfx-buddy__sources-panel {
   margin-top: 8px;
   padding: 8px 10px;
-  background: rgba(10, 15, 26, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #0d0f15;
+  border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 8px;
 }
 
@@ -1206,14 +1301,14 @@ body > .sfx-buddy__tip-card,
   gap: 6px;
   font-size: 10px;
   font-weight: 700;
-  color: #94a3b8;
+  color: #9299A6;
   text-transform: uppercase;
   letter-spacing: 0.6px;
   margin-bottom: 6px;
 }
 
 .sfx-buddy__sources-header svg {
-  color: #38bdf8;
+  color: #168BFF;
 }
 
 .sfx-buddy__sources-list {
@@ -1227,10 +1322,10 @@ body > .sfx-buddy__tip-card,
   align-items: center;
   gap: 8px;
   padding: 5px 8px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 6px;
-  color: #e2e8f0;
+  color: #F5F7FA;
   text-decoration: none;
   font-size: 11px;
   transition: all 120ms ease;
@@ -1238,17 +1333,17 @@ body > .sfx-buddy__tip-card,
 }
 
 .sfx-buddy__source-chip:hover {
-  background: rgba(56, 189, 248, 0.1);
-  border-color: rgba(56, 189, 248, 0.4);
-  color: #38bdf8;
+  background: rgba(22, 139, 255, 0.08);
+  border-color: rgba(22, 139, 255, 0.35);
+  color: #168BFF;
   transform: translateX(2px);
 }
 
 .sfx-buddy__source-domain {
   font-size: 9.5px;
   font-weight: 600;
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.14);
+  color: #168BFF;
+  background: rgba(22, 139, 255, 0.12);
   padding: 2px 6px;
   border-radius: 4px;
   white-space: nowrap;

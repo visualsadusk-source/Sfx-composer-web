@@ -1,6 +1,6 @@
-# SFX Composer — Premium Product Website & Interactive Demo
+# SFX Composer — Professional Sound Design & Audio Workflow Software
 
-A responsive, high-conversion product website for **SFX Composer**, the complete audio and sound-design toolkit for Adobe Premiere Pro and After Effects video editors.
+A responsive product website and interactive demo for **SFX Composer**, independent desktop software designed to simplify audio workflows, manage sound effects, and support creative editing processes.
 
 Built with a deep black aesthetic (`#080A09`), glowing neon green accents (`#35EA86`), minimal typography, fixed vertical left navigation, scroll-based feature showcases, and a **browser-based interactive Web Audio API DSP workstation demo**.
 
@@ -8,7 +8,7 @@ Built with a deep black aesthetic (`#080A09`), glowing neon green accents (`#35E
 
 ## 🚀 Live Demo Highlights
 
-The website features an interactive in-browser simulation of the desktop plugin:
+The website features an interactive in-browser simulation of the desktop software:
 
 1. **SFX Library Auditioning:**
    - 6 bundled high-fidelity sample sounds (`Cinematic Whoosh`, `Deep Impact`, `Soft Transition`, `Tension Riser`, `Modern UI Click`, `Ambient Atmosphere`).

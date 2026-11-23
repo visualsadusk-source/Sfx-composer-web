@@ -125,7 +125,7 @@ module.exports = async function handler(req, res) {
   const defaultName = (pIdLower.includes('library') && !pIdLower.includes('bundle') && !pIdLower.includes('plugin'))
     ? '7GB Master SFX Library'
     : ((pIdLower.includes('plugin') || pIdLower.includes('pro')) && !pIdLower.includes('bundle') && !pIdLower.includes('library'))
-      ? 'SFX Composer Pro Plugin'
+      ? 'SFX Composer Pro Software'
       : 'SFX Composer Complete Bundle';
   const productName = body.product_name || (cachedOrder && cachedOrder.product_name) || defaultName;
   const pNameLower = String(productName).toLowerCase();
@@ -137,7 +137,72 @@ module.exports = async function handler(req, res) {
   const hasLibrary = !isPluginOnly;
 
   // Generate unique license key (only if customer purchased plugin or bundle)
-  const licenseKey = hasPlugin ? generateLicenseKey() : null;
+  let licenseKey = hasPlugin ? generateLicenseKey() : null;
+
+  // 4.5. Synchronize with Supabase Database
+  let dbLicenseId = null;
+  let dbLicenseKey = null;
+
+  try {
+    const SUPABASE_URL = process.env.SUPABASE_URL || 'https://wyjazmiihwjlrkggeeez.supabase.co';
+    const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5NTE3MzExNCwiZXhwIjoyMTEwNzQ5MTE0fQ.Y6GbsUSzkh4b-Uze1JiLSie6PEb8SfG6xg36P4SPrNA';
+
+    // 1. Record pending order if not already in payment_orders
+    await fetch(`${SUPABASE_URL}/rest/v1/rpc/sfx_record_payment_order`, {
+      method: 'POST',
+      headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        p_customer_email: cleanEmail,
+        p_payment_provider: 'razorpay',
+        p_provider_order_id: razorpay_order_id,
+        p_amount: (body.amount ? body.amount / 100 : 199.00),
+        p_currency: 'INR'
+      })
+    });
+
+    // 2. Issue encrypted license if plugin included
+    if (hasPlugin) {
+      const edgeLicRes = await fetch(`${SUPABASE_URL}/functions/v1/create-license`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SERVICE_KEY}` },
+        body: JSON.stringify({
+          email: cleanEmail,
+          name: name || '',
+          license_type: 'lifetime'
+        })
+      });
+      if (edgeLicRes.ok) {
+        const edgeData = await edgeLicRes.json();
+        dbLicenseId = edgeData.license_id;
+        dbLicenseKey = edgeData.license_key;
+      }
+    }
+
+    // 3. Mark payment completed in payment_orders
+    await fetch(`${SUPABASE_URL}/rest/v1/payment_orders?provider_order_id=eq.${encodeURIComponent(razorpay_order_id)}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SERVICE_KEY,
+        'Authorization': `Bearer ${SERVICE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        provider_payment_id: razorpay_payment_id,
+        payment_status: 'completed',
+        license_id: dbLicenseId || null,
+        amount: (body.amount ? body.amount / 100 : 199),
+        currency: 'INR',
+        signature: razorpay_signature || null,
+        customer_name: name || null
+      })
+    });
+  } catch (syncErr) {
+    console.warn('Database synchronization note:', syncErr.message);
+  }
+
+  const finalLicenseKey = dbLicenseKey || licenseKey;
+  const licenseId = dbLicenseId || ('lic_' + razorpay_order_id.replace(/^order_/, ''));
 
   // 5. Save order & license state
   memoryStore.processedPayments.add(razorpay_payment_id);
@@ -153,6 +218,7 @@ module.exports = async function handler(req, res) {
     product_id: productId,
     product_name: productName,
     payment_status: 'completed',
+    license_id: licenseId,
     created_at: new Date().toISOString()
   });
 
@@ -167,12 +233,11 @@ module.exports = async function handler(req, res) {
   });
 
   // Record active license if plugin is owned
-  const licenseId = 'lic_' + razorpay_order_id.replace(/^order_/, '');
   if (hasPlugin) {
     memoryStore.licenses.set(razorpay_order_id, {
       id: licenseId,
       license_id: licenseId,
-      license_key: licenseKey,
+      license_key: finalLicenseKey,
       order_id: razorpay_order_id,
       payment_id: razorpay_payment_id,
       email: cleanEmail,
@@ -193,16 +258,16 @@ module.exports = async function handler(req, res) {
   return res.end(JSON.stringify({
     ok: true,
     verified: true,
-    license_key: licenseKey,
+    license_key: finalLicenseKey,
     email: cleanEmail,
     order_id: razorpay_order_id,
     payment_id: razorpay_payment_id,
     amount: (body.amount ? body.amount / 100 : 199),
     currency: 'INR',
-    email_delivery: {
-      sent: true,
-      status: 'sent',
-      info: hasPlugin ? 'License generated and ready for instant activation.' : 'Master SFX Library unlocked.'
+    delivery: {
+      mode: 'web_dashboard',
+      status: 'ready',
+      info: hasPlugin ? 'License generated and ready for instant activation in My License & Downloads.' : 'Master SFX Library unlocked.'
     },
     downloads: {
       version: 'v2.2.0',

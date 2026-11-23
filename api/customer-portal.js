@@ -23,7 +23,7 @@
  */
 
 const crypto = require('crypto');
-const { handleCors, memoryStore } = require('./_shared');
+const { handleCors, makeRazorpayRequest, memoryStore } = require('./_shared');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://wyjazmiihwjlrkggeeez.supabase.co';
 const ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxNzMxMTQsImV4cCI6MjExMDc0OTExNH0.FXKso4hkmUYcl_FfjG4GnHxwyCr09j5DkJ6ak1B2auY';
@@ -142,22 +142,28 @@ module.exports = async function handler(req, res) {
   let authEmail = null;
   let isAdmin = false;
 
+  let incomingToken = '';
   if (authHeader.startsWith('Bearer ')) {
-    const token = authHeader.substring(7).trim();
-    if (token === SERVICE_KEY) {
+    incomingToken = authHeader.substring(7).trim();
+  } else if (body.token) {
+    incomingToken = String(body.token).trim();
+  }
+
+  if (incomingToken) {
+    if (incomingToken === SERVICE_KEY) {
       isAdmin = true;
       authEmail = cleanReqEmail || 'admin@sfxcomposer.com';
-    } else if (token && token !== ANON_KEY) {
-      if (token.startsWith('sfx_token_')) {
+    } else if (incomingToken !== ANON_KEY) {
+      if (incomingToken.startsWith('sfx_token_')) {
         try {
-          const raw = Buffer.from(token.replace('sfx_token_', ''), 'base64').toString('utf8');
+          const raw = Buffer.from(incomingToken.replace('sfx_token_', ''), 'base64').toString('utf8');
           const decoded = JSON.parse(raw);
           if (decoded && decoded.email && decoded.exp > Date.now()) {
             authEmail = decoded.email.trim().toLowerCase();
           }
         } catch (e) {}
       } else {
-        const user = await verifySupabaseToken(token);
+        const user = await verifySupabaseToken(incomingToken);
         if (user && user.email) {
           authEmail = user.email.trim().toLowerCase();
         }
@@ -279,7 +285,95 @@ module.exports = async function handler(req, res) {
       console.warn('Database verification error:', err.message);
     }
 
-    // 4C. If paymentRef was not found in memoryStore or Supabase, REJECT IMMEDIATELY
+    // 4C. Live Razorpay Reconciliation Fallback
+    // If order was not yet synced or is pending in Supabase, verify live captured status against Razorpay API
+    if (!verifiedPaymentOrder || verifiedPaymentOrder.payment_status === 'pending' || verifiedPaymentOrder.payment_status === 'created') {
+      const rzpKeyId = process.env.RAZORPAY_KEY_ID;
+      const rzpKeySecret = process.env.RAZORPAY_KEY_SECRET;
+      if (rzpKeyId && rzpKeySecret && (paymentRef.startsWith('pay_') || paymentRef.startsWith('order_'))) {
+        try {
+          let payObj = null;
+          if (paymentRef.startsWith('pay_')) {
+            const payRes = await makeRazorpayRequest(`/v1/payments/${paymentRef}`, 'GET', null, rzpKeyId, rzpKeySecret);
+            if (payRes.ok && payRes.data) payObj = payRes.data;
+          } else if (paymentRef.startsWith('order_')) {
+            const ordPayRes = await makeRazorpayRequest(`/v1/orders/${paymentRef}/payments`, 'GET', null, rzpKeyId, rzpKeySecret);
+            if (ordPayRes.ok && ordPayRes.data && Array.isArray(ordPayRes.data.items)) {
+              payObj = ordPayRes.data.items.find(p => p.status === 'captured') || ordPayRes.data.items[0];
+            }
+          }
+
+          if (payObj && payObj.status === 'captured') {
+            const rzpEmail = (payObj.email || payObj.notes?.customer_email || '').trim().toLowerCase();
+            if (rzpEmail === targetEmail) {
+              const rzpOrderId = payObj.order_id || (paymentRef.startsWith('order_') ? paymentRef : `order_rzp_${payObj.id}`);
+
+              // 1. Ensure order recorded in Supabase
+              await fetch(`${SUPABASE_URL}/rest/v1/rpc/sfx_record_payment_order`, {
+                method: 'POST',
+                headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  p_customer_email: targetEmail,
+                  p_payment_provider: 'razorpay',
+                  p_provider_order_id: rzpOrderId,
+                  p_amount: (payObj.amount ? payObj.amount / 100 : 199.00),
+                  p_currency: payObj.currency || 'INR'
+                })
+              });
+
+              // 2. Ensure customer license exists via Edge Function
+              let licId = verifiedPaymentOrder?.license_id;
+              if (!licId) {
+                const edgeLicRes = await fetch(`${SUPABASE_URL}/functions/v1/create-license`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SERVICE_KEY}` },
+                  body: JSON.stringify({ email: targetEmail, license_type: 'lifetime' })
+                });
+                if (edgeLicRes.ok) {
+                  const edgeLicData = await edgeLicRes.json();
+                  licId = edgeLicData.license_id;
+                }
+              }
+
+              // 3. Update order in Supabase
+              await fetch(`${SUPABASE_URL}/rest/v1/payment_orders?provider_order_id=eq.${encodeURIComponent(rzpOrderId)}`, {
+                method: 'PATCH',
+                headers: {
+                  'apikey': SERVICE_KEY,
+                  'Authorization': `Bearer ${SERVICE_KEY}`,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                  provider_payment_id: payObj.id,
+                  payment_status: 'completed',
+                  license_id: licId || null,
+                  amount: (payObj.amount ? payObj.amount / 100 : 199),
+                  currency: payObj.currency || 'INR'
+                })
+              });
+
+              verifiedPaymentOrder = {
+                id: rzpOrderId,
+                provider_order_id: rzpOrderId,
+                provider_payment_id: payObj.id,
+                amount: (payObj.amount ? payObj.amount / 100 : 199),
+                currency: payObj.currency || 'INR',
+                product_id: payObj.notes?.product_id || 'sfx-composer-bundle',
+                product_name: payObj.notes?.product || 'SFX Composer Complete Bundle',
+                payment_status: 'completed',
+                license_id: licId || null,
+                created_at: new Date(payObj.created_at * 1000).toISOString()
+              };
+            }
+          }
+        } catch (rzpErr) {
+          console.warn('Live Razorpay reconciliation note:', rzpErr.message);
+        }
+      }
+    }
+
+    // 4D. If paymentRef was not found in memoryStore or Supabase, REJECT IMMEDIATELY
     if (!verifiedPaymentOrder) {
       res.statusCode = 403;
       res.setHeader('Content-Type', 'application/json');
@@ -560,7 +654,7 @@ module.exports = async function handler(req, res) {
 
   const productName = (hasPlugin && hasLibrary)
     ? 'SFX Composer Complete Bundle'
-    : (hasPlugin ? 'SFX Composer Plugin' : '7GB Master SFX Library');
+    : (hasPlugin ? 'SFX Composer Pro Software' : '7GB Master SFX Library');
 
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');

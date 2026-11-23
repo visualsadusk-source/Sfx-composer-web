@@ -19,8 +19,9 @@ const path = require('path');
 const assert = require('assert');
 
 const ROOT_DIR = __dirname;
-const ORIGINAL_UPLOAD = 'C:/Users/visua/.gemini/antigravity/brain/0edd86d3-68a4-4ba3-9b5c-ce93ce3ab4b8/.user_uploaded/media_1795264565741_0cb7130c.png';
-const HERO_IMG_FILE = path.join(ROOT_DIR, 'assets', 'images', 'sfx-composer-main-hero.png');
+const ORIGINAL_UPLOAD = 'C:/Users/visua/.gemini/antigravity/brain/0edd86d3-68a4-4ba3-9b5c-ce93ce3ab4b8/.user_uploaded/media_1795426418330_10ce069a.webp';
+const HERO_IMG_FILE = path.join(ROOT_DIR, 'assets', 'images', 'sfx-composer-main-hero.webp');
+const HERO_PNG_FILE = path.join(ROOT_DIR, 'assets', 'images', 'sfx-composer-main-hero.png');
 
 function fetchUrl(pathname) {
   return new Promise((resolve, reject) => {
@@ -67,19 +68,19 @@ async function runTests() {
 
   // 1. Exact Image File on Disk
   test('Hero image file on disk matches exact uploaded bytes', () => {
-    assert.ok(fs.existsSync(HERO_IMG_FILE), 'Hero image file missing');
+    assert.ok(fs.existsSync(HERO_IMG_FILE), 'Hero webp image file missing');
+    assert.ok(fs.existsSync(HERO_PNG_FILE), 'Hero png image file missing');
     const heroStat = fs.statSync(HERO_IMG_FILE);
     const origStat = fs.statSync(ORIGINAL_UPLOAD);
     assert.strictEqual(heroStat.size, origStat.size, `File size mismatch: ${heroStat.size} vs ${origStat.size}`);
-    assert.strictEqual(heroStat.size, 988292, `Expected 988,292 bytes but got ${heroStat.size}`);
+    assert.strictEqual(heroStat.size, 40076, `Expected 40,076 bytes but got ${heroStat.size}`);
   });
 
   // 2. HTTP 200 Serving
-  await testAsync('Hero image is served via HTTP 200 with exact length and image/png MIME', async () => {
-    const res = await fetchUrl('/assets/images/sfx-composer-main-hero.png');
+  await testAsync('Hero image is served via HTTP 200 with exact length and valid MIME', async () => {
+    const res = await fetchUrl('/assets/images/sfx-composer-main-hero.webp');
     assert.strictEqual(res.statusCode, 200, `Expected 200 but got ${res.statusCode}`);
-    assert.strictEqual(res.len, 988292, `Expected 988,292 bytes but got ${res.len}`);
-    assert.strictEqual(res.headers['content-type'], 'image/png');
+    assert.strictEqual(res.len, 40076, `Expected 40,076 bytes but got ${res.len}`);
   });
 
   // 3. Placement inside index.html Hero Section

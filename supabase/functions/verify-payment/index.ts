@@ -1,6 +1,5 @@
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import { generateLicenseKey, sha256, encryptLicenseKey } from '../_shared/crypto.ts';
-import { sendLicenseEmailBrevo } from '../_shared/brevo.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 async function verifyHmacSha256(data: string, signature: string, secret: string): Promise<boolean> {
@@ -170,60 +169,6 @@ Deno.serve(async (req: Request) => {
         .eq('provider_order_id', razorpay_order_id);
     }
 
-    // 6. Automatic License Email via Brevo API
-    let emailStatus = {
-      sent: false,
-      status: 'pending',
-      info: 'Email dispatch initiated'
-    };
-
-    // If not already processed, send Brevo email
-    if (!orderData.already_processed) {
-      const emailResult = await sendLicenseEmailBrevo({
-        toEmail: cleanEmail,
-        toName: name || '',
-        licenseKey: rawLicenseKey,
-        licenseType: 'lifetime',
-        orderId: razorpay_order_id,
-        paymentId: razorpay_payment_id,
-        amount: 199,
-        currency: 'INR',
-        isResend: false
-      });
-
-      // Update email tracking in database
-      const dbStatus = emailResult.success ? 'sent' : 'failed';
-      await supabase.rpc('sfx_update_order_email_delivery', {
-        p_provider_order_id: razorpay_order_id,
-        p_status: dbStatus,
-        p_message_id: emailResult.messageId || null,
-        p_error: emailResult.error || null
-      });
-
-      emailStatus = {
-        sent: emailResult.success,
-        status: dbStatus,
-        messageId: emailResult.messageId || null,
-        info: emailResult.success 
-          ? `Dispatched via Brevo (Message ID: ${emailResult.messageId})`
-          : `Brevo dispatch failed: ${emailResult.error}`
-      };
-    } else {
-      // Re-read existing email status from order
-      const { data: ordRow } = await supabase
-        .from('payment_orders')
-        .select('email_delivery_status, email_message_id, email_sent_at')
-        .eq('provider_order_id', razorpay_order_id)
-        .maybeSingle();
-
-      emailStatus = {
-        sent: ordRow?.email_delivery_status === 'sent',
-        status: ordRow?.email_delivery_status || 'sent',
-        messageId: ordRow?.email_message_id || null,
-        info: 'Order previously verified; email record preserved.'
-      };
-    }
-
     return new Response(JSON.stringify({
       ok: true,
       verified: true,
@@ -232,7 +177,11 @@ Deno.serve(async (req: Request) => {
       order_id: razorpay_order_id,
       payment_id: razorpay_payment_id,
       license_id: orderData.license_id,
-      email_delivery: emailStatus,
+      delivery: {
+        mode: 'web_dashboard',
+        status: 'ready',
+        info: 'License generated and ready for instant activation in My License & Downloads.'
+      },
       downloads: {
         version: 'v2.2.0',
         zxp_url: '/downloads/sfx-composer-pro-v2.2.0.zxp',
