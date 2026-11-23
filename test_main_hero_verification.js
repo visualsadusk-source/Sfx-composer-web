@@ -19,7 +19,7 @@ const path = require('path');
 const assert = require('assert');
 
 const ROOT_DIR = __dirname;
-const ORIGINAL_UPLOAD = 'C:/Users/visua/.gemini/antigravity/brain/0edd86d3-68a4-4ba3-9b5c-ce93ce3ab4b8/.user_uploaded/media_1795426418330_10ce069a.webp';
+const ORIGINAL_UPLOAD = 'C:/Users/visua/.gemini/antigravity/brain/0edd86d3-68a4-4ba3-9b5c-ce93ce3ab4b8/.user_uploaded/media_1795437072294_7a04fbb6.jpg';
 const HERO_IMG_FILE = path.join(ROOT_DIR, 'assets', 'images', 'sfx-composer-main-hero.webp');
 const HERO_PNG_FILE = path.join(ROOT_DIR, 'assets', 'images', 'sfx-composer-main-hero.png');
 
@@ -73,14 +73,14 @@ async function runTests() {
     const heroStat = fs.statSync(HERO_IMG_FILE);
     const origStat = fs.statSync(ORIGINAL_UPLOAD);
     assert.strictEqual(heroStat.size, origStat.size, `File size mismatch: ${heroStat.size} vs ${origStat.size}`);
-    assert.strictEqual(heroStat.size, 40076, `Expected 40,076 bytes but got ${heroStat.size}`);
+    assert.strictEqual(heroStat.size, 81694, `Expected 81,694 bytes but got ${heroStat.size}`);
   });
 
   // 2. HTTP 200 Serving
   await testAsync('Hero image is served via HTTP 200 with exact length and valid MIME', async () => {
     const res = await fetchUrl('/assets/images/sfx-composer-main-hero.webp');
     assert.strictEqual(res.statusCode, 200, `Expected 200 but got ${res.statusCode}`);
-    assert.strictEqual(res.len, 40076, `Expected 40,076 bytes but got ${res.len}`);
+    assert.strictEqual(res.len, 81694, `Expected 81,694 bytes but got ${res.len}`);
   });
 
   // 3. Placement inside index.html Hero Section
