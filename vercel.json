@@ -1,5 +1,11 @@
 {
   "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/downloads/(.*)",
+      "destination": "/api/download"
+    }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",
@@ -16,6 +22,10 @@
         {
           "key": "Content-Disposition",
           "value": "attachment"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, private"
         }
       ]
     },

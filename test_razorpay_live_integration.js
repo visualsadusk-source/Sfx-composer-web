@@ -211,11 +211,11 @@ async function runVerification() {
     assert.strictEqual(res.status, 200, 'Verification must succeed with 200');
     assert.strictEqual(res.body.ok, true);
     assert.strictEqual(res.body.verified, true);
-    assert.ok(res.body.license_key && /^SFX-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}$/.test(res.body.license_key), 'Must return standard format license key');
+    assert.ok(res.body.license_key && /^SFX-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(res.body.license_key), 'Must return standard format license key');
     assert.strictEqual(res.body.email, 'studio.editor@example.com');
     assert.strictEqual(res.body.order_id, liveOrderId);
     assert.strictEqual(res.body.payment_id, testPaymentId);
-    assert.strictEqual(res.body.downloads?.sfx_library_url, EXPECTED_DRIVE_URL, 'Must deliver 7GB SFX Library Drive link');
+    assert.ok(res.body.downloads?.sfx_library_url.includes('/api/download?type=sfx-library'), 'Must deliver secure gated SFX Library link');
     verifiedLicenseKey = res.body.license_key;
   });
 
@@ -268,7 +268,7 @@ async function runVerification() {
       assert.ok(html.includes('id="checkout-success"'), `${p} must include success screen`);
       assert.ok(html.includes('id="issued-license-key-val"'), `${p} must include license key display`);
       assert.ok(html.includes('id="success-sfx-library-btn"'), `${p} must include 7GB library button`);
-      assert.ok(html.includes(EXPECTED_DRIVE_URL), `${p} must contain default Drive link`);
+      assert.ok(!html.includes(EXPECTED_DRIVE_URL), `${p} must NOT leak raw Drive link in markup`);
     });
   });
 

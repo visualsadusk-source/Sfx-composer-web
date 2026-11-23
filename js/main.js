@@ -16,6 +16,7 @@
     setupFaqAccordion();
     setupSmoothScrollButtons();
     setupFolderExplorer();
+    setupLibraryDownloadForm();
   });
 
   // ── 1. FIXED LEFT VERTICAL NAVIGATION & MOBILE DRAWER ──
@@ -454,13 +455,19 @@
         successEmailStatusDisp.style.color = 'var(--sfx-positive)';
       }
 
-      // Deliver 7GB SFX Library Google Drive Link securely post-verification
+      // Deliver verified download links securely post-verification
+      var successZxpBtn = document.getElementById('success-download-zxp-btn');
+      var successZipBtn = document.getElementById('success-download-zip-btn');
       var successDriveBtn = document.getElementById('success-sfx-library-btn');
-      if (successDriveBtn) {
-        var libraryUrl = (result.downloads && result.downloads.sfx_library_url)
-          ? result.downloads.sfx_library_url
-          : 'https://drive.google.com/file/d/1rF1f3KEKSpri1KoZqP8SCv-Q0-NYxvGD/view?usp=sharing';
-        successDriveBtn.href = libraryUrl;
+
+      if (successZxpBtn && result.downloads && result.downloads.zxp_url) {
+        successZxpBtn.href = result.downloads.zxp_url;
+      }
+      if (successZipBtn && result.downloads && result.downloads.zip_url) {
+        successZipBtn.href = result.downloads.zip_url;
+      }
+      if (successDriveBtn && result.downloads && result.downloads.sfx_library_url) {
+        successDriveBtn.href = result.downloads.sfx_library_url;
       }
     }
 
@@ -1184,8 +1191,12 @@
           downloadsContainer.innerHTML = '';
         } else {
           var tokenQuery = authToken ? ('&token=' + encodeURIComponent(authToken)) : '';
-          var zxpUrl = '/api/download?type=zxp' + tokenQuery;
-          var zipUrl = '/api/download?type=zip' + tokenQuery;
+          var zxpUrl = (portal.downloads && portal.downloads.zxp_url)
+            ? portal.downloads.zxp_url
+            : ('/api/download?type=zxp' + tokenQuery);
+          var zipUrl = (portal.downloads && portal.downloads.zip_url)
+            ? portal.downloads.zip_url
+            : ('/api/download?type=zip' + tokenQuery);
           var sfxLibUrl = (portal.downloads && portal.downloads.sfx_library_url) 
             ? portal.downloads.sfx_library_url 
             : ('/api/download?type=sfx-library' + tokenQuery);
@@ -1393,7 +1404,138 @@
     });
   }
 
-  // ── 9. RAZORPAY COMPLIANCE & LEGAL POLICY MODALS ──
+  // ── 9. SFX LIBRARY LICENSE VERIFICATION & SECURE DOWNLOAD ──
+  function setupLibraryDownloadForm() {
+    var form = document.getElementById('sfx-library-download-form');
+    var input = document.getElementById('sfx-lib-license-input');
+    var submitBtn = document.getElementById('sfx-lib-download-submit-btn');
+    var btnLabel = document.getElementById('sfx-lib-btn-label');
+    var statusArea = document.getElementById('sfx-lib-status-area');
+
+    if (!form || !input) return;
+
+    // Auto-formatting for license key input
+    input.addEventListener('input', function () {
+      var val = input.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+      if (val && !val.startsWith('SFX') && !'SFX'.startsWith(val)) {
+        val = 'SFX-' + val;
+      }
+      input.value = val;
+    });
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var key = (input.value || '').trim().toUpperCase();
+
+      if (!key) {
+        showStatus('error', 'Please enter your SFX Composer license key.');
+        input.focus();
+        return;
+      }
+
+      var keyRegex = /^SFX-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+      if (!keyRegex.test(key)) {
+        showStatus('error', 'Invalid license key format. Keys follow the format: SFX-XXXX-XXXX-XXXX-XXXX.');
+        input.focus();
+        return;
+      }
+
+      // 1. Loading State
+      setLoading(true);
+      showStatus('loading', '<div style="display: flex; align-items: center; gap: 10px;"><span class="sfx-spinner" style="display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.2); border-top-color: #38bdf8; border-radius: 50%; animation: sfx-spin 0.8s linear infinite;"></span><span>Verifying license key with security server...</span></div>');
+
+      try {
+        var res = await fetch('/api/download?type=sfx-library&verify_only=true', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ license_key: key })
+        });
+
+        var data;
+        try {
+          data = await res.json();
+        } catch (jsonErr) {
+          data = { ok: false, message: 'Server response error. Please try again.' };
+        }
+
+        if (!res.ok || !data.ok) {
+          setLoading(false);
+          var errMsg = data.message || 'License verification failed. Please check your key.';
+          showStatus('error', '<strong>Verification Failed:</strong> ' + escapeHtml(errMsg));
+          return;
+        }
+
+        // 2. Success State
+        showStatus('success', '<strong>License Verified!</strong> Initializing 7GB master audio archive download...');
+
+        // 3. Trigger Direct Download
+        var downloadUrl = '/api/download?type=sfx-library&license_key=' + encodeURIComponent(key);
+        
+        var hiddenFrame = document.getElementById('sfx-download-iframe');
+        if (!hiddenFrame) {
+          hiddenFrame = document.createElement('iframe');
+          hiddenFrame.id = 'sfx-download-iframe';
+          hiddenFrame.style.display = 'none';
+          document.body.appendChild(hiddenFrame);
+        }
+        hiddenFrame.src = downloadUrl;
+
+        // 4. Download Confirmation
+        setTimeout(function () {
+          setLoading(false);
+          showStatus('downloading', '<div style="display: flex; flex-direction: column; gap: 6px;">' +
+            '<div style="font-weight: 700; color: #34d399; font-size: 14px;">Download Started!</div>' +
+            '<div style="color: #cbd5e1;">Your browser is now downloading <strong>SFX-Composer-Master-Library.zip (7GB)</strong>.</div>' +
+            '<div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">If the download did not start automatically, <a href="' + downloadUrl + '" style="color: #38bdf8; text-decoration: underline;">click here to resume download</a>.</div>' +
+          '</div>');
+        }, 1200);
+
+      } catch (netErr) {
+        setLoading(false);
+        showStatus('error', '<strong>Network Error:</strong> Could not connect to license verification server. Please check your internet connection.');
+      }
+    });
+
+    function setLoading(isLoading) {
+      input.disabled = isLoading;
+      submitBtn.disabled = isLoading;
+      if (isLoading) {
+        submitBtn.style.opacity = '0.7';
+        submitBtn.style.cursor = 'not-allowed';
+        if (btnLabel) btnLabel.textContent = 'Verifying...';
+      } else {
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
+        if (btnLabel) btnLabel.textContent = 'Verify License & Download';
+      }
+    }
+
+    function showStatus(type, html) {
+      statusArea.style.display = 'block';
+      if (type === 'loading') {
+        statusArea.style.background = 'rgba(56, 189, 248, 0.08)';
+        statusArea.style.border = '1px solid rgba(56, 189, 248, 0.3)';
+        statusArea.style.color = '#38bdf8';
+      } else if (type === 'error') {
+        statusArea.style.background = 'rgba(239, 68, 68, 0.1)';
+        statusArea.style.border = '1px solid rgba(239, 68, 68, 0.35)';
+        statusArea.style.color = '#fca5a5';
+      } else if (type === 'success' || type === 'downloading') {
+        statusArea.style.background = 'rgba(16, 185, 129, 0.12)';
+        statusArea.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+        statusArea.style.color = '#a7f3d0';
+      }
+      statusArea.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+  }
+
+  // ── 10. RAZORPAY COMPLIANCE & LEGAL POLICY MODALS ──
   (function initComplianceModals() {
     function openModal(modalId) {
       var modal = document.getElementById(modalId);

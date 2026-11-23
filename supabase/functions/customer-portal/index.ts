@@ -317,9 +317,9 @@ Deno.serve(async (req: Request) => {
       has_plugin: hasPlugin,
       has_library: hasLibrary,
       product_name: productName,
-      zxp_url: '/downloads/sfx-composer-pro-v2.2.0.zxp',
-      zip_url: '/downloads/sfx-composer-pro-v2.2.0.zip',
-      sfx_library_url: driveUrl
+      zxp_url: hasPlugin ? `/downloads/sfx-composer-pro-v2.2.0.zxp?token=${encodeURIComponent(sessionToken)}` : null,
+      zip_url: hasPlugin ? `/downloads/sfx-composer-pro-v2.2.0.zip?token=${encodeURIComponent(sessionToken)}` : null,
+      sfx_library_url: hasLibrary ? `/api/download?type=sfx-library&token=${encodeURIComponent(sessionToken)}` : null
     }
   });
 });

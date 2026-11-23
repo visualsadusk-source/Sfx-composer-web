@@ -63,7 +63,11 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // 2. Call Supabase RPC sfx_revoke_entitlement
+  if (targetEmail) {
+    memoryStore.entitlements.delete(targetEmail);
+  }
+
+  // 2. Call Supabase RPC sfx_revoke_entitlement and update customer records
   try {
     const rpcRes = await fetch(`${SUPABASE_URL}/rest/v1/rpc/sfx_revoke_entitlement`, {
       method: 'POST',
@@ -78,19 +82,27 @@ module.exports = async function handler(req, res) {
       })
     });
 
-    const rpcData = await rpcRes.json().catch(() => ({}));
+    if (targetEmail) {
+      // Find customer ID to revoke licenses
+      const custRes = await fetch(`${SUPABASE_URL}/rest/v1/customers?select=id&email=eq.${encodeURIComponent(targetEmail)}`, {
+        headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` }
+      });
+      if (custRes.ok) {
+        const custs = await custRes.json();
+        if (Array.isArray(custs) && custs.length > 0) {
+          const custId = custs[0].id;
+          await fetch(`${SUPABASE_URL}/rest/v1/licenses?customer_id=eq.${encodeURIComponent(custId)}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` },
+            body: JSON.stringify({ status: 'revoked', revoked_reason: revokeReason })
+          });
+        }
+      }
 
-    // Fallback direct updates if RPC not yet deployed
-    if (!rpcRes.ok) {
-      await fetch(`${SUPABASE_URL}/rest/v1/payment_orders?customer_email=eq.${targetEmail}`, {
+      await fetch(`${SUPABASE_URL}/rest/v1/payment_orders?customer_email=eq.${encodeURIComponent(targetEmail)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` },
         body: JSON.stringify({ payment_status: 'refunded' })
-      });
-      await fetch(`${SUPABASE_URL}/rest/v1/licenses?customer_id=in.(select id from customers where lower(email)=eq.${targetEmail})`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` },
-        body: JSON.stringify({ status: 'revoked', revoked_reason: revokeReason })
       });
     }
   } catch (err) {

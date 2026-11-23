@@ -169,6 +169,12 @@ Deno.serve(async (req: Request) => {
         .eq('provider_order_id', razorpay_order_id);
     }
 
+    const sessionToken = 'sfx_token_' + btoa(JSON.stringify({
+      email: cleanEmail,
+      payment_id: razorpay_payment_id,
+      exp: Date.now() + 30 * 24 * 3600 * 1000
+    }));
+
     return new Response(JSON.stringify({
       ok: true,
       verified: true,
@@ -176,6 +182,7 @@ Deno.serve(async (req: Request) => {
       email: cleanEmail,
       order_id: razorpay_order_id,
       payment_id: razorpay_payment_id,
+      token: sessionToken,
       license_id: orderData.license_id,
       delivery: {
         mode: 'web_dashboard',
@@ -184,9 +191,9 @@ Deno.serve(async (req: Request) => {
       },
       downloads: {
         version: 'v2.2.0',
-        zxp_url: '/downloads/sfx-composer-pro-v2.2.0.zxp',
-        zip_url: '/downloads/sfx-composer-pro-v2.2.0.zip',
-        sfx_library_url: (Deno.env.get('SFX_LIBRARY_DRIVE_URL') || 'https://drive.google.com/file/d/1rF1f3KEKSpri1KoZqP8SCv-Q0-NYxvGD/view?usp=sharing').trim()
+        zxp_url: `/downloads/sfx-composer-pro-v2.2.0.zxp?token=${encodeURIComponent(sessionToken)}`,
+        zip_url: `/downloads/sfx-composer-pro-v2.2.0.zip?token=${encodeURIComponent(sessionToken)}`,
+        sfx_library_url: `/api/download?type=sfx-library&token=${encodeURIComponent(sessionToken)}`
       }
     }), {
       status: 200,

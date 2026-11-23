@@ -126,8 +126,67 @@
         <span class="sfx-site-kicker">7GB MASTER AUDIO ARCHIVE</span>
         <h1 class="sfx-site-title" style="font-size: 34px;">SFX LIBRARY</h1>
         <p class="sfx-site-desc">
-          Explore all 20 sound-effect folder categories included in the 7GB SFX Library. Click any folder to inspect its production specifications, format details, and category scope. Delivered via high-speed Google Drive download upon bundle purchase.
+          Explore all 20 sound-effect folder categories included in the 7GB SFX Library. Click any folder to inspect its production specifications, format details, and category scope. Delivered via high-speed direct archive download upon bundle purchase.
         </p>
+      </div>
+
+      <!-- SECURE LICENSE-VERIFIED DOWNLOAD COMPONENT -->
+      <div id="library-download-section" class="sfx-library-download-card" style="margin-bottom: 32px; background: linear-gradient(180deg, rgba(8, 16, 36, 0.95) 0%, rgba(5, 10, 20, 0.98) 100%); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 16px; padding: 32px; position: relative; overflow: hidden; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(16, 185, 129, 0.08);">
+        <!-- Ambient Glow -->
+        <div style="position: absolute; top: -80px; right: -80px; width: 220px; height: 220px; background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, transparent 70%); pointer-events: none;"></div>
+        
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;">
+          <div>
+            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px; padding: 4px 12px; margin-bottom: 12px;">
+              <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;"></span>
+              <span style="font-size: 11px; font-weight: 800; color: #34d399; letter-spacing: 0.06em; text-transform: uppercase;">SECURE DIRECT ARCHIVE DOWNLOAD</span>
+            </div>
+            <h2 style="font-size: 24px; font-weight: 800; color: #ffffff; margin: 0 0 6px 0; letter-spacing: -0.01em;">Download 7GB Master SFX Library</h2>
+            <p style="font-size: 13.5px; color: #94a3b8; margin: 0; line-height: 1.5; max-width: 620px;">
+              Enter your SFX Composer Pro license key below. Your license will be securely verified server-side and the 7GB master audio archive will start downloading automatically.
+            </p>
+          </div>
+          <div style="text-align: right; font-size: 11.5px; color: #64748b;">
+            <div style="font-weight: 700; color: #e2e8f0; font-size: 14px;">4,500+ WAV Files</div>
+            <div>24-bit / 48kHz Broadcast Audio · 20 Folders</div>
+          </div>
+        </div>
+
+        <!-- Download Form -->
+        <form id="sfx-library-download-form" style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 280px; position: relative;">
+              <input 
+                type="text" 
+                id="sfx-lib-license-input" 
+                name="license_key" 
+                placeholder="SFX-XXXX-XXXX-XXXX-XXXX" 
+                autocomplete="off" 
+                spellcheck="false"
+                style="width: 100%; height: 48px; background: #050508; border: 1px solid #2a2a34; border-radius: 10px; padding: 0 16px; font-family: var(--sfx-font-mono, monospace); font-size: 15px; font-weight: 700; color: #ffffff; letter-spacing: 0.08em; text-transform: uppercase; outline: none; transition: border-color 0.2s, box-shadow 0.2s;"
+                required
+              />
+            </div>
+            <button 
+              type="submit" 
+              id="sfx-lib-download-submit-btn" 
+              class="sfx-site-btn-primary" 
+              style="height: 48px; padding: 0 28px; font-size: 14px; font-weight: 700; background: #059669; border-color: #10b981; display: inline-flex; align-items: center; justify-content: center; gap: 10px; white-space: nowrap;"
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span id="sfx-lib-btn-label">Verify License &amp; Download</span>
+            </button>
+          </div>
+
+          <!-- Status & Feedback Area -->
+          <div id="sfx-lib-status-area" style="display: none; padding: 14px 18px; border-radius: 8px; font-size: 13px; line-height: 1.5;"></div>
+        </form>
+
+        <!-- Help Link -->
+        <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 12px; color: #64748b;">
+          <span>Don't have your key? Find it anytime in <a href="#" class="open-customer-dashboard-trigger" style="color: #38bdf8; text-decoration: underline;">My License &amp; Downloads</a> using your purchase email.</span>
+          <span>Single-file master archive · Resumable download supported</span>
+        </div>
       </div>
 
       <!-- INTERACTIVE SEARCH & CATEGORY FILTER BAR -->
@@ -179,7 +238,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -216,7 +275,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -253,7 +312,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -290,7 +349,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -327,7 +386,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -364,7 +423,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -401,7 +460,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -438,7 +497,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -475,7 +534,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -512,7 +571,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -549,7 +608,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -586,7 +645,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -623,7 +682,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -660,7 +719,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -697,7 +756,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -734,7 +793,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -771,7 +830,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -808,7 +867,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -845,7 +904,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -882,7 +941,7 @@
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Delivery</div>
-                <div class="sfx-folder-meta-val">Google Drive (7GB)</div>
+                <div class="sfx-folder-meta-val">Direct Download (7GB)</div>
               </div>
               <div>
                 <div class="sfx-folder-meta-label">Licensing</div>
@@ -903,7 +962,7 @@
         <span class="sfx-bundle-tag">TWO PRODUCTS — ONE BUNDLE</span>
         <h3 style="font-size: 24px; font-weight: 800; color: #fff; margin: 0 0 8px 0;">Get SFX Composer Software + 7GB Master SFX Library</h3>
         <p style="font-size: 14px; color: #94a3b8; max-width: 600px; margin: 0 auto 20px auto; line-height: 1.6;">
-          Unlock the complete SFX Composer desktop software, plus lifetime high-speed Google Drive access to all 20 sound categories for just ₹199.
+          Unlock the complete SFX Composer desktop software, plus lifetime direct download access to all 20 sound categories for just ₹199.
         </p>
         <button class="sfx-site-btn-primary sfx-buy-trigger" style="padding: 14px 32px; font-size: 15px; font-weight: 700;">
           Buy Complete Bundle — ₹199
@@ -1022,24 +1081,24 @@
 
           <!-- Software Downloads -->
           <div style="display: flex; gap: 10px; margin-bottom: 14px;">
-            <a href="/downloads/sfx-composer-pro-v2.2.0.zxp" download class="sfx-site-btn-primary" style="flex: 1; text-align: center; padding: 10px; font-size: 12px;">
+            <a href="#" id="success-download-zxp-btn" class="sfx-site-btn-primary" style="flex: 1; text-align: center; padding: 10px; font-size: 12px; text-decoration: none;">
               Download Software Package
             </a>
-            <a href="/downloads/sfx-composer-pro-v2.2.0.zip" download class="sfx-site-btn-secondary" style="flex: 1; text-align: center; padding: 10px; font-size: 12px;">
+            <a href="#" id="success-download-zip-btn" class="sfx-site-btn-secondary" style="flex: 1; text-align: center; padding: 10px; font-size: 12px; text-decoration: none;">
               Download CEP ZIP
             </a>
           </div>
 
-          <!-- Product 2: 7GB SFX Library Google Drive Delivery -->
+          <!-- Product 2: 7GB SFX Library Delivery -->
           <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
               <span style="font-size: 12px; font-weight: 800; color: #34d399;">PRODUCT 2: 7GB Master SFX Library</span>
-              <span style="font-size: 10.5px; color: #a7f3d0; background: rgba(16, 185, 129, 0.2); padding: 1px 6px; border-radius: 4px;">Google Drive</span>
+              <span style="font-size: 10.5px; color: #a7f3d0; background: rgba(16, 185, 129, 0.2); padding: 1px 6px; border-radius: 4px;">High-Speed Delivery</span>
             </div>
             <p style="font-size: 11.5px; color: var(--sfx-text-muted); margin: 0 0 10px 0; line-height: 1.45;">
               Original 24-bit/48kHz broadcast WAV audio archive with all 20 production folders (Button, Impact, Foley, Glitch, Transitions, etc.).
             </p>
-            <a href="https://drive.google.com/file/d/1rF1f3KEKSpri1KoZqP8SCv-Q0-NYxvGD/view?usp=sharing" id="success-sfx-library-btn" target="_blank" rel="noopener noreferrer" class="sfx-site-btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 11px; font-size: 13px; font-weight: 700; background: #059669; border-color: #10b981; text-decoration: none;">
+            <a href="#" id="success-sfx-library-btn" target="_blank" rel="noopener noreferrer" class="sfx-site-btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 11px; font-size: 13px; font-weight: 700; background: #059669; border-color: #10b981; text-decoration: none;">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
               Download SFX Library (7GB)
             </a>

@@ -4,6 +4,11 @@
    Audio Waveform: Vibrant Green (#35EA86) • Clean Typography: Crisp White (#FFFFFF)
    ========================================================================== */
 
+@keyframes sfx-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 :root {
   /* 1. Primary Black Brand Identity (#050505 / near-black) */
   --sfx-bg-deep: #050505;

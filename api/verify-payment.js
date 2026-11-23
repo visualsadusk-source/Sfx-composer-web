@@ -4,7 +4,7 @@
  * Automatically generates license and unlocks Google Drive product delivery upon payment.
  */
 
-const { handleCors, verifyHmacSha256, makeRazorpayRequest, generateLicenseKey, memoryStore } = require('./_shared');
+const { handleCors, verifyHmacSha256, makeRazorpayRequest, generateLicenseKey, memoryStore, createSignedDownloadToken } = require('./_shared');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
@@ -98,6 +98,11 @@ module.exports = async function handler(req, res) {
   if (memoryStore.processedPayments.has(razorpay_payment_id)) {
     const existing = memoryStore.licenses.get(razorpay_order_id);
     if (existing) {
+      const existingToken = createSignedDownloadToken({
+        email: cleanEmail,
+        payment_id: razorpay_payment_id
+      }, 30 * 24 * 3600 * 1000);
+
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');
       return res.end(JSON.stringify({
@@ -107,12 +112,13 @@ module.exports = async function handler(req, res) {
         email: cleanEmail,
         order_id: razorpay_order_id,
         payment_id: razorpay_payment_id,
+        token: existingToken,
         already_processed: true,
         downloads: {
           version: 'v2.2.0',
-          zxp_url: '/downloads/sfx-composer-pro-v2.2.0.zxp',
-          zip_url: '/downloads/sfx-composer-pro-v2.2.0.zip',
-          sfx_library_url: process.env.SFX_LIBRARY_DRIVE_URL || 'https://drive.google.com/file/d/1rF1f3KEKSpri1KoZqP8SCv-Q0-NYxvGD/view?usp=sharing'
+          zxp_url: `/downloads/sfx-composer-pro-v2.2.0.zxp?token=${encodeURIComponent(existingToken)}`,
+          zip_url: `/downloads/sfx-composer-pro-v2.2.0.zip?token=${encodeURIComponent(existingToken)}`,
+          sfx_library_url: `/api/download?type=sfx-library&token=${encodeURIComponent(existingToken)}`
         }
       }));
     }
@@ -251,7 +257,10 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  const driveUrl = process.env.SFX_LIBRARY_DRIVE_URL || 'https://drive.google.com/file/d/1rF1f3KEKSpri1KoZqP8SCv-Q0-NYxvGD/view?usp=sharing';
+  const sessionToken = createSignedDownloadToken({
+    email: cleanEmail,
+    payment_id: razorpay_payment_id
+  }, 30 * 24 * 3600 * 1000);
 
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
@@ -262,6 +271,7 @@ module.exports = async function handler(req, res) {
     email: cleanEmail,
     order_id: razorpay_order_id,
     payment_id: razorpay_payment_id,
+    token: sessionToken,
     amount: (body.amount ? body.amount / 100 : 199),
     currency: 'INR',
     delivery: {
@@ -271,9 +281,9 @@ module.exports = async function handler(req, res) {
     },
     downloads: {
       version: 'v2.2.0',
-      zxp_url: hasPlugin ? '/downloads/sfx-composer-pro-v2.2.0.zxp' : null,
-      zip_url: hasPlugin ? '/downloads/sfx-composer-pro-v2.2.0.zip' : null,
-      sfx_library_url: hasLibrary ? driveUrl : null
+      zxp_url: hasPlugin ? `/downloads/sfx-composer-pro-v2.2.0.zxp?token=${encodeURIComponent(sessionToken)}` : null,
+      zip_url: hasPlugin ? `/downloads/sfx-composer-pro-v2.2.0.zip?token=${encodeURIComponent(sessionToken)}` : null,
+      sfx_library_url: hasLibrary ? `/api/download?type=sfx-library&token=${encodeURIComponent(sessionToken)}` : null
     }
   }));
 };

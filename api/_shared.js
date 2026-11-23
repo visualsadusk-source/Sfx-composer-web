@@ -109,11 +109,66 @@ const memoryStore = {
   entitlements: new Map()
 };
 
+function getDownloadTokenSecret() {
+  return process.env.LICENSE_ENCRYPTION_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.RAZORPAY_KEY_SECRET || 'sfx-composer-secure-token-secret-2026';
+}
+
+// Generate cryptographically signed, expiring download session token (HMAC-SHA256)
+function createSignedDownloadToken(payload, expiresInMs = 24 * 60 * 60 * 1000) {
+  const secret = getDownloadTokenSecret();
+  const tokenPayload = {
+    ...payload,
+    exp: Date.now() + expiresInMs
+  };
+  const data = Buffer.from(JSON.stringify(tokenPayload)).toString('base64');
+  const sig = crypto.createHmac('sha256', secret).update(data).digest('hex');
+  return `sfx_token_${data}.${sig}`;
+}
+
+// Verify signed download session token
+function verifySignedDownloadToken(token) {
+  if (!token || typeof token !== 'string') return null;
+  if (!token.startsWith('sfx_token_')) return null;
+  const raw = token.substring('sfx_token_'.length);
+  const secret = getDownloadTokenSecret();
+  const parts = raw.split('.');
+  if (parts.length === 2) {
+    const [data, sig] = parts;
+    const expectedSig = crypto.createHmac('sha256', secret).update(data).digest('hex');
+    const sigBuf = Buffer.from(sig, 'hex');
+    const expBuf = Buffer.from(expectedSig, 'hex');
+    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+      return null;
+    }
+    try {
+      const payload = JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
+      if (payload && payload.exp && payload.exp > Date.now()) {
+        return payload;
+      }
+    } catch (e) {
+      return null;
+    }
+  } else if (parts.length === 1) {
+    // Backwards-compatible fallback for active sessions in memory
+    try {
+      const payload = JSON.parse(Buffer.from(parts[0], 'base64').toString('utf8'));
+      if (payload && payload.exp && payload.exp > Date.now()) {
+        return payload;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+  return null;
+}
+
 module.exports = {
   getCorsHeaders,
   handleCors,
   generateLicenseKey,
   verifyHmacSha256,
   makeRazorpayRequest,
-  memoryStore
+  memoryStore,
+  createSignedDownloadToken,
+  verifySignedDownloadToken
 };

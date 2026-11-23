@@ -108,7 +108,7 @@ async function runTests() {
     const html = fs.readFileSync(path.join(ROOT_DIR, 'library.html'), 'utf8');
     // Ensure technical specs are shown instead of fake mp3/wav files
     assert.ok(html.includes('24-bit / 48kHz WAV'), 'Expected technical format spec');
-    assert.ok(html.includes('Google Drive (7GB)'), 'Expected delivery spec');
+    assert.ok(html.includes('Direct Download (7GB)') || html.includes('Google Drive (7GB)'), 'Expected delivery spec');
     assert.ok(!html.includes('button_click_01.wav'), 'Found fake audio file');
     assert.ok(!html.includes('whoosh_trans_04.wav'), 'Found fake audio file');
   });
@@ -142,7 +142,7 @@ async function runTests() {
       assert.ok(html.includes('id="checkout-modal"'), `Page ${p} missing checkout-modal`);
       assert.ok(html.includes('SFX Composer Ultimate Bundle'), `Page ${p} checkout modal missing Ultimate Bundle title`);
       assert.ok(html.includes('id="success-sfx-library-btn"'), `Page ${p} missing success-sfx-library-btn`);
-      assert.ok(html.includes(DRIVE_URL), `Page ${p} missing Drive URL in success modal or binding`);
+      assert.ok(!html.includes(DRIVE_URL), `Page ${p} must NOT leak raw Drive URL in public markup`);
     });
   });
 
@@ -153,6 +153,7 @@ async function runTests() {
       const html = fs.readFileSync(path.join(ROOT_DIR, p), 'utf8');
       assert.ok(html.includes('id="customer-dashboard-modal"'), `Page ${p} missing customer-dashboard-modal`);
       assert.ok(html.includes('id="cdm-sfx-library-btn"'), `Page ${p} missing cdm-sfx-library-btn`);
+      assert.ok(!html.includes(DRIVE_URL), `Page ${p} must NOT expose raw Drive URL in HTML`);
     });
   });
 
@@ -171,7 +172,6 @@ async function runTests() {
   test('verify-payment Supabase Edge Function includes sfx_library_url in downloads', () => {
     const fn = fs.readFileSync(path.join(ROOT_DIR, 'supabase', 'functions', 'verify-payment', 'index.ts'), 'utf8');
     assert.ok(fn.includes('sfx_library_url:'), 'verify-payment missing sfx_library_url');
-    assert.ok(fn.includes('SFX_LIBRARY_DRIVE_URL'), 'verify-payment missing SFX_LIBRARY_DRIVE_URL lookup');
   });
 
   test('Web dashboard delivers Product 1 and Product 2 instantly upon verified purchase', () => {

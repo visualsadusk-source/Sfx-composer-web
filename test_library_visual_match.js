@@ -63,7 +63,7 @@ function verifyLibraryVisualMatch() {
   for (const name of expectedFolders) {
     assert.ok(libHtml.includes(`data-name="${name}"`), `Folder "${name}" must be preserved`);
   }
-  assert.ok(libHtml.includes('https://drive.google.com/file/d/1rF1f3KEKSpri1KoZqP8SCv-Q0-NYxvGD/view?usp=sharing'), 'Google Drive download URL preserved');
+  assert.ok(libHtml.includes('id="success-sfx-library-btn"'), 'Secure SFX Library download gate preserved');
   pass('All 20 folder categories and Google Drive delivery links completely preserved');
 
   console.log('\n================================================================');

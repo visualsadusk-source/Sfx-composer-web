@@ -6,7 +6,9 @@ const crypto = require('crypto');
 const assert = require('assert');
 
 const SERVER_URL = 'http://localhost:3000';
-const DOWNLOADS_DIR = path.join(__dirname, 'downloads');
+const DOWNLOADS_DIR = fs.existsSync(path.join(__dirname, 'private_storage', 'downloads'))
+  ? path.join(__dirname, 'private_storage', 'downloads')
+  : path.join(__dirname, 'downloads');
 
 // Load .env
 const envPath = path.join(__dirname, '.env');
@@ -172,32 +174,36 @@ async function run() {
   // ── TEST SUITE 3: WEBSITE & LIVE DEMO VERIFICATION ──
   console.log('\n--- TEST SUITE 3: Website, Live Demo & Customer Dashboard Markup ---');
 
-  test('demo.html links to v2.2.0 downloads and authentic license-ui.css', () => {
+  test('demo.html contains secure gated download buttons and authentic license-ui.css', () => {
     const html = fs.readFileSync(path.join(__dirname, 'demo.html'), 'utf8');
-    assert.ok(html.includes('/downloads/sfx-composer-pro-v2.2.0.zxp'), 'demo.html must have v2.2.0 zxp');
-    assert.ok(html.includes('/downloads/sfx-composer-pro-v2.2.0.zip'), 'demo.html must have v2.2.0 zip');
+    assert.ok(html.includes('id="success-download-zxp-btn"'), 'demo.html must have success-download-zxp-btn');
+    assert.ok(html.includes('id="success-download-zip-btn"'), 'demo.html must have success-download-zip-btn');
     assert.ok(html.includes('plugin-dist/license-ui.css'), 'demo.html must include license-ui.css');
     assert.ok(html.includes('id="sfx-license-overlay"'), 'demo.html must contain authentic license modal');
     assert.ok(html.includes('id="sfx-settings-drawer"'), 'demo.html must contain settings drawer');
     assert.ok(html.includes('License &amp; Activation'), 'demo.html must showcase License & Activation section');
   });
 
-  test('index.html links to v2.2.0 downloads', () => {
+  test('index.html contains secure gated download buttons without exposing raw URLs', () => {
     const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
-    assert.ok(html.includes('/downloads/sfx-composer-pro-v2.2.0.zxp'), 'index.html must have v2.2.0 zxp');
-    assert.ok(html.includes('/downloads/sfx-composer-pro-v2.2.0.zip'), 'index.html must have v2.2.0 zip');
+    assert.ok(html.includes('id="success-download-zxp-btn"'), 'index.html must have success-download-zxp-btn');
+    assert.ok(html.includes('id="success-download-zip-btn"'), 'index.html must have success-download-zip-btn');
+    assert.ok(!html.includes('drive.google.com'), 'index.html must never expose raw Google Drive URL');
   });
 
-  test('library.html and screenshots.html link to v2.2.0 downloads', () => {
+  test('library.html and screenshots.html contain secure gated download buttons', () => {
     const libHtml = fs.readFileSync(path.join(__dirname, 'library.html'), 'utf8');
     const scrHtml = fs.readFileSync(path.join(__dirname, 'screenshots.html'), 'utf8');
-    assert.ok(libHtml.includes('/downloads/sfx-composer-pro-v2.2.0.zxp'), 'library.html must have v2.2.0 zxp');
-    assert.ok(scrHtml.includes('/downloads/sfx-composer-pro-v2.2.0.zxp'), 'screenshots.html must have v2.2.0 zxp');
+    assert.ok(libHtml.includes('id="success-download-zxp-btn"'), 'library.html must have success-download-zxp-btn');
+    assert.ok(scrHtml.includes('id="success-download-zxp-btn"'), 'screenshots.html must have success-download-zxp-btn');
+    assert.ok(!libHtml.includes('drive.google.com'), 'library.html must never expose raw Google Drive URL');
+    assert.ok(!scrHtml.includes('drive.google.com'), 'screenshots.html must never expose raw Google Drive URL');
   });
 
-  test('No outdated static download links active in customer dashboard', () => {
+  test('No raw static download links active in customer dashboard or source HTML', () => {
     const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
-    assert.ok(!html.includes('href="/downloads/sfx-composer-pro-v2.4.0.zxp" download class="sfx-button'), 'No old static download links');
+    assert.ok(!html.includes('href="/downloads/sfx-composer-pro-v2.4.0.zxp"'), 'No raw v2.4.0 static download links');
+    assert.ok(!html.includes('href="/downloads/sfx-composer-pro-v2.2.0.zxp"'), 'No raw v2.2.0 static download links');
   });
 
   console.log(`\n================================================================`);

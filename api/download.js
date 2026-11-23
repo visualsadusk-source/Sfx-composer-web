@@ -12,7 +12,9 @@
 
 const fs = require('fs');
 const path = require('path');
-const { handleCors, memoryStore } = require('./_shared');
+const { handleCors, memoryStore, verifySignedDownloadToken } = require('./_shared');
+const { streamSfxLibrary, isDriveStreamingConfigured } = require('./drive-stream');
+const { verifyLicenseKey } = require('./library-download');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://wyjazmiihwjlrkggeeez.supabase.co';
 const ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxNzMxMTQsImV4cCI6MjExMDc0OTExNH0.FXKso4hkmUYcl_FfjG4GnHxwyCr09j5DkJ6ak1B2auY';
@@ -28,15 +30,12 @@ async function verifySupabaseToken(token) {
     return { email: 'admin@sfxcomposer.com', is_admin: true, id: 'admin-service-role' };
   }
 
-  // Check customer portal verified session token (sfx_token_BASE64)
+  // Check customer portal verified session token (sfx_token_...)
   if (token.startsWith('sfx_token_')) {
-    try {
-      const jsonStr = Buffer.from(token.substring('sfx_token_'.length), 'base64').toString('utf8');
-      const payload = JSON.parse(jsonStr);
-      if (payload && payload.email && payload.exp && payload.exp > Date.now()) {
-        return { email: payload.email, payment_id: payload.payment_id, id: payload.payment_id || payload.email };
-      }
-    } catch (e) {}
+    const payload = verifySignedDownloadToken(token);
+    if (payload && payload.email) {
+      return { email: payload.email, payment_id: payload.payment_id, id: payload.payment_id || payload.email };
+    }
     return null;
   }
 
@@ -126,6 +125,7 @@ module.exports = async function handler(req, res) {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const reqType = url.searchParams.get('type') || '';
   const tokenParam = url.searchParams.get('token') || '';
+  const licenseKeyParam = (url.searchParams.get('license_key') || (req.body && req.body.license_key) || '').trim();
 
   // 1. Extract Bearer Token from Authorization Header or query param
   let token = '';
@@ -146,8 +146,55 @@ module.exports = async function handler(req, res) {
     requestedFile = 'sfx-library';
   }
 
-  // 2. Authentication Check
-  if (!token) {
+  // 2. Authentication Check (Accepts either session token OR verified license key)
+  let user = null;
+  let entitlement = { has_access: false, reason: 'unauthenticated' };
+
+  if (licenseKeyParam) {
+    // License key authentication path
+    const licResult = await verifyLicenseKey(licenseKeyParam);
+    if (!licResult.valid) {
+      logAudit({
+        email: 'invalid_license',
+        file: requestedFile || 'sfx-library',
+        status: 'denied',
+        ip: req.socket?.remoteAddress,
+        reason: licResult.reason
+      });
+
+      res.statusCode = 403;
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify({
+        ok: false,
+        code: (licResult.reason || 'INVALID_LICENSE').toUpperCase(),
+        message: 'Invalid, expired, or revoked license key. Access denied.'
+      }));
+    }
+
+    user = { email: licResult.email || 'license-user', id: licResult.license_id };
+    entitlement = { has_access: true, reason: licResult.reason };
+  } else if (token) {
+    user = await verifySupabaseToken(token);
+    if (!user) {
+      logAudit({
+        email: 'invalid_token',
+        file: requestedFile || 'unknown',
+        status: 'denied',
+        ip: req.socket?.remoteAddress,
+        reason: 'invalid_or_expired_token'
+      });
+
+      res.statusCode = 401;
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify({
+        ok: false,
+        code: 'UNAUTHENTICATED',
+        message: 'Invalid or expired session token. Please sign in again.'
+      }));
+    }
+
+    entitlement = await checkEntitlement((user.email || '').trim().toLowerCase(), user);
+  } else {
     logAudit({
       email: 'anonymous',
       file: requestedFile || 'unknown',
@@ -161,34 +208,13 @@ module.exports = async function handler(req, res) {
     return res.end(JSON.stringify({
       ok: false,
       code: 'UNAUTHENTICATED',
-      message: 'Authentication required. Please sign in to access product downloads.'
-    }));
-  }
-
-  const user = await verifySupabaseToken(token);
-  if (!user) {
-    logAudit({
-      email: 'invalid_token',
-      file: requestedFile || 'unknown',
-      status: 'denied',
-      ip: req.socket?.remoteAddress,
-      reason: 'invalid_or_expired_token'
-    });
-
-    res.statusCode = 401;
-    res.setHeader('Content-Type', 'application/json');
-    return res.end(JSON.stringify({
-      ok: false,
-      code: 'UNAUTHENTICATED',
-      message: 'Invalid or expired session token. Please sign in again.'
+      message: 'Authentication required. Please enter your license key or sign in to access product downloads.'
     }));
   }
 
   const userEmail = (user.email || '').trim().toLowerCase();
 
   // 3. Purchase Entitlement Check
-  const entitlement = await checkEntitlement(userEmail, user);
-
   if (!entitlement.has_access) {
     logAudit({
       email: userEmail,
@@ -216,9 +242,23 @@ module.exports = async function handler(req, res) {
     reason: entitlement.reason
   });
 
-  // Action A: Deliver 7GB SFX Library (Google Drive)
+  // Action A: Deliver 7GB SFX Library
   if (requestedFile === 'sfx-library') {
-    const driveUrl = process.env.SFX_LIBRARY_DRIVE_URL || 'https://drive.google.com/file/d/1rF1f3KEKSpri1KoZqP8SCv-Q0-NYxvGD/view?usp=sharing';
+    // 1. Verification-only check (for frontend status preview)
+    const isVerifyOnly = url.searchParams.get('verify_only') === 'true' || (req.body && req.body.verify_only);
+    if (isVerifyOnly) {
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify({
+        ok: true,
+        verified: true,
+        has_access: true,
+        email: userEmail,
+        product: '7GB Master SFX Library',
+        message: 'License verified. Ready to download.'
+      }));
+    }
+
     const acceptHeader = req.headers['accept'] || '';
     if (acceptHeader.includes('application/json') || url.searchParams.get('format') === 'json') {
       res.statusCode = 200;
@@ -226,22 +266,88 @@ module.exports = async function handler(req, res) {
       return res.end(JSON.stringify({
         ok: true,
         has_access: true,
+        verified: true,
         product: 'SFX Composer Complete Bundle',
-        download_url: driveUrl
+        download_ready: true,
+        download_url: `/api/download?type=sfx-library&token=${encodeURIComponent(token || licenseKeyParam)}`
       }));
     }
-    // Direct browser click / navigation: HTTP 302 Redirect
-    res.writeHead(302, { 'Location': driveUrl });
-    return res.end();
+
+    // 2. Stream directly from Google Drive API if configured
+    if (isDriveStreamingConfigured()) {
+      logAudit({
+        email: userEmail,
+        file: 'sfx-library-stream',
+        status: 'granted',
+        ip: req.socket?.remoteAddress,
+        reason: 'streaming_via_drive_api'
+      });
+
+      try {
+        await streamSfxLibrary(req, res);
+        return;
+      } catch (streamErr) {
+        console.error('Drive stream error:', streamErr.message);
+        if (!res.headersSent) {
+          res.statusCode = 502;
+          res.setHeader('Content-Type', 'application/json');
+          return res.end(JSON.stringify({
+            ok: false,
+            code: 'DRIVE_STREAM_ERROR',
+            message: 'Unable to stream download from Google Drive API. Please try again.'
+          }));
+        }
+        return;
+      }
+    }
+
+    // 3. Local/Private storage streaming fallback (for offline, testing or dedicated server hosting)
+    const localLibPaths = [
+      path.join(__dirname, '..', 'private_storage', 'downloads', 'SFX-Composer-Master-Library.zip'),
+      path.join(__dirname, '..', 'private_storage', 'SFX-Composer-Master-Library.zip'),
+      path.join(__dirname, '..', 'private_storage', 'downloads', 'sfx-library-7gb.zip')
+    ];
+    const localLibFile = localLibPaths.find(p => fs.existsSync(p));
+    if (localLibFile) {
+      const stat = fs.statSync(localLibFile);
+      res.writeHead(200, {
+        'Content-Type': 'application/zip',
+        'Content-Length': stat.size,
+        'Content-Disposition': 'attachment; filename="SFX-Composer-Master-Library.zip"',
+        'Cache-Control': 'private, no-cache, no-store, must-revalidate'
+      });
+      return fs.createReadStream(localLibFile).pipe(res);
+    }
+
+    // 4. If neither Google Drive streaming nor local archive is configured
+    res.statusCode = 503;
+    res.setHeader('Content-Type', 'application/json');
+    return res.end(JSON.stringify({
+      ok: false,
+      code: 'SERVICE_NOT_CONFIGURED',
+      message: 'The secure SFX Library streaming service is not configured with Google Drive API credentials. Please contact support.'
+    }));
   }
 
-  // Action B: Stream Binary Plugin Installers (.zxp or .zip)
+  // Action B: Stream Binary Plugin Installers (.zxp or .zip) from Private Storage
   if (requestedFile.endsWith('.zxp') || requestedFile.endsWith('.zip')) {
-    let filePath = path.join(__dirname, '..', 'downloads', requestedFile);
-    if (!fs.existsSync(filePath)) {
+    const candidatePaths = [
+      path.join(__dirname, '..', 'private_storage', 'downloads', requestedFile),
+      path.join(__dirname, '..', 'private_storage', requestedFile),
+      path.join(__dirname, '..', 'downloads', requestedFile)
+    ];
+
+    let filePath = candidatePaths.find(p => fs.existsSync(p));
+
+    if (!filePath) {
       // Fallback to canonical v2.2.0 files
       const canonicalName = requestedFile.endsWith('.zxp') ? 'sfx-composer-pro-v2.2.0.zxp' : 'sfx-composer-pro-v2.2.0.zip';
-      filePath = path.join(__dirname, '..', 'downloads', canonicalName);
+      const fallbackPaths = [
+        path.join(__dirname, '..', 'private_storage', 'downloads', canonicalName),
+        path.join(__dirname, '..', 'private_storage', canonicalName),
+        path.join(__dirname, '..', 'downloads', canonicalName)
+      ];
+      filePath = fallbackPaths.find(p => fs.existsSync(p));
     }
     if (!fs.existsSync(filePath)) {
       res.statusCode = 404;

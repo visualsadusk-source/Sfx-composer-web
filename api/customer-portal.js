@@ -23,7 +23,7 @@
  */
 
 const crypto = require('crypto');
-const { handleCors, makeRazorpayRequest, memoryStore } = require('./_shared');
+const { handleCors, makeRazorpayRequest, memoryStore, createSignedDownloadToken } = require('./_shared');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://wyjazmiihwjlrkggeeez.supabase.co';
 const ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxNzMxMTQsImV4cCI6MjExMDc0OTExNH0.FXKso4hkmUYcl_FfjG4GnHxwyCr09j5DkJ6ak1B2auY';
@@ -643,14 +643,11 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // 10. Generate Verified Session Token
-  const sessionToken = 'sfx_token_' + Buffer.from(JSON.stringify({
+  // 10. Generate Verified Cryptographically Signed Session Token
+  const sessionToken = createSignedDownloadToken({
     email: targetEmail,
-    payment_id: paymentRef,
-    exp: Date.now() + 30 * 24 * 3600 * 1000
-  })).toString('base64');
-
-  const driveUrl = process.env.SFX_LIBRARY_DRIVE_URL || 'https://drive.google.com/file/d/1rF1f3KEKSpri1KoZqP8SCv-Q0-NYxvGD/view?usp=sharing';
+    payment_id: paymentRef
+  }, 30 * 24 * 3600 * 1000);
 
   const productName = (hasPlugin && hasLibrary)
     ? 'SFX Composer Complete Bundle'
@@ -681,7 +678,7 @@ module.exports = async function handler(req, res) {
       product_name: productName,
       zxp_url: hasPlugin ? `/downloads/sfx-composer-pro-v2.2.0.zxp?token=${encodeURIComponent(sessionToken)}` : null,
       zip_url: hasPlugin ? `/downloads/sfx-composer-pro-v2.2.0.zip?token=${encodeURIComponent(sessionToken)}` : null,
-      sfx_library_url: hasLibrary ? driveUrl : null
+      sfx_library_url: hasLibrary ? `/api/download?type=sfx-library&token=${encodeURIComponent(sessionToken)}` : null
     }
   }));
 };
