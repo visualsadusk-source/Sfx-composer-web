@@ -7,6 +7,31 @@
 (function () {
   'use strict';
 
+  function escapeHtml(val) {
+    return String(val == null ? '' : val)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function safeUrl(url, allowRelative) {
+    if (!url || typeof url !== 'string') return '#';
+    var trimmed = url.trim();
+    if (!trimmed) return '#';
+    if (allowRelative && trimmed.startsWith('/') && !trimmed.startsWith('//')) {
+      return trimmed;
+    }
+    try {
+      var parsed = new URL(trimmed, window.location.origin);
+      if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+        return parsed.href;
+      }
+    } catch (e) {}
+    return '#';
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     setupLeftNav();
     setupHeroWaveform();
@@ -256,21 +281,60 @@
             card.className = 'tutorial-card';
             card.style.cursor = 'pointer';
 
-            var thumb = video.custom_thumbnail_url || video.thumbnail_url || ('https://img.youtube.com/vi/' + video.youtube_id + '/hqdefault.jpg');
-            var durationTag = video.duration ? '<span class="tutorial-tag" style="background: rgba(0,0,0,0.85); color: #fff;">' + video.duration + '</span>' : '';
-            var categoryTag = video.category ? '<span style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sfx-accent); font-weight: 700; display: block; margin-bottom: 4px;">' + video.category + '</span>' : '';
+            var thumbRaw = video.custom_thumbnail_url || video.thumbnail_url || ('https://img.youtube.com/vi/' + encodeURIComponent(video.youtube_id || '') + '/hqdefault.jpg');
+            var thumb = safeUrl(thumbRaw, true);
 
-            card.innerHTML = 
-              '<div class="tutorial-thumb" style="background-image: url(\'' + thumb + '\'); background-size: cover; background-position: center; position: relative;">' +
-                '<div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 100%);"></div>' +
-                '<div class="tutorial-play-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>' +
-                durationTag +
-              '</div>' +
-              '<div class="tutorial-info">' +
-                categoryTag +
-                '<h4 class="tutorial-title">' + (video.title || '') + '</h4>' +
-                '<p class="tutorial-desc">' + (video.description || '') + '</p>' +
-              '</div>';
+            var thumbDiv = document.createElement('div');
+            thumbDiv.className = 'tutorial-thumb';
+            thumbDiv.style.backgroundSize = 'cover';
+            thumbDiv.style.backgroundPosition = 'center';
+            thumbDiv.style.position = 'relative';
+            if (thumb !== '#') {
+              thumbDiv.style.backgroundImage = 'url("' + thumb.replace(/"/g, '%22') + '")';
+            }
+
+            var overlayDiv = document.createElement('div');
+            overlayDiv.style.position = 'absolute';
+            overlayDiv.style.inset = '0';
+            overlayDiv.style.background = 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 100%)';
+            thumbDiv.appendChild(overlayDiv);
+
+            var playDiv = document.createElement('div');
+            playDiv.className = 'tutorial-play-icon';
+            playDiv.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+            thumbDiv.appendChild(playDiv);
+
+            if (video.duration) {
+              var durSpan = document.createElement('span');
+              durSpan.className = 'tutorial-tag';
+              durSpan.style.background = 'rgba(0,0,0,0.85)';
+              durSpan.style.color = '#fff';
+              durSpan.textContent = video.duration;
+              thumbDiv.appendChild(durSpan);
+            }
+
+            var infoDiv = document.createElement('div');
+            infoDiv.className = 'tutorial-info';
+
+            if (video.category) {
+              var catSpan = document.createElement('span');
+              catSpan.style.cssText = 'font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sfx-accent); font-weight: 700; display: block; margin-bottom: 4px;';
+              catSpan.textContent = video.category;
+              infoDiv.appendChild(catSpan);
+            }
+
+            var titleH4 = document.createElement('h4');
+            titleH4.className = 'tutorial-title';
+            titleH4.textContent = video.title || '';
+            infoDiv.appendChild(titleH4);
+
+            var descP = document.createElement('p');
+            descP.className = 'tutorial-desc';
+            descP.textContent = video.description || '';
+            infoDiv.appendChild(descP);
+
+            card.appendChild(thumbDiv);
+            card.appendChild(infoDiv);
 
             card.addEventListener('click', function () {
               openVideoModal(video);
@@ -741,7 +805,8 @@
 
     async function checkCurrentSession() {
       try {
-        var rawSess = localStorage.getItem('sfx_customer_session');
+        try { localStorage.removeItem('sfx_customer_session'); } catch (e) {}
+        var rawSess = sessionStorage.getItem('sfx_customer_session');
         if (rawSess) {
           var cached = JSON.parse(rawSess);
           if (cached && cached.email && (cached.token || cached.order_id || cached.payment_id)) {
@@ -833,6 +898,7 @@
         var cleanVal = (this.value || '').trim().toLowerCase();
         if (activeCustomerSession && activeCustomerSession.email && activeCustomerSession.email.toLowerCase() !== cleanVal) {
           activeCustomerSession = null;
+          sessionStorage.removeItem('sfx_customer_session');
           localStorage.removeItem('sfx_customer_session');
           if (recentSessionBanner) recentSessionBanner.style.display = 'none';
           if (paymentInput && paymentInput.dataset.autofilled === 'true') {
@@ -885,7 +951,7 @@
           if (portal && portal.ok && portal.is_paid) {
             currentAuthEmail = portal.email || email;
             if (portal.token) {
-              localStorage.setItem('sfx_customer_session', JSON.stringify({
+              sessionStorage.setItem('sfx_customer_session', JSON.stringify({
                 email: currentAuthEmail,
                 payment_id: paymentId,
                 token: portal.token
@@ -915,6 +981,7 @@
     // ── SIGN OUT / SWITCH EMAIL ──
     if (btnSignout) {
       btnSignout.addEventListener('click', function () {
+        sessionStorage.removeItem('sfx_customer_session');
         localStorage.removeItem('sfx_customer_session');
         activeCustomerSession = null;
         currentAuthEmail = '';
@@ -1001,7 +1068,7 @@
             '<div class="sfx-dashboard-card" style="border: 1px solid rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.05); padding: 14px; margin-bottom: 4px;">' +
               '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
                 '<div>' +
-                  '<div style="font-size: 14px; font-weight: 700; color: #fff;">' + productName + '</div>' +
+                  '<div style="font-size: 14px; font-weight: 700; color: #fff;">' + escapeHtml(productName) + '</div>' +
                   '<div style="font-size: 11.5px; color: var(--sfx-text-muted);">Verified Purchase • Lifetime Access • Official Order Granted</div>' +
                 '</div>' +
                 '<span class="sfx-badge-status active">Active Lifetime Entitlement</span>' +
@@ -1034,10 +1101,10 @@
 
             var workstationStatus = '';
             if (devCount > 0) {
-              var devNames = activeDevs.map(function (d) { return d.device_name || 'Workstation'; }).join(', ');
-              workstationStatus = '<span style="color: var(--sfx-positive); font-weight: 600;">Bound to: ' + devNames + '</span> (' + devCount + '/' + maxDevs + ' Slots)';
+              var devNames = activeDevs.map(function (d) { return escapeHtml(d.device_name || 'Workstation'); }).join(', ');
+              workstationStatus = '<span style="color: var(--sfx-positive); font-weight: 600;">Bound to: ' + devNames + '</span> (' + escapeHtml(devCount) + '/' + escapeHtml(maxDevs) + ' Slots)';
             } else {
-              workstationStatus = '<span style="color: var(--sfx-accent);">Available for Activation (0/' + maxDevs + ' Slots Bound)</span>';
+              workstationStatus = '<span style="color: var(--sfx-accent);">Available for Activation (0/' + escapeHtml(maxDevs) + ' Slots Bound)</span>';
             }
 
             var purchaseDateStr = lic.purchase_date || lic.created_at 
@@ -1045,8 +1112,8 @@
               : 'Verified Purchase';
 
             var paymentStatusStr = lic.payment_status === 'completed'
-              ? '<span style="color: var(--sfx-positive); font-weight: 600;">Paid (₹' + (lic.payment_amount || 199) + ')</span>'
-              : (lic.payment_status ? '<span style="color: var(--sfx-caution);">' + lic.payment_status + '</span>' : '<span style="color: var(--sfx-positive);">Verified Purchase</span>');
+              ? '<span style="color: var(--sfx-positive); font-weight: 600;">Paid (₹' + escapeHtml(lic.payment_amount || 199) + ')</span>'
+              : (lic.payment_status ? '<span style="color: var(--sfx-caution);">' + escapeHtml(lic.payment_status) + '</span>' : '<span style="color: var(--sfx-positive);">Verified Purchase</span>');
 
             var expiryStr = lic.expires_at 
               ? new Date(lic.expires_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) 
@@ -1055,6 +1122,7 @@
             // Key Box with Reveal/Hide & Copy Buttons
             var keyBoxHtml = '';
             if (lic.license_key) {
+              var safeKey = escapeHtml(lic.license_key);
               keyBoxHtml = 
                 '<div style="background: #000; border: 1px solid var(--sfx-accent); border-radius: 8px; padding: 14px; margin: 12px 0;">' +
                   '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">' +
@@ -1062,12 +1130,12 @@
                     '<span style="font-size: 11px; color: var(--sfx-positive); font-weight: 600;">Verified & Active</span>' +
                   '</div>' +
                   '<div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">' +
-                    '<code class="portal-lic-key-val" data-raw="' + lic.license_key + '" style="font-family: var(--sfx-font-mono); font-size: 17px; font-weight: 800; color: #ffffff; letter-spacing: 0.08em; user-select: all;">' + lic.license_key + '</code>' +
+                    '<code class="portal-lic-key-val" data-raw="' + safeKey + '" style="font-family: var(--sfx-font-mono); font-size: 17px; font-weight: 800; color: #ffffff; letter-spacing: 0.08em; user-select: all;">' + safeKey + '</code>' +
                     '<div style="display: flex; gap: 6px;">' +
                       '<button type="button" class="btn-toggle-portal-key sfx-button sfx-button--quiet" style="height: 30px; font-size: 11px; padding: 0 12px; border: 1px solid var(--sfx-border); color: var(--sfx-accent);">' +
                         'Hide' +
                       '</button>' +
-                      '<button type="button" class="btn-copy-portal-key sfx-button sfx-button--quiet" data-key="' + lic.license_key + '" style="height: 30px; font-size: 11px; padding: 0 12px; border: 1px solid var(--sfx-border); color: #fff;">' +
+                      '<button type="button" class="btn-copy-portal-key sfx-button sfx-button--quiet" data-key="' + safeKey + '" style="height: 30px; font-size: 11px; padding: 0 12px; border: 1px solid var(--sfx-border); color: #fff;">' +
                         'Copy' +
                       '</button>' +
                     '</div>' +
@@ -1081,7 +1149,7 @@
                   '</div>' +
                   '<p style="font-size: 12px; color: var(--sfx-text-muted); line-height: 1.6; margin: 0 0 10px 0;">' +
                     'A valid purchase record exists for this order, but no encrypted license key was generated in the database.<br>' +
-                    'Please contact support at <a href="mailto:sfxcomposer@gmail.com" style="color: var(--sfx-accent);">sfxcomposer@gmail.com</a> with your Payment ID (<code>' + (lic.provider_payment_id || 'receipt') + '</code>) to receive your official key.' +
+                    'Please contact support at <a href="mailto:sfxcomposer@gmail.com" style="color: var(--sfx-accent);">sfxcomposer@gmail.com</a> with your Payment ID (<code>' + escapeHtml(lic.provider_payment_id || 'receipt') + '</code>) to receive your official key.' +
                   '</p>' +
                   '<a href="mailto:sfxcomposer@gmail.com?subject=License%20Key%20Issue%20Request%20-%20Payment%20' + encodeURIComponent(lic.provider_payment_id || '') + '&body=Hello%20SFX%20Composer%20Support%2C%0A%0AMy%20verified%20purchase%20email%20is%3A%20' + encodeURIComponent(lic.customer_email || currentAuthEmail) + '%0APayment%20ID%3A%20' + encodeURIComponent(lic.provider_payment_id || '') + '%0AOrder%20ID%3A%20' + encodeURIComponent(lic.provider_order_id || '') + '%0ALicense%20ID%3A%20' + encodeURIComponent(lic.id || '') + '%0A%0APlease%20issue%20my%20license%20key.%20Thank%20you!" ' +
                   'style="display: inline-block; height: 32px; line-height: 32px; padding: 0 16px; background: rgba(255,69,58,0.15); border: 1px solid rgba(255,69,58,0.5); border-radius: 6px; color: #ff453a; font-size: 12px; font-weight: 700; text-decoration: none;">' +
@@ -1094,19 +1162,19 @@
               '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
                 '<div>' +
                   '<div style="font-weight: 700; font-size: 15px; color: #fff;">SFX Composer Pro</div>' +
-                  '<div style="font-size: 11.5px; color: var(--sfx-text-muted);">License ID: <code style="color:var(--sfx-accent); font-size:11px;">' + (lic.license_id || lic.id) + '</code></div>' +
+                  '<div style="font-size: 11.5px; color: var(--sfx-text-muted);">License ID: <code style="color:var(--sfx-accent); font-size:11px;">' + escapeHtml(lic.license_id || lic.id) + '</code></div>' +
                 '</div>' +
                 statusBadge +
               '</div>' +
               keyBoxHtml +
               '<!-- License Metadata Grid -->' +
               '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 10px 0; background: rgba(0,0,0,0.25); border: 1px solid var(--sfx-border); border-radius: 6px; padding: 10px 12px; font-size: 11.5px;">' +
-                '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Purchase Date</span><strong>' + purchaseDateStr + '</strong></div>' +
+                '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Purchase Date</span><strong>' + escapeHtml(purchaseDateStr) + '</strong></div>' +
                 '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Payment Status</span>' + paymentStatusStr + '</div>' +
                 '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Activation Status</span>' + workstationStatus + '</div>' +
                 '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Product Name</span><span style="font-size: 11.5px; color: #fff; font-weight: 600;">SFX Composer Pro</span></div>' +
-                '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Product ID</span><code style="font-size: 10.5px; color: var(--sfx-accent);">' + (lic.product_id || 'sfx-composer-pro') + '</code></div>' +
-                (lic.provider_payment_id ? '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Payment ID</span><code style="font-size: 10.5px; color: var(--sfx-accent);">' + lic.provider_payment_id + '</code></div>' : '') +
+                '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Product ID</span><code style="font-size: 10.5px; color: var(--sfx-accent);">' + escapeHtml(lic.product_id || 'sfx-composer-pro') + '</code></div>' +
+                (lic.provider_payment_id ? '<div><span style="color: var(--sfx-text-muted); font-size: 10.5px; display: block;">Payment ID</span><code style="font-size: 10.5px; color: var(--sfx-accent);">' + escapeHtml(lic.provider_payment_id) + '</code></div>' : '') +
               '</div>' +
             '</div>';
           }).join('');
@@ -1186,12 +1254,12 @@
           downloadsContainer.innerHTML = '';
         } else {
           var tokenQuery = authToken ? ('&token=' + encodeURIComponent(authToken)) : '';
-          var zxpUrl = (portal.downloads && portal.downloads.zxp_url)
+          var zxpUrl = safeUrl((portal.downloads && portal.downloads.zxp_url)
             ? portal.downloads.zxp_url
-            : ('/api/download?type=zxp' + tokenQuery);
-          var sfxLibUrl = (portal.downloads && portal.downloads.sfx_library_url) 
+            : ('/api/download?type=zxp' + tokenQuery), true);
+          var sfxLibUrl = safeUrl((portal.downloads && portal.downloads.sfx_library_url) 
             ? portal.downloads.sfx_library_url 
-            : ('/api/download?type=sfx-library' + tokenQuery);
+            : ('/api/download?type=sfx-library' + tokenQuery), true);
 
           var downloadCardsHtml = '<div class="sfx-dashboard-card">';
           downloadCardsHtml += 
@@ -1245,11 +1313,11 @@
               : (ordStatus === 'failed' ? '<span class="sfx-badge-status revoked">Failed</span>' : '<span class="sfx-badge-status pending">Pending</span>');
 
             return '<tr>' +
-              '<td><code style="font-size:11px;">' + (ord.provider_order_id || '—') + '</code></td>' +
-              '<td><code style="font-size:11px;">' + (ord.provider_payment_id || '—') + '</code></td>' +
-              '<td>₹' + ord.amount + '</td>' +
+              '<td><code style="font-size:11px;">' + escapeHtml(ord.provider_order_id || '—') + '</code></td>' +
+              '<td><code style="font-size:11px;">' + escapeHtml(ord.provider_payment_id || '—') + '</code></td>' +
+              '<td>₹' + escapeHtml(ord.amount) + '</td>' +
               '<td>' + badge + '</td>' +
-              '<td>' + date + '</td>' +
+              '<td>' + escapeHtml(date) + '</td>' +
             '</tr>';
           }).join('');
         }
