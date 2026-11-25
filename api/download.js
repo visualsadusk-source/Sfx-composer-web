@@ -17,8 +17,8 @@ const { streamSfxLibrary, isDriveStreamingConfigured } = require('./drive-stream
 const { verifyLicenseKey } = require('./library-download');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://wyjazmiihwjlrkggeeez.supabase.co';
-const ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxNzMxMTQsImV4cCI6MjExMDc0OTExNH0.FXKso4hkmUYcl_FfjG4GnHxwyCr09j5DkJ6ak1B2auY';
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5NTE3MzExNCwiZXhwIjoyMTEwNzQ5MTE0fQ.Y6GbsUSzkh4b-Uze1JiLSie6PEb8SfG6xg36P4SPrNA';
+const ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 // In-memory download audit trail (supplementing database audit logs)
 const downloadAuditLogs = [];
@@ -26,7 +26,7 @@ const downloadAuditLogs = [];
 async function verifySupabaseToken(token) {
   if (!token) return null;
   // If service role key provided in admin context, treat as admin
-  if (token === SERVICE_KEY) {
+  if (SERVICE_KEY && token === SERVICE_KEY) {
     return { email: 'admin@sfxcomposer.com', is_admin: true, id: 'admin-service-role' };
   }
 
@@ -140,8 +140,6 @@ module.exports = async function handler(req, res) {
   let requestedFile = '';
   if (url.pathname.includes('.zxp') || reqType === 'zxp') {
     requestedFile = url.pathname.includes('v2.4.0') ? 'sfx-composer-pro-v2.4.0.zxp' : 'sfx-composer-pro-v2.2.0.zxp';
-  } else if (url.pathname.includes('.zip') || reqType === 'zip') {
-    requestedFile = url.pathname.includes('v2.4.0') ? 'sfx-composer-pro-v2.4.0.zip' : 'sfx-composer-pro-v2.2.0.zip';
   } else if (reqType === 'sfx-library') {
     requestedFile = 'sfx-library';
   }
@@ -246,6 +244,31 @@ module.exports = async function handler(req, res) {
   if (requestedFile === 'sfx-library') {
     // 1. Verification-only check (for frontend status preview)
     const isVerifyOnly = url.searchParams.get('verify_only') === 'true' || (req.body && req.body.verify_only);
+
+  // Handle verify_only request: respond with JSON indicating verification status and download URLs
+  if (isVerifyOnly) {
+    // Perform entitlement check without streaming the file
+    const entitlement = await checkEntitlement(userEmail, user);
+    if (!entitlement.has_access) {
+      res.statusCode = 403;
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify({ ok: false, code: 'UNAUTHORIZED', message: 'License verification failed: ' + entitlement.reason }));
+    }
+    // Successful verification: return JSON with secure download URLs (including token)
+    const tokenParam = encodeURIComponent(token || licenseKeyParam);
+    const responsePayload = {
+      ok: true,
+      verified: true,
+      email: userEmail,
+      downloads: {
+        zxp_url: `/api/download?type=zxp&token=${tokenParam}`,
+        sfx_library_url: `/api/download?type=sfx-library&token=${tokenParam}`
+      }
+    };
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    return res.end(JSON.stringify(responsePayload));
+  }
     if (isVerifyOnly) {
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');
@@ -329,8 +352,8 @@ module.exports = async function handler(req, res) {
     }));
   }
 
-  // Action B: Stream Binary Plugin Installers (.zxp or .zip) from Private Storage
-  if (requestedFile.endsWith('.zxp') || requestedFile.endsWith('.zip')) {
+  // Action B: Stream Binary Plugin Installer (.zxp) from Private Storage
+  if (requestedFile.endsWith('.zxp')) {
     const candidatePaths = [
       path.join(__dirname, '..', 'private_storage', 'downloads', requestedFile),
       path.join(__dirname, '..', 'private_storage', requestedFile),
@@ -340,8 +363,8 @@ module.exports = async function handler(req, res) {
     let filePath = candidatePaths.find(p => fs.existsSync(p));
 
     if (!filePath) {
-      // Fallback to canonical v2.2.0 files
-      const canonicalName = requestedFile.endsWith('.zxp') ? 'sfx-composer-pro-v2.2.0.zxp' : 'sfx-composer-pro-v2.2.0.zip';
+      // Fallback to canonical v2.2.0 file
+      const canonicalName = 'sfx-composer-pro-v2.2.0.zxp';
       const fallbackPaths = [
         path.join(__dirname, '..', 'private_storage', 'downloads', canonicalName),
         path.join(__dirname, '..', 'private_storage', canonicalName),
@@ -349,14 +372,14 @@ module.exports = async function handler(req, res) {
       ];
       filePath = fallbackPaths.find(p => fs.existsSync(p));
     }
-    if (!fs.existsSync(filePath)) {
+    if (!filePath || !fs.existsSync(filePath)) {
       res.statusCode = 404;
       res.setHeader('Content-Type', 'application/json');
       return res.end(JSON.stringify({ ok: false, message: 'Installer file not found on server' }));
     }
 
     const stat = fs.statSync(filePath);
-    const contentType = requestedFile.endsWith('.zip') ? 'application/zip' : 'application/octet-stream';
+    const contentType = 'application/octet-stream';
 
     res.writeHead(200, {
       'Content-Type': contentType,
@@ -378,7 +401,6 @@ module.exports = async function handler(req, res) {
     email: userEmail,
     downloads: {
       zxp_url: `/api/download?type=zxp&token=${encodeURIComponent(token)}`,
-      zip_url: `/api/download?type=zip&token=${encodeURIComponent(token)}`,
       sfx_library_url: `/api/download?type=sfx-library&token=${encodeURIComponent(token)}`
     }
   }));

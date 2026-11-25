@@ -305,6 +305,114 @@ const METADATA_TTL = 10 * 60 * 1000; // 10 minutes
 
 // ─── Main Export ─────────────────────────────────────────────────────────────
 
+const DEFAULT_SFX_LIBRARY_FILE_ID = '1NBpzJIUwErF6RPNaIOxcoGtWYL50Hw5s';
+
+/**
+ * Stream a shared Google Drive file via drive.usercontent.google.com with
+ * confirmation bypass, redirect handling, HTML-response guard, and Range support.
+ */
+function streamPublicDriveToResponse(fileId, req, res, redirectUrl, depth) {
+  const hop = depth || 0;
+  if (hop > 5) {
+    if (!res.headersSent) {
+      res.writeHead(502, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, code: 'DRIVE_REDIRECT_LOOP', message: 'Too many redirects from storage provider.' }));
+    }
+    return Promise.resolve();
+  }
+
+  const targetUrl = redirectUrl || `https://drive.usercontent.google.com/download?id=${encodeURIComponent(fileId)}&export=download&confirm=t`;
+
+  return new Promise((resolve) => {
+    const reqHeaders = {};
+    if (req.headers['range']) {
+      reqHeaders['Range'] = req.headers['range'];
+    }
+
+    const driveReq = https.request(targetUrl, { method: 'GET', headers: reqHeaders }, (driveRes) => {
+      if (driveRes.statusCode >= 300 && driveRes.statusCode < 400 && driveRes.headers.location) {
+        driveRes.resume();
+        const nextUrl = new URL(driveRes.headers.location, targetUrl).toString();
+        return streamPublicDriveToResponse(fileId, req, res, nextUrl, hop + 1).then(resolve);
+      }
+
+      const contentType = (driveRes.headers['content-type'] || '').toLowerCase();
+      if ((driveRes.statusCode !== 200 && driveRes.statusCode !== 206) || contentType.includes('text/html')) {
+        let errBody = '';
+        driveRes.on('data', (c) => { if (errBody.length < 1024) errBody += c; });
+        driveRes.on('end', () => {
+          console.error(`Drive direct stream error (${driveRes.statusCode}, ${contentType}):`, errBody.substring(0, 300));
+          if (!res.headersSent) {
+            res.writeHead(502, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+              ok: false,
+              code: 'DRIVE_ERROR',
+              message: 'Unable to stream the Master SFX Library archive from storage. Please try again.'
+            }));
+          }
+          resolve();
+        });
+        return;
+      }
+
+      const responseHeaders = {
+        'Content-Type': 'application/zip',
+        'Content-Disposition': driveRes.headers['content-disposition'] || 'attachment; filename="Sfx.zip"',
+        'Accept-Ranges': driveRes.headers['accept-ranges'] || 'bytes',
+        'Cache-Control': 'private, no-cache, no-store, must-revalidate',
+        'X-Content-Type-Options': 'nosniff'
+      };
+      if (driveRes.headers['content-length']) {
+        responseHeaders['Content-Length'] = driveRes.headers['content-length'];
+      }
+      if (driveRes.headers['content-range']) {
+        responseHeaders['Content-Range'] = driveRes.headers['content-range'];
+      }
+
+      res.writeHead(driveRes.statusCode, responseHeaders);
+      driveRes.pipe(res);
+
+      driveRes.on('end', resolve);
+      driveRes.on('error', (err) => {
+        console.error('Drive stream pipe error:', err.message);
+        if (!res.writableEnded) res.end();
+        resolve();
+      });
+      res.on('close', () => {
+        driveRes.destroy();
+      });
+    });
+
+    driveReq.on('error', (err) => {
+      console.error('Drive direct connection error:', err.message);
+      if (!res.headersSent) {
+        res.writeHead(502, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          ok: false,
+          code: 'DRIVE_UNAVAILABLE',
+          message: 'Could not connect to the download service. Please try again later.'
+        }));
+      }
+      resolve();
+    });
+
+    driveReq.setTimeout(30000, () => {
+      driveReq.destroy();
+      if (!res.headersSent) {
+        res.writeHead(504, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          ok: false,
+          code: 'DRIVE_TIMEOUT',
+          message: 'The download service took too long to respond. Please try again.'
+        }));
+      }
+      resolve();
+    });
+
+    driveReq.end();
+  });
+}
+
 /**
  * Stream the SFX Library archive from Google Drive to the authenticated client.
  * Call this ONLY after verifying the user's license / entitlement.
@@ -315,17 +423,12 @@ const METADATA_TTL = 10 * 60 * 1000; // 10 minutes
  */
 async function streamSfxLibrary(req, res) {
   // 1. Load credentials from environment
-  const fileId = process.env.SFX_LIBRARY_DRIVE_FILE_ID;
+  const fileId = process.env.SFX_LIBRARY_DRIVE_FILE_ID || DEFAULT_SFX_LIBRARY_FILE_ID;
   const saJsonStr = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
 
-  if (!fileId || !saJsonStr) {
-    console.error('Drive streaming not configured: missing SFX_LIBRARY_DRIVE_FILE_ID or GOOGLE_SERVICE_ACCOUNT_JSON');
-    res.writeHead(503, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify({
-      ok: false,
-      code: 'SERVICE_NOT_CONFIGURED',
-      message: 'The SFX Library download service is not configured. Please contact support.'
-    }));
+  if (!saJsonStr) {
+    await streamPublicDriveToResponse(fileId, req, res);
+    return;
   }
 
   let serviceAccount;
@@ -384,7 +487,7 @@ async function streamSfxLibrary(req, res) {
  * Returns true if both env vars are set.
  */
 function isDriveStreamingConfigured() {
-  return !!(process.env.SFX_LIBRARY_DRIVE_FILE_ID && process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
+  return !!(process.env.SFX_LIBRARY_DRIVE_FILE_ID || DEFAULT_SFX_LIBRARY_FILE_ID);
 }
 
 module.exports = {

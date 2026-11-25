@@ -26,8 +26,8 @@ const crypto = require('crypto');
 const { handleCors, makeRazorpayRequest, memoryStore, createSignedDownloadToken } = require('./_shared');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://wyjazmiihwjlrkggeeez.supabase.co';
-const ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxNzMxMTQsImV4cCI6MjExMDc0OTExNH0.FXKso4hkmUYcl_FfjG4GnHxwyCr09j5DkJ6ak1B2auY';
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5NTE3MzExNCwiZXhwIjoyMTEwNzQ5MTE0fQ.Y6GbsUSzkh4b-Uze1JiLSie6PEb8SfG6xg36P4SPrNA';
+const ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 // Rate limiting & abuse protection (in-memory per client IP / email)
 const rateLimitMap = new Map();
@@ -677,7 +677,6 @@ module.exports = async function handler(req, res) {
       product_id: (hasPlugin && hasLibrary) ? 'sfx-composer-bundle' : (hasPlugin ? 'sfx-composer-plugin' : 'sfx-library'),
       product_name: productName,
       zxp_url: hasPlugin ? `/downloads/sfx-composer-pro-v2.2.0.zxp?token=${encodeURIComponent(sessionToken)}` : null,
-      zip_url: hasPlugin ? `/downloads/sfx-composer-pro-v2.2.0.zip?token=${encodeURIComponent(sessionToken)}` : null,
       sfx_library_url: hasLibrary ? `/api/download?type=sfx-library&token=${encodeURIComponent(sessionToken)}` : null
     }
   }));

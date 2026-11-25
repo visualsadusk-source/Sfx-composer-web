@@ -863,12 +863,94 @@
 
     if (normBtn) {
       normBtn.addEventListener('click', function () {
-        atState.gainDb = 2.5;
-        var gainSlider = document.getElementById('at-ctrl-gain');
-        var gainVal = document.getElementById('at-val-gain');
-        if (gainSlider) gainSlider.value = 2.5;
-        if (gainVal) gainVal.textContent = '+2.5 dB';
-        showToast('Normalized to -1 dBFS target');
+        if (!atState.sound) {
+          showToast('Select an audio sound first');
+          return;
+        }
+
+        function applyNormalization(buf) {
+          var peak = engine.measurePeak(buf, atState.trimStart, atState.trimEnd);
+          if (peak < 1e-6) {
+            showToast('Audio is silent or empty; cannot normalize.');
+            return;
+          }
+
+          var targetDb = -1.0;
+          var currentPeakDb = 20 * Math.log10(peak);
+          var neededGainDb = targetDb - currentPeakDb;
+          neededGainDb = Math.round(neededGainDb * 10) / 10;
+          neededGainDb = Math.max(-24, Math.min(24, neededGainDb));
+
+          atState.gainDb = neededGainDb;
+
+          var gainSlider = document.getElementById('at-ctrl-gain');
+          var gainVal = document.getElementById('at-val-gain');
+          if (gainSlider) gainSlider.value = neededGainDb;
+          if (gainVal) gainVal.textContent = (neededGainDb > 0 ? '+' : '') + neededGainDb.toFixed(1) + ' dB';
+
+          var newPeakDb = Math.min(0, currentPeakDb + neededGainDb);
+          var rms = engine.measureRms ? engine.measureRms(buf, atState.trimStart, atState.trimEnd) : 0;
+          var newRmsDb = rms > 1e-6 ? ((20 * Math.log10(rms)) + neededGainDb).toFixed(1) + ' dB' : '-∞ dB';
+
+          var peakEl = document.getElementById('at-peak-val');
+          var rmsEl = document.getElementById('at-rms-val');
+          if (peakEl) peakEl.textContent = newPeakDb.toFixed(1) + ' dB';
+          if (rmsEl) rmsEl.textContent = newRmsDb;
+
+          renderAtWaveform();
+          showToast('Normalized to ' + targetDb.toFixed(1) + ' dBFS (Gain: ' + (neededGainDb > 0 ? '+' : '') + neededGainDb.toFixed(1) + ' dB)');
+        }
+
+        if (atState.sound.buffer) {
+          applyNormalization(atState.sound.buffer);
+        } else if (engine && engine.loadSound) {
+          showToast('Analyzing audio buffer...');
+          engine.loadSound(atState.sound).then(function (buf) {
+            atState.sound.buffer = buf;
+            applyNormalization(buf);
+          }).catch(function (err) {
+            showToast('Normalization failed: ' + (err.message || 'audio load error'));
+          });
+        }
+      });
+    }
+
+    // Open Custom Audio File Handler
+    var openFileBtn = document.getElementById('at-open-file-btn');
+    var fileInput = document.getElementById('at-file-input');
+
+    if (openFileBtn && fileInput) {
+      openFileBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        fileInput.click();
+      });
+
+      fileInput.addEventListener('change', function (e) {
+        var file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        showToast('Decoding ' + file.name + '...');
+        if (engine && engine.decodeAudioFile) {
+          engine.decodeAudioFile(file).then(function (buffer) {
+            var customSound = {
+              id: 'audio-custom-' + Date.now(),
+              name: file.name.replace(/\.[^/.]+$/, ''),
+              file: file.name,
+              cat: 'Custom',
+              duration: buffer.duration,
+              sampleRate: buffer.sampleRate,
+              channels: buffer.numberOfChannels,
+              buffer: buffer
+            };
+            extendedCatalog.unshift(customSound);
+            renderAtLibList();
+            loadAudioIntoTools(customSound);
+            showToast('Loaded ' + customSound.name + ' (' + buffer.duration.toFixed(2) + 's, ' + buffer.numberOfChannels + 'ch)');
+          }).catch(function (err) {
+            showToast('Failed to decode audio: ' + (err.message || 'Unsupported or corrupted format'));
+          });
+        }
+        fileInput.value = '';
       });
     }
 
@@ -907,6 +989,22 @@
         atState.gainDb = parseFloat(this.value);
         var val = document.getElementById('at-val-gain');
         if (val) val.textContent = (atState.gainDb > 0 ? '+' : '') + atState.gainDb.toFixed(1) + ' dB';
+
+        if (atState.sound && atState.sound.buffer && engine) {
+          var pk = engine.measurePeak(atState.sound.buffer, atState.trimStart, atState.trimEnd);
+          if (pk > 1e-6) {
+            var curPkDb = Math.min(0, 20 * Math.log10(pk) + atState.gainDb);
+            var peakEl = document.getElementById('at-peak-val');
+            if (peakEl) peakEl.textContent = curPkDb.toFixed(1) + ' dB';
+          }
+          var rms = engine.measureRms ? engine.measureRms(atState.sound.buffer, atState.trimStart, atState.trimEnd) : 0;
+          if (rms > 1e-6) {
+            var curRmsDb = (20 * Math.log10(rms)) + atState.gainDb;
+            var rmsEl = document.getElementById('at-rms-val');
+            if (rmsEl) rmsEl.textContent = curRmsDb.toFixed(1) + ' dB';
+          }
+        }
+        renderAtWaveform();
       });
     }
 
@@ -945,6 +1043,14 @@
     if (trimStart) {
       trimStart.addEventListener('input', function () {
         atState.trimStart = parseFloat(this.value);
+        if (atState.sound && atState.sound.buffer && engine) {
+          var pk = engine.measurePeak(atState.sound.buffer, atState.trimStart, atState.trimEnd);
+          if (pk > 1e-6) {
+            var curPkDb = Math.min(0, 20 * Math.log10(pk) + atState.gainDb);
+            var peakEl = document.getElementById('at-peak-val');
+            if (peakEl) peakEl.textContent = curPkDb.toFixed(1) + ' dB';
+          }
+        }
         renderAtWaveform();
       });
     }
@@ -952,6 +1058,14 @@
     if (trimEnd) {
       trimEnd.addEventListener('input', function () {
         atState.trimEnd = parseFloat(this.value);
+        if (atState.sound && atState.sound.buffer && engine) {
+          var pk = engine.measurePeak(atState.sound.buffer, atState.trimStart, atState.trimEnd);
+          if (pk > 1e-6) {
+            var curPkDb = Math.min(0, 20 * Math.log10(pk) + atState.gainDb);
+            var peakEl = document.getElementById('at-peak-val');
+            if (peakEl) peakEl.textContent = curPkDb.toFixed(1) + ' dB';
+          }
+        }
         renderAtWaveform();
       });
     }
@@ -961,11 +1075,17 @@
     atState.sound = sound;
     atState.trimStart = 0;
     atState.trimEnd = sound.duration;
+    atState.gainDb = 0;
 
     var nameEl = document.getElementById('at-active-sound-name');
     var timecodeEl = document.getElementById('at-center-timecode');
     var startRange = document.getElementById('at-trim-start-range');
     var endRange = document.getElementById('at-trim-end-range');
+    var gainSlider = document.getElementById('at-ctrl-gain');
+    var gainVal = document.getElementById('at-val-gain');
+
+    if (gainSlider) gainSlider.value = 0;
+    if (gainVal) gainVal.textContent = '0.0 dB';
 
     if (nameEl) nameEl.textContent = sound.name + ' (' + sound.duration.toFixed(2) + 's)';
     if (timecodeEl) timecodeEl.textContent = '00:00:00:00 / 00:00:' + sound.duration.toFixed(2).replace('.', ':');
@@ -975,6 +1095,25 @@
 
     renderAtWaveform();
     renderAtLibList();
+
+    if (engine && engine.loadSound) {
+      engine.loadSound(sound).then(function (buf) {
+        if (!buf) return;
+        sound.buffer = buf;
+        var pk = engine.measurePeak(buf, atState.trimStart, atState.trimEnd);
+        var pkDb = pk > 1e-6 ? (20 * Math.log10(pk)).toFixed(1) + ' dB' : '-∞ dB';
+        var rms = engine.measureRms ? engine.measureRms(buf, atState.trimStart, atState.trimEnd) : 0;
+        var rmsDb = rms > 1e-6 ? (20 * Math.log10(rms)).toFixed(1) + ' dB' : '-∞ dB';
+
+        var peakEl = document.getElementById('at-peak-val');
+        var rmsEl = document.getElementById('at-rms-val');
+        if (peakEl) peakEl.textContent = pkDb;
+        if (rmsEl) rmsEl.textContent = rmsDb;
+        renderAtWaveform();
+      }).catch(function (e) {
+        console.warn('Could not load sound buffer for analysis:', e);
+      });
+    }
   }
 
   function renderAtLibList() {
@@ -1033,19 +1172,37 @@
     var bars = 100;
     var barW = (w / bars) - 1.5;
     var dur = atState.sound.duration;
+    var gainMult = Math.pow(10, (atState.gainDb || 0) / 20);
+    var buf = atState.sound.buffer;
+    var chData = buf && buf.numberOfChannels > 0 ? buf.getChannelData(0) : null;
+    var totalFrames = buf ? buf.length : 0;
 
     for (var i = 0; i < bars; i++) {
       var prog = i / bars;
       var sec = prog * dur;
       var isTrimmed = sec >= atState.trimStart && sec <= atState.trimEnd;
+      var bh = 4;
 
-      var env = Math.sin(prog * Math.PI);
-      if (atState.sound.id.includes('impact') || atState.sound.id.includes('earthquake')) env = Math.exp(-prog * 3.5);
-      if (atState.sound.id.includes('riser')) env = Math.pow(prog, 1.8);
+      if (chData && totalFrames > 0) {
+        var startFrame = Math.floor((i / bars) * totalFrames);
+        var endFrame = Math.floor(((i + 1) / bars) * totalFrames);
+        var pk = 0;
+        var step = Math.max(1, Math.floor((endFrame - startFrame) / 16));
+        for (var f = startFrame; f < endFrame; f += step) {
+          var v = Math.abs(chData[f] || 0);
+          if (v > pk) pk = v;
+        }
+        var scaled = Math.min(1.0, pk * gainMult);
+        bh = Math.max(3, scaled * (h - 16));
+      } else {
+        var env = Math.sin(prog * Math.PI);
+        if (atState.sound.id && (atState.sound.id.includes('impact') || atState.sound.id.includes('earthquake'))) env = Math.exp(-prog * 3.5);
+        if (atState.sound.id && atState.sound.id.includes('riser')) env = Math.pow(prog, 1.8);
+        var scaled = Math.min(1.0, env * (0.3 + 0.7 * Math.sin(i * 1.4)) * gainMult);
+        bh = Math.max(4, scaled * (h - 20));
+      }
 
-      var bh = Math.max(4, env * (h - 20) * (0.3 + 0.7 * Math.sin(i * 1.4)));
       var by = (h - bh) / 2;
-
       ctx.fillStyle = isTrimmed ? '#35ea86' : '#334455';
       ctx.fillRect(i * (barW + 1.5), by, barW, bh);
     }

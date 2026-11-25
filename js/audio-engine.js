@@ -53,6 +53,8 @@
   // Load and decode sound by item object
   function loadSound(item) {
     return new Promise(function (resolve, reject) {
+      if (!item) return reject(new Error('No sound provided'));
+      if (item.buffer) return resolve(item.buffer);
       if (bufferCache[item.id]) {
         return resolve(bufferCache[item.id]);
       }
@@ -128,6 +130,37 @@
     return max;
   }
 
+  // Calculate RMS amplitude in buffer between start and end seconds
+  function measureRms(buffer, startSec, endSec) {
+    if (!buffer) return 0;
+    var sr = buffer.sampleRate;
+    var i0 = Math.max(0, Math.floor((startSec || 0) * sr));
+    var i1 = Math.min(buffer.length, Math.floor((endSec != null ? endSec : buffer.duration) * sr));
+    if (i1 <= i0) return 0;
+    var sum = 0;
+    var totalSamples = 0;
+    for (var c = 0; c < buffer.numberOfChannels; c++) {
+      var data = buffer.getChannelData(c);
+      var step = Math.max(1, Math.floor((i1 - i0) / 40000));
+      for (var i = i0; i < i1; i += step) {
+        sum += data[i] * data[i];
+        totalSamples++;
+      }
+    }
+    return Math.sqrt(sum / Math.max(1, totalSamples));
+  }
+
+  function measureLoudness(buffer, startSec, endSec) {
+    var peak = measurePeak(buffer, startSec, endSec);
+    var rms = measureRms(buffer, startSec, endSec);
+    return {
+      peak: peak,
+      peakDb: gainToDb(peak),
+      rms: rms,
+      rmsDb: gainToDb(rms)
+    };
+  }
+
   function dbToGain(db) {
     return Math.pow(10, Number(db) / 20);
   }
@@ -135,6 +168,41 @@
   function gainToDb(gain) {
     if (gain <= 1e-6) return -120;
     return 20 * Math.log10(gain);
+  }
+
+  // Decode external audio file/blob (non-destructive)
+  function decodeAudioFile(file) {
+    return new Promise(function (resolve, reject) {
+      if (!file) return reject(new Error('No file selected'));
+      var ctx = getAudioContext();
+      if (!ctx) return reject(new Error('Web Audio API not supported'));
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var arrayBuf = e.target.result;
+        ctx.decodeAudioData(
+          arrayBuf,
+          function (decoded) {
+            resolve({
+              id: 'custom_' + Date.now(),
+              name: (file.name || 'Custom Audio').replace(/\.[^.]+$/, ''),
+              cat: 'Custom',
+              duration: decoded.duration,
+              sampleRate: decoded.sampleRate,
+              channels: decoded.numberOfChannels,
+              buffer: decoded,
+              file: file
+            });
+          },
+          function (decodeErr) {
+            reject(new Error('Audio decoding failed: unsupported format or corrupted audio file.'));
+          }
+        );
+      };
+      reader.onerror = function () {
+        reject(new Error('Failed to read audio file from disk.'));
+      };
+      reader.readAsArrayBuffer(file);
+    });
   }
 
   // Fast client-side WAV encoder
@@ -204,6 +272,9 @@
     loadSound: loadSound,
     preloadCatalog: preloadCatalog,
     measurePeak: measurePeak,
+    measureRms: measureRms,
+    measureLoudness: measureLoudness,
+    decodeAudioFile: decodeAudioFile,
     dbToGain: dbToGain,
     gainToDb: gainToDb,
     audioBufferToWav: audioBufferToWav,
@@ -386,11 +457,12 @@
 
     // ── AUDIO TOOLS DSP RENDERER (OFFLINE AUDIO CONTEXT) ──
     renderProcessedSample: function (buffer, params) {
+      params = params || {};
       var sr = buffer.sampleRate;
       var trimStart = Math.max(0, Number(params.trimStart) || 0);
       var trimEnd = Math.min(buffer.duration, Number(params.trimEnd) || buffer.duration);
       if (trimEnd <= trimStart) trimEnd = buffer.duration;
-      var duration = trimEnd - trimStart;
+      var duration = Math.max(0.01, trimEnd - trimStart);
 
       var OfflineContextClass = window.OfflineAudioContext || window.webkitOfflineAudioContext;
       if (!OfflineContextClass) {
@@ -404,42 +476,193 @@
       // Filter nodes
       var hp = offlineCtx.createBiquadFilter();
       hp.type = 'highpass';
-      hp.frequency.value = params.highpass || 20;
+      hp.frequency.value = Math.max(20, Number(params.hp != null ? params.hp : params.highpass) || 20);
 
       var lp = offlineCtx.createBiquadFilter();
       lp.type = 'lowpass';
-      lp.frequency.value = params.lowpass || 20000;
+      lp.frequency.value = Math.min(20000, Number(params.lp != null ? params.lp : params.lowpass) || 20000);
+
+      var bass = offlineCtx.createBiquadFilter();
+      bass.type = 'lowshelf';
+      bass.frequency.value = 120;
+      bass.gain.value = Number(params.bass || 0);
+
+      var eq = offlineCtx.createBiquadFilter();
+      eq.type = 'peaking';
+      eq.frequency.value = 3200;
+      eq.Q.value = 1.2;
+      eq.gain.value = Number(params.eq != null ? params.eq : params.presence || 0);
 
       var gainNode = offlineCtx.createGain();
       var gainMultiplier = dbToGain(params.gainDb || 0);
 
-      // If normalize requested, boost peak to -1 dBFS
+      // If normalize requested, boost peak to target dBFS (default -1.0 dBFS)
       if (params.normalize) {
         var currentPeak = measurePeak(buffer, trimStart, trimEnd);
         if (currentPeak > 1e-5) {
-          var targetPeak = dbToGain(-1); // -1 dBFS
+          var targetPeak = dbToGain(params.targetDb != null ? params.targetDb : -1.0);
           gainMultiplier = targetPeak / currentPeak;
         }
       }
 
-      gainNode.gain.setValueAtTime(0.0001, 0);
-      var fadeIn = Math.min(duration * 0.4, Math.max(0.002, Number(params.fadeIn) || 0));
-      var fadeOut = Math.min(duration * 0.4, Math.max(0.002, Number(params.fadeOut) || 0));
+      var safeGain = Math.max(0, gainMultiplier);
+      var fadeIn = Math.min(duration * 0.4, Math.max(0, Number(params.fadeIn) || 0));
+      var fadeOut = Math.min(duration * 0.4, Math.max(0, Number(params.fadeOut) || 0));
 
-      gainNode.gain.exponentialRampToValueAtTime(gainMultiplier, fadeIn);
-      if (duration > fadeOut) {
-        gainNode.gain.setValueAtTime(gainMultiplier, duration - fadeOut);
-        gainNode.gain.exponentialRampToValueAtTime(0.0001, duration);
+      if (fadeIn > 0.001) {
+        gainNode.gain.setValueAtTime(0, 0);
+        gainNode.gain.linearRampToValueAtTime(safeGain, fadeIn);
+      } else {
+        gainNode.gain.setValueAtTime(safeGain, 0);
+      }
+
+      if (fadeOut > 0.001 && duration > fadeOut) {
+        gainNode.gain.setValueAtTime(safeGain, duration - fadeOut);
+        gainNode.gain.linearRampToValueAtTime(0, duration);
       }
 
       src.connect(hp);
       hp.connect(lp);
-      lp.connect(gainNode);
+      lp.connect(bass);
+      bass.connect(eq);
+      eq.connect(gainNode);
       gainNode.connect(offlineCtx.destination);
 
       src.start(0, trimStart, duration);
 
-      return offlineCtx.startRendering();
+      return offlineCtx.startRendering().then(function (rendered) {
+        // Output safety check: prevent any digital clipping
+        var peak = measurePeak(rendered);
+        if (peak > 1.0) {
+          var factor = 1.0 / peak;
+          for (var c = 0; c < rendered.numberOfChannels; c++) {
+            var chData = rendered.getChannelData(c);
+            for (var i = 0; i < chData.length; i++) {
+              chData[i] *= factor;
+            }
+          }
+        }
+        return rendered;
+      });
+    },
+
+    playSampleWithFx: function (item, params, onEnded) {
+      var self = this;
+      this.stopSample();
+
+      params = params || {};
+      return this.loadSound(item).then(function (buf) {
+        var ctx = getAudioContext();
+        if (!ctx) return null;
+
+        var src = ctx.createBufferSource();
+        src.buffer = buf;
+
+        var trimStart = Math.max(0, Number(params.trimStart) || 0);
+        var trimEnd = Math.min(buf.duration, Number(params.trimEnd) || buf.duration);
+        if (trimEnd <= trimStart) trimEnd = buf.duration;
+        var dur = Math.max(0.01, trimEnd - trimStart);
+
+        var hp = ctx.createBiquadFilter();
+        hp.type = 'highpass';
+        hp.frequency.value = Math.max(20, Number(params.hp != null ? params.hp : params.highpass) || 20);
+
+        var lp = ctx.createBiquadFilter();
+        lp.type = 'lowpass';
+        lp.frequency.value = Math.min(20000, Number(params.lp != null ? params.lp : params.lowpass) || 20000);
+
+        var bass = ctx.createBiquadFilter();
+        bass.type = 'lowshelf';
+        bass.frequency.value = 120;
+        bass.gain.value = Number(params.bass || 0);
+
+        var eq = ctx.createBiquadFilter();
+        eq.type = 'peaking';
+        eq.frequency.value = 3200;
+        eq.Q.value = 1.2;
+        eq.gain.value = Number(params.eq != null ? params.eq : params.presence || 0);
+
+        var gainNode = ctx.createGain();
+        var gMultiplier = dbToGain(params.gainDb || 0);
+        gainNode.gain.value = Math.max(0, gMultiplier);
+
+        src.connect(hp);
+        hp.connect(lp);
+        lp.connect(bass);
+        bass.connect(eq);
+        eq.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        var now = ctx.currentTime;
+        var fadeIn = Math.min(dur * 0.4, Math.max(0, Number(params.fadeIn) || 0));
+        var fadeOut = Math.min(dur * 0.4, Math.max(0, Number(params.fadeOut) || 0));
+
+        if (fadeIn > 0.001) {
+          gainNode.gain.setValueAtTime(0, now);
+          gainNode.gain.linearRampToValueAtTime(gMultiplier, now + fadeIn);
+        } else {
+          gainNode.gain.setValueAtTime(gMultiplier, now);
+        }
+
+        if (fadeOut > 0.001 && dur > fadeOut) {
+          gainNode.gain.setValueAtTime(gMultiplier, now + dur - fadeOut);
+          gainNode.gain.linearRampToValueAtTime(0, now + dur);
+        }
+
+        src.start(0, trimStart, dur);
+
+        var isStopped = false;
+        var player = {
+          src: src,
+          gainNode: gainNode,
+          stop: function () {
+            if (isStopped) return;
+            isStopped = true;
+            try { src.stop(); } catch (e) {}
+            try { src.disconnect(); } catch (e) {}
+            if (self.currentSoloPlayer === player) self.currentSoloPlayer = null;
+            if (typeof onEnded === 'function') onEnded();
+          }
+        };
+
+        src.onended = function () {
+          if (!isStopped) {
+            isStopped = true;
+            if (self.currentSoloPlayer === player) self.currentSoloPlayer = null;
+            if (typeof onEnded === 'function') onEnded();
+          }
+        };
+
+        self.currentSoloPlayer = player;
+        return player;
+      });
+    },
+
+    exportProcessedWav: function (item, params) {
+      var self = this;
+      return this.loadSound(item).then(function (buf) {
+        return self.renderProcessedSample(buf, params);
+      }).then(function (renderedBuffer) {
+        var wavBlob = audioBufferToWav(renderedBuffer);
+        var url = URL.createObjectURL(wavBlob);
+        var a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        var soundName = (item.name || item.id || 'audio').replace(/[^a-zA-Z0-9_-]/g, '_');
+        a.download = 'SFX-Composer_' + soundName + '_normalized.wav';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 1500);
+        return {
+          blob: wavBlob,
+          sizeKb: (wavBlob.size / 1024).toFixed(1),
+          downloadName: a.download,
+          buffer: renderedBuffer
+        };
+      });
     },
 
     // ── MULTI-TRACK MINI TIMELINE ENGINE ──

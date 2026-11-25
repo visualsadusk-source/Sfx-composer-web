@@ -562,15 +562,15 @@
   // ── 3. AUDIO TOOLS DEMO ──
   function setupAudioTools() {
     var sampleSelect = document.getElementById('at-sample-select');
-    var trimStartSlider = document.getElementById('at-trim-start');
-    var trimEndSlider = document.getElementById('at-trim-end');
+    var trimStartSlider = document.getElementById('at-trim-start') || document.getElementById('at-trim-start-range');
+    var trimEndSlider = document.getElementById('at-trim-end') || document.getElementById('at-trim-end-range');
     var fadeInSlider = document.getElementById('at-fade-in');
     var fadeOutSlider = document.getElementById('at-fade-out');
-    var gainSlider = document.getElementById('at-gain');
-    var normBtn = document.getElementById('at-norm-btn');
-    var playTrimBtn = document.getElementById('at-play-btn');
+    var gainSlider = document.getElementById('at-gain') || document.getElementById('at-ctrl-gain');
+    var normBtn = document.getElementById('at-norm-btn') || document.getElementById('at-ctrl-norm-btn');
+    var playTrimBtn = document.getElementById('at-play-btn') || document.getElementById('at-transport-play');
     var resetBtn = document.getElementById('at-reset-btn');
-    var exportBtn = document.getElementById('at-export-btn');
+    var exportBtn = document.getElementById('at-export-btn') || document.getElementById('at-export-wav-btn');
 
     // Populate Sample Selector
     if (sampleSelect) {
@@ -643,19 +643,6 @@
     }
 
     // Reset Trims
-    if (loopBtn) {
-      loopBtn.addEventListener('click', function () {
-        tl.isLooping = !tl.isLooping;
-        if (tl.isLooping) {
-          loopBtn.classList.add('is-active');
-          showToast('Timeline looping enabled.');
-        } else {
-          loopBtn.classList.remove('is-active');
-          showToast('Timeline looping disabled.');
-        }
-      });
-    }
-
     if (resetBtn) {
       resetBtn.addEventListener('click', function () {
         if (!activeSample) return;

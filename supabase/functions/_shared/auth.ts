@@ -8,19 +8,7 @@ export interface AdminAuthResult {
 }
 
 function isServiceRoleToken(token: string, serviceKey: string): boolean {
-  if (serviceKey && token === serviceKey) {
-    return true;
-  }
-  try {
-    const parts = token.split('.');
-    if (parts.length === 3) {
-      const payload = JSON.parse(atob(parts[1]));
-      if (payload && payload.role === 'service_role') {
-        return true;
-      }
-    }
-  } catch (e) {}
-  return false;
+  return Boolean(serviceKey && token && token === serviceKey);
 }
 
 /**
@@ -114,12 +102,6 @@ export async function verifyAdminRequest(req: Request): Promise<AdminAuthResult>
     } catch (e) {
       console.warn('Error checking sfx_admins table:', e);
     }
-  }
-
-  // C. Fallback bootstrap: if ADMIN_EMAILS is not yet configured, allow authenticated users
-  if (!isAuthorized && adminEmails.length === 0) {
-    console.warn(`[SECURITY WARNING] ADMIN_EMAILS secret is not set. Permitting authenticated user: ${userEmail}`);
-    isAuthorized = true;
   }
 
   if (!isAuthorized) {

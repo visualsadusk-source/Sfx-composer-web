@@ -117,7 +117,6 @@ module.exports = async function handler(req, res) {
         downloads: {
           version: 'v2.2.0',
           zxp_url: `/downloads/sfx-composer-pro-v2.2.0.zxp?token=${encodeURIComponent(existingToken)}`,
-          zip_url: `/downloads/sfx-composer-pro-v2.2.0.zip?token=${encodeURIComponent(existingToken)}`,
           sfx_library_url: `/api/download?type=sfx-library&token=${encodeURIComponent(existingToken)}`
         }
       }));
@@ -151,7 +150,7 @@ module.exports = async function handler(req, res) {
 
   try {
     const SUPABASE_URL = process.env.SUPABASE_URL || 'https://wyjazmiihwjlrkggeeez.supabase.co';
-    const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5NTE3MzExNCwiZXhwIjoyMTEwNzQ5MTE0fQ.Y6GbsUSzkh4b-Uze1JiLSie6PEb8SfG6xg36P4SPrNA';
+    const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
     // 1. Record pending order if not already in payment_orders
     await fetch(`${SUPABASE_URL}/rest/v1/rpc/sfx_record_payment_order`, {
@@ -282,7 +281,6 @@ module.exports = async function handler(req, res) {
     downloads: {
       version: 'v2.2.0',
       zxp_url: hasPlugin ? `/downloads/sfx-composer-pro-v2.2.0.zxp?token=${encodeURIComponent(sessionToken)}` : null,
-      zip_url: hasPlugin ? `/downloads/sfx-composer-pro-v2.2.0.zip?token=${encodeURIComponent(sessionToken)}` : null,
       sfx_library_url: hasLibrary ? `/api/download?type=sfx-library&token=${encodeURIComponent(sessionToken)}` : null
     }
   }));

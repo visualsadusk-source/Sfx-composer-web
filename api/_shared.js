@@ -8,10 +8,19 @@ const crypto = require('crypto');
 const https = require('https');
 
 // CORS configuration for production (sfxcomposer.in, GitHub Pages, Localhost)
+const ALLOWED_ORIGINS = new Set([
+  'https://sfxcomposer.in',
+  'https://www.sfxcomposer.in',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000'
+]);
+
 function getCorsHeaders(req) {
-  const origin = req?.headers?.origin || '*';
+  const origin = req?.headers?.origin || '';
+  const allowedOrigin = ALLOWED_ORIGINS.has(origin) ? origin : 'https://sfxcomposer.in';
   return {
-    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Vary': 'Origin',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, apikey, x-razorpay-signature',
     'Access-Control-Allow-Credentials': 'true'
@@ -109,8 +118,10 @@ const memoryStore = {
   entitlements: new Map()
 };
 
+const EPHEMERAL_FALLBACK_SECRET = crypto.randomBytes(32).toString('hex');
+
 function getDownloadTokenSecret() {
-  return process.env.LICENSE_ENCRYPTION_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.RAZORPAY_KEY_SECRET || 'sfx-composer-secure-token-secret-2026';
+  return process.env.LICENSE_ENCRYPTION_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.RAZORPAY_KEY_SECRET || EPHEMERAL_FALLBACK_SECRET;
 }
 
 // Generate cryptographically signed, expiring download session token (HMAC-SHA256)

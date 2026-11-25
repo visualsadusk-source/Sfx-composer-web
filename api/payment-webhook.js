@@ -29,34 +29,39 @@ module.exports = async function handler(req, res) {
     rawBody = JSON.stringify(req.body);
   }
 
-  // If webhook secret is configured, verify HMAC signature
-  if (webhookSecret) {
-    if (!signature) {
+  // Enforce HMAC signature verification — never accept unsigned webhooks
+  if (!webhookSecret) {
+    console.error('RAZORPAY_WEBHOOK_SECRET is not configured.');
+    res.statusCode = 500;
+    res.setHeader('Content-Type', 'application/json');
+    return res.end(JSON.stringify({ ok: false, message: 'Webhook verification secret is not configured.' }));
+  }
+
+  if (!signature) {
+    res.statusCode = 400;
+    res.setHeader('Content-Type', 'application/json');
+    return res.end(JSON.stringify({ ok: false, message: 'Missing x-razorpay-signature header' }));
+  }
+
+  try {
+    const expected = crypto
+      .createHmac('sha256', webhookSecret)
+      .update(rawBody)
+      .digest('hex');
+
+    const sigBuf = Buffer.from(signature.trim().toLowerCase(), 'hex');
+    const expBuf = Buffer.from(expected.toLowerCase(), 'hex');
+
+    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
       res.statusCode = 400;
       res.setHeader('Content-Type', 'application/json');
-      return res.end(JSON.stringify({ ok: false, message: 'Missing x-razorpay-signature header' }));
+      return res.end(JSON.stringify({ ok: false, message: 'Invalid webhook signature' }));
     }
-
-    try {
-      const expected = crypto
-        .createHmac('sha256', webhookSecret)
-        .update(rawBody)
-        .digest('hex');
-
-      const sigBuf = Buffer.from(signature.trim().toLowerCase(), 'hex');
-      const expBuf = Buffer.from(expected.toLowerCase(), 'hex');
-
-      if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
-        res.statusCode = 400;
-        res.setHeader('Content-Type', 'application/json');
-        return res.end(JSON.stringify({ ok: false, message: 'Invalid webhook signature' }));
-      }
-    } catch (err) {
-      console.error('Webhook signature verification error:', err);
-      res.statusCode = 400;
-      res.setHeader('Content-Type', 'application/json');
-      return res.end(JSON.stringify({ ok: false, message: 'Signature verification error' }));
-    }
+  } catch (err) {
+    console.error('Webhook signature verification error:', err);
+    res.statusCode = 400;
+    res.setHeader('Content-Type', 'application/json');
+    return res.end(JSON.stringify({ ok: false, message: 'Signature verification error' }));
   }
 
   let eventPayload = {};

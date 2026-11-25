@@ -24,7 +24,10 @@ if (fs.existsSync(envPath)) {
 
 // Ensure defaults
 if (!process.env.SFX_LIBRARY_DRIVE_URL) {
-  process.env.SFX_LIBRARY_DRIVE_URL = 'https://drive.google.com/file/d/1rF1f3KEKSpri1KoZqP8SCv-Q0-NYxvGD/view?usp=sharing';
+  process.env.SFX_LIBRARY_DRIVE_URL = 'https://drive.google.com/file/d/1NBpzJIUwErF6RPNaIOxcoGtWYL50Hw5s/view?usp=sharing';
+}
+if (!process.env.SFX_LIBRARY_DRIVE_FILE_ID) {
+  process.env.SFX_LIBRARY_DRIVE_FILE_ID = '1NBpzJIUwErF6RPNaIOxcoGtWYL50Hw5s';
 }
 if (!process.env.PRICE_INR) {
   process.env.PRICE_INR = '199';
@@ -57,7 +60,14 @@ const MIME_TYPES = {
   '.zxp': 'application/octet-stream'
 };
 
+const MAX_BODY_BYTES = 1024 * 1024; // 1 MB
+
 const server = http.createServer((req, res) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+
   const [reqPath] = req.url.split('?');
   const cleanPath = decodeURI(reqPath);
 
@@ -66,8 +76,23 @@ const server = http.createServer((req, res) => {
     const handler = apiHandlers[cleanPath] || apiHandlers[cleanPath.replace(/\/$/, '')];
     if (handler) {
       let bodyData = '';
-      req.on('data', chunk => bodyData += chunk);
+      let bodyBytes = 0;
+      let aborted = false;
+      req.on('data', chunk => {
+        if (aborted) return;
+        bodyBytes += chunk.length;
+        if (bodyBytes > MAX_BODY_BYTES) {
+          aborted = true;
+          res.statusCode = 413;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ ok: false, message: 'Payload Too Large' }));
+          req.destroy();
+          return;
+        }
+        bodyData += chunk;
+      });
       req.on('end', async () => {
+        if (aborted) return;
         try {
           if (bodyData && req.headers['content-type']?.includes('application/json')) {
             req.body = JSON.parse(bodyData);
@@ -113,7 +138,7 @@ const server = http.createServer((req, res) => {
 
   fs.stat(filePath, (err, stats) => {
     if (err || !stats.isFile()) {
-      // Clean URLs fallback (e.g. /admin -> /admin.html, /demo -> /demo.html)
+      // Clean URLs fallback (e.g. /demo -> /demo.html)
       const htmlPath = filePath + '.html';
       if (fs.existsSync(htmlPath) && fs.statSync(htmlPath).isFile()) {
         filePath = htmlPath;

@@ -7,7 +7,7 @@
 const { handleCors, memoryStore } = require('./_shared');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://wyjazmiihwjlrkggeeez.supabase.co';
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5NTE3MzExNCwiZXhwIjoyMTEwNzQ5MTE0fQ.Y6GbsUSzkh4b-Uze1JiLSie6PEb8SfG6xg36P4SPrNA';
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
@@ -23,7 +23,7 @@ module.exports = async function handler(req, res) {
   const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7).trim() : apiKey;
 
   // Verify Admin / Service Key authorization
-  if (token !== SERVICE_KEY) {
+  if (!SERVICE_KEY || token !== SERVICE_KEY) {
     res.statusCode = 403;
     res.setHeader('Content-Type', 'application/json');
     return res.end(JSON.stringify({ ok: false, message: 'Forbidden: Admin service key required to process refunds.' }));

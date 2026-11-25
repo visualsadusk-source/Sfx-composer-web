@@ -91,7 +91,7 @@ module.exports = async function handler(req, res) {
     // Synchronize pending order to Supabase payment_orders
     try {
       const SUPABASE_URL = process.env.SUPABASE_URL || 'https://wyjazmiihwjlrkggeeez.supabase.co';
-      const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5NTE3MzExNCwiZXhwIjoyMTEwNzQ5MTE0fQ.Y6GbsUSzkh4b-Uze1JiLSie6PEb8SfG6xg36P4SPrNA';
+      const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
       await fetch(`${SUPABASE_URL}/rest/v1/rpc/sfx_record_payment_order`, {
         method: 'POST',
         headers: {

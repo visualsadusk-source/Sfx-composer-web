@@ -90,18 +90,7 @@ Deno.serve(async (req: Request) => {
     const token = authHeader.substring(7).trim();
     // Service-role JWT check
     if (token && token !== anonKey) {
-      try {
-        const parts = token.split('.');
-        if (parts.length === 3) {
-          const payload = JSON.parse(atob(parts[1]));
-          if (payload?.role === 'service_role') {
-            isAdmin = true;
-            adminEmail = cleanEmail || 'admin@sfxcomposer.internal';
-          }
-        }
-      } catch { /* not a JWT */ }
-      // Also accept exact service key match (legacy)
-      if (!isAdmin && token === serviceKey) {
+      if (serviceKey && token === serviceKey) {
         isAdmin = true;
         adminEmail = cleanEmail || 'admin@sfxcomposer.internal';
       }

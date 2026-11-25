@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /downloads/
+Disallow: /private_storage/
+
+Sitemap: https://sfxcomposer.in/sitemap.xml

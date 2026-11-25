@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Live Software Demo — SFX Composer Professional Sound Design Software</title>
   <meta name="description" content="Test the SFX Composer professional sound design software directly in your browser. Engineered to simplify audio workflows and assist creative editing." />
+  <link rel="canonical" href="https://sfxcomposer.in/demo.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="SFX Composer" />
+  <meta property="og:title" content="Live Software Demo — SFX Composer Professional Sound Design Software" />
+  <meta property="og:description" content="Test the SFX Composer professional sound design software directly in your browser." />
+  <meta property="og:url" content="https://sfxcomposer.in/demo.html" />
+  <meta property="og:image" content="https://sfxcomposer.in/assets/brand/mark-128.png" />
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="assets/brand/mark-128.png" />
@@ -81,6 +88,12 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
           SFX Library
           <span style="font-size: 9px; font-weight: 700; color: #34d399; background: #064e3b; padding: 1px 5px; border-radius: 3px; margin-left: auto;">7GB BUNDLE</span>
+        </a>
+      </li>
+      <li>
+        <a href="#customer-dashboard" class="sfx-site-nav-link open-customer-dashboard-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Dashboard
         </a>
       </li>
       <li>
@@ -462,6 +475,11 @@
               <div class="sfx-au__lib" style="width: 220px;">
                 <div class="sfx-au__lib-head">
                   <div style="font-size: 11px; font-weight: 600; margin-bottom: 6px;">Library Assets</div>
+                  <button type="button" class="sfx-button sfx-button--quiet" id="at-open-file-btn" style="width: 100%; height: 26px; font-size: 11px; margin-bottom: 6px;" title="Select an external audio file to analyze and normalize">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -1px; margin-right: 4px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                    Open Audio File…
+                  </button>
+                  <input type="file" id="at-file-input" accept="audio/*,.wav,.mp3,.ogg,.flac,.aac,.m4a" style="display: none;" />
                 </div>
                 <div class="sfx-au__lib-list" id="at-lib-items" style="flex: 1; overflow-y: auto; padding: 4px;"></div>
               </div>
@@ -498,7 +516,7 @@
                   <button type="button" class="sfx-button sfx-button--quiet" id="at-transport-stop" style="height: 28px; width: 34px; padding: 0;">
                     <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>
                   </button>
-                  <span style="font-size: 11px; color: var(--sfx-text-muted); margin-left: 10px;">Peak: <strong style="color: #60a5fa;">-2.4 dB</strong> · RMS: <strong style="color: #60a5fa;">-23.0 dB</strong></span>
+                  <span style="font-size: 11px; color: var(--sfx-text-muted); margin-left: 10px;">Peak: <strong id="at-peak-val" style="color: #60a5fa;">-2.4 dB</strong> · RMS: <strong id="at-rms-val" style="color: #60a5fa;">-23.0 dB</strong></span>
                   <button type="button" class="sfx-button sfx-button--quiet" id="at-ctrl-norm-btn" style="height: 28px; font-size: 11px; margin-left: auto;">
                     Normalize (-1 dBFS)
                   </button>
@@ -1969,9 +1987,6 @@
           <div style="display: flex; gap: 10px; margin-bottom: 14px;">
             <a href="#" id="success-download-zxp-btn" class="sfx-site-btn-primary" style="flex: 1; text-align: center; padding: 10px; font-size: 12px; text-decoration: none;">
               Download Software Package
-            </a>
-            <a href="#" id="success-download-zip-btn" class="sfx-site-btn-secondary" style="flex: 1; text-align: center; padding: 10px; font-size: 12px; text-decoration: none;">
-              Download CEP ZIP
             </a>
           </div>
 
