@@ -6,6 +6,7 @@ import {
   constantTimeEqual,
   createSignedDownloadToken
 } from '../_shared/crypto.ts';
+import { resolveLatestRelease } from '../_shared/release-resolver.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 async function verifyHmacSha256(data: string, signature: string, secret: string): Promise<boolean> {
@@ -198,6 +199,8 @@ Deno.serve(async (req: Request) => {
       payment_id: razorpay_payment_id
     }, 30 * 24 * 3600 * 1000);
     const functionsBase = `${supabaseUrl.replace(/\/$/, '')}/functions/v1`;
+    const latestRelease = await resolveLatestRelease(supabase, { verifyStorageAsset: false });
+    const resolvedVersion = latestRelease.ok ? latestRelease.latest_version : null;
 
     return new Response(JSON.stringify({
       ok: true,
@@ -208,13 +211,19 @@ Deno.serve(async (req: Request) => {
       payment_id: razorpay_payment_id,
       token: sessionToken,
       license_id: orderData.license_id,
+      release: latestRelease.ok ? {
+        version: latestRelease.latest_version,
+        release_date: latestRelease.release_date,
+        changelog: latestRelease.changelog,
+        sha256: latestRelease.sha256
+      } : null,
       delivery: {
         mode: 'web_dashboard',
         status: 'ready',
         info: 'License generated and ready for instant activation in My License & Downloads.'
       },
       downloads: {
-        version: 'v2.2.0',
+        version: resolvedVersion ? `v${resolvedVersion}` : null,
         zxp_url: `${functionsBase}/download?type=zxp&token=${encodeURIComponent(sessionToken)}`,
         zip_url: `${functionsBase}/download?type=zip&token=${encodeURIComponent(sessionToken)}`,
         sfx_library_url: `${functionsBase}/download?type=sfx-library&token=${encodeURIComponent(sessionToken)}`

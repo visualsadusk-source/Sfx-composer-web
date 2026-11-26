@@ -1280,27 +1280,43 @@
           downloadsContainer.innerHTML = '';
         } else {
           var tokenQuery = authToken ? ('&token=' + encodeURIComponent(authToken)) : '';
+          var functionsDlBase = 'https://wyjazmiihwjlrkggeeez.supabase.co/functions/v1/download';
+          var isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+          var fallbackDlBase = isLocalHost ? '/api/download' : functionsDlBase;
           var zxpUrl = safeUrl((portal.downloads && portal.downloads.zxp_url)
             ? portal.downloads.zxp_url
-            : ('/api/download?type=zxp' + tokenQuery), true);
-          var sfxLibUrl = safeUrl((portal.downloads && portal.downloads.sfx_library_url) 
-            ? portal.downloads.sfx_library_url 
-            : ('/api/download?type=sfx-library' + tokenQuery), true);
+            : (fallbackDlBase + '?type=zxp' + tokenQuery), true);
+          var sfxLibUrl = safeUrl((portal.downloads && portal.downloads.sfx_library_url)
+            ? portal.downloads.sfx_library_url
+            : (fallbackDlBase + '?type=sfx-library' + tokenQuery), true);
+
+          var rel = portal.release || {};
+          var relVer = rel.latest_version ? ('v' + escapeHtml(rel.latest_version)) : (portal.downloads && portal.downloads.version ? escapeHtml(portal.downloads.version) : 'Latest');
+          var relDate = rel.release_date ? (' · Released ' + escapeHtml(rel.release_date)) : '';
+          var relSha = rel.sha256 ? ('<div style="font-family: var(--sfx-font-mono); font-size: 10px; color: var(--sfx-text-muted); margin-bottom: 10px; word-break: break-all;">SHA-256: ' + escapeHtml(rel.sha256) + '</div>') : '';
+          var relNotesHtml = '';
+          if (Array.isArray(rel.changelog) && rel.changelog.length > 0) {
+            relNotesHtml = '<ul style="margin: 0 0 10px 16px; padding: 0; font-size: 11px; color: var(--sfx-text-secondary); line-height: 1.45;">' +
+              rel.changelog.slice(0, 3).map(function (item) { return '<li>' + escapeHtml(String(item)) + '</li>'; }).join('') +
+              '</ul>';
+          }
 
           var downloadCardsHtml = '<div class="sfx-dashboard-card">';
           downloadCardsHtml += 
             '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">' +
               '<div style="font-size: 13px; font-weight: 700; color: #fff;">' + (hasLibrary ? '7GB Master SFX Library &amp; Downloads' : 'Software Downloads') + '</div>' +
-              '<span class="sfx-badge-status active">Unlocked</span>' +
+              '<span class="sfx-badge-status active">Unlocked · ' + relVer + '</span>' +
             '</div>';
 
           if (hasPlugin) {
             downloadCardsHtml += 
-              '<div style="font-size: 11.5px; color: var(--sfx-text-muted); margin-bottom: 12px;">SFX Composer Pro Software Package: Windows 10/11 &amp; macOS 11+ (Intel &amp; Apple Silicon)</div>' +
+              '<div style="font-size: 11.5px; color: var(--sfx-text-muted); margin-bottom: 8px;">SFX Composer Pro (' + relVer + relDate + '): Windows 10/11 &amp; macOS 11+ (Intel &amp; Apple Silicon)</div>' +
+              relNotesHtml +
+              relSha +
               '<div style="margin-bottom: 12px;">' +
                 '<a href="' + zxpUrl + '" download class="sfx-button sfx-button--quiet" style="height: 38px; width: 100%; border: 1px solid var(--sfx-border); justify-content: center; font-size: 12px; color: #fff; background: #121418; text-decoration: none;">' +
                   '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>' +
-                  'Software Installer (.zxp)' +
+                  'Download Latest Version (' + relVer + ' .zxp)' +
                 '</a>' +
               '</div>';
           }

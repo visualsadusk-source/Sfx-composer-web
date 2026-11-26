@@ -433,74 +433,55 @@ var extendedCatalog = whooshCatalog;
       row.style.display = 'flex';
       row.style.alignItems = 'center';
       row.style.padding = '5px 12px';
-      row.style.borderBottom = '1px solid #141416';
+      row.style.borderBottom = '1px solid rgba(255, 255, 255, 0.06)';
       row.style.cursor = 'pointer';
-      row.style.background = isSelected ? '#121e33' : 'transparent';
+      row.style.background = isSelected ? 'rgba(10, 132, 255, 0.12)' : 'transparent';
+      row.style.borderLeft = isSelected ? '2px solid #0a84ff' : '2px solid transparent';
       row.style.userSelect = 'none';
+
+      var isPlaying = engine && engine.isPlayingSample && engine.isPlayingSample(sound.id);
 
       row.innerHTML =
         '<button type="button" class="sfx-star" data-id="' + sound.id + '" style="background: none; border: none; color: ' + (isFav ? '#ffd60a' : '#5e5e64') + '; font-size: 11px; cursor: pointer; padding: 0 4px 0 0;">' +
           (isFav ? '★' : '☆') +
         '</button>' +
 
-        '<button type="button" class="sfx-iconbutton sfx-row-play-btn" data-id="' + sound.id + '" style="background: #18181c; border: 1px solid #28282c; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 8px; cursor: pointer; margin-right: 8px;">' +
-          '▶' +
+        '<button type="button" class="sfx-iconbutton sfx-row-play-btn" data-id="' + sound.id + '" style="background: ' + (isPlaying ? '#0a84ff' : '#18181c') + '; border: 1px solid ' + (isPlaying ? '#0a84ff' : '#28282c') + '; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 8px; cursor: pointer; margin-right: 8px;">' +
+          (isPlaying ? '❚❚' : '▶') +
         '</button>' +
 
         '<div class="sfx-row__main" style="flex: 1; min-width: 0;">' +
-          '<div class="sfx-row__name" style="font-size: 11.5px; font-weight: 600; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + sound.name + '</div>' +
-          '<div class="sfx-row__meta" style="font-size: 10px; color: #707076; margin-top: 1px;">' + sound.subcat + '</div>' +
+          '<div class="sfx-row__name" style="font-size: 11.5px; font-weight: 600; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + sound.name + '</div>' +
+          '<div class="sfx-row__meta" style="font-size: 10px; color: #8e8e93; margin-top: 1px;">' + sound.subcat + '</div>' +
         '</div>' +
 
         '<div class="sfx-row__wave" style="width: 140px; margin: 0 16px; flex-shrink: 0;">' +
           '<canvas class="sfx-row-wave-canvas" width="140" height="18" data-id="' + sound.id + '" style="display: block; width: 140px; height: 18px;"></canvas>' +
         '</div>' +
 
-        '<div class="sfx-row__duration" style="font-family: var(--sfx-font-mono); font-size: 11px; color: #8e8e93; min-width: 34px; text-align: right; flex-shrink: 0;">' + sound.duration.toFixed(1) + 's</div>' +
+        '<div class="sfx-row__duration" style="font-family: var(--sfx-font-mono); font-size: 11px; color: #9c9ca4; min-width: 34px; text-align: right; flex-shrink: 0;">' + sound.duration.toFixed(1) + 's</div>' +
 
-        '<button type="button" class="sfx-iconbutton sfx-btn-row-trim" data-id="' + sound.id + '" title="Trim" style="background: none; border: none; color: #707076; cursor: pointer; padding: 2px 6px; margin-left: 8px; font-size: 12px;">' +
+        '<button type="button" class="sfx-iconbutton sfx-btn-row-trim" data-id="' + sound.id + '" title="Trim" style="background: none; border: none; color: #8e8e93; cursor: pointer; padding: 2px 6px; margin-left: 8px; font-size: 12px;">' +
           '✂' +
         '</button>';
 
       container.appendChild(row);
 
-      // Draw authentic waveform
+      // Draw authentic HiDPI per-sound waveform matching CEP plugin tokens
       var cvs = row.querySelector('.sfx-row-wave-canvas');
-      if (cvs) {
-        var ctx = cvs.getContext('2d');
-        var w = cvs.width;
-        var h = cvs.height;
-        ctx.clearRect(0, 0, w, h);
-        ctx.fillStyle = '#93c5fd';
-        var bars = 35;
-        var barW = w / bars;
-        for (var i = 0; i < bars; i++) {
-          var p = i / bars;
-          var env = Math.sin(p * Math.PI) * (0.3 + 0.7 * Math.sin(i * 1.7));
-          var barH = Math.max(2, env * (h - 2));
-          var y = (h - barH) / 2;
-          ctx.fillRect(i * barW + 1, y, barW - 1.5, barH);
-        }
-      }
+      drawRowWaveform(cvs, sound, isPlaying || isSelected);
 
       // Click row loads into docked trimmer tray
       row.addEventListener('click', function (e) {
         if (e.target.closest('button')) return;
         state.activeSound = sound;
+        state.trimVisible = true;
         updateTrimTray(sound);
         renderSoundRows();
       });
     });
 
-    // Star favorite toggle
-    container.querySelectorAll('.sfx-star').forEach(function (star) {
-      star.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var id = this.getAttribute('data-id');
-        state.favorites[id] = !state.favorites[id];
-        renderSoundRows();
-      });
-    });
+    attachRowEvents(container);
   }
 
   function renderGalleryCards() {
@@ -570,27 +551,63 @@ var extendedCatalog = whooshCatalog;
     });
   }
 
-  function drawRowWaveform(canvas, sound, isPlaying) {
+  function hashSeed(str) {
+    var h = 2166136261;
+    for (var i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return Math.abs(h);
+  }
+
+  function sampleEnvelope(sound, i, bars) {
+    var seed = hashSeed((sound && (sound.id || sound.name)) || 'sfx');
+    var p = i / Math.max(1, bars - 1);
+    var env = Math.sin(p * Math.PI);
+    var id = (sound && sound.id) || '';
+    if (id.indexOf('impact') !== -1 || id.indexOf('earthquake') !== -1) {
+      env = Math.exp(-p * 3.4);
+    } else if (id.indexOf('riser') !== -1) {
+      env = Math.pow(p, 1.8);
+    } else {
+      // Shift peak slightly per sound so each Whoosh has its own authentic shape
+      var peakShift = 0.25 + ((seed % 50) / 100);
+      var dist = Math.abs(p - peakShift);
+      env = Math.exp(-Math.pow(dist * 2.6, 2));
+    }
+    var n1 = Math.abs(Math.sin((i + 1) * 1.43 + (seed % 97)));
+    var n2 = Math.abs(Math.cos((i + 1) * 0.67 + ((seed >> 4) % 53)));
+    return Math.min(1, env * (0.28 + 0.72 * (0.65 * n1 + 0.35 * n2)));
+  }
+
+  function drawRowWaveform(canvas, sound, isHighlighted) {
     if (!canvas) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var cssW = canvas.clientWidth || parseInt(canvas.getAttribute('width'), 10) || 140;
+    var cssH = canvas.clientHeight || parseInt(canvas.getAttribute('height'), 10) || 18;
+    if (canvas.width !== cssW * dpr || canvas.height !== cssH * dpr) {
+      canvas.width = cssW * dpr;
+      canvas.height = cssH * dpr;
+    }
     var ctx = canvas.getContext('2d');
-    var w = canvas.width;
-    var h = canvas.height;
-    ctx.clearRect(0, 0, w, h);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
 
-    var bars = canvas.classList.contains('sfx-card-wave-canvas') ? 36 : 24;
-    var barW = (w / bars) - 1.2;
+    // Center hairline matching studio waveform aesthetic
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+    ctx.fillRect(0, Math.floor(cssH / 2), cssW, 1);
 
-    ctx.fillStyle = isPlaying ? '#4a9eff' : '#8a9bb5';
+    var bars = canvas.classList.contains('sfx-card-wave-canvas') ? 56 : 48;
+    var step = cssW / bars;
+    var barW = Math.max(1.2, step - 1.1);
+
+    ctx.fillStyle = isHighlighted ? '#0a84ff' : '#8a9bb5';
 
     for (var i = 0; i < bars; i++) {
-      var progress = i / bars;
-      var env = Math.sin(progress * Math.PI);
-      if (sound.id.includes('impact') || sound.id.includes('earthquake')) env = Math.exp(-progress * 3.2);
-      if (sound.id.includes('riser')) env = Math.pow(progress, 1.8);
-
-      var barH = Math.max(2, env * (h - 4) * (0.4 + 0.6 * Math.sin(i * 1.5)));
-      var y = (h - barH) / 2;
-      ctx.fillRect(i * (barW + 1.2), y, barW, barH);
+      var amp = sampleEnvelope(sound, i, bars);
+      var barH = Math.max(2, amp * (cssH - 3));
+      var y = (cssH - barH) / 2;
+      ctx.fillRect(i * step, y, barW, barH);
     }
   }
 
@@ -809,27 +826,39 @@ var extendedCatalog = whooshCatalog;
     updateStatusClipInfo();
 
     if (canvas) {
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var cssW = canvas.clientWidth || 800;
+      var cssH = canvas.clientHeight || 52;
+      if (canvas.width !== cssW * dpr || canvas.height !== cssH * dpr) {
+        canvas.width = cssW * dpr;
+        canvas.height = cssH * dpr;
+      }
       var ctx = canvas.getContext('2d');
-      var w = canvas.width;
-      var h = canvas.height;
-      ctx.clearRect(0, 0, w, h);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, cssW, cssH);
 
-      ctx.fillStyle = '#08080a';
-      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#08080b';
+      ctx.fillRect(0, 0, cssW, cssH);
 
-      var bars = 80;
-      var barW = (w / bars) - 1;
+      // Subtle center timeline axis
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.07)';
+      ctx.fillRect(0, Math.floor(cssH / 2), cssW, 1);
 
-      ctx.fillStyle = '#8a9bb5';
+      var bars = 140;
+      var step = cssW / bars;
+      var barW = Math.max(1.5, step - 1.2);
+      var totalDur = Math.max(0.01, sound.duration || 4.431);
+      var inPct = (state.trimIn || 0) / totalDur;
+      var outPct = (state.trimOut != null ? state.trimOut : totalDur) / totalDur;
+
       for (var i = 0; i < bars; i++) {
         var prog = i / bars;
-        var env = Math.sin(prog * Math.PI);
-        if (sound.id.includes('impact') || sound.id.includes('earthquake')) env = Math.exp(-prog * 3.5);
-        if (sound.id.includes('riser')) env = Math.pow(prog, 1.8);
-
-        var bh = Math.max(3, env * (h - 8) * (0.3 + 0.7 * Math.sin(i * 1.2)));
-        var by = (h - bh) / 2;
-        ctx.fillRect(i * (barW + 1), by, barW, bh);
+        var amp = sampleEnvelope(sound, i, bars);
+        var bh = Math.max(3, amp * (cssH - 10));
+        var by = (cssH - bh) / 2;
+        var inSelection = prog >= inPct && prog <= outPct;
+        ctx.fillStyle = inSelection ? '#4da3ff' : 'rgba(138, 155, 181, 0.28)';
+        ctx.fillRect(i * step, by, barW, bh);
       }
     }
   }

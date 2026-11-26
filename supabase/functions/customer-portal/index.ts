@@ -20,6 +20,7 @@
 
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import { decryptLicenseKey, createSignedDownloadToken } from '../_shared/crypto.ts';
+import { resolveLatestRelease } from '../_shared/release-resolver.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // In-memory rate limiting (per Deno isolate — resets on cold start, good enough for edge)
@@ -284,6 +285,7 @@ Deno.serve(async (req: Request) => {
     payment_id: paymentRef
   }, 30 * 24 * 3600 * 1000);
   const functionsBase = `${supabaseUrl.replace(/\/$/, '')}/functions/v1`;
+  const latestRelease = await resolveLatestRelease(supabase, { verifyStorageAsset: false });
 
   return json({
     ok: true,
@@ -298,6 +300,19 @@ Deno.serve(async (req: Request) => {
       has_library: hasLibrary,
       product_name: productName
     },
+    release: latestRelease.ok ? {
+      latest_version: latestRelease.latest_version,
+      release_date: latestRelease.release_date,
+      changelog: latestRelease.changelog,
+      release_notes_url: latestRelease.release_notes_url,
+      platform_compatibility: latestRelease.platform_compatibility,
+      sha256: latestRelease.sha256,
+      approved: latestRelease.approved
+    } : {
+      available: false,
+      code: latestRelease.code || 'RELEASE_UNAVAILABLE',
+      message: latestRelease.message || 'Release information unavailable.'
+    },
     license: portalData.licenses?.[0] || null,
     licenses: portalData.licenses || [],
     orders: portalData.orders || [],
@@ -306,6 +321,7 @@ Deno.serve(async (req: Request) => {
       has_plugin: hasPlugin,
       has_library: hasLibrary,
       product_name: productName,
+      version: latestRelease.ok ? `v${latestRelease.latest_version}` : null,
       zxp_url: hasPlugin ? `${functionsBase}/download?type=zxp&token=${encodeURIComponent(sessionToken)}` : null,
       zip_url: hasPlugin ? `${functionsBase}/download?type=zip&token=${encodeURIComponent(sessionToken)}` : null,
       sfx_library_url: hasLibrary ? `${functionsBase}/download?type=sfx-library&token=${encodeURIComponent(sessionToken)}` : null

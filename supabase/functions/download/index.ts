@@ -17,14 +17,10 @@
 
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import { sha256, verifySignedDownloadToken } from '../_shared/crypto.ts';
+import { resolveLatestRelease } from '../_shared/release-resolver.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const ALLOWED_TYPES = new Set(['zxp', 'zip', 'sfx-library']);
-
-const ASSET_PATHS: Record<string, { objectPath: string; downloadName: string }> = {
-  zxp: { objectPath: 'sfx-composer-pro-v2.2.0.zxp', downloadName: 'sfx-composer-pro-v2.2.0.zxp' },
-  zip: { objectPath: 'sfx-composer-pro-v2.2.0.zxp', downloadName: 'sfx-composer-pro-v2.2.0.zip' }
-};
 
 function json(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
@@ -165,12 +161,44 @@ Deno.serve(async (req: Request) => {
     return json({ ok: true, type: 'sfx-library', download_url: driveUrl });
   }
 
-  // Plugin ZXP / ZIP from private Supabase Storage bucket
+  // Plugin ZXP / ZIP resolved dynamically from Single Latest-Release Resolver
+  const release = await resolveLatestRelease(supabase, { verifyStorageAsset: true });
+  if (!release.ok || !release.available) {
+    return json({
+      ok: false,
+      code: release.code || 'RELEASE_UNAVAILABLE',
+      message: release.message || 'Latest approved release is currently unavailable.'
+    }, 503);
+  }
+
   const bucket = (Deno.env.get('SFX_DOWNLOAD_BUCKET') || 'private-downloads').trim();
-  const asset = ASSET_PATHS[downloadType];
+  const objectPath = release.asset_name;
+  const downloadName = downloadType === 'zip'
+    ? objectPath.replace(/\.zxp$/i, '.zip')
+    : objectPath;
+
+  // Verify SHA-256 checksum if specified in manifest/release record
+  if (release.sha256) {
+    const { data: blobData, error: dlErr } = await supabase.storage.from(bucket).download(objectPath);
+    if (dlErr || !blobData) {
+      return json({ ok: false, code: 'ASSET_MISSING', message: 'Release package could not be verified.' }, 503);
+    }
+    const buf = new Uint8Array(await blobData.arrayBuffer());
+    const digest = await crypto.subtle.digest('SHA-256', buf);
+    const actualSha = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('').toLowerCase();
+    if (actualSha !== release.sha256.toLowerCase()) {
+      console.error(`Checksum mismatch for ${objectPath}: expected ${release.sha256}, got ${actualSha}`);
+      return json({
+        ok: false,
+        code: 'CHECKSUM_MISMATCH',
+        message: 'Release integrity check failed. Download blocked for your safety.'
+      }, 503);
+    }
+  }
+
   const { data: signedData, error: signErr } = await supabase.storage
     .from(bucket)
-    .createSignedUrl(asset.objectPath, 60, { download: asset.downloadName });
+    .createSignedUrl(objectPath, 60, { download: downloadName });
 
   if (signErr || !signedData?.signedUrl) {
     console.error('Signed URL generation error:', signErr?.message || 'missing asset');
@@ -181,8 +209,16 @@ Deno.serve(async (req: Request) => {
     }, 503);
   }
 
+  console.log(`[DOWNLOAD] granted type=${downloadType} version=${release.latest_version} asset=${objectPath}`);
+
   if (req.method === 'GET') {
     return Response.redirect(signedData.signedUrl, 302);
   }
-  return json({ ok: true, type: downloadType, download_url: signedData.signedUrl });
+  return json({
+    ok: true,
+    type: downloadType,
+    version: release.latest_version,
+    sha256: release.sha256,
+    download_url: signedData.signedUrl
+  });
 });

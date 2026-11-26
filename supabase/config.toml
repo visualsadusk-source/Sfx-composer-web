@@ -472,3 +472,9 @@ verify_jwt = false
 
 [functions.download]
 verify_jwt = false
+
+[functions.latest-release]
+verify_jwt = false
+
+[functions.admin-releases]
+verify_jwt = false

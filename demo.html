@@ -40,6 +40,7 @@
   <!-- High-Fidelity Audio Manifest (With Bundled Assets & Base64 Data URIs) -->
   <script src="assets/audio/audio-manifest.js"></script>
   <link rel="stylesheet" href="css/product-expert.css" />
+  <link rel="stylesheet" href="css/demo-guide.css" />
   <script src="js/feature-flags.js"></script>
 </head>
 <body class="ew-body sfx-has-header-menu">
@@ -91,7 +92,7 @@
     <!-- ── DEDICATED LIVE SOFTWARE DEMO ── -->
     <section class="sfx-site-section" id="live-plugin-demo">
       <div class="sfx-site-sec-head" style="margin-bottom: 24px; text-align: center;">
-        <span class="sfx-site-kicker" style="font-size: 11px; letter-spacing: 0.1em; color: #00a2ff; text-transform: uppercase; font-weight: 800;">Interactive Desktop Software · Version 2.2.0</span>
+        <span class="sfx-site-kicker" style="font-size: 11px; letter-spacing: 0.1em; color: #00a2ff; text-transform: uppercase; font-weight: 800;">Interactive Desktop Software · Version <span data-sfx-version>2.2.0</span> <span data-sfx-new-release-badge style="display:none; margin-left:6px; padding:2px 7px; border-radius:999px; background:rgba(10,132,255,0.16); border:1px solid rgba(10,132,255,0.4); color:#5eaaff; font-size:10px;"></span></span>
         <h2 class="sfx-site-title" style="font-size: 25px; font-weight: 800; margin: 6px 0 8px 0; color: #ffffff; letter-spacing: -0.01em;">Live Software Demo</h2>
         <p class="sfx-site-desc" style="font-size: 14px; max-width: 620px; margin: 0 auto; line-height: 1.5; color: #94a3b8;">
           Interact with the genuine SFX Composer application interface directly in your browser. Audition lossless sounds, test waveform trimming, and explore smart workflow tools.
@@ -294,7 +295,7 @@
                   </div>
 
                   <!-- Bottom Controls Row -->
-                  <div style="display: flex; align-items: center; justify-content: space-between;">
+                  <div class="sfx-trim-controls-row">
                     <div style="display: flex; align-items: center; gap: 6px;">
                       <button type="button" class="sfx-button sfx-button--quiet" id="sfx-trim-play-btn" style="height: 24px; width: 24px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; background: #18181c; border: 1px solid #28282c; color: #fff; font-size: 10px;" title="Play selection">
                         ▶
@@ -1835,7 +1836,7 @@
           <h4 style="color: #fff; font-size: 14.5px; margin: 0 0 6px 0;">Step 1: Download SFX Composer Software Package</h4>
           <ol style="padding-left: 18px; margin: 0; display: flex; flex-direction: column; gap: 6px;">
             <li>Access your customer dashboard under <strong>My License &amp; Downloads</strong>.</li>
-            <li>Download the official <strong>sfx-composer-pro-v2.2.0</strong> software package for your workstation.</li>
+            <li>Download the official <strong data-sfx-version data-sfx-version-prefix="sfx-composer-pro-v">sfx-composer-pro-v2.2.0</strong> software package for your workstation.</li>
           </ol>
         </div>
 
@@ -1879,9 +1880,11 @@
   <script src="js/audio-engine.js"></script>
   <script src="js/browser-demo-adapter.js"></script>
   <script src="js/plugin-controller.js"></script>
+  <script src="js/demo-guide.js"></script>
   <script src="js/payment-service.js"></script>
   <script src="js/content-service.js"></script>
     <script src="js/motion-system.js" defer></script>
+  <script src="js/release-service.js"></script>
   <script src="js/main.js"></script>
 
 
