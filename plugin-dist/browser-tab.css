@@ -719,3 +719,74 @@
 .sfx-br__live:focus-within {
   border-color: var(--sfx-accent, #7b5bff);
 }
+
+/* ---------- Floating Window Card ---------- */
+.sfx-br__floating-badge {
+  display: inline-block;
+  align-self: center;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(123, 91, 255, 0.2);
+  color: #c4b5fd;
+  border: 1px solid rgba(123, 91, 255, 0.4);
+  margin-bottom: 8px;
+}
+.sfx-br__floating-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 6px;
+  text-align: center;
+}
+.sfx-br__floating-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 6px 0;
+  font-size: 11px;
+  color: var(--sfx-text, #e8e8ee);
+  max-width: 440px;
+  text-align: left;
+}
+.sfx-br__floating-url {
+  font-size: 10px;
+  color: var(--sfx-text-muted, #9a9aa8);
+  word-break: break-all;
+}
+.sfx-br__floating-desc {
+  font-size: 11px;
+  color: var(--sfx-text-muted, #9a9aa8);
+  max-width: 400px;
+  line-height: 1.4;
+  margin: 4px 0 12px;
+  text-align: center;
+}
+.sfx-br__floating-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sfx-br__btn--dock {
+  background: var(--sfx-accent, #7b5bff) !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(123, 91, 255, 0.35);
+}
+.sfx-br__btn--dock:hover:not(:disabled) {
+  background: #6c4af5 !important;
+}
+.sfx-br__btn--detach {
+  border-color: rgba(123, 91, 255, 0.5) !important;
+}
+.sfx-br__btn--detach:hover:not(:disabled) {
+  border-color: var(--sfx-accent, #7b5bff) !important;
+  color: #c4b5fd !important;
+}

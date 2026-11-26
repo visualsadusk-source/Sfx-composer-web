@@ -3,7 +3,15 @@
   applies once the menu is really in the top bar; otherwise the original
   floating buttons keep working exactly as before.
 */
+.sfx-shell__header {
+  position: relative !important;
+  z-index: 1000010 !important;
+  pointer-events: auto !important;
+}
 #sfx-header-menu {
+  position: relative !important;
+  z-index: 1000010 !important;
+  pointer-events: auto !important;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -24,18 +32,32 @@
   font: 600 11px/1 var(--sfx-font, -apple-system, 'Segoe UI', system-ui, sans-serif);
   cursor: pointer;
   white-space: nowrap;
+  opacity: 1;
+  visibility: visible;
+  transition: background 150ms ease, border-color 150ms ease, box-shadow 150ms ease, color 150ms ease, transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .sfx-hm__btn:hover:not(:disabled) {
-  background: var(--sfx-surface-hover, rgba(255, 255, 255, 0.07));
+  background: rgba(16, 64, 128, 0.18);
+  border-color: rgba(91, 127, 172, 0.35);
+  color: #ffffff;
 }
 .sfx-hm__btn:disabled {
-  opacity: 0.4;
-  cursor: default;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
-.sfx-hm__btn[aria-pressed='true'] {
-  background: var(--sfx-accent, #7b5bff);
-  border-color: transparent;
-  color: var(--sfx-text-on-accent, #fff);
+.sfx-hm__btn[aria-pressed='true'],
+.sfx-hm__btn.is-active {
+  background: var(--sfx-brand-gradient, linear-gradient(135deg, #104080 0%, #0a84ff 52%, #38bdf8 100%)) !important;
+  border-color: rgba(126, 200, 255, 0.45) !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  box-shadow: 0 2px 8px rgba(10, 132, 255, 0.35), 0 0 1px rgba(126, 200, 255, 0.6) !important;
+}
+.sfx-hm__btn[aria-pressed='true']:hover,
+.sfx-hm__btn.is-active:hover {
+  background: var(--sfx-brand-gradient-hover, linear-gradient(135deg, #144e99 0%, #2094ff 52%, #56c8ff 100%)) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(10, 132, 255, 0.45) !important;
 }
 .sfx-hm__btn svg {
   width: 13px;
@@ -70,3 +92,68 @@ html.sfx-has-header-menu #sfx-ai-assistant {
 html.sfx-has-header-menu #sfx-browser {
   top: var(--sfx-hm-bottom, 0px);
 }
+
+/* ─────────────────────────────────────────────────────────
+   Global Application-Level Settings Overlay
+   Enables Settings to be accessed globally from ANY workspace
+   (Library, Essential Sound, Scene AI, BGM Flow, Analytics,
+   Audio Tools, Browser, Downloads, AI SFX) without losing state.
+   ───────────────────────────────────────────────────────── */
+
+.sfx-settings {
+  position: fixed !important;
+  top: var(--sfx-hm-bottom, 42px) !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 1000005 !important;
+  background: var(--sfx-surface, #141416) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+.sfx-settings__bar {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: var(--sfx-space2, 8px) !important;
+  padding: 10px var(--sfx-space3, 16px) !important;
+  border-bottom: 1px solid var(--sfx-border, rgba(255, 255, 255, 0.08)) !important;
+  background: var(--sfx-surface-raised, #18181b) !important;
+  box-sizing: border-box !important;
+}
+
+.sfx-settings__heading {
+  margin: 0 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--sfx-text, #ffffff) !important;
+  letter-spacing: -0.01em;
+}
+
+.sfx-settings__body {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  padding: var(--sfx-space3, 16px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: var(--sfx-space5, 24px) !important;
+  box-sizing: border-box !important;
+}
+
+/* Profile button active state when Settings overlay is open */
+.sfx-profile.is-active,
+html.sfx-has-settings-open .sfx-profile {
+  background: var(--sfx-surface-hover, rgba(255, 255, 255, 0.1)) !important;
+  box-shadow: 0 0 0 1px var(--sfx-brand-border-active, rgba(10, 132, 255, 0.5)), 0 2px 8px rgba(10, 132, 255, 0.25) !important;
+}
+
+.sfx-profile.is-active .sfx-profile__avatar,
+html.sfx-has-settings-open .sfx-profile .sfx-profile__avatar {
+  transform: scale(1.08);
+}
+

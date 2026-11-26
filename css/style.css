@@ -954,9 +954,9 @@ img, svg {
 /* ── VIEWPORT & DESKTOP CEP SHELL PROPORTIONS ── */
 .sfx-plugin-viewport {
   position: relative !important;
-  height: 600px !important;
-  min-height: 600px !important;
-  max-height: 600px !important;
+  height: 720px !important;
+  min-height: 720px !important;
+  max-height: 720px !important;
   background: var(--sfx-surface, #000000) !important;
   display: flex !important;
   flex-direction: column !important;
@@ -1004,13 +1004,13 @@ img, svg {
 .sfx-plugin-viewport #sfx-analytics.sfx-an,
 .sfx-plugin-viewport #sfx-settings-drawer {
   position: absolute !important;
-  top: 46px !important;
+  top: 62px !important;
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
   width: 100% !important;
-  height: calc(100% - 46px) !important;
-  max-height: calc(100% - 46px) !important;
+  height: calc(100% - 62px) !important;
+  max-height: calc(100% - 62px) !important;
   z-index: 25 !important;
   display: none;
   flex-direction: column !important;
@@ -1982,13 +1982,13 @@ img, svg {
 /* ── 3B. AI SFX ASSISTANT WORKSTATION & CHAT STYLES ── */
 .sfx-plugin-viewport #sfx-ai-assistant {
   position: absolute !important;
-  top: 46px !important;
+  top: 62px !important;
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
   width: 100% !important;
-  height: calc(100% - 46px) !important;
-  max-height: calc(100% - 46px) !important;
+  height: calc(100% - 62px) !important;
+  max-height: calc(100% - 62px) !important;
   z-index: 25 !important;
   background: #111115 !important;
   color: #ffffff !important;
@@ -2162,13 +2162,13 @@ img, svg {
 /* ── 4. BGM FLOW OVERLAY MODULE ── */
 #sfx-bgm-flow.sfx-bf {
   position: absolute !important;
-  top: 46px !important;
+  top: 62px !important;
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
   width: 100% !important;
-  height: calc(100% - 46px) !important;
-  max-height: calc(100% - 46px) !important;
+  height: calc(100% - 62px) !important;
+  max-height: calc(100% - 62px) !important;
   z-index: 25 !important;
   display: none;
   flex-direction: column !important;
@@ -3821,19 +3821,19 @@ img, svg {
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: linear-gradient(135deg, rgba(0, 102, 255, 0.22) 0%, rgba(0, 64, 170, 0.32) 100%);
-  border: 1px solid rgba(0, 102, 255, 0.3);
-  color: #70b4ff;
+  background: #14171e;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: #e4e8f0;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 
 .sfx-folder-card:hover .sfx-folder-icon-wrap {
-  background: linear-gradient(135deg, rgba(0, 102, 255, 0.35) 0%, rgba(0, 64, 170, 0.45) 100%);
-  border-color: rgba(0, 102, 255, 0.5);
+  background: #181c26;
+  border-color: rgba(59, 130, 246, 0.45);
   color: #ffffff;
 }
 
@@ -4711,3 +4711,54 @@ img, svg {
 }
 
 
+
+/* ── MOBILE OPTIMIZATIONS FOR EMBEDDED PLUGIN VIEWPORT ── */
+@media (max-width: 640px) {
+  .sfx-sidebar__panel {
+    display: none !important;
+  }
+  .sfx-shell__header {
+    padding: 6px 8px !important;
+    gap: 6px !important;
+  }
+  .sfx-shell__title,
+  .sfx-shell .sfx-badge:not(.sfx-buy-trigger) {
+    display: none !important;
+  }
+  #sfx-header-menu {
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    flex: 1 1 auto !important;
+    max-width: calc(100vw - 160px) !important;
+    padding-bottom: 2px !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  #sfx-header-menu::-webkit-scrollbar {
+    display: none !important;
+  }
+  .sfx-hm__btn {
+    flex-shrink: 0 !important;
+  }
+  .sfx-select--track {
+    max-width: 80px !important;
+    font-size: 10px !important;
+  }
+  .sfx-profile-avatar span:not(.sfx-avatar-dot) {
+    display: none !important;
+  }
+  .sfx-buy-trigger {
+    padding: 2px 6px !important;
+    font-size: 10px !important;
+    white-space: nowrap !important;
+  }
+  .sfx-row {
+    padding: 6px 8px !important;
+  }
+  .sfx-row__wave {
+    width: 60px !important;
+    min-width: 60px !important;
+  }
+  .sfx-trim-tray {
+    padding: 8px 10px !important;
+  }
+}

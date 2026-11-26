@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="ew-page">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SFX Composer — Professional Sound Design & Audio Workflow Software</title>
-  <meta name="description" content="SFX Composer is professional sound design software designed to simplify audio workflows, manage sound effects, and support creative editing processes. Features a 17,000+ sound effects library, precision audio trimming, normalization, volume adjustment, and workflow assistance." />
+  <meta name="description" content="SFX Composer is professional sound design software designed to simplify audio workflows, manage sound effects, and support creative editing processes. Features a 7GB Master SFX Library, precision audio trimming, fade control, and timeline workflow." />
   <link rel="canonical" href="https://sfxcomposer.in/" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="SFX Composer" />
@@ -13,1008 +13,478 @@
   <meta property="og:url" content="https://sfxcomposer.in/" />
   <meta property="og:image" content="https://sfxcomposer.in/assets/brand/mark-128.png" />
   <meta name="twitter:card" content="summary" />
-
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="assets/brand/mark-128.png" />
-
-  <!-- Plugin Authentic Stylesheets (Extracted Directly From SFX Composer Extension) -->
-  <link rel="stylesheet" href="plugin-dist/core-bundle.css" />
-  <link rel="stylesheet" href="plugin-dist/header-menu.css" />
-  <link rel="stylesheet" href="plugin-dist/audio-tools.css" />
-  <link rel="stylesheet" href="plugin-dist/essential-sound.css" />
-  <link rel="stylesheet" href="plugin-dist/browser-tab.css" />
-  <link rel="stylesheet" href="plugin-dist/ai-assistant.css" />
-  <link rel="stylesheet" href="plugin-dist/scene-designer.css" />
-  <link rel="stylesheet" href="plugin-dist/analytics.css" />
-  <link rel="stylesheet" href="plugin-dist/brand-theme.css" />
-  <link rel="stylesheet" href="plugin-dist/sfx-buddy.css" />
-
-  <!-- Website Outer Styling (Pro Dark + #0A84FF Blue Accent) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
-
-  <!-- High-Fidelity Audio Manifest (With Bundled Assets & Base64 Data URIs) -->
+  <link rel="stylesheet" href="css/ew-theme.css" />
   <script src="assets/audio/audio-manifest.js"></script>
+  <link rel="stylesheet" href="css/product-expert.css" />
 </head>
-<body class="sfx-has-header-menu">
+<body class="ew-body">
 
-  <!-- Mobile Header -->
-  <header class="sfx-site-mobile-header" id="sfx-site-mobile-header">
-    <div class="sfx-site-logo-wrap" style="margin-bottom: 0;">
-      <div class="sfx-site-logo-mark">
-        <img src="assets/brand/mark-128.png" alt="SFX Composer" width="22" height="22" />
-      </div>
-      <span class="sfx-site-logo-text">SFX <span class="sfx-site-logo-accent">Composer</span></span>
-    </div>
-    <button class="sfx-hamburger" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-  </header>
+  <!-- COMPACT TOP NAVIGATION -->
+  <nav class="ew-nav" aria-label="Primary Navigation">
+    <div class="ew-nav-inner">
+      <a href="index.html" class="ew-brand">
+        <span class="ew-brand-mark"><img src="assets/brand/mark-128.png" alt="SFX Composer" width="22" height="22" /></span>
+        <span>SFX <span class="ew-brand-accent">Composer</span></span>
+      </a>
 
-  <!-- Mobile Overlay -->
-  <div class="sfx-nav-overlay" id="sfx-nav-overlay"></div>
+      <ul class="ew-nav-links">
+        <li><a href="#features" class="ew-nav-link">Features</a></li>
+        <li><a href="screenshots.html" class="ew-nav-link">Tools</a></li>
+        <li><a href="#how-it-works" class="ew-nav-link">How It Works</a></li>
+        <li><a href="#pricing" class="ew-nav-link">Pricing</a></li>
+        <li><a href="#faq" class="ew-nav-link">FAQ</a></li>
+      </ul>
 
-
-  <!-- FIXED VERTICAL LEFT NAVIGATION (SFX Composer Pro Dark + Blue) -->
-  <aside class="sfx-site-sidebar" id="sfx-left-nav">
-    <div class="sfx-site-logo-wrap">
-      <div class="sfx-site-logo-mark">
-        <img src="assets/brand/mark-128.png" alt="SFX Composer" width="22" height="22" />
-      </div>
-      <div class="sfx-site-logo-text">
-        <span>SFX <span class="sfx-site-logo-accent">Composer</span></span>
-        <span class="sfx-site-badge">DESKTOP SOFTWARE</span>
-      </div>
-    </div>
-
-    <!-- Navigation Links (Clean 5-Item Core Navigation) -->
-    <ul class="sfx-site-nav-menu">
-      <li>
-        <a href="index.html" class="sfx-site-nav-link is-active">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-          Overview
-        </a>
-      </li>
-      <li>
-        <a href="demo.html" class="sfx-site-nav-link">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          Live Demo
-          <span style="font-size: 9px; font-weight: 700; color: #7ec8ff; background: #132438; padding: 1px 5px; border-radius: 3px; margin-left: auto;">EXACT UI</span>
-        </a>
-      </li>
-      <li>
-        <a href="library.html" class="sfx-site-nav-link">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-          SFX Library
-          <span style="font-size: 9px; font-weight: 700; color: #34d399; background: #064e3b; padding: 1px 5px; border-radius: 3px; margin-left: auto;">7GB BUNDLE</span>
-        </a>
-      </li>
-      <li>
-        <a href="#customer-dashboard" class="sfx-site-nav-link open-customer-dashboard-link">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-          Dashboard
-        </a>
-      </li>
-      <li>
-        <a href="index.html#pricing" class="sfx-site-nav-link">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-          Pricing
-        </a>
-      </li>
-      <li>
-        <a href="index.html#faq" class="sfx-site-nav-link">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-          FAQ
-        </a>
-      </li>
-    </ul>
-
-    <!-- Bottom Conversion CTA Button in Sidebar -->
-    <div style="margin-top: auto; padding: 14px 14px 4px 14px; border-top: 1px solid var(--sfx-border);">
-      <button class="sfx-site-btn-primary sfx-buy-trigger" style="width: 100%; padding: 10px; font-size: 13px; font-weight: 700;">
-        Buy Bundle — ₹199
-      </button>
-    </div>
-
-    <!-- Live Status / Active Release Pill -->
-    <div class="sfx-site-nav-footer">
-      <div class="sfx-status-indicator">
-        <span class="sfx-status-dot"></span>
-        <span>v2.2.0 Active · Ready</span>
-      </div>
-    </div>
-  </aside>
-
-  <main class="sfx-site-main-content">
-
-    <!-- ── SECTION 01 — HERO ── -->
-    <section class="sfx-site-hero" id="hero">
-      <div class="sfx-site-hero-badge">
-        <span>⚡ SFX Composer v2.2.0 — Professional Sound Design & Audio Workflow Software</span>
-      </div>
-
-      <h1 class="sfx-site-hero-headline">
-        SFX Composer — <span class="blue-highlight">Professional Sound Design & Audio Workflow Software</span>
-      </h1>
-
-      <p class="sfx-site-hero-sub" style="font-size: 15px; font-weight: 500; color: #ffffff; margin-bottom: 6px;">
-        Professional sound design software designed to simplify audio workflows, manage sound effects, and support creative editing processes.
-      </p>
-
-      <p class="sfx-site-hero-desc" style="font-size: 14.5px; color: #cbd5e1; line-height: 1.55; max-width: 660px; margin-inline: auto; margin-bottom: 12px;">
-        Search, preview, organize and shape sound effects with a powerful desktop audio toolkit featuring a 17,000+ sound effects library.
-      </p>
-
-      <!-- 3 Short Selling Points -->
-      <div class="sfx-hero-selling-points" style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 14px; margin-bottom: 18px; font-size: 13.5px; font-weight: 600; color: #94a3b8;">
-        <span style="display: inline-flex; align-items: center; gap: 6px;">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          17,000+ Sound Effects
-        </span>
-        <span style="color: rgba(255, 255, 255, 0.2);">·</span>
-        <span style="display: inline-flex; align-items: center; gap: 6px;">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          Professional Audio Tools
-        </span>
-        <span style="color: rgba(255, 255, 255, 0.2);">·</span>
-        <span style="display: inline-flex; align-items: center; gap: 6px;">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#34d399" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          7GB SFX Bundle Included
-        </span>
-      </div>
-
-      <!-- Animated Waveform Visualizer (Pure White / Atmospheric Feathered) -->
-      <div class="sfx-hero-waveform-container" style="width: 100%; max-width: 800px; height: 44px; margin-bottom: 14px; margin-inline: auto; position: relative;">
-        <canvas id="hero-waveform-canvas" style="width: 100%; height: 100%; display: block; margin-inline: auto;"></canvas>
-      </div>
-
-      <!-- Three primary actions -->
-      <div class="sfx-site-hero-actions" style="margin-bottom: 24px;">
-        <a href="demo.html" class="sfx-site-btn-primary" style="font-size: 14.5px; padding: 12px 24px; text-decoration: none;">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          Explore Live Demo
-        </a>
-        <a href="library.html" class="sfx-site-btn-secondary" style="font-size: 14.5px; padding: 12px 22px; text-decoration: none; border-color: rgba(16, 185, 129, 0.4); color: #34d399;">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-          Explore SFX Library
-        </a>
-        <button class="sfx-site-btn-secondary sfx-buy-trigger" style="font-size: 14.5px; padding: 12px 22px; border-color: rgba(59, 130, 246, 0.5); color: #60a5fa; background: rgba(29, 104, 255, 0.08);">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg>
-          Get Lifetime License — ₹199
+      <div class="ew-nav-right">
+        <div class="ew-page-switcher" role="navigation" aria-label="Product Pages">
+          <a href="index.html" class="ew-switch-pill is-active">Overview</a>
+          <a href="demo.html" class="ew-switch-pill">Live Demo</a>
+          <a href="library.html" class="ew-switch-pill">7GB Library</a>
+          <a href="screenshots.html" class="ew-switch-pill">Gallery</a>
+        </div>
+        <button type="button" class="ew-nav-account-btn open-customer-dashboard-link" id="open-customer-dashboard-btn">My License</button>
+        <button type="button" class="ew-nav-cta sfx-buy-trigger">Buy — ₹199</button>
+        <button type="button" class="ew-mobile-toggle" id="ew-mobile-toggle" aria-label="Toggle Menu" aria-expanded="false">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
       </div>
+    </div>
 
-      <!-- ── PRIMARY HERO PRODUCT SHOWCASE VISUAL ── -->
-      <div class="sfx-main-hero-showcase" id="main-hero-showcase">
-        <!-- Ambient Blue Backlight Glow -->
-        <div class="sfx-main-hero-glow" aria-hidden="true"></div>
+    <div class="ew-mobile-drawer" id="ew-mobile-drawer">
+      <a href="index.html" class="ew-nav-link is-active">Overview</a>
+      <a href="demo.html" class="ew-nav-link">Live Software Demo</a>
+      <a href="library.html" class="ew-nav-link">7GB SFX Library</a>
+      <a href="screenshots.html" class="ew-nav-link">Studio Gallery</a>
+      <a href="#features" class="ew-nav-link">Features</a>
+      <a href="#how-it-works" class="ew-nav-link">How It Works</a>
+      <a href="#pricing" class="ew-nav-link">Pricing</a>
+      <a href="#faq" class="ew-nav-link">FAQ</a>
+      <div style="display:flex; gap:10px; padding-top:8px;">
+        <button type="button" class="ew-nav-account-btn open-customer-dashboard-link" style="display:inline-flex; flex:1; justify-content:center;">My License</button>
+        <button type="button" class="ew-nav-cta sfx-buy-trigger" style="display:inline-flex; flex:1; justify-content:center;">Buy — ₹199</button>
+      </div>
+    </div>
+  </nav>
 
-        <!-- Premium Framed Product Display -->
-        <div class="sfx-main-hero-frame">
-          <!-- Top SaaS Bar -->
-          <div class="sfx-main-hero-bar">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <div class="sfx-main-hero-dots" aria-hidden="true">
-                <span class="sfx-main-hero-dot" style="background: #ff5f56;"></span>
-                <span class="sfx-main-hero-dot" style="background: #ffbd2e;"></span>
-                <span class="sfx-main-hero-dot" style="background: #27c93f;"></span>
-              </div>
-              <div class="sfx-main-hero-bar-title">
-                <img src="assets/brand/mark-128.png" alt="SFX Composer" width="14" height="14" style="border-radius: 3px;" />
-                <span>SFX Composer · Professional Sound Design Software</span>
-              </div>
-            </div>
-            <div class="sfx-main-hero-hosts">
-              <span class="sfx-main-hero-host-pill" title="Supports workflows involving Adobe Premiere Pro">Premiere Pro Workflows</span>
-              <span class="sfx-main-hero-host-pill" title="Supports workflows involving Adobe After Effects">After Effects Workflows</span>
-            </div>
+  <main class="ew-main">
+
+    <!-- HERO SECTION -->
+    <section class="ew-hero" id="overview">
+      <canvas id="ew-hero-waves" aria-hidden="true"></canvas>
+      <div class="ew-container">
+        <span class="ew-kicker"><span class="ew-kicker-dot"></span> Premiere Pro &amp; After Effects Extension</span>
+        <h1 class="ew-hero-title">
+          Sound Design Workflow
+          <span class="ew-hero-title-accent">For Video Editors</span>
+        </h1>
+        <p class="ew-hero-desc">
+          Browse 4,500+ broadcast WAV sound effects, trim waveforms, shape fades, and drop audio directly onto your timeline — without leaving your edit.
+        </p>
+        <div class="ew-hero-ctas">
+          <button type="button" class="ew-btn-primary sfx-buy-trigger">
+            Get SFX Composer — ₹199
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"></path><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+          <a href="demo.html" class="ew-btn-secondary">
+            Explore Live Demo
+          </a>
+        </div>
+
+        <div class="ew-stats">
+          <div>
+            <div class="ew-stat-val">7GB</div>
+            <div class="ew-stat-lbl">Master SFX Library</div>
           </div>
+          <div>
+            <div class="ew-stat-val">20</div>
+            <div class="ew-stat-lbl">Folder Categories</div>
+          </div>
+          <div>
+            <div class="ew-stat-val">₹199</div>
+            <div class="ew-stat-lbl">One-Time Lifetime</div>
+          </div>
+        </div>
 
-          <!-- 16:9 Image Viewport Stage -->
-          <div class="sfx-main-hero-stage">
-            <picture class="sfx-main-hero-picture">
-              <source srcset="assets/images/sfx-composer-main-hero.webp" type="image/webp">
-              <img 
-                src="assets/images/sfx-composer-main-hero.png" 
-                alt="SFX Composer - Professional Sound Design & Audio Workflow Software" 
-                class="sfx-main-hero-img" 
-                id="sfx-main-hero-img"
-                loading="eager"
-              />
+        <div class="ew-window-frame ew-reveal">
+          <div class="ew-window-topbar">
+            <div class="ew-window-dots">
+              <span class="ew-dot-r"></span>
+              <span class="ew-dot-y"></span>
+              <span class="ew-dot-g"></span>
+            </div>
+            <span class="ew-window-title">SFX Composer Pro</span>
+            <span class="ew-window-pill">Windows &amp; macOS</span>
+          </div>
+          <div class="ew-window-body">
+            <picture>
+              <source srcset="assets/images/sfx-composer-main-hero.webp" type="image/webp" />
+              <img src="assets/images/sfx-composer-main-hero.png" alt="SFX Composer interface showing sound browser, waveform trimmer, and audio tools" width="1600" height="900" loading="eager" />
             </picture>
           </div>
+        </div>
+      </div>
+    </section>
 
-          <!-- Bottom Features Strip -->
-          <div class="sfx-main-hero-footer">
-            <div class="sfx-main-hero-features-strip">
-              <span class="sfx-main-hero-feat-item">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                17,000+ Library
-              </span>
-              <span class="sfx-main-hero-feat-item">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                Sound Management
-              </span>
-              <span class="sfx-main-hero-feat-item">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                Audio Trimming
-              </span>
-              <span class="sfx-main-hero-feat-item">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                Fades & Normalization
-              </span>
-              <span class="sfx-main-hero-feat-item">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                AI Sound Design
-              </span>
-              <span class="sfx-main-hero-feat-item">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                Asset Organization
-              </span>
+    <!-- PRODUCT OVERVIEW -->
+    <section class="ew-section-tight ew-reveal">
+      <div class="ew-container">
+        <div class="ew-sec-head" style="margin-bottom: 0;">
+          <span class="ew-kicker"><span class="ew-kicker-dot"></span> Built for Speed</span>
+          <h2 class="ew-sec-title">Stop hunting through messy folders</h2>
+          <p class="ew-sec-desc">
+            SFX Composer brings your sound library, waveform trimmer, fade controls, and AI sound discovery directly inside Adobe Premiere Pro and After Effects — for a single ₹199 one-time payment.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES SECTION -->
+    <section class="ew-section" id="features">
+      <div class="ew-container">
+        <div class="ew-sec-head ew-reveal">
+          <span class="ew-kicker"><span class="ew-kicker-dot"></span> Core Capabilities</span>
+          <h2 class="ew-sec-title">Everything you need to score scenes faster</h2>
+          <p class="ew-sec-desc">Designed around real editorial workflows — find, audition, shape, and place clean audio in seconds.</p>
+        </div>
+
+        <div class="ew-features-grid">
+          <article class="ew-feature-card ew-reveal">
+            <div class="ew-feature-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             </div>
-            <div style="font-size: 11.5px; color: #7ec8ff; font-weight: 600;">
-              Active Pro Release · v2.2.0
+            <h3 class="ew-feature-title">Instant Sound Browser</h3>
+            <p class="ew-feature-desc">Search and audition impacts, whooshes, foley, and risers across 20 organized folders without leaving your NLE.</p>
+          </article>
+
+          <article class="ew-feature-card ew-reveal">
+            <div class="ew-feature-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h3l2-6 4 12 3-8 2 4h6"></path></svg>
+            </div>
+            <h3 class="ew-feature-title">Precision Waveform Trimming</h3>
+            <p class="ew-feature-desc">Trim silence and isolate exact transients visually before dropping audio onto your timeline.</p>
+          </article>
+
+          <article class="ew-feature-card ew-reveal">
+            <div class="ew-feature-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            </div>
+            <h3 class="ew-feature-title">Smooth Fade &amp; Gain Control</h3>
+            <p class="ew-feature-desc">Shape fade-ins, fade-outs, and dB levels cleanly so every transition sits naturally in your mix.</p>
+          </article>
+
+          <article class="ew-feature-card ew-reveal">
+            <div class="ew-feature-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+            </div>
+            <h3 class="ew-feature-title">7GB Master SFX Library Included</h3>
+            <p class="ew-feature-desc">Includes 4,500+ royalty-free 24-bit / 48kHz broadcast WAV files organized into 20 production categories.</p>
+          </article>
+
+          <article class="ew-feature-card ew-reveal">
+            <div class="ew-feature-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            </div>
+            <h3 class="ew-feature-title">AI-Assisted Sound Discovery</h3>
+            <p class="ew-feature-desc">Describe a scene or mood and surface matching SFX cues and transitions without manual guesswork.</p>
+          </article>
+
+          <article class="ew-feature-card ew-reveal">
+            <div class="ew-feature-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>
+            </div>
+            <h3 class="ew-feature-title">Direct Timeline Placement</h3>
+            <p class="ew-feature-desc">Preview, customize, and place ready-to-mix audio straight into Premiere Pro and After Effects.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE PRODUCT SHOWCASE -->
+
+    <!-- HOW IT WORKS -->
+    <section class="ew-section" id="how-it-works">
+      <div class="ew-container">
+        <div class="ew-sec-head ew-reveal">
+          <span class="ew-kicker"><span class="ew-kicker-dot"></span> Simple Setup</span>
+          <h2 class="ew-sec-title">Up and running in minutes</h2>
+          <p class="ew-sec-desc">No subscriptions, no complicated server setup — purchase once and start editing.</p>
+        </div>
+
+        <div class="ew-steps-grid">
+          <div class="ew-step-card ew-reveal">
+            <span class="ew-step-num">01</span>
+            <h3>Purchase Bundle</h3>
+            <p>Complete your ₹199 one-time Razorpay checkout using your email address.</p>
+          </div>
+          <div class="ew-step-card ew-reveal">
+            <span class="ew-step-num">02</span>
+            <h3>Get Key &amp; Downloads</h3>
+            <p>Receive your license key immediately and download the `.zxp` installer and 7GB SFX Library from My License.</p>
+          </div>
+          <div class="ew-step-card ew-reveal">
+            <span class="ew-step-num">03</span>
+            <h3>Install &amp; Activate</h3>
+            <p>Install the extension in Premiere Pro or After Effects on Windows or macOS and enter your key.</p>
+          </div>
+          <div class="ew-step-card ew-reveal">
+            <span class="ew-step-num">04</span>
+            <h3>Edit Faster</h3>
+            <p>Browse, trim, fade, and place broadcast-ready WAV sound effects directly in your timeline.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUCT VIDEO / TUTORIALS -->
+    <section class="ew-section" id="tutorials">
+      <div class="ew-container">
+        <div class="ew-sec-head ew-reveal">
+          <span class="ew-kicker" id="tutorials-sec-kicker"><span class="ew-kicker-dot"></span> Video Tutorials</span>
+          <h2 class="ew-sec-title" id="tutorials-sec-title">Master SFX Composer In Minutes</h2>
+          <p class="ew-sec-desc" id="tutorials-sec-desc">Step-by-step guides for installing, configuring, and mastering audio design inside Premiere Pro and After Effects.</p>
+        </div>
+
+        <div class="ew-video-showcase ew-reveal">
+          <div class="video-wrapper" id="tutorial-video-wrapper">
+            <iframe 
+              id="tutorial-main-iframe"
+              src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0" 
+              title="Master SFX Composer In Minutes — Tutorial Walkthrough" 
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+
+        <div class="tutorials-grid" id="tutorials-grid-container" style="display: none;"></div>
+      </div>
+    </section>
+
+    <!-- PRICING SECTION -->
+    <section class="ew-section" id="pricing">
+      <div class="ew-container">
+        <div class="ew-sec-head ew-reveal">
+          <span class="ew-kicker"><span class="ew-kicker-dot"></span> Simple Pricing</span>
+          <h2 class="ew-sec-title">One payment. Everything included.</h2>
+          <p class="ew-sec-desc">No monthly fees or hidden tiers. Get the complete extension and the full 7GB Master SFX Library.</p>
+        </div>
+
+        <div class="ew-pricing-wrap ew-reveal">
+          <div class="ew-pricing-card">
+            <span class="ew-kicker" style="margin-bottom:10px;"><span class="ew-kicker-dot"></span> Complete Bundle</span>
+            <h3 style="font-size:22px; font-weight:800; color:#fff; margin:0;">SFX Composer Ultimate Bundle</h3>
+            <div class="ew-price-row">
+              <span class="ew-price-amount">₹199</span>
+              <span class="ew-price-type">One-Time Payment • Lifetime Access</span>
+            </div>
+            <p style="font-size:13.5px; color:var(--ew-text-secondary); margin:0;">Instant license key &amp; customer portal access immediately after checkout.</p>
+
+            <ul class="ew-check-list">
+              <li><span class="ew-check-dot">✓</span> SFX Composer Pro Extension (.zxp) for Windows &amp; macOS</li>
+              <li><span class="ew-check-dot">✓</span> 7GB Master SFX Library (20 Folders, 4,500+ 24-bit WAVs)</li>
+              <li><span class="ew-check-dot">✓</span> Adobe Premiere Pro &amp; After Effects support</li>
+              <li><span class="ew-check-dot">✓</span> Commercial Royalty-Free Audio License</li>
+              <li><span class="ew-check-dot">✓</span> Instant download &amp; key recovery via My License portal</li>
+            </ul>
+
+            <button type="button" class="ew-btn-primary sfx-buy-trigger" style="width:100%; padding:14px 24px; font-size:15px;">
+              Buy Complete Bundle — ₹199
+            </button>
+            <div style="text-align:center; margin-top:14px; font-size:12.5px; color:var(--ew-text-muted);">
+              Already purchased? <a href="#customer-dashboard" class="open-customer-dashboard-link" style="color:var(--ew-sky); text-decoration:underline;">Open My License &amp; Downloads</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- HORIZONTAL COMMUNITY BAR -->
+        <div class="ew-community-bar ew-reveal" aria-label="Join Our Community">
+          <div class="ew-community-heading">JOIN OUR COMMUNITY</div>
+          <div class="ew-community-links">
+            <a href="https://discord.gg/zrvYJeq9W" target="_blank" rel="noopener noreferrer" class="ew-community-link">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+              <span>Discord</span>
+            </a>
+            <span class="ew-community-sep" aria-hidden="true"></span>
+            <a href="https://www.instagram.com/sfx.composer/" target="_blank" rel="noopener noreferrer" class="ew-community-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+              <span>Instagram</span>
+            </a>
+            <span class="ew-community-sep" aria-hidden="true"></span>
+            <a href="https://www.youtube.com/@SfxComposer" target="_blank" rel="noopener noreferrer" class="ew-community-link">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              <span>YouTube</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section class="ew-section" id="faq">
+      <div class="ew-container">
+        <div class="ew-sec-head ew-reveal">
+          <span class="ew-kicker"><span class="ew-kicker-dot"></span> Frequently Asked Questions</span>
+          <h2 class="ew-sec-title">Questions &amp; answers</h2>
+          <p class="ew-sec-desc">Everything you need to know about licensing, compatibility, and delivery.</p>
+        </div>
+
+        <div class="ew-faq-list">
+          <div class="faq-item is-open">
+            <button type="button" class="faq-question" aria-expanded="true">
+              <span>What is included in the ₹199 SFX Composer bundle?</span>
+              <svg class="faq-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="faq-answer">
+              You get the SFX Composer Pro desktop extension (.zxp installer), your lifetime activation license key, and direct access to download the complete 7GB Master SFX Library (4,500+ 24-bit / 48kHz WAV files across 20 folders).
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+              <span>Is this a one-time payment or a monthly subscription?</span>
+              <svg class="faq-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="faq-answer">
+              It is a single ₹199 one-time payment with lifetime access. There are no recurring monthly or annual charges.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+              <span>Which software and operating systems are supported?</span>
+              <svg class="faq-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="faq-answer">
+              SFX Composer supports Adobe Premiere Pro and After Effects on Windows 10/11 and macOS 11+ (Intel &amp; Apple Silicon).
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+              <span>What happens immediately after I pay?</span>
+              <svg class="faq-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="faq-answer">
+              Your payment is verified server-side, your license key is generated immediately on screen, and you can download both the `.zxp` installer and the 7GB Master SFX Library anytime from the <strong>My License</strong> portal using your purchase email and Razorpay Payment ID.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+              <span>How do I install the .zxp extension and get support?</span>
+              <svg class="faq-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="faq-answer">
+              Open the <a href="#install-guide" data-open-modal="install-guide-modal" style="color:var(--ew-sky); text-decoration:underline;">Installation Guide</a> inside your dashboard or footer, or email <a href="mailto:sfxcomposer@gmail.com" style="color:var(--ew-sky); text-decoration:underline;">sfxcomposer@gmail.com</a> anytime for direct support.
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ── SECTION 02 — PRODUCT SHOWCASE & DESTINATIONS ── -->
-    <section class="sfx-site-section" id="explore-destinations">
-      <div class="sfx-site-sec-head">
-        <span class="sfx-site-kicker">Interactive Experience &amp; Studio Showcase</span>
-        <h2 class="sfx-site-title">See SFX Composer in Action</h2>
-        <p class="sfx-site-desc">
-          Explore the live software in your browser, inspect studio screenshots, or browse the 7GB master sound library.
-        </p>
-      </div>
-
-      <div class="sfx-dest-cards-grid-3">
-        <!-- Card 1: Live Software Demo -->
-        <a href="demo.html" class="sfx-dest-card sfx-dest-card--interactive">
-          <div class="sfx-dest-card-header">
-            <span class="sfx-dest-badge sfx-dest-badge--blue">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-              ⚡ LIVE SOFTWARE DEMO
-            </span>
-            <span class="sfx-dest-pill">EXACT UI</span>
-          </div>
-          <div class="sfx-dest-preview-graphic sfx-dest-preview-graphic--demo">
-            <img src="assets/images/sfx-overview-main.png" alt="SFX Composer Live Software Interface" loading="lazy" />
-            <div class="sfx-dest-gallery-count">
-              <span>Interactive Web Demo</span>
-            </div>
-          </div>
-          <div class="sfx-dest-card-content">
-            <h3 class="sfx-dest-title">Explore Live Software</h3>
-            <p class="sfx-dest-desc">
-              Experience the interface and test the audio tools.
-            </p>
-            <div class="sfx-dest-action">
-              <span>Launch Live Demo</span>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </div>
-          </div>
-        </a>
-
-        <!-- Card 2: Studio Gallery -->
-        <a href="demo.html#gallery" class="sfx-dest-card sfx-dest-card--gallery">
-          <div class="sfx-dest-card-header">
-            <span class="sfx-dest-badge sfx-dest-badge--purple">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-              📸 STUDIO GALLERY
-            </span>
-            <span class="sfx-dest-pill">HIGH RES</span>
-          </div>
-          <div class="sfx-dest-preview-graphic sfx-dest-preview-graphic--gallery">
-            <img src="assets/images/sfx-ai-assistant.png" alt="SFX Composer Studio Gallery Preview" loading="lazy" />
-            <div class="sfx-dest-gallery-count">
-              <span>8 Studio Screenshots · Fullscreen Viewer</span>
-            </div>
-          </div>
-          <div class="sfx-dest-card-content">
-            <h3 class="sfx-dest-title">Inside SFX Composer</h3>
-            <p class="sfx-dest-desc">
-              Explore real screenshots of the software.
-            </p>
-            <div class="sfx-dest-action">
-              <span>Explore Gallery</span>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </div>
-          </div>
-        </a>
-
-        <!-- Card 3: 7GB SFX Library -->
-        <a href="library.html" class="sfx-dest-card sfx-dest-card--interactive" style="border-color: rgba(16, 185, 129, 0.25);">
-          <div class="sfx-dest-card-header">
-            <span class="sfx-dest-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-              📁 7GB MASTER AUDIO ARCHIVE
-            </span>
-            <span class="sfx-dest-pill" style="border-color: rgba(16, 185, 129, 0.3); color: #a7f3d0;">20 FOLDERS</span>
-          </div>
-          <div class="sfx-dest-preview-graphic" style="background: #050608;">
-            <img src="assets/images/sfx-library-main.png" alt="SFX Composer 7GB Master SFX Library" loading="lazy" />
-            <div class="sfx-dest-gallery-count" style="border-color: rgba(16, 185, 129, 0.3); color: #a7f3d0;">
-              <span>20 Production Folders · Google Drive</span>
-            </div>
-          </div>
-          <div class="sfx-dest-card-content">
-            <h3 class="sfx-dest-title">7GB Master SFX Library</h3>
-            <p class="sfx-dest-desc">
-              Explore 20 categorized production sound folders.
-            </p>
-            <div class="sfx-dest-action" style="color: #34d399;">
-              <span>Explore SFX Library</span>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </div>
-          </div>
-        </a>
-      </div>
-    </section>
-
-    <!-- ── SECTION 03 — CORE AUDIO CAPABILITIES ── -->
-    <section class="sfx-site-section" id="features">
-      <a id="workflow" style="display:block; position:relative; top:-80px; visibility:hidden;"></a>
-      <a id="tutorials" style="display:block; position:relative; top:-80px; visibility:hidden;"></a>
-      <a id="how-it-works" style="display:block; position:relative; top:-80px; visibility:hidden;"></a>
-      
-      <div class="sfx-site-sec-head">
-        <span class="sfx-site-kicker">Desktop Productivity &amp; Audio Toolkit</span>
-        <h2 class="sfx-site-title">Engineered for Professional Sound Design</h2>
-        <p class="sfx-site-desc">
-          Professional Audio Workflow: Search, shape, and place audio assets efficiently alongside editing workflows in Adobe Premiere Pro and Adobe After Effects.
-        </p>
-      </div>
-
-      <!-- 6 Compact Visual Feature Cards -->
-      <div class="sfx-features-grid">
-        <!-- 1. 17,000+ Sound Library -->
-        <div class="sfx-feature-box">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-            <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.25); display: flex; align-items: center; justify-content: center; color: #3b82f6; flex-shrink: 0;">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            </div>
-            <h3 style="font-size: 15.5px; font-weight: 700; color: #ffffff; margin: 0;">17,000+ Sound Library</h3>
-          </div>
-          <p style="font-size: 13.5px; color: var(--sfx-text-muted); line-height: 1.55; margin: 0;">
-            Search and preview 17,000+ sound effects with instant category filtering, real-time audio auditioning, and smart tags.
-          </p>
-        </div>
-
-        <!-- 2. Audio Trimming -->
-        <div class="sfx-feature-box">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-            <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.25); display: flex; align-items: center; justify-content: center; color: #3b82f6; flex-shrink: 0;">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-            </div>
-            <h3 style="font-size: 15.5px; font-weight: 700; color: #ffffff; margin: 0;">Audio Trimming</h3>
-          </div>
-          <p style="font-size: 13.5px; color: var(--sfx-text-muted); line-height: 1.55; margin: 0;">
-            Precision waveform trimming allows editors to isolate exact hit points, transients, and clean heads/tails before placement.
-          </p>
-        </div>
-
-        <!-- 3. Fade In / Fade Out & Volume Normalization -->
-        <div class="sfx-feature-box">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-            <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.25); display: flex; align-items: center; justify-content: center; color: #3b82f6; flex-shrink: 0;">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-            </div>
-            <h3 style="font-size: 15.5px; font-weight: 700; color: #ffffff; margin: 0;">Fade In / Fade Out</h3>
-          </div>
-          <p style="font-size: 13.5px; color: var(--sfx-text-muted); line-height: 1.55; margin: 0;">
-            Volume &amp; Normalization: Control audio fade curves, gain adjustments, and peak audio normalization for balanced output.
-          </p>
-        </div>
-
-        <!-- 4. Sound Management -->
-        <div class="sfx-feature-box">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-            <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.25); display: flex; align-items: center; justify-content: center; color: #3b82f6; flex-shrink: 0;">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-            </div>
-            <h3 style="font-size: 15.5px; font-weight: 700; color: #ffffff; margin: 0;">Sound Management</h3>
-          </div>
-          <p style="font-size: 13.5px; color: var(--sfx-text-muted); line-height: 1.55; margin: 0;">
-            Organize sounds into custom collections, favorites, and project bins for instant recall across creative editing sessions.
-          </p>
-        </div>
-
-        <!-- 5. AI Sound Design -->
-        <div class="sfx-feature-box">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-            <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.25); display: flex; align-items: center; justify-content: center; color: #3b82f6; flex-shrink: 0;">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
-            </div>
-            <h3 style="font-size: 15.5px; font-weight: 700; color: #ffffff; margin: 0;">AI Sound Design</h3>
-          </div>
-          <p style="font-size: 13.5px; color: var(--sfx-text-muted); line-height: 1.55; margin: 0;">
-            AI-assisted sound discovery helps editors match audio to scene mood, pacing, cinematic tension, and storytelling dynamics.
-          </p>
-        </div>
-
-        <!-- 6. Integrated Download Manager -->
-        <div class="sfx-feature-box">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-            <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.25); display: flex; align-items: center; justify-content: center; color: #3b82f6; flex-shrink: 0;">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            </div>
-            <h3 style="font-size: 15.5px; font-weight: 700; color: #ffffff; margin: 0;">Integrated Download Manager</h3>
-          </div>
-          <p style="font-size: 13.5px; color: var(--sfx-text-muted); line-height: 1.55; margin: 0;">
-            Track, cache, and manage downloaded sound assets locally for offline editing productivity and fast timeline placement.
-          </p>
-        </div>
-      </div>
-
-      <!-- Feature Action Bar Linking to Live Demo and Gallery -->
-      <div style="margin-top: 28px; background: rgba(10, 132, 255, 0.05); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 12px; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
-        <div>
-          <div style="color: #ffffff; font-size: 15px; font-weight: 700; margin-bottom: 4px;">
-            Want to test these capabilities live?
-          </div>
-          <div style="color: var(--sfx-text-muted); font-size: 13px;">
-            Experience the full software interface interactively in your browser or inspect high-resolution studio screenshots.
-          </div>
-        </div>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <a href="demo.html" class="sfx-site-btn-primary" style="padding: 9px 18px; font-size: 13px; text-decoration: none;">
-            Launch Live Demo
-          </a>
-          <a href="demo.html#gallery" class="sfx-site-btn-secondary" style="padding: 9px 18px; font-size: 13px; text-decoration: none;">
-            Explore Gallery
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── SECTION 05 — BUNDLE & PRICING (MERGED WITH WHAT YOU GET DELIVERABLES) ── -->
-    <section class="sfx-site-section" id="pricing">
-      <a id="what-you-get" style="display:block; position:relative; top:-80px; visibility:hidden;"></a>
-
-      <div class="sfx-site-sec-head">
-        <span class="sfx-site-kicker">TWO PRODUCTS · ONE BUNDLE</span>
-        <h2 class="sfx-site-title">Everything in One Bundle</h2>
-        <p class="sfx-site-desc">
-          SFX Composer Ultimate Bundle: Get the complete software and massive 7GB audio collection together for a single one-time payment of ₹199.
-        </p>
-      </div>
-
-      <!-- Transparent Deliverables: What You Get With SFX Composer Pro -->
-      <div style="background: var(--sfx-surface-raised); border: 1px solid var(--sfx-border); border-radius: var(--sfx-radius-large); padding: 26px; max-width: 960px; margin-inline: auto; margin-bottom: 24px;">
-        <div style="font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sfx-accent); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          What You Get With SFX Composer Pro
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-bottom: 20px;">
-          <div style="display: flex; gap: 12px;">
-            <div style="color: var(--sfx-accent); font-size: 18px; line-height: 1;">✦</div>
-            <div>
-              <strong style="color: #fff; font-size: 14px; display: block; margin-bottom: 3px;">Lifetime Software License</strong>
-              <span style="font-size: 12.5px; color: var(--sfx-text-muted); line-height: 1.5; display: block;">Perpetual single-user software license for SFX Composer Pro. One-time payment of ₹199 with no subscriptions or recurring fees.</span>
-            </div>
-          </div>
-          <div style="display: flex; gap: 12px;">
-            <div style="color: var(--sfx-accent); font-size: 18px; line-height: 1;">✦</div>
-            <div>
-              <strong style="color: #fff; font-size: 14px; display: block; margin-bottom: 3px;">SFX Composer Software Packages</strong>
-              <span style="font-size: 12.5px; color: var(--sfx-text-muted); line-height: 1.5; display: block;">Full desktop software application packages for direct installation and flexible workstation setup on Windows and macOS.</span>
-            </div>
-          </div>
-          <div style="display: flex; gap: 12px;">
-            <div style="color: var(--sfx-accent); font-size: 18px; line-height: 1;">✦</div>
-            <div>
-              <strong style="color: #fff; font-size: 14px; display: block; margin-bottom: 3px;">Step-by-Step Software Setup Guide</strong>
-              <span style="font-size: 12.5px; color: var(--sfx-text-muted); line-height: 1.5; display: block;">Comprehensive setup and license activation guide for Windows and macOS with troubleshooting support.</span>
-            </div>
-          </div>
-          <div style="display: flex; gap: 12px;">
-            <div style="color: var(--sfx-accent); font-size: 18px; line-height: 1;">✦</div>
-            <div>
-              <strong style="color: #fff; font-size: 14px; display: block; margin-bottom: 3px;">Software Updates &amp; Improvements</strong>
-              <span style="font-size: 12.5px; color: var(--sfx-text-muted); line-height: 1.5; display: block;">Ongoing software enhancements, performance updates, and sound library additions as outlined in our terms.</span>
-            </div>
-          </div>
-          <div style="display: flex; gap: 12px;">
-            <div style="color: #34d399; font-size: 18px; line-height: 1;">★</div>
-            <div>
-              <strong style="color: #34d399; font-size: 14px; display: block; margin-bottom: 3px;">Included Bonus: 7GB Master SFX Library</strong>
-              <span style="font-size: 12.5px; color: var(--sfx-text-muted); line-height: 1.5; display: block;">20 categorized production folders with uncompressed 24-bit/48kHz broadcast WAV audio, delivered via Google Drive as a starter resource.</span>
-            </div>
-          </div>
-          <div style="display: flex; gap: 12px;">
-            <div style="color: var(--sfx-accent); font-size: 18px; line-height: 1;">✦</div>
-            <div>
-              <strong style="color: #fff; font-size: 14px; display: block; margin-bottom: 3px;">Dedicated Customer Support</strong>
-              <span style="font-size: 12.5px; color: var(--sfx-text-muted); line-height: 1.5; display: block;">Direct official email assistance from the developers at <a href="mailto:sfxcomposer@gmail.com" style="color: var(--sfx-accent); text-decoration: underline;">sfxcomposer@gmail.com</a>.</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Explicit Distinction Notice -->
-        <div style="background: rgba(10, 132, 255, 0.08); border: 1px solid rgba(10, 132, 255, 0.25); border-radius: 8px; padding: 14px 18px; font-size: 12.5px; color: #cbd5e1; line-height: 1.6;">
-          <strong style="color: #fff;">Clear Product Distinction:</strong> SFX Composer is independently developed <strong>professional sound design and audio workflow software</strong>. It is designed to support creative workflows involving professional editing applications such as Adobe Premiere Pro and Adobe After Effects. The 7GB audio collection is provided as an included starter resource; SFX Composer is not an audio hosting, file-storage, or music streaming subscription service.
-        </div>
-      </div>
-
-      <!-- Unified Bundle Container -->
-      <div class="sfx-bundle-container">
-        <!-- Two Separate Product Cards Visually Combined -->
-        <div class="sfx-bundle-split-grid">
-          <div class="sfx-bundle-plus-connector">+</div>
-
-          <!-- Product 1: SFX Composer Pro Plugin -->
-          <div class="sfx-bundle-item-card">
-            <div class="sfx-bundle-item-badge">
-              <span class="sfx-bundle-item-title">Product 1</span>
-              <span class="sfx-badge sfx-badge--trial" style="margin: 0;">Lifetime License</span>
-            </div>
-            <div class="sfx-bundle-item-preview">
-              <img src="assets/images/sfx-overview-main.png" alt="SFX Composer Pro Software" loading="lazy" />
-            </div>
-            <div class="sfx-bundle-item-body">
-              <h4 class="sfx-bundle-item-h3">SFX Composer Pro Software</h4>
-              <p class="sfx-bundle-item-desc">
-                Professional sound design software featuring 17,000+ sound effects browser, real-time waveform trimming, normalization, volume adjustment, and AI discovery tools.
-              </p>
-              <ul class="sfx-bundle-item-features">
-                <li>
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span><strong>Professional Audio Workflow:</strong> Supports creative workflows involving Adobe Premiere Pro and After Effects</span>
-                </li>
-                <li>
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span><strong>Full Audio Suite:</strong> Sound Library, Audio Trimming, Fades, Normalization &amp; Volume Adjustment</span>
-                </li>
-                <li>
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span><strong>Lifetime Software License:</strong> Perpetual activation key with direct installation package</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- Product 2: 7GB Master SFX Library -->
-          <div class="sfx-bundle-item-card">
-            <div class="sfx-bundle-item-badge">
-              <span class="sfx-bundle-item-title" style="color: #34d399;">Product 2</span>
-              <span class="sfx-dest-pill" style="border-color: rgba(16, 185, 129, 0.4); color: #6ee7b7; margin: 0;">7GB Uncompressed</span>
-            </div>
-            <div class="sfx-bundle-item-preview" style="background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.15) 0%, #06090e 100%); padding: 16px;">
-              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center;">
-                <div style="width: 44px; height: 44px; border-radius: 8px; background: rgba(16, 185, 129, 0.18); border: 1.5px solid #10b981; color: #34d399; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
-                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                </div>
-                <strong style="color: #ffffff; font-size: 15px;">7GB Master SFX Library</strong>
-                <span style="color: #34d399; font-size: 11px; font-weight: 700; margin-top: 2px;">20 Categorized Production Folders</span>
-                <span style="font-size: 10.5px; color: #94a3b8; margin-top: 4px;">24-bit / 48kHz Broadcast WAV · Stereo Lossless</span>
-              </div>
-            </div>
-            <div class="sfx-bundle-item-body">
-              <h4 class="sfx-bundle-item-h3">7GB Master SFX Library</h4>
-              <p class="sfx-bundle-item-desc">
-                Massive production sound library with 20 original categorized folders, uncompressed and mastered for cinematic filmmaking and content creation.
-              </p>
-              <ul class="sfx-bundle-item-features">
-                <li>
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span><strong>20 Categories:</strong> Button, Foley, Glitch, Human, Impact, Transitions, Typing &amp; more</span>
-                </li>
-                <li>
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span><strong>Studio Quality:</strong> Uncompressed 24-bit / 48kHz Broadcast WAV (zero drift)</span>
-                </li>
-                <li>
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span><strong>Direct Delivery:</strong> Instant high-speed Google Drive download post-payment</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Combined Pricing Footer Bar -->
-        <div class="sfx-bundle-pricing-footer">
+    <!-- FOOTER -->
+    <footer class="ew-footer">
+      <div class="ew-container">
+        <div class="ew-footer-grid">
           <div>
-            <div class="sfx-bundle-price-wrap">
-              <span class="sfx-price-original">₹1,999</span>
-              <span class="sfx-price-current">₹199</span>
-              <span class="sfx-price-period">One-time payment</span>
-              <span class="sfx-bundle-savings-pill">Save 90% Launch Offer</span>
-            </div>
-            <div style="font-size: 12px; color: var(--sfx-text-muted); margin-top: 6px; display: flex; flex-wrap: wrap; gap: 14px;">
-              <span>✓ Lifetime Software License</span>
-              <span>✓ 30-Day Money-Back Guarantee</span>
-              <span>✓ Instant Web Customer Access</span>
-            </div>
-          </div>
-
-          <button class="sfx-site-btn-primary sfx-buy-trigger" style="padding: 15px 36px; font-size: 15px; font-weight: 750; white-space: nowrap;" title="Buy Complete Bundle">
-            Get Complete Bundle — ₹199
-          </button>
-        </div>
-
-        <div style="font-size: 11.5px; color: var(--sfx-text-muted); text-align: center; margin-top: 14px;">
-          🔒 256-bit encrypted checkout via Razorpay • ₹199 one-time payment for lifetime software license • 30-day money-back guarantee • No subscriptions • Official Support: <a href="mailto:sfxcomposer@gmail.com" style="color: var(--sfx-accent); text-decoration: underline;">sfxcomposer@gmail.com</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── SECTION 06 — FAQ ── -->
-    <section class="sfx-site-section sfx-faq-section" id="faq">
-      <div class="sfx-site-sec-head sfx-faq-sec-head">
-        <span class="sfx-site-kicker">Help &amp; Answers</span>
-        <h2 class="sfx-site-title">Frequently Asked Questions</h2>
-        <p class="sfx-site-desc sfx-faq-subtitle">Everything you need to know about compatibility, licensing, installation, and our 30-day money-back guarantee.</p>
-      </div>
-
-      <div class="faq-container">
-        <!-- Question 1 -->
-        <div class="faq-item">
-          <button type="button" class="faq-question" id="faq-q-1" aria-expanded="false" aria-controls="faq-a-1">
-            <span class="faq-question-text">What is SFX Composer?</span>
-            <span class="faq-chevron-wrap" aria-hidden="true">
-              <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </span>
-          </button>
-          <div class="faq-answer" id="faq-a-1" role="region" aria-labelledby="faq-q-1">
-            <div class="faq-answer-inner">
-              SFX Composer is professional sound design software designed to simplify audio workflows, manage sound effects, and support creative editing processes. It provides precision audio utilities including trimming, fade in/out, normalization, volume adjustment, and AI sound discovery.
-            </div>
-          </div>
-        </div>
-
-        <!-- Question 2 -->
-        <div class="faq-item">
-          <button type="button" class="faq-question" id="faq-q-2" aria-expanded="false" aria-controls="faq-a-2">
-            <span class="faq-question-text">Which operating systems and editing workflows are supported?</span>
-            <span class="faq-chevron-wrap" aria-hidden="true">
-              <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </span>
-          </button>
-          <div class="faq-answer" id="faq-a-2" role="region" aria-labelledby="faq-q-2">
-            <div class="faq-answer-inner">
-              SFX Composer supports Windows 10 and Windows 11 (64-bit) as well as macOS 11+ (both Intel and Apple Silicon M1/M2/M3/M4). It is designed to support creative workflows involving professional editing software such as Adobe Premiere Pro and Adobe After Effects.
-            </div>
-          </div>
-        </div>
-
-        <!-- Question 3 -->
-        <div class="faq-item">
-          <button type="button" class="faq-question" id="faq-q-3" aria-expanded="false" aria-controls="faq-a-3">
-            <span class="faq-question-text">What is included in the ₹199 purchase?</span>
-            <span class="faq-chevron-wrap" aria-hidden="true">
-              <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </span>
-          </button>
-          <div class="faq-answer" id="faq-a-3" role="region" aria-labelledby="faq-q-3">
-            <div class="faq-answer-inner">
-              Your ₹199 one-time payment provides a perpetual lifetime software license for SFX Composer Pro, the software installation packages, step-by-step setup instructions, ongoing software updates per terms, official support at <a href="mailto:sfxcomposer@gmail.com" style="color: var(--sfx-accent);">sfxcomposer@gmail.com</a>, and complimentary bonus access to our curated 7GB Master SFX Library.
-            </div>
-          </div>
-        </div>
-
-        <!-- Question 4 -->
-        <div class="faq-item">
-          <button type="button" class="faq-question" id="faq-q-4" aria-expanded="false" aria-controls="faq-a-4">
-            <span class="faq-question-text">How do I install and activate the software?</span>
-            <span class="faq-chevron-wrap" aria-hidden="true">
-              <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </span>
-          </button>
-          <div class="faq-answer" id="faq-a-4" role="region" aria-labelledby="faq-q-4">
-            <div class="faq-answer-inner">
-              Download the SFX Composer software package from your customer dashboard. Run the installer or extract the application files on your computer. Launch SFX Composer, enter your purchase email and lifetime license key, and click <strong>Activate License</strong>. Once activated, you can manage and edit sound effects offline with zero restrictions.
-            </div>
-          </div>
-        </div>
-
-        <!-- Question 5 -->
-        <div class="faq-item">
-          <button type="button" class="faq-question" id="faq-q-5" aria-expanded="false" aria-controls="faq-a-5">
-            <span class="faq-question-text">How do I access my license key and downloads?</span>
-            <span class="faq-chevron-wrap" aria-hidden="true">
-              <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </span>
-          </button>
-          <div class="faq-answer" id="faq-a-5" role="region" aria-labelledby="faq-q-5">
-            <div class="faq-answer-inner">
-              Delivery is 100% web-based and instantaneous. Immediately after completing payment via Razorpay, your lifetime license key and software download links are displayed on screen. You can also re-access your licenses and downloads anytime via the <a href="#customer-dashboard" class="open-customer-dashboard-link" style="color: var(--sfx-accent); text-decoration: underline;">My License &amp; Downloads</a> portal using your purchase email and Razorpay Payment ID.
-            </div>
-          </div>
-        </div>
-
-        <!-- Question 6 -->
-        <div class="faq-item">
-          <button type="button" class="faq-question" id="faq-q-6" aria-expanded="false" aria-controls="faq-a-6">
-            <span class="faq-question-text">What is your refund policy?</span>
-            <span class="faq-chevron-wrap" aria-hidden="true">
-              <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </span>
-          </button>
-          <div class="faq-answer" id="faq-a-6" role="region" aria-labelledby="faq-q-6">
-            <div class="faq-answer-inner">
-              We offer a straightforward <strong>100% 30-Day Money-Back Guarantee</strong>. If SFX Composer fails to function properly on your system or does not suit your creative editing workflow, simply email us at <a href="mailto:sfxcomposer@gmail.com" style="color: var(--sfx-accent); text-decoration: underline;">sfxcomposer@gmail.com</a> within 30 days with your payment ID for a full refund back to your original payment method.
-            </div>
-          </div>
-        </div>
-
-        <!-- Question 7 -->
-        <div class="faq-item">
-          <button type="button" class="faq-question" id="faq-q-7" aria-expanded="false" aria-controls="faq-a-7">
-            <span class="faq-question-text">How can I contact customer support?</span>
-            <span class="faq-chevron-wrap" aria-hidden="true">
-              <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </span>
-          </button>
-          <div class="faq-answer" id="faq-a-7" role="region" aria-labelledby="faq-q-7">
-            <div class="faq-answer-inner">
-              You can contact our official customer support team directly at <a href="mailto:sfxcomposer@gmail.com" style="color: var(--sfx-accent); text-decoration: underline;">sfxcomposer@gmail.com</a>. We answer all inquiries promptly. You can also join our <a href="https://discord.gg/zrvYJeq9W" target="_blank" rel="noopener noreferrer" style="color: var(--sfx-accent); text-decoration: underline;">Discord community</a> for user guides and discussions.
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── SECTION: SOFTWARE COMPATIBILITY (PRE-FOOTER SPECIFICATIONS) ── -->
-    <section class="sfx-site-section" id="compatibility">
-      <div class="sfx-site-sec-head">
-        <span class="sfx-site-kicker">Operating Systems &amp; Editing Workflows</span>
-        <h2 class="sfx-site-title">Software Compatibility</h2>
-        <p class="sfx-site-desc">
-          SFX Composer is independent desktop software designed to support professional video editing and audio production workflows.
-        </p>
-      </div>
-
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
-        <!-- Card 1: Supported Host Software -->
-        <div class="sfx-feature-box" style="padding: 22px;">
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-            <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); display: flex; align-items: center; justify-content: center; color: var(--sfx-accent); font-weight: 800; font-size: 13px;">NLE</div>
-            <div>
-              <h3 style="font-size: 15px; font-weight: 700; color: #ffffff; margin: 0;">Editing Workflows</h3>
-              <span style="font-size: 11px; color: var(--sfx-accent);">Workflow Support</span>
-            </div>
-          </div>
-          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #cbd5e1;">
-            <li style="display: flex; align-items: center; gap: 8px;">
-              <span style="color: var(--sfx-positive);">✓</span> Supports creative workflows involving <strong>Adobe Premiere Pro</strong>
-            </li>
-            <li style="display: flex; align-items: center; gap: 8px;">
-              <span style="color: var(--sfx-positive);">✓</span> Supports creative workflows involving <strong>Adobe After Effects</strong>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Card 2: Supported Operating Systems -->
-        <div class="sfx-feature-box" style="padding: 22px;">
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-            <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); display: flex; align-items: center; justify-content: center; color: var(--sfx-accent);">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-            </div>
-            <div>
-              <h3 style="font-size: 15px; font-weight: 700; color: #ffffff; margin: 0;">Operating Systems</h3>
-              <span style="font-size: 11px; color: var(--sfx-accent);">Windows &amp; macOS</span>
-            </div>
-          </div>
-          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #cbd5e1;">
-            <li style="display: flex; align-items: center; gap: 8px;">
-              <span style="color: var(--sfx-positive);">✓</span> <strong>Windows 10 / 11</strong> (64-bit)
-            </li>
-            <li style="display: flex; align-items: center; gap: 8px;">
-              <span style="color: var(--sfx-positive);">✓</span> <strong>macOS 11+</strong> (Intel &amp; Apple Silicon M1–M4)
-            </li>
-          </ul>
-        </div>
-
-        <!-- Card 3: Supported Audio Architecture -->
-        <div class="sfx-feature-box" style="padding: 22px;">
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-            <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); display: flex; align-items: center; justify-content: center; color: var(--sfx-accent);">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            </div>
-            <div>
-              <h3 style="font-size: 15px; font-weight: 700; color: #ffffff; margin: 0;">Audio Engine Architecture</h3>
-              <span style="font-size: 11px; color: var(--sfx-accent);">Lossless Audio Engine</span>
-            </div>
-          </div>
-          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #cbd5e1;">
-            <li style="display: flex; align-items: center; gap: 8px;">
-              <span style="color: var(--sfx-positive);">✓</span> <strong>64-Bit Architecture:</strong> High-performance audio DSP
-            </li>
-            <li style="display: flex; align-items: center; gap: 8px;">
-              <span style="color: var(--sfx-positive);">✓</span> <strong>Lossless Formats:</strong> 24-bit / 48kHz Broadcast WAV
-            </li>
-          </ul>
-        </div>
-
-        <!-- Card 4: System Requirements -->
-        <div class="sfx-feature-box" style="padding: 22px;">
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-            <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); display: flex; align-items: center; justify-content: center; color: var(--sfx-accent);">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-            </div>
-            <div>
-              <h3 style="font-size: 15px; font-weight: 700; color: #ffffff; margin: 0;">Requirements</h3>
-              <span style="font-size: 11px; color: var(--sfx-accent);">Prerequisites</span>
-            </div>
-          </div>
-          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #cbd5e1;">
-            <li style="display: flex; align-items: center; gap: 8px;">
-              <span style="color: var(--sfx-positive);">✓</span> <strong>Desktop Workstation:</strong> 64-bit multi-core processor &amp; 4GB+ RAM
-            </li>
-            <li style="display: flex; align-items: center; gap: 8px;">
-              <span style="color: var(--sfx-positive);">✓</span> <strong>Modern Browser</strong> for dashboard &amp; activation
-            </li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── SECTION: JOIN THE COMMUNITY ── -->
-    <section class="sfx-site-section" id="community" style="padding-bottom: 8px;">
-      <div class="sfx-site-sec-head">
-        <span class="sfx-site-kicker">Connect &amp; Collaborate</span>
-        <h2 class="sfx-site-title">Join the Community</h2>
-        <p class="sfx-site-desc">
-          Connect with professional sound designers and video editors, get product announcements, and watch in-depth workflows.
-        </p>
-      </div>
-
-      <div class="sfx-community-grid">
-        <!-- Discord Card -->
-        <a href="https://discord.gg/zrvYJeq9W" target="_blank" rel="noopener noreferrer" class="sfx-community-card sfx-community-card--discord">
-          <div class="sfx-community-card-icon sfx-community-card-icon--discord">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
-              <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
-            </svg>
-          </div>
-          <div class="sfx-community-card-body">
-            <div class="sfx-community-card-header">
-              <h3 class="sfx-community-card-title">Discord</h3>
-              <span class="sfx-community-card-arrow">↗</span>
-            </div>
-            <p class="sfx-community-card-desc">Join our community</p>
-          </div>
-        </a>
-
-        <!-- Instagram Card -->
-        <a href="https://www.instagram.com/sfx.composer/" target="_blank" rel="noopener noreferrer" class="sfx-community-card sfx-community-card--instagram">
-          <div class="sfx-community-card-icon sfx-community-card-icon--instagram">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-            </svg>
-          </div>
-          <div class="sfx-community-card-body">
-            <div class="sfx-community-card-header">
-              <h3 class="sfx-community-card-title">Instagram</h3>
-              <span class="sfx-community-card-arrow">↗</span>
-            </div>
-            <p class="sfx-community-card-desc">Follow our updates</p>
-          </div>
-        </a>
-
-        <!-- YouTube Card -->
-        <a href="https://www.youtube.com/@SfxComposer" target="_blank" rel="noopener noreferrer" class="sfx-community-card sfx-community-card--youtube">
-          <div class="sfx-community-card-icon sfx-community-card-icon--youtube">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
-              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-            </svg>
-          </div>
-          <div class="sfx-community-card-body">
-            <div class="sfx-community-card-header">
-              <h3 class="sfx-community-card-title">YouTube</h3>
-              <span class="sfx-community-card-arrow">↗</span>
-            </div>
-            <p class="sfx-community-card-desc">Watch tutorials and product updates</p>
-          </div>
-        </a>
-      </div>
-    </section>
-
-    <!-- ── SECTION 07 — FOOTER ── -->
-    <footer class="sfx-site-footer" style="padding: 32px 0 20px; margin-top: 40px;">
-      <!-- Customer Account & License Retrieval Bar -->
-      <div class="sfx-footer-account-bar" style="background: rgba(10, 132, 255, 0.08); border: 1px solid rgba(10, 132, 255, 0.25); border-radius: 10px; padding: 16px 20px; margin-bottom: 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
-        <div>
-          <div style="font-size: 11px; font-weight: 800; color: var(--sfx-accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 3px;">
-            CUSTOMER ACCOUNT &amp; LICENSE
-          </div>
-          <div style="color: #fff; font-size: 13.5px; font-weight: 600;">
-            Already a customer? Access your lifetime license key, downloads, and receipts anytime.
-          </div>
-        </div>
-        <button type="button" class="sfx-site-btn-primary open-customer-dashboard-trigger" id="open-customer-dashboard-footer-btn" style="padding: 10px 18px; font-size: 13px; font-weight: 700; white-space: nowrap;">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-          My License &amp; Downloads
-        </button>
-      </div>
-
-      <div class="sfx-footer-grid">
-        <!-- Brand Info -->
-        <div>
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
-            <img src="assets/brand/mark-128.png" width="22" height="22" alt="SFX Composer" />
-            <span style="font-size: 15px; font-weight: 700; color: #fff;">SFX <span class="sfx-site-logo-accent">Composer</span></span>
-          </div>
-          <p style="font-size: 12.5px; color: var(--sfx-text-muted); line-height: 1.55; margin: 0 0 14px 0; max-width: 280px;">
-            SFX Composer is professional sound design and audio workflow software. Designed to simplify audio workflows, manage sound effects, and support creative editing processes involving professional editing software.
-          </p>
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-            <a href="https://discord.gg/zrvYJeq9W" target="_blank" rel="noopener noreferrer" class="sfx-footer-icon-link" title="Discord" aria-label="Discord">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+            <a href="index.html" class="ew-brand" style="margin-bottom:12px;">
+              <span class="ew-brand-mark"><img src="assets/brand/mark-128.png" alt="SFX Composer" width="20" height="20" /></span>
+              <span>SFX <span class="ew-brand-accent">Composer</span></span>
             </a>
-            <a href="https://www.instagram.com/sfx.composer/" target="_blank" rel="noopener noreferrer" class="sfx-footer-icon-link" title="Instagram" aria-label="Instagram">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-            </a>
-            <a href="https://www.youtube.com/@SfxComposer" target="_blank" rel="noopener noreferrer" class="sfx-footer-icon-link" title="YouTube" aria-label="YouTube">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-            </a>
+            <p style="font-size:13.5px; color:var(--ew-text-secondary); max-width:300px; margin:10px 0 0;">
+              Professional sound design extension and 7GB broadcast SFX library built for Premiere Pro and After Effects editors.
+            </p>
           </div>
-          <div style="font-size: 11.5px; color: #64748b;">
-            &copy; 2026 SFX Composer. All rights reserved.
+
+          <div>
+            <h4>Product</h4>
+            <ul>
+              <li><a href="#features">Features</a></li>
+              <li><a href="demo.html">Live Software Demo</a></li>
+              <li><a href="library.html">7GB SFX Library</a></li>
+              <li><a href="screenshots.html">Studio Gallery</a></li>
+              <li><a href="#pricing">Pricing</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4>Customer</h4>
+            <ul>
+              <li><a href="#customer-dashboard" class="open-customer-dashboard-link">My License &amp; Downloads</a></li>
+              <li><a href="#install-guide" data-open-modal="install-guide-modal">Installation Guide</a></li>
+              <li><a href="#faq">FAQ</a></li>
+              <li><a href="mailto:sfxcomposer@gmail.com">sfxcomposer@gmail.com</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4>Legal &amp; Social</h4>
+            <ul>
+              <li><a href="#terms" data-open-modal="terms-modal">Terms &amp; Conditions</a></li>
+              <li><a href="#privacy" data-open-modal="privacy-modal">Privacy Policy</a></li>
+              <li><a href="#refund" data-open-modal="refund-modal">Refund Policy</a></li>
+            </ul>
           </div>
         </div>
 
-        <!-- Product Links -->
-        <div>
-          <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #fff; margin-bottom: 12px;">Product</div>
-          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
-            <li><a href="index.html" style="color: var(--sfx-text-muted); text-decoration: none;">Overview</a></li>
-            <li><a href="demo.html" style="color: var(--sfx-text-muted); text-decoration: none;">Live Demo</a></li>
-            <li><a href="index.html#features" style="color: var(--sfx-text-muted); text-decoration: none;">Features</a></li>
-            <li><a href="screenshots.html" style="color: var(--sfx-text-muted); text-decoration: none;">Studio Gallery</a></li>
-            <li><a href="library.html" style="color: var(--sfx-text-muted); text-decoration: none;">SFX Library</a></li>
-            <li><a href="index.html#pricing" style="color: var(--sfx-text-muted); text-decoration: none;">Pricing</a></li>
-            <li><a href="index.html#faq" style="color: var(--sfx-text-muted); text-decoration: none;">FAQ</a></li>
-            <li><a href="#customer-dashboard" class="open-customer-dashboard-link" style="color: var(--sfx-accent); text-decoration: none;">My License &amp; Downloads</a></li>
-          </ul>
-        </div>
-
-        <!-- Software Specs & Compatibility -->
-        <div>
-          <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #fff; margin-bottom: 12px;">Compatibility</div>
-          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; color: var(--sfx-text-muted);">
-            <li><a href="index.html#compatibility" style="color: var(--sfx-accent); text-decoration: none; font-weight: 600;">System Compatibility &rarr;</a></li>
-            <li>Supports Adobe Premiere Pro workflows</li>
-            <li>Supports Adobe After Effects workflows</li>
-            <li>Windows 10 / 11 (64-bit)</li>
-            <li>macOS 11+ (Intel &amp; Apple Silicon)</li>
-            <li>Lifetime Software License</li>
-          </ul>
-        </div>
-
-        <!-- Legal & Policies (Razorpay Compliance) -->
-        <div>
-          <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #fff; margin-bottom: 12px;">Legal &amp; Policies</div>
-          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
-            <li><a href="#terms" data-open-modal="terms-modal" style="color: var(--sfx-text-muted); text-decoration: none;">Terms &amp; Conditions</a></li>
-            <li><a href="#privacy" data-open-modal="privacy-modal" style="color: var(--sfx-text-muted); text-decoration: none;">Privacy Policy</a></li>
-            <li><a href="#refund" data-open-modal="refund-modal" style="color: var(--sfx-text-muted); text-decoration: none;">Refund Policy (30 Days)</a></li>
-            <li><a href="#install-guide" data-open-modal="install-guide-modal" style="color: var(--sfx-text-muted); text-decoration: none;">Installation Guide</a></li>
-          </ul>
-        </div>
-
-        <!-- Official Support -->
-        <div>
-          <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #fff; margin-bottom: 12px;">Official Support</div>
-          <p style="font-size: 12.5px; color: var(--sfx-text-muted); line-height: 1.5; margin: 0 0 8px 0;">
-            Direct assistance for licensing, orders, and technical support:
-          </p>
-          <a href="mailto:sfxcomposer@gmail.com" style="color: var(--sfx-accent); font-size: 13px; font-weight: 600; text-decoration: underline; display: block; margin-bottom: 8px;">sfxcomposer@gmail.com</a>
-          <div style="font-size: 11.5px; color: var(--sfx-text-muted);">
-            One-time payment ₹199 • 30-Day Money-Back Guarantee
-          </div>
+        <div class="ew-footer-bottom">
+          <span>© 2026 SFX Composer. All rights reserved.</span>
+          <span>One-time payment ₹199 • Instant Digital Delivery</span>
         </div>
       </div>
     </footer>
 
+    <!-- FINAL CTA -->
+    <section class="ew-section-tight">
+      <div class="ew-container">
+        <div class="ew-final-cta ew-reveal">
+          <h2 class="ew-sec-title" style="margin-bottom:12px;">Ready to speed up your sound design?</h2>
+          <p class="ew-sec-desc" style="max-width:540px; margin:0 auto 26px;">Get the SFX Composer extension and the complete 7GB Master SFX Library for a one-time ₹199 payment.</p>
+          <div class="ew-hero-ctas" style="margin-bottom:0;">
+            <button type="button" class="ew-btn-primary sfx-buy-trigger">Buy Complete Bundle — ₹199</button>
+            <a href="demo.html" class="ew-btn-secondary">Try Live Demo</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
+
+  <!-- Interactive Showcase, Mobile Nav & Reveal Script -->
+  <script>
+    (function () {
+      var toggle = document.getElementById('ew-mobile-toggle');
+      var drawer = document.getElementById('ew-mobile-drawer');
+      if (toggle && drawer) {
+        toggle.addEventListener('click', function () {
+          var open = drawer.classList.toggle('is-open');
+          toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+      }
+
+
+      var reveals = document.querySelectorAll('.ew-reveal');
+      if ('IntersectionObserver' in window) {
+        var obs = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              obs.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.08 });
+        reveals.forEach(function (el) { obs.observe(el); });
+      } else {
+        reveals.forEach(function (el) { el.classList.add('is-visible'); });
+      }
+    })();
+  </script>
 
   <!-- ── CUSTOMER DASHBOARD & MY LICENSES MODAL ── -->
   <div class="sfx-modal" id="customer-dashboard-modal" role="dialog" aria-modal="true">
@@ -1536,7 +1006,7 @@
   <script src="js/plugin-controller.js"></script>
   <script src="js/payment-service.js"></script>
   <script src="js/content-service.js"></script>
-  <script src="plugin-dist/sfx-buddy.js"></script>
+  <script src="js/motion-system.js" defer></script>
   <script src="js/main.js"></script>
 
 
@@ -1567,5 +1037,6 @@
   </div>
 
 
+  <script src="js/product-expert.js" defer></script>
 </body>
 </html>

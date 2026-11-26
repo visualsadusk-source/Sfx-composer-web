@@ -16,20 +16,38 @@
   var catalog = window.SFX_AUDIO_CATALOG || [];
 
   // Extended catalog to represent the 17,420+ library sounds
-  var extendedCatalog = [
-    ...catalog,
-    { id: 'airlock', name: 'Sci-Fi Air Lock Release', file: 'cinematic-whoosh.wav', cat: 'SFX', subcat: 'Whoosh', tags: ['Pneumatic', 'Futuristic', 'Metal'], duration: 1.8, sizeKb: '142.0', url: 'assets/audio/cinematic-whoosh.wav' },
-    { id: 'earthquake', name: 'Earthquake Sub Boom 808', file: 'deep-impact.wav', cat: 'SFX', subcat: 'Impacts', tags: ['Subsonic', 'Heavy', 'Trailer'], duration: 2.5, sizeKb: '210.5', url: 'assets/audio/deep-impact.wav' },
-    { id: 'cyberriser', name: 'Cyberpunk Tension Riser', file: 'riser.wav', cat: 'SFX', subcat: 'Transitions', tags: ['Tension', 'Build-up', 'Climax'], duration: 3.0, sizeKb: '516.8', url: 'assets/audio/riser.wav' },
-    { id: 'shimmer', name: 'Organic Shimmer Sweep', file: 'soft-transition.wav', cat: 'SFX', subcat: 'Transitions', tags: ['Modern', 'Warm', 'Chime'], duration: 1.1, sizeKb: '189.5', url: 'assets/audio/soft-transition.wav' },
-    { id: 'haptic', name: 'Haptic Mechanical Click', file: 'ui-click.wav', cat: 'SFX', subcat: 'UI', tags: ['Tactile', 'Button', 'Interface'], duration: 0.15, sizeKb: '48.2', url: 'assets/audio/ui-click.wav' },
-    { id: 'dystopia', name: 'Dystopian Industrial Drone', file: 'ambient-atmosphere.wav', cat: 'Ambience', subcat: 'Ambience', tags: ['Eerie', 'Pad', 'Soundscape'], duration: 5.0, sizeKb: '840.0', url: 'assets/audio/ambient-atmosphere.wav' },
-    { id: 'cinematic_braam', name: 'Low Brass Trailer Braam', file: 'deep-impact.wav', cat: 'SFX', subcat: 'Impacts', tags: ['Braam', 'Horn', 'Cinematic'], duration: 2.8, sizeKb: '240.0', url: 'assets/audio/deep-impact.wav' },
-    { id: 'whosh_flame', name: 'Fireball Whoosh Pass-by', file: 'cinematic-whoosh.wav', cat: 'SFX', subcat: 'Whoosh', tags: ['Fire', 'Magic', 'Whoosh'], duration: 1.6, sizeKb: '160.0', url: 'assets/audio/cinematic-whoosh.wav' }
+  
+  var whooshCatalog = [
+    { id: 'w1', name: '_Whoosh 1', cat: 'SFX', subcat: 'SFX monster/Whoosh', duration: 9.1 },
+    { id: 'w2', name: '_Whoosh 2', cat: 'SFX', subcat: 'SFX monster/Whoosh', duration: 7.3 },
+    { id: 'w3', name: '_Whoosh 3', cat: 'SFX', subcat: 'SFX monster/Whoosh', duration: 4.6 },
+    { id: 'w4', name: '_Whoosh 4', cat: 'SFX', subcat: 'SFX monster/Whoosh', duration: 0.5 },
+    { id: 'w5', name: '_Whoosh 5', cat: 'SFX', subcat: 'SFX monster/Whoosh', duration: 0.5 },
+    { id: 'w6', name: '_Whoosh 6', cat: 'SFX', subcat: 'SFX monster/Whoosh', duration: 0.7 },
+    { id: 'w7', name: '_Whoosh 7', cat: 'SFX', subcat: 'SFX monster/Whoosh', duration: 6.0 },
+    { id: 'w8', name: '_Whoosh 8', cat: 'SFX', subcat: 'SFX monster/Whoosh', duration: 6.8 },
+    { id: 'w9', name: '_Whoosh 9', cat: 'SFX', subcat: 'SFX monster/Whoosh', duration: 4.0 },
+    { id: 'w10', name: '_Whoosh 10', cat: 'SFX', subcat: 'SFX monster/Whoosh', duration: 8.0 },
+    { id: 'w11', name: '_Whoosh 11', cat: 'SFX', subcat: 'SFX monster/Whoosh', duration: 5.1 },
+    { id: 'w12', name: '_Whoosh 12', cat: 'SFX', subcat: 'SFX monster/Whoosh', duration: 6.9 },
+    { id: 'w13', name: '_Whoosh 13', cat: 'SFX', subcat: 'SFX monster/Whoosh', duration: 5.0 },
+    { id: 'w14', name: '_Whoosh 14', cat: 'SFX', subcat: 'SFX monster/Whoosh', duration: 5.1 },
+    { id: 'w15', name: '_Whoosh 15', cat: 'SFX', subcat: 'SFX monster/Whoosh', duration: 3.7 },
+    { id: 'w16', name: '_Whoosh 16', cat: 'SFX', subcat: 'SFX monster/Whoosh', duration: 2.1 },
+    { id: 'w17', name: '_Whoosh 17', cat: 'SFX', subcat: 'SFX monster/Whoosh', duration: 5.9 },
+    { id: 'w18', name: '_Whoosh 18', cat: 'SFX', subcat: 'SFX monster/Whoosh', duration: 1.0 }
   ];
 
+  var defaultWhoosh20 = {
+    id: 'w20',
+    name: '_Whoosh 20',
+    cat: 'SFX', subcat: 'SFX monster/Whoosh',
+    duration: 4.431
+  };
+var extendedCatalog = whooshCatalog;
+
   var state = {
-    activeSound: extendedCatalog[0],
+    activeSound: defaultWhoosh20,
     selectedCategory: 'all',
     viewMode: 'list', // 'list' | 'grid'
     activeTrack: 'A1',
@@ -394,79 +412,95 @@
   }
 
   function renderSoundRows() {
-    var container = document.getElementById('sfx-vlist-container');
-    var countEl = document.getElementById('sfx-sounds-count');
+    var container = document.getElementById('sfx-sound-rows') || document.getElementById('sfx-vlist-container');
     if (!container) return;
 
-    var filtered = getFilteredSounds();
-
-    if (countEl) {
-      countEl.textContent = filtered.length + ' sounds';
+    var sounds = whooshCatalog;
+    var query = state.searchQuery ? state.searchQuery.toLowerCase() : '';
+    if (query) {
+      sounds = whooshCatalog.filter(function (s) {
+        return s.name.toLowerCase().includes(query) || s.subcat.toLowerCase().includes(query);
+      });
     }
 
     container.innerHTML = '';
-    if (filtered.length === 0) {
-      container.innerHTML = '<div style="padding: 40px 20px; color: var(--sfx-text-muted); font-size: 12px; text-align: center;">No audio files found matching query. Try another keyword.</div>';
-      return;
-    }
-
-    filtered.forEach(function (sound) {
+    sounds.forEach(function (sound) {
       var row = document.createElement('div');
-      var isSelected = state.activeSound && state.activeSound.id === sound.id;
+      var isSelected = state.activeSound && state.activeSound.name === sound.name;
       var isFav = !!state.favorites[sound.id];
-      var isPlaying = engine ? engine.isPlayingSample(sound.id) : false;
 
-      row.className = 'sfx-row ' + (isSelected ? 'sfx-row--selected' : '') + (isPlaying ? ' sfx-row--previewing' : '');
-      row.setAttribute('data-id', sound.id);
+      row.className = 'sfx-row' + (isSelected ? ' sfx-row--selected' : '');
+      row.style.display = 'flex';
+      row.style.alignItems = 'center';
+      row.style.padding = '5px 12px';
+      row.style.borderBottom = '1px solid #141416';
+      row.style.cursor = 'pointer';
+      row.style.background = isSelected ? '#121e33' : 'transparent';
+      row.style.userSelect = 'none';
 
       row.innerHTML =
-        '<button class="sfx-star ' + (isFav ? 'sfx-star--on' : '') + '" data-id="' + sound.id + '" title="Toggle Favorite">' +
+        '<button type="button" class="sfx-star" data-id="' + sound.id + '" style="background: none; border: none; color: ' + (isFav ? '#ffd60a' : '#5e5e64') + '; font-size: 11px; cursor: pointer; padding: 0 4px 0 0;">' +
           (isFav ? '★' : '☆') +
         '</button>' +
 
-        '<button class="sfx-iconbutton sfx-row-play-btn" data-id="' + sound.id + '" title="Audition Sound">' +
-          '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">' +
-            (isPlaying ? '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>' : '<path d="M8 5v14l11-7z"/>') +
-          '</svg>' +
+        '<button type="button" class="sfx-iconbutton sfx-row-play-btn" data-id="' + sound.id + '" style="background: #18181c; border: 1px solid #28282c; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 8px; cursor: pointer; margin-right: 8px;">' +
+          '▶' +
         '</button>' +
 
-        '<div class="sfx-row__main">' +
-          '<div class="sfx-row__name">' + (sound.name.replace(/^_+/, '').replace(/^sfx_/i, '')) + '</div>' +
-          '<div class="sfx-row__meta">' +
-            '<span class="sfx-tag">' + (sound.subcat || sound.cat) + '</span>' +
-          '</div>' +
+        '<div class="sfx-row__main" style="flex: 1; min-width: 0;">' +
+          '<div class="sfx-row__name" style="font-size: 11.5px; font-weight: 600; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + sound.name + '</div>' +
+          '<div class="sfx-row__meta" style="font-size: 10px; color: #707076; margin-top: 1px;">' + sound.subcat + '</div>' +
         '</div>' +
 
-        '<div class="sfx-row__wave">' +
-          '<canvas class="sfx-waveform sfx-row-wave-canvas" width="90" height="20" data-id="' + sound.id + '"></canvas>' +
+        '<div class="sfx-row__wave" style="width: 140px; margin: 0 16px; flex-shrink: 0;">' +
+          '<canvas class="sfx-row-wave-canvas" width="140" height="18" data-id="' + sound.id + '" style="display: block; width: 140px; height: 18px;"></canvas>' +
         '</div>' +
 
-        '<div class="sfx-row__duration">' + sound.duration.toFixed(1) + 's</div>' +
+        '<div class="sfx-row__duration" style="font-family: var(--sfx-font-mono); font-size: 11px; color: #8e8e93; min-width: 34px; text-align: right; flex-shrink: 0;">' + sound.duration.toFixed(1) + 's</div>' +
 
-        '<button class="sfx-iconbutton sfx-btn-row-trim" data-id="' + sound.id + '" title="Non-destructive Trim">' +
-          '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>' +
-        '</button>' +
-
-        '<button class="sfx-row__import sfx-btn-row-insert" data-id="' + sound.id + '" title="Place at Playhead on Track ' + state.activeTrack + '">' +
-          '+ Track ' + state.activeTrack +
+        '<button type="button" class="sfx-iconbutton sfx-btn-row-trim" data-id="' + sound.id + '" title="Trim" style="background: none; border: none; color: #707076; cursor: pointer; padding: 2px 6px; margin-left: 8px; font-size: 12px;">' +
+          '✂' +
         '</button>';
 
       container.appendChild(row);
 
-      // Draw subtle row waveform
-      drawRowWaveform(row.querySelector('.sfx-row-wave-canvas'), sound, isPlaying);
+      // Draw authentic waveform
+      var cvs = row.querySelector('.sfx-row-wave-canvas');
+      if (cvs) {
+        var ctx = cvs.getContext('2d');
+        var w = cvs.width;
+        var h = cvs.height;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = '#93c5fd';
+        var bars = 35;
+        var barW = w / bars;
+        for (var i = 0; i < bars; i++) {
+          var p = i / bars;
+          var env = Math.sin(p * Math.PI) * (0.3 + 0.7 * Math.sin(i * 1.7));
+          var barH = Math.max(2, env * (h - 2));
+          var y = (h - barH) / 2;
+          ctx.fillRect(i * barW + 1, y, barW - 1.5, barH);
+        }
+      }
 
-      // Row Selection
+      // Click row loads into docked trimmer tray
       row.addEventListener('click', function (e) {
         if (e.target.closest('button')) return;
         state.activeSound = sound;
-        renderSoundRows();
-        renderGalleryCards();
         updateTrimTray(sound);
+        renderSoundRows();
       });
     });
 
-    attachRowEvents(container);
+    // Star favorite toggle
+    container.querySelectorAll('.sfx-star').forEach(function (star) {
+      star.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var id = this.getAttribute('data-id');
+        state.favorites[id] = !state.favorites[id];
+        renderSoundRows();
+      });
+    });
   }
 
   function renderGalleryCards() {
@@ -611,7 +645,7 @@
         if (sound) {
           state.activeSound = sound;
           var tray = document.getElementById('sfx-trim-tray');
-          if (tray) tray.style.display = 'flex';
+          if (tray) { tray.style.display = 'flex'; tray.style.flexDirection = 'column'; }
           state.trimVisible = true;
           updateTrimTray(sound);
           renderSoundRows();
@@ -762,9 +796,9 @@
     state.trimIn = 0.0;
     state.trimOut = sound.duration;
 
-    if (nameEl) nameEl.textContent = sound.name.replace(/^_+/, '').replace(/^sfx_/i, '');
+    if (nameEl) nameEl.textContent = sound.name || '_Whoosh 20';
     if (lenEl) lenEl.textContent = sound.duration.toFixed(2) + 's';
-    if (readout) readout.textContent = 'In: 0.00s • Out: ' + sound.duration.toFixed(2) + 's (' + sound.duration.toFixed(2) + 's)';
+    if (readout) { var dur = (sound.duration || 4.431).toFixed(3); readout.innerHTML = 'In <span style="color: #fff;">0.000s</span> · Out <span style="color: #fff;">' + dur + 's</span> · Length <span style="color: #0a84ff; font-weight: 600;">' + dur + 's</span>'; }
 
     if (handleIn) handleIn.style.left = '0%';
     if (handleOut) handleOut.style.left = '100%';
@@ -903,7 +937,7 @@
 
         if (atState.sound.buffer) {
           applyNormalization(atState.sound.buffer);
-        } else if (engine && engine.loadSound) {
+        } else if (engine && engine.loadSound && sound && sound.url) {
           showToast('Analyzing audio buffer...');
           engine.loadSound(atState.sound).then(function (buf) {
             atState.sound.buffer = buf;
@@ -1203,7 +1237,7 @@
       }
 
       var by = (h - bh) / 2;
-      ctx.fillStyle = isTrimmed ? '#35ea86' : '#334455';
+      ctx.fillStyle = isTrimmed ? '#3b82f6' : '#334455';
       ctx.fillRect(i * (barW + 1.5), by, barW, bh);
     }
   }
@@ -1316,6 +1350,26 @@
   function setupBrowserPanel() {
     var search = document.getElementById('sfx-br-search');
     var list = document.getElementById('sfx-br-downloads-list');
+
+    // Browser Subtabs Switching (Browse, Downloads, Import)
+    var brTabs = document.querySelectorAll('.sfx-br-tab-btn');
+    brTabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        brTabs.forEach(function (t) {
+          t.classList.remove('is-active');
+          t.classList.add('sfx-button--quiet');
+        });
+        this.classList.add('is-active');
+        this.classList.remove('sfx-button--quiet');
+        var tabName = this.getAttribute('data-tab');
+        var browseView = document.getElementById('sfx-br-view-browse');
+        var downloadsView = document.getElementById('sfx-br-view-downloads');
+        var importView = document.getElementById('sfx-br-view-import');
+        if (browseView) browseView.style.display = (tabName === 'browse') ? 'flex' : 'none';
+        if (downloadsView) downloadsView.style.display = (tabName === 'downloads') ? 'flex' : 'none';
+        if (importView) importView.style.display = (tabName === 'import') ? 'flex' : 'none';
+      });
+    });
 
     var resources = [
       { name: 'Trailer Impacts Pack Vol. 4', size: '240 MB', sounds: '128 sounds', format: '24-bit 96kHz' },
@@ -2004,7 +2058,38 @@
       });
     }
 
-    // SFX Buddy Display Controls
+    // Accent Color Palette
+    var accentDots = drawer ? drawer.querySelectorAll('[style*="border-radius: 50%"]') : [];
+    accentDots.forEach(function (dot) {
+      dot.style.cursor = 'pointer';
+      dot.addEventListener('click', function () {
+        accentDots.forEach(function (d) { d.style.boxShadow = 'none'; });
+        this.style.boxShadow = '0 0 0 2px #fff, 0 0 8px rgba(255,255,255,0.4)';
+        var bg = this.style.backgroundColor || this.style.background;
+        if (bg) {
+          document.documentElement.style.setProperty('--sfx-accent', bg);
+        }
+      });
+    });
+
+    // Theme Switcher Cards
+    var themeCards = drawer ? drawer.querySelectorAll('[style*="border-radius: 6px"]') : [];
+    themeCards.forEach(function (card) {
+      if (card.textContent.includes('Studio Dark') || card.textContent.includes('Ultra Dark')) {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', function () {
+          themeCards.forEach(function (c) {
+            if (c.textContent.includes('Studio Dark') || c.textContent.includes('Ultra Dark')) {
+              c.style.borderColor = 'var(--sfx-border)';
+            }
+          });
+          this.style.borderColor = 'var(--sfx-accent)';
+        });
+      }
+    });
+
+    // Standalone SFX Buddy Display Controls
+    var currentBuddyMode = 'floating';
     var floatingToggle = document.getElementById('sfx-buddy-floating-toggle');
     var toggleStatus = document.getElementById('sfx-buddy-toggle-status');
     var modeButtons = [
@@ -2014,21 +2099,18 @@
     ];
 
     function syncBuddySettingsUI() {
-      if (!window.__sfxBuddy) return;
-      var curMode = window.__sfxBuddy.getDisplayMode ? window.__sfxBuddy.getDisplayMode() : 'floating';
-
       modeButtons.forEach(function (item) {
         var btn = document.getElementById(item.id);
         if (btn) {
-          btn.classList.toggle('sfx-buddy-mode-card--active', item.mode === curMode);
+          btn.classList.toggle('sfx-buddy-mode-card--active', item.mode === currentBuddyMode);
         }
       });
 
       if (floatingToggle) {
-        floatingToggle.checked = (curMode === 'floating');
+        floatingToggle.checked = (currentBuddyMode === 'floating');
       }
       if (toggleStatus) {
-        toggleStatus.textContent = (curMode === 'floating') ? 'Currently Active' : (curMode === 'docked' ? 'Docked Side Panel' : 'Hidden');
+        toggleStatus.textContent = (currentBuddyMode === 'floating') ? 'Currently Active' : (currentBuddyMode === 'docked' ? 'Docked Side Panel' : 'Hidden');
       }
     }
 
@@ -2036,9 +2118,7 @@
       var btn = document.getElementById(item.id);
       if (btn) {
         btn.addEventListener('click', function () {
-          if (window.__sfxBuddy && typeof window.__sfxBuddy.setDisplayMode === 'function') {
-            window.__sfxBuddy.setDisplayMode(item.mode);
-          }
+          currentBuddyMode = item.mode;
           syncBuddySettingsUI();
         });
       }

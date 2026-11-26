@@ -52,6 +52,7 @@
 
   // Load and decode sound by item object
   function loadSound(item) {
+    if (!item || !item.url) return Promise.resolve(null);
     return new Promise(function (resolve, reject) {
       if (!item) return reject(new Error('No sound provided'));
       if (item.buffer) return resolve(item.buffer);

@@ -1,0 +1,391 @@
+/* ==========================================================================
+   SFX COMPOSER — "Your Personal Product Expert" AI Assistant UI
+   Deep black / navy studio aesthetic, electric blue accent (#0a84ff),
+   zero excessive glow, zero layout shift, responsive desktop & mobile.
+   ========================================================================== */
+
+#sfx-pe-root {
+  font-family: var(--ew-font, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif);
+  z-index: 920;
+}
+
+/* Floating Launcher Button */
+.sfx-pe-fab {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 920;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 44px;
+  padding: 0 16px 0 13px;
+  border-radius: 999px;
+  background: #0c111b;
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  color: #f5f5f7;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.2s ease,
+              background 0.2s ease,
+              opacity 0.2s ease;
+}
+
+.sfx-pe-fab:hover {
+  transform: translate3d(0, -2px, 0);
+  background: #101726;
+  border-color: rgba(10, 132, 255, 0.65);
+}
+
+.sfx-pe-fab.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, 8px, 0) scale(0.95);
+}
+
+.sfx-pe-fab__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(10, 132, 255, 0.16);
+  color: #38bdf8;
+  flex-shrink: 0;
+}
+
+/* Chat Panel */
+.sfx-pe-panel {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 925;
+  width: 390px;
+  max-width: calc(100vw - 28px);
+  height: 580px;
+  max-height: calc(100vh - 96px);
+  display: flex;
+  flex-direction: column;
+  background: #090c12;
+  border: 1px solid #1f2736;
+  border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.72);
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate3d(0, 14px, 0) scale(0.97);
+  transition: opacity 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+              visibility 0.24s ease;
+}
+
+.sfx-pe-panel.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+/* Header */
+.sfx-pe-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px 12px;
+  background: #0d121c;
+  border-bottom: 1px solid #1c2433;
+  flex-shrink: 0;
+}
+
+.sfx-pe-title-wrap {
+  min-width: 0;
+}
+
+.sfx-pe-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.sfx-pe-subtitle {
+  margin: 2px 0 6px;
+  font-size: 11.5px;
+  color: #9c9ca4;
+}
+
+.sfx-pe-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #9c9ca4;
+}
+
+.sfx-pe-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #64748b;
+  flex-shrink: 0;
+}
+
+.sfx-pe-status.is-online {
+  color: #86efac;
+}
+
+.sfx-pe-status.is-online .sfx-pe-status-dot {
+  background: #30d158;
+}
+
+.sfx-pe-status.is-offline {
+  color: #fbbf24;
+}
+
+.sfx-pe-status.is-offline .sfx-pe-status-dot {
+  background: #f59e0b;
+}
+
+.sfx-pe-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.sfx-pe-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #9c9ca4;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.sfx-pe-icon-btn:hover {
+  background: #161d2b;
+  border-color: #263147;
+  color: #ffffff;
+}
+
+/* Messages Area */
+.sfx-pe-messages {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-behavior: smooth;
+}
+
+.sfx-pe-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sfx-pe-messages::-webkit-scrollbar-thumb {
+  background: #1f2736;
+  border-radius: 999px;
+}
+
+.sfx-pe-msg {
+  max-width: 88%;
+  padding: 10px 13px;
+  border-radius: 11px;
+  font-size: 13px;
+  line-height: 1.52;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.sfx-pe-msg--ai {
+  align-self: flex-start;
+  background: #111622;
+  border: 1px solid #1d2638;
+  color: #e6ebf5;
+  border-bottom-left-radius: 4px;
+}
+
+.sfx-pe-msg--user {
+  align-self: flex-end;
+  background: #0a84ff;
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+}
+
+.sfx-pe-msg--error {
+  align-self: flex-start;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  color: #fde68a;
+  font-size: 12px;
+}
+
+.sfx-pe-msg a {
+  color: #7ec8ff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sfx-pe-msg a:hover {
+  color: #ffffff;
+}
+
+/* Suggested Questions */
+.sfx-pe-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.sfx-pe-chip {
+  background: #0e1420;
+  border: 1px solid #1e283b;
+  color: #cbd5e1;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
+}
+
+.sfx-pe-chip:hover {
+  background: #141d2e;
+  border-color: rgba(10, 132, 255, 0.55);
+  color: #ffffff;
+}
+
+/* Typing Indicator */
+.sfx-pe-typing {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 14px;
+  background: #111622;
+  border: 1px solid #1d2638;
+  border-radius: 11px;
+  border-bottom-left-radius: 4px;
+}
+
+.sfx-pe-typing span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+  opacity: 0.4;
+  animation: sfxPeBounce 1.1s infinite ease-in-out;
+}
+
+.sfx-pe-typing span:nth-child(2) { animation-delay: 0.15s; }
+.sfx-pe-typing span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes sfxPeBounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.35; }
+  40% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Input Footer */
+.sfx-pe-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #0d121c;
+  border-top: 1px solid #1c2433;
+  flex-shrink: 0;
+}
+
+.sfx-pe-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 9px;
+  background: #080b10;
+  border: 1px solid #1f2736;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.16s ease;
+}
+
+.sfx-pe-input:focus {
+  border-color: #0a84ff;
+}
+
+.sfx-pe-input::placeholder {
+  color: #64748b;
+}
+
+.sfx-pe-send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  background: #0a84ff;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.16s ease, opacity 0.16s ease;
+}
+
+.sfx-pe-send:hover:not(:disabled) {
+  background: #2b96ff;
+}
+
+.sfx-pe-send:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Mobile Responsive */
+@media (max-width: 520px) {
+  .sfx-pe-fab {
+    right: 14px;
+    bottom: 14px;
+    height: 42px;
+    padding: 0 13px 0 11px;
+    font-size: 12.5px;
+  }
+
+  .sfx-pe-panel {
+    right: 10px;
+    left: 10px;
+    bottom: 10px;
+    width: auto;
+    max-width: none;
+    height: min(76vh, 560px);
+    max-height: calc(100vh - 20px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sfx-pe-fab,
+  .sfx-pe-panel,
+  .sfx-pe-typing span {
+    transition: none !important;
+    animation: none !important;
+  }
+}

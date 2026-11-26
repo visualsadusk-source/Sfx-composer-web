@@ -559,7 +559,7 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
 
 /* ==========================================================================
    AI AUDIO ENHANCE ENGINE STYLES
-   Professional Audio DSP & Neural Enhancement Layout
+   Premium DAW-grade Dark UI aligned with SFX Composer Library
    ========================================================================== */
 
 /* Header Mode Tabs Switcher */
@@ -567,7 +567,7 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
   display: inline-flex;
   align-items: center;
   background: #08090C;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 6px;
   padding: 2px;
   gap: 2px;
@@ -586,7 +586,7 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
   color: #9299A6;
   font: 600 11px/1 inherit;
   cursor: pointer;
-  transition: all 0.14s ease;
+  transition: background 0.14s ease, color 0.14s ease;
 }
 
 .sfx-au__mode-btn:hover {
@@ -595,7 +595,7 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
 }
 
 .sfx-au__mode-btn.is-active {
-  background: #168BFF;
+  background: #0a84ff;
   color: #FFFFFF;
 }
 
@@ -609,10 +609,12 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  padding: 12px;
+  gap: 12px;
+  padding: 14px 16px;
   background: #08090C;
   min-width: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   box-sizing: border-box;
 }
 
@@ -621,25 +623,24 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 8px 12px;
+  gap: 12px;
+  padding: 10px 14px;
   background: #111318;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
-  margin-bottom: 10px;
+  border-radius: 8px;
   flex-wrap: wrap;
 }
 
 .sfx-au__enh-source-info {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
-  flex: 1;
+  flex: 1 1 200px;
 }
 
 .sfx-au__enh-source-title {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 700;
   color: #F5F7FA;
   white-space: nowrap;
@@ -653,7 +654,7 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
 .sfx-au__enh-source-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-size: 11px;
   color: #9299A6;
   flex-wrap: wrap;
@@ -663,7 +664,48 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
   flex-shrink: 0;
+}
+
+.sfx-au__selection-picker {
+  height: 28px;
+  max-width: 210px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #08090C;
+  color: #e8e8ec;
+  font: 11px/1 inherit;
+  padding: 0 8px;
+}
+
+/* Section Wrapper & Header */
+.sfx-au__enh-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sfx-au__enh-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 2px;
+}
+
+.sfx-au__enh-section-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9299A6;
+}
+
+.sfx-au__enh-section-sub {
+  font-size: 10.5px;
+  color: #64748b;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
 }
 
 /* Dual Waveform Stack */
@@ -671,33 +713,39 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  flex: 1;
-  min-height: 220px;
 }
 
 .sfx-au__enh-wave-box {
-  background: #0e0e12;
+  background: #0B0D12;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
 .sfx-au__enh-wave-box.is-active-ab {
-  border-color: rgba(22, 139, 255, 0.55);
-  box-shadow: 0 0 10px rgba(22, 139, 255, 0.12);
+  border-color: rgba(10, 132, 255, 0.65);
+  box-shadow: 0 0 0 1px rgba(10, 132, 255, 0.2), 0 4px 14px rgba(10, 132, 255, 0.1);
 }
 
 .sfx-au__enh-wave-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 10px;
+  gap: 8px;
+  padding: 7px 12px;
   background: #111318;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   font-size: 11px;
+}
+
+.sfx-au__enh-wave-head-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
 .sfx-au__enh-wave-tag {
@@ -706,55 +754,40 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
   gap: 4px;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  padding: 2px 6px;
-  border-radius: 3px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .sfx-au__enh-wave-tag.orig {
-  background: rgba(148, 163, 184, 0.15);
-  color: #94a3b8;
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.22);
 }
 
 .sfx-au__enh-wave-tag.enh {
-  background: rgba(22, 139, 255, 0.15);
-  color: #168BFF;
-  border: 1px solid rgba(22, 139, 255, 0.35);
+  background: rgba(10, 132, 255, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.35);
 }
 
 .sfx-au__enh-wave-metrics {
   font-size: 10.5px;
   color: #9299A6;
-  font-family: monospace;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sfx-au__enh-wave-canvas {
   width: 100%;
-  height: 95px;
+  height: 104px;
   display: block;
   background: #08090C;
   cursor: crosshair;
-}
-
-.sfx-au__enh-placeholder {
-  height: 95px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  color: #64748b;
-  font-size: 11.5px;
-  background: #08090C;
-}
-
-.sfx-au__enh-placeholder svg {
-  width: 20px;
-  height: 20px;
-  color: #168BFF;
-  opacity: 0.6;
 }
 
 /* Transport & A/B Switcher Bar */
@@ -766,32 +799,25 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
   padding: 8px 12px;
   background: #111318;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
-  margin-top: 10px;
+  border-radius: 8px;
   flex-wrap: wrap;
 }
 
 .sfx-au__enh-transport-controls {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .sfx-au__ab-toggle {
   display: inline-flex;
   align-items: center;
   background: #08090C;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
   padding: 2px;
   gap: 2px;
-}
-
-.sfx-au__ab-label {
-  font-size: 10.5px;
-  color: #9299A6;
-  font-weight: 600;
-  padding-left: 6px;
 }
 
 .sfx-au__ab-btn {
@@ -804,28 +830,35 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all 0.14s ease;
+  transition: background 0.14s ease, color 0.14s ease;
 }
 
 .sfx-au__ab-btn:hover {
   color: #F5F7FA;
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .sfx-au__ab-btn.is-active {
-  background: #168BFF;
+  background: #0a84ff;
   color: #FFFFFF;
+}
+
+.sfx-au__ab-btn--flip {
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0 4px 4px 0;
+  margin-left: 2px;
+  color: #7ec8ff;
 }
 
 /* Enhancement Progress Banner */
 .sfx-au__enh-progress {
-  padding: 10px 14px;
+  padding: 12px 14px;
   background: #111318;
-  border: 1px solid rgba(22, 139, 255, 0.35);
-  border-radius: 6px;
-  margin-top: 10px;
+  border: 1px solid rgba(10, 132, 255, 0.35);
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .sfx-au__enh-progress-head {
@@ -837,6 +870,11 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
   color: #F5F7FA;
 }
 
+.sfx-au__enh-progress-text {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  color: #38bdf8;
+}
+
 .sfx-au__enh-progress-bar {
   height: 6px;
   background: #08090C;
@@ -846,52 +884,70 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
 
 .sfx-au__enh-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #168BFF, #38bdf8);
+  background: linear-gradient(90deg, #0a84ff, #38bdf8);
   transition: width 0.25s ease;
 }
 
-/* Audio Metrics Row */
+/* Enhancement Results Metrics Row */
 .sfx-au__enh-metrics {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  margin-top: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
 }
 
+.sfx-au__enh-metric-card,
 .sfx-au__metric-card {
-  padding: 8px 10px;
+  padding: 10px 12px;
   background: #111318;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
-  text-align: center;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
+.sfx-au__enh-metric-label,
 .sfx-au__metric-title {
   font-size: 10px;
+  font-weight: 600;
   color: #9299A6;
-  margin-bottom: 2px;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
+.sfx-au__enh-metric-val,
 .sfx-au__metric-val {
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 700;
   color: #F5F7FA;
-  font-family: monospace;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
 }
 
+.sfx-au__enh-metric-val.positive,
 .sfx-au__metric-val.positive {
   color: #10B981;
 }
 
-/* Right Panel: Enhancement Engine Controls */
+.sfx-au__enh-metric-sub {
+  font-size: 10px;
+  color: #64748b;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+
+@media (max-width: 900px) {
+  .sfx-au__enh-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Right Panel: Enhancement Settings */
 .sfx-au__enh-panel {
   display: flex;
   flex-direction: column;
   height: 100%;
   background: #111318;
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  min-width: 0;
+  overflow: hidden;
 }
 
 .sfx-au__enh-head {
@@ -900,6 +956,14 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.sfx-au__enh-head strong {
+  font-size: 12px;
+  font-weight: 700;
+  color: #F5F7FA;
 }
 
 .sfx-au__enh-engine-badge {
@@ -909,15 +973,17 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
   font-size: 10px;
   padding: 2px 7px;
   background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  border: 1px solid rgba(16, 185, 129, 0.28);
   color: #10B981;
   border-radius: 4px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .sfx-au__enh-body {
   flex: 1 1 auto;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 12px 14px;
   display: flex;
   flex-direction: column;
@@ -925,54 +991,204 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
 }
 
 .sfx-au__enh-sec {
-  background: #08090C;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 6px;
-  padding: 10px;
+  background: #0B0D12;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 11px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sfx-au__enh-sec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
 }
 
 .sfx-au__enh-sec-title {
-  font-size: 11.5px;
+  font-size: 10.5px;
   font-weight: 700;
-  color: #F5F7FA;
-  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #9299A6;
+}
+
+.sfx-au__enh-sec-tag {
+  font-size: 9.5px;
+  color: #64748b;
+  font-weight: 600;
 }
 
 .sfx-au__enh-sec-desc {
   font-size: 10px;
-  color: #9299A6;
-  margin-top: 3px;
-  line-height: 1.35;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.sfx-au__preset-select {
+  width: 100%;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #08090C;
+  color: #F5F7FA;
+  font: 11.5px/1 inherit;
+  padding: 0 8px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.sfx-au__preset-select:focus {
+  border-color: #0a84ff;
+}
+
+.sfx-au__enh-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sfx-au__enh-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+/* Improved Enhancement Slider Rows (no cramped labels or horizontal scroll) */
+.sfx-au__enh-slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 2px 0;
+}
+
+.sfx-au__enh-slider-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sfx-au__enh-slider-head label {
+  font-size: 11px;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+.sfx-au__enh-slider-val {
+  font: 600 11px/1 ui-monospace, Menlo, Consolas, monospace;
+  color: #38bdf8;
+}
+
+.sfx-au__enh-slider-row input[type="range"] {
+  width: 100%;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #23262f;
+  border-radius: 2px;
+  outline: none;
+  margin: 2px 0;
+}
+
+.sfx-au__enh-slider-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #0a84ff;
+  cursor: pointer;
+  border: 2px solid #F5F7FA;
+}
+
+/* Action Buttons Hierarchy */
+.sfx-au__enh-actions {
+  padding: 12px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: #111318;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex: 0 0 auto;
+}
+
+.sfx-au__enh-actions .sfx-au__btn {
+  width: 100%;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-sizing: border-box;
+}
+
+.sfx-au__enh-workflow-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.sfx-au__enh-secondary-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
 }
 
 .sfx-au__btn--enhance {
-  background: #168BFF !important;
+  background: #0a84ff !important;
   color: #FFFFFF !important;
   font-weight: 700 !important;
   height: 32px !important;
-  font-size: 12px !important;
-  border-color: #168BFF !important;
+  font-size: 11.5px !important;
+  border-color: #0a84ff !important;
 }
 
-.sfx-au__btn--enhance:hover {
-  background: #2695FF !important;
+.sfx-au__btn--enhance:hover:not(:disabled) {
+  background: #1f90ff !important;
 }
 
 .sfx-au__btn--apply {
-  background: #10B981 !important;
+  background: #0a84ff !important;
   color: #FFFFFF !important;
   font-weight: 700 !important;
-  border-color: #10B981 !important;
+  height: 34px !important;
+  font-size: 12px !important;
+  border-color: #0a84ff !important;
 }
 
-.sfx-au__btn--apply:hover {
-  background: #059669 !important;
+.sfx-au__btn--apply:hover:not(:disabled) {
+  background: #1f90ff !important;
+}
+
+.sfx-au__btn--secondary {
+  background: #181b22 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #e8e8ec !important;
+}
+
+.sfx-au__btn--secondary:hover:not(:disabled) {
+  background: #222630 !important;
+}
+
+.sfx-au__btn--tertiary {
+  background: transparent !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+  color: #9299A6 !important;
+  height: 26px !important;
+  font-size: 10.5px !important;
+}
+
+.sfx-au__btn--tertiary:hover:not(:disabled) {
+  color: #F5F7FA !important;
+  background: rgba(255, 255, 255, 0.04) !important;
 }
 
 .sfx-au__btn--ai-banner {
-  background: rgba(22, 139, 255, 0.12);
-  border: 1px solid rgba(22, 139, 255, 0.35);
-  color: #168BFF;
+  background: rgba(10, 132, 255, 0.12);
+  border: 1px solid rgba(10, 132, 255, 0.35);
+  color: #38bdf8;
   font-weight: 600;
   padding: 8px 12px;
   border-radius: 6px;
@@ -980,22 +1196,154 @@ html.sfx-has-header-menu #sfx-audio-tools.sfx-au {
   text-align: center;
   width: 100%;
   margin: 8px 0;
-  transition: all 0.14s ease;
+  transition: background 0.14s ease, color 0.14s ease;
 }
 
 .sfx-au__btn--ai-banner:hover {
-  background: #168BFF;
+  background: #0a84ff;
   color: #FFFFFF;
 }
 
-
 /* Scrollbar */
 .sfx-au__lib-results::-webkit-scrollbar,
-.sfx-au__es-body::-webkit-scrollbar {
+.sfx-au__es-body::-webkit-scrollbar,
+.sfx-au__enh-center::-webkit-scrollbar,
+.sfx-au__enh-body::-webkit-scrollbar {
   width: 6px;
 }
 .sfx-au__lib-results::-webkit-scrollbar-thumb,
-.sfx-au__es-body::-webkit-scrollbar-thumb {
-  background: #2e2e32;
+.sfx-au__es-body::-webkit-scrollbar-thumb,
+.sfx-au__enh-center::-webkit-scrollbar-thumb,
+.sfx-au__enh-body::-webkit-scrollbar-thumb {
+  background: #2a2d36;
   border-radius: 3px;
+}
+
+/* ── Acoustic Scan & Analyze Card & Badges ── */
+.sfx-au__btn--scan {
+  background: rgba(56, 189, 248, 0.12) !important;
+  border: 1px solid rgba(56, 189, 248, 0.38) !important;
+  color: #38bdf8 !important;
+  font-weight: 600 !important;
+  height: 32px !important;
+  font-size: 11.5px !important;
+  border-radius: 6px !important;
+  transition: background 0.15s ease, color 0.15s ease !important;
+}
+
+.sfx-au__btn--scan:hover:not(:disabled) {
+  background: rgba(56, 189, 248, 0.22) !important;
+  color: #ffffff !important;
+}
+
+.sfx-au__btn--scan.is-scanning {
+  background: rgba(56, 189, 248, 0.2) !important;
+  color: #38bdf8 !important;
+  opacity: 0.85;
+  cursor: wait;
+}
+
+.sfx-au__btn--enhance.is-ready {
+  box-shadow: 0 0 10px rgba(10, 132, 255, 0.35);
+}
+
+.sfx-au__enh-scan-card {
+  background: #111318;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sfx-au__enh-scan-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sfx-au__enh-scan-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #9299A6;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sfx-au__enh-scan-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@media (max-width: 900px) {
+  .sfx-au__enh-scan-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.sfx-au__scan-badge {
+  background: #0B0D12;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sfx-au__scan-badge-label {
+  font-size: 10px;
+  color: #9299A6;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sfx-au__scan-badge-val {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #F5F7FA;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+
+.sfx-au__scan-badge--good .sfx-au__scan-badge-val {
+  color: #10B981;
+}
+
+.sfx-au__scan-badge--warn .sfx-au__scan-badge-val {
+  color: #F59E0B;
+}
+
+.sfx-au__scan-badge--accent .sfx-au__scan-badge-val {
+  color: #38bdf8;
+}
+
+.sfx-au__scan-prompt {
+  background: #111318;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sfx-au__scan-prompt-text {
+  font-size: 11.5px;
+  color: #9299A6;
+  line-height: 1.45;
+  flex: 1 1 220px;
+}
+
+.sfx-au__scan-prompt-text strong {
+  color: #F5F7FA;
+  display: block;
+  margin-bottom: 2px;
 }

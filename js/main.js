@@ -223,6 +223,7 @@
     var secKicker = document.getElementById('tutorials-sec-kicker');
     var secTitle = document.getElementById('tutorials-sec-title');
     var secDesc = document.getElementById('tutorials-sec-desc');
+    var mainIframe = document.getElementById('tutorial-main-iframe');
 
     function openVideoModal(video) {
       if (!video) return;
@@ -274,74 +275,97 @@
 
       try {
         var videos = await window.SFX_CONTENT_SERVICE.getPublishedVideos('tutorials');
-        if (gridContainer && videos && videos.length > 0) {
-          gridContainer.innerHTML = '';
-          videos.forEach(function (video) {
-            var card = document.createElement('div');
-            card.className = 'tutorial-card';
-            card.style.cursor = 'pointer';
-
-            var thumbRaw = video.custom_thumbnail_url || video.thumbnail_url || ('https://img.youtube.com/vi/' + encodeURIComponent(video.youtube_id || '') + '/hqdefault.jpg');
-            var thumb = safeUrl(thumbRaw, true);
-
-            var thumbDiv = document.createElement('div');
-            thumbDiv.className = 'tutorial-thumb';
-            thumbDiv.style.backgroundSize = 'cover';
-            thumbDiv.style.backgroundPosition = 'center';
-            thumbDiv.style.position = 'relative';
-            if (thumb !== '#') {
-              thumbDiv.style.backgroundImage = 'url("' + thumb.replace(/"/g, '%22') + '")';
+        if (videos && videos.length > 0) {
+          var primaryVideo = videos[0];
+          var primaryYtId = primaryVideo.youtube_id || (window.SFX_CONTENT_SERVICE ? window.SFX_CONTENT_SERVICE.extractYouTubeId(primaryVideo.youtube_url) : '');
+          if (mainIframe && primaryYtId) {
+            mainIframe.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(primaryYtId) + '?rel=0';
+            if (primaryVideo.title) {
+              mainIframe.title = primaryVideo.title;
             }
+          }
 
-            var overlayDiv = document.createElement('div');
-            overlayDiv.style.position = 'absolute';
-            overlayDiv.style.inset = '0';
-            overlayDiv.style.background = 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 100%)';
-            thumbDiv.appendChild(overlayDiv);
+          if (gridContainer) {
+            if (videos.length > 1) {
+              gridContainer.style.display = 'grid';
+              gridContainer.innerHTML = '';
+              videos.forEach(function (video) {
+                var card = document.createElement('div');
+                card.className = 'tutorial-card';
+                card.style.cursor = 'pointer';
 
-            var playDiv = document.createElement('div');
-            playDiv.className = 'tutorial-play-icon';
-            playDiv.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-            thumbDiv.appendChild(playDiv);
+                var thumbRaw = video.custom_thumbnail_url || video.thumbnail_url || ('https://img.youtube.com/vi/' + encodeURIComponent(video.youtube_id || '') + '/hqdefault.jpg');
+                var thumb = safeUrl(thumbRaw, true);
 
-            if (video.duration) {
-              var durSpan = document.createElement('span');
-              durSpan.className = 'tutorial-tag';
-              durSpan.style.background = 'rgba(0,0,0,0.85)';
-              durSpan.style.color = '#fff';
-              durSpan.textContent = video.duration;
-              thumbDiv.appendChild(durSpan);
+                var thumbDiv = document.createElement('div');
+                thumbDiv.className = 'tutorial-thumb';
+                thumbDiv.style.backgroundSize = 'cover';
+                thumbDiv.style.backgroundPosition = 'center';
+                thumbDiv.style.position = 'relative';
+                if (thumb !== '#') {
+                  thumbDiv.style.backgroundImage = 'url("' + thumb.replace(/"/g, '%22') + '")';
+                }
+
+                var overlayDiv = document.createElement('div');
+                overlayDiv.style.position = 'absolute';
+                overlayDiv.style.inset = '0';
+                overlayDiv.style.background = 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 100%)';
+                thumbDiv.appendChild(overlayDiv);
+
+                var playDiv = document.createElement('div');
+                playDiv.className = 'tutorial-play-icon';
+                playDiv.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+                thumbDiv.appendChild(playDiv);
+
+                if (video.duration) {
+                  var durSpan = document.createElement('span');
+                  durSpan.className = 'tutorial-tag';
+                  durSpan.style.background = 'rgba(0,0,0,0.85)';
+                  durSpan.style.color = '#fff';
+                  durSpan.textContent = video.duration;
+                  thumbDiv.appendChild(durSpan);
+                }
+
+                var infoDiv = document.createElement('div');
+                infoDiv.className = 'tutorial-info';
+
+                if (video.category) {
+                  var catSpan = document.createElement('span');
+                  catSpan.style.cssText = 'font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sfx-accent); font-weight: 700; display: block; margin-bottom: 4px;';
+                  catSpan.textContent = video.category;
+                  infoDiv.appendChild(catSpan);
+                }
+
+                var titleH4 = document.createElement('h4');
+                titleH4.className = 'tutorial-title';
+                titleH4.textContent = video.title || '';
+                infoDiv.appendChild(titleH4);
+
+                var descP = document.createElement('p');
+                descP.className = 'tutorial-desc';
+                descP.textContent = video.description || '';
+                infoDiv.appendChild(descP);
+
+                card.appendChild(thumbDiv);
+                card.appendChild(infoDiv);
+
+                card.addEventListener('click', function () {
+                  var vidId = video.youtube_id || (window.SFX_CONTENT_SERVICE ? window.SFX_CONTENT_SERVICE.extractYouTubeId(video.youtube_url) : '');
+                  if (mainIframe && vidId) {
+                    mainIframe.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(vidId) + '?autoplay=1&rel=0';
+                    mainIframe.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  } else {
+                    openVideoModal(video);
+                  }
+                });
+
+                gridContainer.appendChild(card);
+              });
+            } else {
+              gridContainer.style.display = 'none';
+              gridContainer.innerHTML = '';
             }
-
-            var infoDiv = document.createElement('div');
-            infoDiv.className = 'tutorial-info';
-
-            if (video.category) {
-              var catSpan = document.createElement('span');
-              catSpan.style.cssText = 'font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sfx-accent); font-weight: 700; display: block; margin-bottom: 4px;';
-              catSpan.textContent = video.category;
-              infoDiv.appendChild(catSpan);
-            }
-
-            var titleH4 = document.createElement('h4');
-            titleH4.className = 'tutorial-title';
-            titleH4.textContent = video.title || '';
-            infoDiv.appendChild(titleH4);
-
-            var descP = document.createElement('p');
-            descP.className = 'tutorial-desc';
-            descP.textContent = video.description || '';
-            infoDiv.appendChild(descP);
-
-            card.appendChild(thumbDiv);
-            card.appendChild(infoDiv);
-
-            card.addEventListener('click', function () {
-              openVideoModal(video);
-            });
-
-            gridContainer.appendChild(card);
-          });
+          }
         }
       } catch (err) {
         console.error('Failed to load dynamic tutorials:', err);

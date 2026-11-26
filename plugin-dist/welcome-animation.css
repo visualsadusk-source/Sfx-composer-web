@@ -1,0 +1,489 @@
+/*
+ * SFX Composer — Smart Welcome Animation & First-Run Experience Stylesheet
+ *
+ * Implements:
+ * 1. Full First-Time Welcome Animation (2.5–3s):
+ *    - Cinematic dark background (#08090C)
+ *    - Concentric circular blue light rings (#0a84ff, #38bdf8)
+ *    - Dynamic audio wave movement & harmonic ripples
+ *    - Center squircle brand logo reveal
+ *    - Typography: "Welcome to SFX Composer" & wordmark
+ *    - Seamless transition into the workspace
+ * 2. Normal Daily Launch (0.5–0.7s):
+ *    - Minimalist, fast logo reveal & instant workspace transition
+ */
+
+:root {
+  --sfx-welcome-bg: #08090c;
+  --sfx-welcome-blue-glow: rgba(10, 132, 255, 0.4);
+  --sfx-welcome-cyan-glow: rgba(56, 189, 248, 0.45);
+  --sfx-welcome-text: #ffffff;
+  --sfx-welcome-subtext: #7d9ec4;
+}
+
+/* ==========================================================================
+   Full Screen Welcome Overlay
+   ========================================================================== */
+
+#sfx-welcome-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999999;
+  background-color: var(--sfx-welcome-bg);
+  background-image: 
+    radial-gradient(ellipse at 50% 40%, rgba(16, 64, 128, 0.32) 0%, rgba(8, 16, 36, 0.45) 35%, #08090c 70%),
+    radial-gradient(circle at 50% 50%, rgba(10, 132, 255, 0.08) 0%, transparent 60%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 420ms cubic-bezier(0.16, 1, 0.3, 1), transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#sfx-welcome-overlay.is-fading-out {
+  opacity: 0 !important;
+  transform: scale(1.025) !important;
+  pointer-events: none !important;
+}
+
+#sfx-welcome-overlay.is-hidden {
+  display: none !important;
+}
+
+/* Optional Skip / Dismiss hint for accessibility (fade-in after 1.5s) */
+.sfx-welcome__skip {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.4);
+  padding: 6px 14px;
+  font-size: 11px;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease, color 200ms ease, border-color 200ms ease;
+  z-index: 20;
+}
+
+.sfx-welcome__skip.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sfx-welcome__skip:hover {
+  color: #ffffff;
+  border-color: rgba(10, 132, 255, 0.6);
+  background: rgba(10, 132, 255, 0.12);
+}
+
+/* ==========================================================================
+   Circular Light Stage & Concentric Rings
+   ========================================================================== */
+
+.sfx-welcome__stage {
+  position: relative;
+  width: 320px;
+  height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ambient Radial Glow Halo */
+.sfx-welcome__halo {
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(10, 132, 255, 0.32) 0%, rgba(56, 189, 248, 0.15) 40%, transparent 70%);
+  filter: blur(28px);
+  opacity: 0;
+  transform: scale(0.7);
+  animation: sfxHaloPulse 2.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes sfxHaloPulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  30% {
+    opacity: 0.85;
+    transform: scale(1.05);
+  }
+  70% {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+  100% {
+    opacity: 0.9;
+    transform: scale(1.12);
+  }
+}
+
+/* Concentric Rings */
+.sfx-welcome__ring {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+/* Outer Ring (Subtle ambient boundary) */
+.sfx-welcome__ring--outer {
+  width: 250px;
+  height: 250px;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  box-shadow: 0 0 24px rgba(10, 132, 255, 0.12);
+  opacity: 0;
+  transform: scale(0.65) rotate(0deg);
+  animation: sfxRingOuter 2.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sfxRingOuter {
+  0% {
+    opacity: 0;
+    transform: scale(0.65) rotate(0deg);
+  }
+  25% {
+    opacity: 0.7;
+    transform: scale(1) rotate(45deg);
+  }
+  100% {
+    opacity: 0.55;
+    transform: scale(1.05) rotate(180deg);
+  }
+}
+
+/* Mid Ring with Rotating Flare Orbit */
+.sfx-welcome__ring--mid {
+  width: 180px;
+  height: 180px;
+  border: 1.5px solid rgba(10, 132, 255, 0.38);
+  box-shadow: inset 0 0 16px rgba(10, 132, 255, 0.2), 0 0 20px rgba(56, 189, 248, 0.25);
+  opacity: 0;
+  transform: scale(0.7) rotate(0deg);
+  animation: sfxRingMid 2.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sfxRingMid {
+  0% {
+    opacity: 0;
+    transform: scale(0.7) rotate(-30deg);
+  }
+  30% {
+    opacity: 0.95;
+    transform: scale(1) rotate(60deg);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1.02) rotate(240deg);
+  }
+}
+
+/* Flare particle on the mid ring perimeter */
+.sfx-welcome__ring--mid::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 10px #38bdf8, 0 0 16px #0a84ff;
+}
+
+/* Inner Ring (Sharp high-intensity core ring) */
+.sfx-welcome__ring--inner {
+  width: 122px;
+  height: 122px;
+  border: 1.5px solid rgba(126, 200, 255, 0.75);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.5), inset 0 0 12px rgba(10, 132, 255, 0.3);
+  opacity: 0;
+  transform: scale(0.8);
+  animation: sfxRingInner 2.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sfxRingInner {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+  70% {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
+  100% {
+    opacity: 0.95;
+    transform: scale(1);
+  }
+}
+
+/* ==========================================================================
+   Dynamic Audio Wave Canvas
+   ========================================================================== */
+
+.sfx-welcome__canvas-wrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  height: 260px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.sfx-welcome__canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ==========================================================================
+   Central Brand Logo Container
+   ========================================================================== */
+
+.sfx-welcome__logo-wrap {
+  position: relative;
+  z-index: 4;
+  width: 82px;
+  height: 82px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  opacity: 0;
+  transform: scale(0.82);
+  animation: sfxLogoReveal 2.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sfxLogoReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.82) translateY(6px);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1.06) translateY(0);
+  }
+  60% {
+    transform: scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.sfx-welcome__logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 20px;
+  box-shadow: 
+    0 10px 32px rgba(0, 0, 0, 0.7),
+    0 0 24px rgba(10, 132, 255, 0.5),
+    0 0 1px rgba(255, 255, 255, 0.4);
+  filter: drop-shadow(0 4px 12px rgba(10, 132, 255, 0.3));
+  -webkit-user-drag: none;
+}
+
+/* ==========================================================================
+   Typography & Wordmark Section
+   ========================================================================== */
+
+.sfx-welcome__content {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 14px;
+}
+
+/* Main Welcome Heading */
+.sfx-welcome__title {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--sfx-welcome-text);
+  text-shadow: 0 2px 20px rgba(10, 132, 255, 0.5);
+  opacity: 0;
+  transform: translateY(12px);
+  animation: sfxTextReveal 2.2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+}
+
+@keyframes sfxTextReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Subtitle & Official Wordmark */
+.sfx-welcome__subtitle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: sfxSubReveal 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards;
+}
+
+@keyframes sfxSubReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sfx-welcome__tagline {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sfx-welcome-subtext);
+}
+
+.sfx-welcome__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  background: rgba(10, 132, 255, 0.16);
+  border: 1px solid rgba(126, 200, 255, 0.35);
+  border-radius: 10px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #38bdf8;
+  box-shadow: 0 0 8px rgba(10, 132, 255, 0.25);
+}
+
+/* ==========================================================================
+   Compact Daily Launch Mode (0.5–0.7s)
+   ========================================================================== */
+
+#sfx-welcome-overlay.is-compact {
+  background-color: var(--sfx-welcome-bg);
+  background-image: radial-gradient(ellipse at center, rgba(16, 64, 128, 0.24) 0%, #08090c 70%);
+}
+
+#sfx-welcome-overlay.is-compact .sfx-welcome__stage {
+  width: 140px;
+  height: 120px;
+}
+
+#sfx-welcome-overlay.is-compact .sfx-welcome__halo {
+  width: 130px;
+  height: 130px;
+  filter: blur(18px);
+  animation: sfxCompactPulse 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sfxCompactPulse {
+  0% { opacity: 0; transform: scale(0.7); }
+  50% { opacity: 0.9; transform: scale(1.05); }
+  100% { opacity: 0.8; transform: scale(1); }
+}
+
+#sfx-welcome-overlay.is-compact .sfx-welcome__ring--outer,
+#sfx-welcome-overlay.is-compact .sfx-welcome__ring--mid,
+#sfx-welcome-overlay.is-compact .sfx-welcome__canvas-wrap,
+#sfx-welcome-overlay.is-compact .sfx-welcome__skip {
+  display: none !important;
+}
+
+#sfx-welcome-overlay.is-compact .sfx-welcome__ring--inner {
+  width: 78px;
+  height: 78px;
+  border: 1px solid rgba(126, 200, 255, 0.6);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.4);
+  animation: sfxCompactRing 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sfxCompactRing {
+  0% { opacity: 0; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.03); }
+  100% { opacity: 0.9; transform: scale(1); }
+}
+
+#sfx-welcome-overlay.is-compact .sfx-welcome__logo-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  animation: sfxCompactLogo 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sfxCompactLogo {
+  0% { opacity: 0; transform: scale(0.9); }
+  60% { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+#sfx-welcome-overlay.is-compact .sfx-welcome__logo-img {
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6), 0 0 16px rgba(10, 132, 255, 0.45);
+}
+
+#sfx-welcome-overlay.is-compact .sfx-welcome__content {
+  margin-top: 10px;
+}
+
+#sfx-welcome-overlay.is-compact .sfx-welcome__title {
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  text-shadow: 0 1px 12px rgba(10, 132, 255, 0.4);
+  animation: sfxCompactText 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sfxCompactText {
+  0% { opacity: 0; transform: translateY(6px); }
+  60% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+#sfx-welcome-overlay.is-compact .sfx-welcome__subtitle-wrap {
+  display: none !important;
+}

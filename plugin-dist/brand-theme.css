@@ -627,3 +627,26 @@ input[type="search"]:focus {
   transform: translateX(16px);
   background-color: #ffffff;
 }
+
+
+/* ==========================================================================
+   Global Settings Overlay Theme Rules
+   ========================================================================== */
+.sfx-settings {
+  position: fixed !important;
+  top: var(--sfx-hm-bottom, 42px) !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 1000005 !important;
+  background: var(--sfx-surface, #141416) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+}
+
+.sfx-profile.is-active,
+html.sfx-has-settings-open .sfx-profile {
+  background: var(--sfx-surface-hover, rgba(255, 255, 255, 0.1)) !important;
+  box-shadow: 0 0 0 1px var(--sfx-brand-border-active, rgba(10, 132, 255, 0.5)), 0 2px 8px rgba(10, 132, 255, 0.25) !important;
+}
