@@ -44,21 +44,32 @@ function isRateLimited(identifier) {
   return recent.length > RATE_LIMIT_MAX_REQUESTS;
 }
 
-// Encryption key derivation for AES-256-GCM
-function getAesKey() {
-  const secret = process.env.LICENSE_ENCRYPTION_KEY || SERVICE_KEY || 'sfx-default-secure-fallback-key-32';
-  return crypto.createHash('sha256').update(secret).digest();
+// Encryption key derivation for AES-256-GCM (matches supabase/functions/_shared/crypto.ts)
+function deriveAesKeyFromSecret(secret) {
+  const s = String(secret || '').trim();
+  if (!s) return null;
+  if (/^[0-9a-fA-F]{64}$/.test(s)) {
+    return Buffer.from(s, 'hex');
+  }
+  return crypto.createHash('sha256').update(s, 'utf8').digest();
 }
 
-function decryptLicenseKey(payload) {
-  if (!payload || !payload.includes(':')) return null;
+function getAesKey() {
+  const encKey = (process.env.LICENSE_ENCRYPTION_KEY || '').trim();
+  if (encKey) {
+    return deriveAesKeyFromSecret(encKey);
+  }
+  const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+  if (serviceKey) {
+    return deriveAesKeyFromSecret(serviceKey);
+  }
+  throw new Error('LICENSE_ENCRYPTION_KEY is not configured');
+}
+
+function tryDecryptWithKey(iv, data, tag, keyBuf) {
+  if (!keyBuf || keyBuf.length !== 32) return null;
   try {
-    const [ivHex, cipherHex] = payload.split(':');
-    const iv = Buffer.from(ivHex, 'hex');
-    const cipherBuf = Buffer.from(cipherHex, 'hex');
-    const tag = cipherBuf.subarray(cipherBuf.length - 16);
-    const data = cipherBuf.subarray(0, cipherBuf.length - 16);
-    const decipher = crypto.createDecipheriv('aes-256-gcm', getAesKey(), iv);
+    const decipher = crypto.createDecipheriv('aes-256-gcm', keyBuf, iv);
     decipher.setAuthTag(tag);
     return Buffer.concat([decipher.update(data), decipher.final()]).toString('utf8');
   } catch (err) {
@@ -66,10 +77,52 @@ function decryptLicenseKey(payload) {
   }
 }
 
+function decryptLicenseKey(payload) {
+  if (!payload || typeof payload !== 'string' || !payload.includes(':')) return null;
+  try {
+    const [ivHex, cipherHex] = payload.split(':');
+    if (!ivHex || !cipherHex) return null;
+    const iv = Buffer.from(ivHex, 'hex');
+    const cipherBuf = Buffer.from(cipherHex, 'hex');
+    if (iv.length !== 12 || cipherBuf.length <= 16) return null;
+    const tag = cipherBuf.subarray(cipherBuf.length - 16);
+    const data = cipherBuf.subarray(0, cipherBuf.length - 16);
+
+    const candidateKeys = [];
+    const encKey = (process.env.LICENSE_ENCRYPTION_KEY || '').trim();
+    const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+
+    if (encKey) {
+      candidateKeys.push(deriveAesKeyFromSecret(encKey));
+      // Backward compatibility if a 64-hex key was previously hashed with SHA-256
+      if (/^[0-9a-fA-F]{64}$/.test(encKey)) {
+        candidateKeys.push(crypto.createHash('sha256').update(encKey, 'utf8').digest());
+      }
+    }
+    if (serviceKey) {
+      candidateKeys.push(deriveAesKeyFromSecret(serviceKey));
+      if (/^[0-9a-fA-F]{64}$/.test(serviceKey)) {
+        candidateKeys.push(crypto.createHash('sha256').update(serviceKey, 'utf8').digest());
+      }
+    }
+    // Backward-compatible decryption only for legacy rows encrypted with default fallback
+    candidateKeys.push(crypto.createHash('sha256').update('sfx-default-secure-fallback-key-32', 'utf8').digest());
+
+    for (const keyBuf of candidateKeys) {
+      const decrypted = tryDecryptWithKey(iv, data, tag, keyBuf);
+      if (decrypted !== null) return decrypted;
+    }
+    return null;
+  } catch (err) {
+    return null;
+  }
+}
+
 function encryptLicenseKey(text) {
+  const keyBuf = getAesKey();
   const iv = crypto.randomBytes(12);
-  const cipher = crypto.createCipheriv('aes-256-gcm', getAesKey(), iv);
-  const enc = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()]);
+  const cipher = crypto.createCipheriv('aes-256-gcm', keyBuf, iv);
+  const enc = Buffer.concat([cipher.update(String(text).trim(), 'utf8'), cipher.final()]);
   const tag = cipher.getAuthTag();
   return iv.toString('hex') + ':' + Buffer.concat([enc, tag]).toString('hex');
 }
@@ -678,3 +731,8 @@ module.exports = async function handler(req, res) {
     }
   }));
 };
+
+module.exports.deriveAesKeyFromSecret = deriveAesKeyFromSecret;
+module.exports.getAesKey = getAesKey;
+module.exports.encryptLicenseKey = encryptLicenseKey;
+module.exports.decryptLicenseKey = decryptLicenseKey;

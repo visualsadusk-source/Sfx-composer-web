@@ -30,8 +30,8 @@
         endpoints.push(base + '/' + (action === 'create-order' ? 'create-order' : 'verify-payment'));
       }
 
-      // 2. Same-origin Serverless API (when hosted on Vercel, Node.js server, or localhost)
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname.includes('github.io')) {
+      // 2. Same-origin Serverless API (when hosted on localhost Node.js server)
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         endpoints.push(action === 'create-order' ? '/api/create-order' : '/api/verify-payment');
       }
 
@@ -160,7 +160,7 @@
       if (window.SFX_API_URL) {
         endpoints.push(String(window.SFX_API_URL).replace(/\/$/, '') + '/customer-portal');
       }
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname.includes('github.io')) {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         endpoints.push('/api/customer-portal');
       }
       endpoints.push(CONFIG.FUNCTIONS_URL + '/customer-portal');
@@ -269,57 +269,19 @@
     },
 
     getAdminStats: async function (authToken) {
-      try {
-        var data = await this.getAdminLicensesData(authToken, '');
-        return data.stats || {};
-      } catch (e) {
-        var res = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/rpc/sfx_admin_get_stats_v2', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': authToken,
-            'Authorization': 'Bearer ' + authToken
-          },
-          body: '{}'
-        });
-        return await res.json();
-      }
+      var data = await this.getAdminLicensesData(authToken, '');
+      return data.stats || {};
     },
 
     getAdminOrders: async function (authToken, limit) {
-      try {
-        var data = await this.getAdminLicensesData(authToken, '');
-        return data.orders || [];
-      } catch (e) {
-        var res = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/rpc/sfx_admin_get_orders_v2', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': authToken,
-            'Authorization': 'Bearer ' + authToken
-          },
-          body: JSON.stringify({ p_limit: limit || 50 })
-        });
-        return await res.json();
-      }
+      var data = await this.getAdminLicensesData(authToken, '');
+      var orders = data.orders || [];
+      return limit ? orders.slice(0, limit) : orders;
     },
 
     searchAdminLicenses: async function (authToken, query) {
-      try {
-        var data = await this.getAdminLicensesData(authToken, query || '');
-        return data.licenses || [];
-      } catch (e) {
-        var res = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/rpc/sfx_admin_search_v2', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': authToken,
-            'Authorization': 'Bearer ' + authToken
-          },
-          body: JSON.stringify({ p_query: query || '' })
-        });
-        return await res.json();
-      }
+      var data = await this.getAdminLicensesData(authToken, query || '');
+      return data.licenses || [];
     },
 
     // ── 6. Admin License Actions ──

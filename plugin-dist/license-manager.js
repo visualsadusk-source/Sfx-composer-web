@@ -262,34 +262,13 @@
             this._emitChange();
             return { ok: false, code: edgeErr.data.code, message: edgeErr.data.message };
           }
-
-          // Fallback to direct RPC sfx_activate_license_v2 if Edge Function is offline
-          var keyHash = await sha256(cleanKey);
-          var rawToken = (typeof crypto !== 'undefined' && crypto.randomUUID)
-            ? (crypto.randomUUID() + crypto.randomUUID()).replace(/-/g, '')
-            : ('tok_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 16));
-          var tokenHash = await sha256(rawToken);
-
-          var rpcRes = await supabase.rpc('sfx_activate_license_v2', {
-            p_email: cleanEmail,
-            p_license_key_hash: keyHash,
-            p_device_id: deviceId,
-            p_device_name: deviceName,
-            p_token_hash: tokenHash
-          });
-
-          if (rpcRes && rpcRes.ok) {
-            res = {
-              ok: true,
-              activation_token: rawToken,
-              email: cleanEmail,
-              max_devices: rpcRes.max_devices,
-              status: 'active',
-              message: 'Activation Successful! Welcome to SFX Composer.'
-            };
-          } else {
-            res = rpcRes;
-          }
+          this._verifying = false;
+          this._emitChange();
+          return {
+            ok: false,
+            code: 'NETWORK_ERROR',
+            message: edgeErr.message || 'Unable to reach license activation server. Please check your internet connection.'
+          };
         }
 
         this._verifying = false;
@@ -361,11 +340,7 @@
           if (edgeErr.data && edgeErr.data.code) {
             res = edgeErr.data;
           } else {
-            var tokenHash = await sha256(token);
-            res = await supabase.rpc('sfx_verify_token_v2', {
-              p_token_hash: tokenHash,
-              p_device_id: deviceId
-            });
+            throw edgeErr;
           }
         }
 
@@ -435,18 +410,10 @@
 
       try {
         var supabase = window.__sfxSupabase;
-        try {
-          await supabase.invokeFunction('deactivate-license', {
-            activation_token: token,
-            device_id: deviceId
-          });
-        } catch (e) {
-          var tokenHash = await sha256(token);
-          await supabase.rpc('sfx_deactivate_token_v2', {
-            p_token_hash: tokenHash,
-            p_device_id: deviceId
-          });
-        }
+        await supabase.invokeFunction('deactivate-license', {
+          activation_token: token,
+          device_id: deviceId
+        });
       } catch (e) {
         console.warn('[SFX License] Deactivation network error, clearing locally:', e);
       }

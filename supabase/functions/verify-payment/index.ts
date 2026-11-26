@@ -1,5 +1,11 @@
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
-import { generateLicenseKey, sha256, encryptLicenseKey } from '../_shared/crypto.ts';
+import {
+  generateLicenseKey,
+  sha256,
+  encryptLicenseKey,
+  constantTimeEqual,
+  createSignedDownloadToken
+} from '../_shared/crypto.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 async function verifyHmacSha256(data: string, signature: string, secret: string): Promise<boolean> {
@@ -15,8 +21,9 @@ async function verifyHmacSha256(data: string, signature: string, secret: string)
     const signatureBytes = await crypto.subtle.sign('HMAC', key, encoder.encode(data));
     const hexSignature = Array.from(new Uint8Array(signatureBytes))
       .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-    return hexSignature.toLowerCase() === signature.trim().toLowerCase();
+      .join('')
+      .toLowerCase();
+    return constantTimeEqual(hexSignature, signature.trim().toLowerCase());
   } catch (err) {
     console.error('HMAC verification error:', err);
     return false;
@@ -118,8 +125,25 @@ Deno.serve(async (req: Request) => {
         });
         if (rzpPayRes.ok) {
           const rzpPayData = await rzpPayRes.json();
+          if (rzpPayData.order_id && rzpPayData.order_id !== razorpay_order_id) {
+            return new Response(JSON.stringify({
+              ok: false,
+              code: 'ORDER_MISMATCH',
+              message: 'Razorpay payment does not belong to the specified order.'
+            }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
           if (rzpPayData.status !== 'captured' && rzpPayData.status !== 'authorized') {
-            console.warn(`Razorpay payment status is ${rzpPayData.status}, not captured.`);
+            return new Response(JSON.stringify({
+              ok: false,
+              code: 'PAYMENT_NOT_CAPTURED',
+              message: `Payment status is '${rzpPayData.status}'. Only captured or authorized payments can be fulfilled.`
+            }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
           }
           if (rzpPayData.amount !== 19900 || rzpPayData.currency !== 'INR') {
             return new Response(JSON.stringify({
@@ -169,11 +193,11 @@ Deno.serve(async (req: Request) => {
         .eq('provider_order_id', razorpay_order_id);
     }
 
-    const sessionToken = 'sfx_token_' + btoa(JSON.stringify({
+    const sessionToken = await createSignedDownloadToken({
       email: cleanEmail,
-      payment_id: razorpay_payment_id,
-      exp: Date.now() + 30 * 24 * 3600 * 1000
-    }));
+      payment_id: razorpay_payment_id
+    }, 30 * 24 * 3600 * 1000);
+    const functionsBase = `${supabaseUrl.replace(/\/$/, '')}/functions/v1`;
 
     return new Response(JSON.stringify({
       ok: true,
@@ -191,9 +215,9 @@ Deno.serve(async (req: Request) => {
       },
       downloads: {
         version: 'v2.2.0',
-        zxp_url: `/downloads/sfx-composer-pro-v2.2.0.zxp?token=${encodeURIComponent(sessionToken)}`,
-        zip_url: `/downloads/sfx-composer-pro-v2.2.0.zip?token=${encodeURIComponent(sessionToken)}`,
-        sfx_library_url: `/api/download?type=sfx-library&token=${encodeURIComponent(sessionToken)}`
+        zxp_url: `${functionsBase}/download?type=zxp&token=${encodeURIComponent(sessionToken)}`,
+        zip_url: `${functionsBase}/download?type=zip&token=${encodeURIComponent(sessionToken)}`,
+        sfx_library_url: `${functionsBase}/download?type=sfx-library&token=${encodeURIComponent(sessionToken)}`
       }
     }), {
       status: 200,

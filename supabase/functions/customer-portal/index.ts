@@ -19,7 +19,7 @@
  */
 
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
-import { decryptLicenseKey } from '../_shared/crypto.ts';
+import { decryptLicenseKey, createSignedDownloadToken } from '../_shared/crypto.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // In-memory rate limiting (per Deno isolate — resets on cold start, good enough for edge)
@@ -106,8 +106,8 @@ Deno.serve(async (req: Request) => {
     }
     verifiedEmail = cleanEmail;
   } else {
-    // Require BOTH fields
-    if (!cleanEmail || !paymentRef) {
+    // Require BOTH fields and sanitize paymentRef against PostgREST filter injection
+    if (!cleanEmail || !paymentRef || !/^[A-Za-z0-9_-]{4,80}$/.test(paymentRef)) {
       return json({
         ok: false,
         code: 'NOT_PAID',
@@ -278,12 +278,12 @@ Deno.serve(async (req: Request) => {
 
   const productName = 'SFX Composer Complete Bundle';
 
-  // ── Build session token (stateless, 30-day, for quick re-access) ─────────────
-  const sessionToken = 'sfx_token_' + btoa(JSON.stringify({
+  // ── Build session token (HMAC-signed, 30-day, for quick re-access) ─────────
+  const sessionToken = await createSignedDownloadToken({
     email: verifiedEmail,
-    payment_id: paymentRef,
-    exp: Date.now() + 30 * 24 * 3600 * 1000
-  }));
+    payment_id: paymentRef
+  }, 30 * 24 * 3600 * 1000);
+  const functionsBase = `${supabaseUrl.replace(/\/$/, '')}/functions/v1`;
 
   return json({
     ok: true,
@@ -306,9 +306,9 @@ Deno.serve(async (req: Request) => {
       has_plugin: hasPlugin,
       has_library: hasLibrary,
       product_name: productName,
-      zxp_url: hasPlugin ? `/downloads/sfx-composer-pro-v2.2.0.zxp?token=${encodeURIComponent(sessionToken)}` : null,
-      zip_url: hasPlugin ? `/downloads/sfx-composer-pro-v2.2.0.zip?token=${encodeURIComponent(sessionToken)}` : null,
-      sfx_library_url: hasLibrary ? `/api/download?type=sfx-library&token=${encodeURIComponent(sessionToken)}` : null
+      zxp_url: hasPlugin ? `${functionsBase}/download?type=zxp&token=${encodeURIComponent(sessionToken)}` : null,
+      zip_url: hasPlugin ? `${functionsBase}/download?type=zip&token=${encodeURIComponent(sessionToken)}` : null,
+      sfx_library_url: hasLibrary ? `${functionsBase}/download?type=sfx-library&token=${encodeURIComponent(sessionToken)}` : null
     }
   });
 });

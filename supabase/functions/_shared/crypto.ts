@@ -125,3 +125,94 @@ export async function decryptLicenseKey(payload: string, secret?: string): Promi
     return null;
   }
 }
+
+/**
+ * Constant-time string comparison to prevent timing side-channel attacks on HMACs.
+ */
+export function constantTimeEqual(a: string, b: string): boolean {
+  if (!a || !b || a.length !== b.length) {
+    return false;
+  }
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+function getSigningSecret(): string {
+  const secret = (
+    Deno.env.get('LICENSE_ENCRYPTION_KEY') ||
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ||
+    Deno.env.get('RAZORPAY_KEY_SECRET') ||
+    ''
+  ).trim();
+  if (!secret) {
+    throw new Error('No server signing secret configured');
+  }
+  return secret;
+}
+
+async function hmacSha256Hex(data: string, secret: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const sigBytes = await crypto.subtle.sign('HMAC', key, encoder.encode(data));
+  return bytesToHex(new Uint8Array(sigBytes));
+}
+
+/**
+ * Generates an HMAC-SHA256 signed, expiring session/download token:
+ *   sfx_token_<base64(json)>.<hmacHex>
+ */
+export async function createSignedDownloadToken(
+  payload: Record<string, unknown>,
+  expiresInMs = 24 * 60 * 60 * 1000
+): Promise<string> {
+  const secret = getSigningSecret();
+  const tokenPayload = {
+    ...payload,
+    exp: Date.now() + expiresInMs
+  };
+  const data = btoa(JSON.stringify(tokenPayload));
+  const sig = await hmacSha256Hex(data, secret);
+  return `sfx_token_${data}.${sig}`;
+}
+
+/**
+ * Verifies an HMAC-SHA256 signed sfx_token_... and checks expiration.
+ */
+export async function verifySignedDownloadToken(
+  token: string
+): Promise<Record<string, unknown> | null> {
+  if (!token || typeof token !== 'string' || !token.startsWith('sfx_token_')) {
+    return null;
+  }
+  const raw = token.substring('sfx_token_'.length);
+  const parts = raw.split('.');
+  if (parts.length !== 2) {
+    return null;
+  }
+  const [data, sig] = parts;
+  if (!data || !sig) return null;
+
+  try {
+    const secret = getSigningSecret();
+    const expectedSig = await hmacSha256Hex(data, secret);
+    if (!constantTimeEqual(sig.toLowerCase(), expectedSig.toLowerCase())) {
+      return null;
+    }
+    const parsed = JSON.parse(atob(data));
+    if (!parsed || typeof parsed !== 'object' || !parsed.exp || Number(parsed.exp) <= Date.now()) {
+      return null;
+    }
+    return parsed as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
