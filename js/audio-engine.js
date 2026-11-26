@@ -50,13 +50,22 @@
     return bytes.buffer;
   }
 
+  function resolveFallbackUrl(item) {
+    var hint = ((item.name || '') + ' ' + (item.subcat || '') + ' ' + (item.cat || '')).toLowerCase();
+    if (hint.indexOf('impact') !== -1 || hint.indexOf('hit') !== -1) return 'assets/audio/deep-impact.wav';
+    if (hint.indexOf('riser') !== -1) return 'assets/audio/riser.wav';
+    if (hint.indexOf('transition') !== -1) return 'assets/audio/soft-transition.wav';
+    if (hint.indexOf('click') !== -1 || hint.indexOf('ui') !== -1) return 'assets/audio/ui-click.wav';
+    if (hint.indexOf('ambient') !== -1 || hint.indexOf('atmos') !== -1) return 'assets/audio/ambient-atmosphere.wav';
+    return 'assets/audio/cinematic-whoosh.wav';
+  }
+
   // Load and decode sound by item object
   function loadSound(item) {
-    if (!item || !item.url) return Promise.resolve(null);
+    if (!item) return Promise.reject(new Error('No sound provided'));
     return new Promise(function (resolve, reject) {
-      if (!item) return reject(new Error('No sound provided'));
       if (item.buffer) return resolve(item.buffer);
-      if (bufferCache[item.id]) {
+      if (item.id && bufferCache[item.id]) {
         return resolve(bufferCache[item.id]);
       }
 
@@ -67,7 +76,7 @@
         ctx.decodeAudioData(
           arrayBuf,
           function (decoded) {
-            bufferCache[item.id] = decoded;
+            if (item.id) bufferCache[item.id] = decoded;
             resolve(decoded);
           },
           function (err) {
@@ -88,10 +97,12 @@
         }
       }
 
+      var targetUrl = item.url || resolveFallbackUrl(item);
+
       // Fallback to fetch
-      fetch(item.url)
+      fetch(targetUrl)
         .then(function (res) {
-          if (!res.ok) throw new Error('HTTP ' + res.status + ' loading sound ' + item.url);
+          if (!res.ok) throw new Error('HTTP ' + res.status + ' loading sound ' + targetUrl);
           return res.arrayBuffer();
         })
         .then(decodeData)
@@ -291,6 +302,9 @@
       if (!ctx) return Promise.reject(new Error('No context'));
 
       return loadSound(item).then(function (buffer) {
+        if (!buffer) {
+          throw new Error('Audio buffer unavailable');
+        }
         var source = ctx.createBufferSource();
         source.buffer = buffer;
 
@@ -363,6 +377,9 @@
 
       var self = this;
       return loadSound(item).then(function (buffer) {
+        if (!buffer) {
+          throw new Error('Audio buffer unavailable');
+        }
         var source = ctx.createBufferSource();
         source.buffer = buffer;
 
