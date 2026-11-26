@@ -43,12 +43,26 @@ module.exports = async function handler(req, res) {
     }));
   }
 
-  // Strict Product Constraints: ₹199 INR (19900 paise default)
-  const amountPaise = body.amount || 19900;
+  // Strict Product Constraints: always enforce ₹199 INR (19900 paise) server-side
+  const amountPaise = 19900;
   const currency = 'INR';
   const receipt = `sfx_rcpt_${Date.now().toString(36)}`;
-  const productId = body.product_id || 'sfx-composer-bundle';
-  const productName = body.product_name || (productId.includes('library') ? '7GB Master SFX Library' : (productId.includes('plugin') ? 'SFX Composer Plugin' : 'SFX Composer Ultimate Bundle (Plugin + 7GB SFX Library)'));
+  const audioStoreEnabled = process.env.ENABLE_AUDIO_EFFECTS_STORE === 'true';
+  const requestedProductId = String(body.product_id || '').toLowerCase();
+  const requestedProductName = String(body.product_name || '').toLowerCase();
+
+  if (!audioStoreEnabled && (requestedProductId.includes('library') || requestedProductId.includes('audio-effects') || requestedProductName.includes('library'))) {
+    res.statusCode = 403;
+    res.setHeader('Content-Type', 'application/json');
+    return res.end(JSON.stringify({
+      ok: false,
+      code: 'AUDIO_EFFECTS_STORE_DISABLED',
+      message: 'Audio Effects / SFX Library purchases are temporarily unavailable.'
+    }));
+  }
+
+  const productId = body.product_id || (audioStoreEnabled ? 'sfx-composer-bundle' : 'sfx-composer-plugin');
+  const productName = body.product_name || (productId.includes('library') ? '7GB Master SFX Library' : (productId.includes('plugin') ? 'SFX Composer Pro Software' : 'SFX Composer Ultimate Bundle (Plugin + 7GB SFX Library)'));
 
   try {
     const rzpRes = await makeRazorpayRequest('/v1/orders', 'POST', {

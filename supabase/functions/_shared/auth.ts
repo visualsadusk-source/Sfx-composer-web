@@ -78,12 +78,11 @@ export async function verifyAdminRequest(req: Request): Promise<AdminAuthResult>
     isAuthorized = true;
   }
 
-  // B. Check app_metadata or user_metadata
+  // B. Check server-controlled app_metadata only (never user_metadata, which is user-editable)
   if (
     user.app_metadata?.role === 'admin' ||
     user.app_metadata?.role === 'service_role' ||
-    user.app_metadata?.is_admin === true ||
-    user.user_metadata?.is_admin === true
+    user.app_metadata?.is_admin === true
   ) {
     isAuthorized = true;
   }

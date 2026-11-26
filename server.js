@@ -127,12 +127,42 @@ const server = http.createServer((req, res) => {
     return apiHandlers['/api/download'](req, res);
   }
 
+  // 1.55. Temporary Razorpay compliance: hide Audio Effects / SFX Library store page when feature flag is off
+  if (process.env.ENABLE_AUDIO_EFFECTS_STORE !== 'true' && (cleanPath === '/library' || cleanPath === '/library.html')) {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    return res.end('404 Not Found');
+  }
+
+  // 1.6. Block direct static access to secrets, private storage, backend code, and tests
+  const normalizedUrlPath = cleanPath.replace(/\\/g, '/');
+  const pathSegments = normalizedUrlPath.split('/').filter(Boolean);
+  const firstSegment = (pathSegments[0] || '').toLowerCase();
+  const hasDotSegment = pathSegments.some(seg => seg.startsWith('.'));
+  const blockedTopDirs = new Set(['private_storage', 'api', 'supabase', 'node_modules', 'sfx composer website']);
+  const blockedRootFiles = new Set([
+    'server.js', 'package.json', 'package-lock.json', 'netlify.toml',
+    'bundle-manifest.js', 'generate-audio.js', 'start.bat', 'readme.md'
+  ]);
+
+  if (
+    hasDotSegment ||
+    blockedTopDirs.has(firstSegment) ||
+    (pathSegments.length === 1 && (blockedRootFiles.has(firstSegment) || firstSegment.startsWith('test_')))
+  ) {
+    res.writeHead(403, { 'Content-Type': 'text/plain' });
+    return res.end('Forbidden');
+  }
+
   // 2. Static File Serving & Clean URLs
-  let filePath = path.join(__dirname, cleanPath === '/' ? 'index.html' : cleanPath);
+  let filePath = path.resolve(__dirname, '.' + normalizedUrlPath);
+  if (normalizedUrlPath === '/') {
+    filePath = path.join(__dirname, 'index.html');
+  }
 
   // Security: prevent directory traversal outside root
-  if (!filePath.startsWith(__dirname)) {
-    res.writeHead(403);
+  const relPath = path.relative(__dirname, filePath);
+  if (relPath.startsWith('..') || path.isAbsolute(relPath)) {
+    res.writeHead(403, { 'Content-Type': 'text/plain' });
     return res.end('Forbidden');
   }
 

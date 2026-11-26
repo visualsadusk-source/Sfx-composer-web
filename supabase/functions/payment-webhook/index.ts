@@ -15,8 +15,17 @@ async function verifyWebhookSignature(rawBody: string, signature: string, secret
     const signatureBytes = await crypto.subtle.sign('HMAC', key, encoder.encode(rawBody));
     const hexSignature = Array.from(new Uint8Array(signatureBytes))
       .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-    return hexSignature.toLowerCase() === signature.trim().toLowerCase();
+      .join('')
+      .toLowerCase();
+    const provided = signature.trim().toLowerCase();
+    if (hexSignature.length !== provided.length || hexSignature.length === 0) {
+      return false;
+    }
+    let diff = 0;
+    for (let i = 0; i < hexSignature.length; i++) {
+      diff |= hexSignature.charCodeAt(i) ^ provided.charCodeAt(i);
+    }
+    return diff === 0;
   } catch (err) {
     console.error('Webhook signature error:', err);
     return false;

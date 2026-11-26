@@ -1,0 +1,38 @@
+{
+  "note": "Apply these Cloudflare WAF Rate Limiting rules ONLY AFTER proxying sfxcomposer.in (and any custom API subdomain) through Cloudflare (orange-cloud DNS). Currently sfxcomposer.in points directly to GitHub Pages (185.199.108-111.153) and wyjazmiihwjlrkggeeez.supabase.co is managed by Supabase.",
+  "rules": [
+    {
+      "description": "SFX Composer - Customer Portal Brute-Force Protection",
+      "expression": "(http.request.uri.path eq \"/api/customer-portal\" or http.request.uri.path eq \"/functions/v1/customer-portal\") and http.request.method eq \"POST\"",
+      "action": "block",
+      "ratelimit": {
+        "characteristics": ["cf.colo.id", "ip.src"],
+        "period": 60,
+        "requests_per_period": 20,
+        "mitigation_timeout": 60
+      }
+    },
+    {
+      "description": "SFX Composer - Order Creation Abuse Protection",
+      "expression": "(http.request.uri.path eq \"/api/create-order\" or http.request.uri.path eq \"/functions/v1/create-razorpay-order\") and http.request.method eq \"POST\"",
+      "action": "block",
+      "ratelimit": {
+        "characteristics": ["cf.colo.id", "ip.src"],
+        "period": 60,
+        "requests_per_period": 15,
+        "mitigation_timeout": 60
+      }
+    },
+    {
+      "description": "SFX Composer - License Key & Library Download Protection",
+      "expression": "(http.request.uri.path eq \"/api/library-download\" or http.request.uri.path eq \"/api/download\" or http.request.uri.path eq \"/functions/v1/activate-license\")",
+      "action": "block",
+      "ratelimit": {
+        "characteristics": ["cf.colo.id", "ip.src"],
+        "period": 60,
+        "requests_per_period": 10,
+        "mitigation_timeout": 120
+      }
+    }
+  ]
+}

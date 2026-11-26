@@ -23,7 +23,7 @@
  */
 
 const crypto = require('crypto');
-const { handleCors, makeRazorpayRequest, memoryStore, createSignedDownloadToken } = require('./_shared');
+const { handleCors, makeRazorpayRequest, memoryStore, createSignedDownloadToken, verifySignedDownloadToken } = require('./_shared');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://wyjazmiihwjlrkggeeez.supabase.co';
 const ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
@@ -150,18 +150,15 @@ module.exports = async function handler(req, res) {
   }
 
   if (incomingToken) {
-    if (incomingToken === SERVICE_KEY) {
+    if (SERVICE_KEY && incomingToken === SERVICE_KEY) {
       isAdmin = true;
       authEmail = cleanReqEmail || 'admin@sfxcomposer.com';
     } else if (incomingToken !== ANON_KEY) {
       if (incomingToken.startsWith('sfx_token_')) {
-        try {
-          const raw = Buffer.from(incomingToken.replace('sfx_token_', ''), 'base64').toString('utf8');
-          const decoded = JSON.parse(raw);
-          if (decoded && decoded.email && decoded.exp > Date.now()) {
-            authEmail = decoded.email.trim().toLowerCase();
-          }
-        } catch (e) {}
+        const decoded = verifySignedDownloadToken(incomingToken);
+        if (decoded && decoded.email) {
+          authEmail = decoded.email.trim().toLowerCase();
+        }
       } else {
         const user = await verifySupabaseToken(incomingToken);
         if (user && user.email) {

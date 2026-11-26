@@ -125,7 +125,8 @@ module.exports = async function handler(req, res) {
 
   // 4. Product & Entitlement Isolation
   const cachedOrder = memoryStore.orders.get(razorpay_order_id);
-  const productId = body.product_id || (cachedOrder && cachedOrder.product_id) || 'sfx-composer-bundle';
+  const audioStoreEnabled = process.env.ENABLE_AUDIO_EFFECTS_STORE === 'true';
+  const productId = body.product_id || (cachedOrder && cachedOrder.product_id) || (audioStoreEnabled ? 'sfx-composer-bundle' : 'sfx-composer-plugin');
   const pIdLower = String(productId).toLowerCase();
   const defaultName = (pIdLower.includes('library') && !pIdLower.includes('bundle') && !pIdLower.includes('plugin'))
     ? '7GB Master SFX Library'

@@ -159,16 +159,6 @@ function verifySignedDownloadToken(token) {
     } catch (e) {
       return null;
     }
-  } else if (parts.length === 1) {
-    // Backwards-compatible fallback for active sessions in memory
-    try {
-      const payload = JSON.parse(Buffer.from(parts[0], 'base64').toString('utf8'));
-      if (payload && payload.exp && payload.exp > Date.now()) {
-        return payload;
-      }
-    } catch (e) {
-      return null;
-    }
   }
   return null;
 }

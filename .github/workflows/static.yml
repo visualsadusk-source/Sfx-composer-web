@@ -33,8 +33,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Strip protected paid downloads from static publish
-        run: rm -rf downloads private_storage
+      - name: Strip backend, tests, secrets, and protected downloads from static publish
+        run: |
+          rm -rf downloads private_storage api supabase "Sfx Composer Website"
+          rm -f server.js package.json package-lock.json netlify.toml bundle-manifest.js generate-audio.js start.bat README.md .env .env.* .gitignore test_*.js
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

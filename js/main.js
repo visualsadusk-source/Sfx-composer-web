@@ -467,7 +467,9 @@
             amount: orderData.amount,
             currency: orderData.currency || 'INR',
             name: 'SFX Composer',
-            description: 'SFX Composer Ultimate Bundle (Software + 7GB SFX Library)',
+            description: (window.SFX_FEATURE_FLAGS && window.SFX_FEATURE_FLAGS.ENABLE_AUDIO_EFFECTS_STORE)
+              ? 'SFX Composer Ultimate Bundle (Software + 7GB SFX Library)'
+              : 'SFX Composer Pro Software (Premiere Pro & After Effects Extension)',
             image: 'assets/brand/mark-128.png',
             order_id: orderData.order_id,
             prefill: {
