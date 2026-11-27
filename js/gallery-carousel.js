@@ -164,6 +164,17 @@
         document.body.style.overflow = 'hidden';
       }
     }
+    if (typeof window.openFullscreenView !== 'function') {
+      window.openFullscreenView = openFullscreenView;
+    }
+
+    slides.forEach((slide, idx) => {
+      const img = slide.querySelector('img');
+      if (img) {
+        img.style.cursor = 'zoom-in';
+        img.addEventListener('click', () => openFullscreenView(idx));
+      }
+    });
 
     slides.forEach((slide, idx) => {
       slide.addEventListener('click', () => {

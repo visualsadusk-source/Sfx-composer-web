@@ -2453,6 +2453,21 @@ var extendedCatalog = whooshCatalog;
       }
     ];
 
+    const swipeSlides = document.querySelectorAll('.sfx-swipe-slide');
+    if (swipeSlides.length > 0) {
+      GALLERY_ITEMS.length = 0;
+      swipeSlides.forEach((slide, idx) => {
+        const slideImg = slide.querySelector('img');
+        GALLERY_ITEMS.push({
+          id: idx + 1,
+          src: slideImg ? slideImg.getAttribute('src') : '',
+          badge: 'Screenshot ' + String(idx + 1).padStart(2, '0'),
+          title: slide.getAttribute('data-title') || (slideImg ? slideImg.alt : ''),
+          desc: slide.getAttribute('data-desc') || ''
+        });
+      });
+    }
+
     let currentLightboxIdx = 0;
     const modal = document.getElementById('sfx-lightbox-modal');
     const imgEl = document.getElementById('sfx-lightbox-img');
@@ -2482,6 +2497,7 @@ var extendedCatalog = whooshCatalog;
       modal.classList.add('is-open');
       document.body.style.overflow = 'hidden';
     }
+    window.openFullscreenView = openLightbox;
 
     function closeLightbox() {
       modal.classList.remove('is-open');

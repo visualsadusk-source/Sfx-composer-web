@@ -151,6 +151,8 @@
     });
 
     document.addEventListener('keydown', function (e) {
+      var lightbox = document.getElementById('sfx-lightbox-modal');
+      if (lightbox && lightbox.classList.contains('is-open')) return;
       var activeTag = document.activeElement && document.activeElement.tagName;
       if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
       if (e.key === 'ArrowLeft') {
@@ -197,8 +199,15 @@
     window.addEventListener('mouseup', endDrag);
     track.addEventListener('mouseleave', endDrag);
 
-    track.querySelectorAll('img').forEach(function (img) {
+    track.querySelectorAll('img').forEach(function (img, idx) {
       img.setAttribute('draggable', 'false');
+      img.style.cursor = 'zoom-in';
+      img.addEventListener('click', function () {
+        if (movedPx > 6) return;
+        if (typeof window.openFullscreenView === 'function') {
+          window.openFullscreenView(idx);
+        }
+      });
     });
 
     updateMeta(0, false);

@@ -137,6 +137,7 @@
 
     bubble.style.top = top + 'px';
     bubble.style.left = left + 'px';
+    bubble.style.right = 'auto';
     bubble.style.bottom = 'auto';
   }
 
@@ -161,9 +162,10 @@
           '<button type="button" class="sfx-guide-btn" data-action="explore">Explore Myself</button>' +
         '</div>';
 
-      bubble.style.left = '20px';
-      bubble.style.bottom = '72px';
-      bubble.style.top = 'auto';
+      bubble.style.right = '20px';
+      bubble.style.left = 'auto';
+      bubble.style.top = '76px';
+      bubble.style.bottom = 'auto';
       bubble.classList.add('is-visible');
       return;
     }
