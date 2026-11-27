@@ -150,9 +150,68 @@
       });
     });
 
+    var lbModal = document.getElementById('sfx-lightbox-modal');
+    var lbImg = document.getElementById('sfx-lightbox-img');
+    var lbTitle = document.getElementById('sfx-lightbox-title');
+    var lbDesc = document.getElementById('sfx-lightbox-desc');
+    var lbCounter = document.getElementById('sfx-lightbox-counter');
+    var lbClose = document.getElementById('sfx-lightbox-close');
+    var lbPrev = document.getElementById('sfx-lightbox-prev');
+    var lbNext = document.getElementById('sfx-lightbox-next');
+    var lbIndex = 0;
+
+    function renderFullscreenView(idx) {
+      lbIndex = ((idx % slides.length) + slides.length) % slides.length;
+      var slide = slides[lbIndex];
+      var slideImg = slide ? slide.querySelector('img') : null;
+      if (lbImg && slideImg) {
+        lbImg.src = slideImg.getAttribute('src') || '';
+        lbImg.alt = slide.getAttribute('data-title') || slideImg.alt || '';
+      }
+      if (lbTitle) lbTitle.textContent = (slide && slide.getAttribute('data-title')) || '';
+      if (lbDesc) lbDesc.textContent = (slide && slide.getAttribute('data-desc')) || '';
+      if (lbCounter) lbCounter.textContent = 'Screenshot ' + (lbIndex + 1) + ' of ' + slides.length;
+    }
+
+    function openFullscreenView(idx) {
+      if (!lbModal) return;
+      renderFullscreenView(typeof idx === 'number' ? idx : currentIndex);
+      lbModal.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeFullscreenView() {
+      if (!lbModal) return;
+      lbModal.classList.remove('is-open');
+      document.body.style.overflow = '';
+    }
+
+    window.openFullscreenView = openFullscreenView;
+
+    if (lbClose) lbClose.addEventListener('click', closeFullscreenView);
+    if (lbPrev) lbPrev.addEventListener('click', function (e) { e.stopPropagation(); renderFullscreenView(lbIndex - 1); });
+    if (lbNext) lbNext.addEventListener('click', function (e) { e.stopPropagation(); renderFullscreenView(lbIndex + 1); });
+    if (lbModal) {
+      lbModal.addEventListener('click', function (e) {
+        if (e.target === lbModal || e.target.classList.contains('sfx-lightbox-stage')) {
+          closeFullscreenView();
+        }
+      });
+    }
+
     document.addEventListener('keydown', function (e) {
-      var lightbox = document.getElementById('sfx-lightbox-modal');
-      if (lightbox && lightbox.classList.contains('is-open')) return;
+      if (lbModal && lbModal.classList.contains('is-open')) {
+        if (e.key === 'Escape') {
+          closeFullscreenView();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          renderFullscreenView(lbIndex - 1);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          renderFullscreenView(lbIndex + 1);
+        }
+        return;
+      }
       var activeTag = document.activeElement && document.activeElement.tagName;
       if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
       if (e.key === 'ArrowLeft') {

@@ -87,9 +87,7 @@ var extendedCatalog = whooshCatalog;
     setupDualHostSwitcher();
     setupSettingsDrawer();
     setupModuleShowcaseTour();
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', setupGalleryLightbox);
-    } else {
+    if (!document.querySelector('.sfx-swipe-slide')) {
       setupGalleryLightbox();
     }
     setupCustomerDashboard();
