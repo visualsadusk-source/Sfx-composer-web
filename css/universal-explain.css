@@ -1,0 +1,326 @@
+/* ==========================================================================
+   SFX COMPOSER — PERSISTENT ANIMATED SIDE GUIDE (LIVE DEMO)
+   Stationary right-side panel docked inside #live-plugin-demo .sfx-plugin-viewport.
+   Matches SFX Composer black/navy & electric-blue (#0a84ff) design system.
+   ========================================================================== */
+
+/* 1. Docked Flex Layout inside .sfx-plugin-viewport */
+#live-plugin-demo .sfx-plugin-viewport {
+  flex-direction: row !important;
+  align-items: stretch !important;
+}
+
+#live-plugin-demo .sfx-shell {
+  position: relative !important;
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+}
+
+/* 2. Persistent Stationary Side Guide Panel */
+.sfx-side-guide {
+  flex: 0 0 288px;
+  width: 288px;
+  height: 100%;
+  background: linear-gradient(180deg, #07090f 0%, #05060a 100%);
+  border-left: 1px solid #232326;
+  display: flex;
+  flex-direction: column;
+  color: #f5f5f7;
+  font-family: var(--sfx-font, "Inter", "SF Pro Text", system-ui, sans-serif);
+  z-index: 40;
+  overflow: hidden;
+  transition: width 200ms cubic-bezier(0.16, 1, 0.3, 1), flex-basis 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sfx-side-guide.is-collapsed {
+  flex: 0 0 38px;
+  width: 38px;
+}
+
+.sfx-side-guide__header {
+  height: 38px;
+  min-height: 38px;
+  padding: 0 10px 0 12px;
+  background: #0c0e14;
+  border-bottom: 1px solid #232326;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.sfx-side-guide.is-collapsed .sfx-side-guide__header {
+  padding: 8px 0;
+  height: 100%;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 12px;
+  border-bottom: none;
+}
+
+.sfx-side-guide__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #7ec8ff;
+  white-space: nowrap;
+}
+
+.sfx-side-guide.is-collapsed .sfx-side-guide__brand-label {
+  display: none;
+}
+
+.sfx-side-guide__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #0a84ff;
+  box-shadow: 0 0 8px rgba(10, 132, 255, 0.85);
+  flex-shrink: 0;
+}
+
+.sfx-side-guide__toggle {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid #232326;
+  background: #12151e;
+  color: #9c9ca4;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.sfx-side-guide__toggle:hover {
+  background: #181d2a;
+  border-color: #0a84ff;
+  color: #ffffff;
+}
+
+.sfx-side-guide__reopen-rail {
+  display: none;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7ec8ff;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sfx-side-guide.is-collapsed .sfx-side-guide__reopen-rail {
+  display: block;
+}
+
+.sfx-side-guide__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 14px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sfx-side-guide.is-collapsed .sfx-side-guide__body,
+.sfx-side-guide.is-collapsed .sfx-side-guide__footer {
+  display: none;
+}
+
+@keyframes sfxGuideContentIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sfx-side-guide__content.is-updating {
+  animation: sfxGuideContentIn 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sfx-side-guide__category {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #0a84ff;
+  background: rgba(10, 132, 255, 0.12);
+  border: 1px solid rgba(10, 132, 255, 0.28);
+  border-radius: 999px;
+  padding: 2px 8px;
+  margin-bottom: 6px;
+}
+
+.sfx-side-guide__title {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.3;
+}
+
+/* 3. Contextual Animated Visual Stage */
+.sfx-sg-visual {
+  position: relative;
+  height: 92px;
+  background: #000000;
+  border: 1px solid #1e2432;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  box-shadow: inset 0 0 20px rgba(10, 132, 255, 0.06);
+}
+
+.sfx-sg-visual svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Lightweight Contextual Keyframes */
+@keyframes sfxSgSweep {
+  0% { transform: translateX(0); opacity: 0.9; }
+  85% { transform: translateX(180px); opacity: 1; }
+  100% { transform: translateX(180px); opacity: 0.2; }
+}
+
+@keyframes sfxSgBarPulse {
+  0%, 100% { transform: scaleY(0.55); opacity: 0.65; }
+  50% { transform: scaleY(1); opacity: 1; }
+}
+
+@keyframes sfxSgSlideIn {
+  0% { transform: translate(-28px, -16px); opacity: 0.2; }
+  45%, 80% { transform: translate(0, 0); opacity: 1; }
+  100% { transform: translate(0, 0); opacity: 0.25; }
+}
+
+@keyframes sfxSgTrimLeft {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(26px); }
+}
+
+@keyframes sfxSgTrimRight {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-26px); }
+}
+
+@keyframes sfxSgDashDraw {
+  0% { stroke-dashoffset: 160; }
+  65%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes sfxSgBeatPing {
+  0%, 100% { opacity: 0.28; transform: scale(0.92); }
+  40% { opacity: 1; transform: scale(1.1); }
+}
+
+.sfx-sg-anim-sweep { animation: sfxSgSweep 2.4s ease-in-out infinite; }
+.sfx-sg-anim-bar { transform-box: fill-box; transform-origin: center; animation: sfxSgBarPulse 1.4s ease-in-out infinite; }
+.sfx-sg-anim-slide { animation: sfxSgSlideIn 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
+.sfx-sg-anim-trim-l { animation: sfxSgTrimLeft 2.4s ease-in-out infinite; }
+.sfx-sg-anim-trim-r { animation: sfxSgTrimRight 2.4s ease-in-out infinite; }
+.sfx-sg-anim-draw { stroke-dasharray: 160; animation: sfxSgDashDraw 2.2s ease-out infinite; }
+.sfx-sg-anim-beat { transform-box: fill-box; transform-origin: center; animation: sfxSgBeatPing 1.2s ease-in-out infinite; }
+
+/* 4. WHAT / WHY / HOW Sections */
+.sfx-side-guide__sections {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.sfx-side-guide__sec {
+  background: #0b0d13;
+  border: 1px solid #1b1e28;
+  border-radius: 7px;
+  padding: 8px 10px;
+}
+
+.sfx-side-guide__sec-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5eaaff;
+  margin-bottom: 3px;
+}
+
+.sfx-side-guide__sec-text {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: #d0d0d8;
+  margin: 0;
+}
+
+.sfx-side-guide__steps {
+  margin: 0;
+  padding-left: 15px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: #d0d0d8;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sfx-side-guide__footer {
+  padding: 8px 12px;
+  border-top: 1px solid #1a1d26;
+  background: #07090e;
+  font-size: 10.5px;
+  color: #7e8594;
+  flex-shrink: 0;
+}
+
+@media (max-width: 960px) {
+  #live-plugin-demo .sfx-plugin-viewport {
+    flex-direction: column !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+  #live-plugin-demo .sfx-shell {
+    height: 620px !important;
+  }
+  .sfx-side-guide {
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    border-left: none;
+    border-top: 1px solid #232326;
+  }
+  .sfx-side-guide.is-collapsed {
+    flex: 0 0 38px;
+    width: 100%;
+    height: 38px;
+  }
+  .sfx-side-guide.is-collapsed .sfx-side-guide__header {
+    flex-direction: row;
+    padding: 0 12px;
+    height: 38px;
+  }
+  .sfx-side-guide.is-collapsed .sfx-side-guide__reopen-rail {
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+}

@@ -582,6 +582,31 @@ var extendedCatalog = whooshCatalog;
     return Math.min(1, env * (0.28 + 0.72 * (0.65 * n1 + 0.35 * n2)));
   }
 
+  function drawRoundedBar(ctx, x, y, w, h, r) {
+    var rad = Math.min(r, w / 2, h / 2);
+    if (rad <= 0 || typeof ctx.roundRect !== 'function') {
+      ctx.fillRect(x, y, w, h);
+      return;
+    }
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, rad);
+    ctx.fill();
+  }
+
+  function createBlueWaveGradient(ctx, yTop, yBottom, bright) {
+    var grad = ctx.createLinearGradient(0, yTop, 0, yBottom);
+    if (bright) {
+      grad.addColorStop(0, '#38bdf8');
+      grad.addColorStop(0.5, '#7ec8ff');
+      grad.addColorStop(1, '#0a84ff');
+    } else {
+      grad.addColorStop(0, 'rgba(56, 189, 248, 0.42)');
+      grad.addColorStop(0.5, 'rgba(10, 132, 255, 0.62)');
+      grad.addColorStop(1, 'rgba(56, 189, 248, 0.42)');
+    }
+    return grad;
+  }
+
   function drawRowWaveform(canvas, sound, isHighlighted) {
     if (!canvas) return;
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -595,21 +620,21 @@ var extendedCatalog = whooshCatalog;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, cssW, cssH);
 
-    // Center hairline matching studio waveform aesthetic
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+    // Subtle center hairline matching hero waveform aesthetic
+    ctx.fillStyle = isHighlighted ? 'rgba(56, 189, 248, 0.24)' : 'rgba(56, 189, 248, 0.12)';
     ctx.fillRect(0, Math.floor(cssH / 2), cssW, 1);
 
     var bars = canvas.classList.contains('sfx-card-wave-canvas') ? 56 : 48;
     var step = cssW / bars;
-    var barW = Math.max(1.2, step - 1.1);
+    var barW = Math.max(1.2, step - 1.2);
 
-    ctx.fillStyle = isHighlighted ? '#0a84ff' : '#8a9bb5';
+    ctx.fillStyle = createBlueWaveGradient(ctx, 1, cssH - 1, isHighlighted);
 
     for (var i = 0; i < bars; i++) {
       var amp = sampleEnvelope(sound, i, bars);
       var barH = Math.max(2, amp * (cssH - 3));
       var y = (cssH - barH) / 2;
-      ctx.fillRect(i * step, y, barW, barH);
+      drawRoundedBar(ctx, i * step, y, barW, barH, 1);
     }
   }
 
@@ -699,7 +724,12 @@ var extendedCatalog = whooshCatalog;
         } else {
           state.analyticsData.auditions++;
           if (engine) {
-            engine.playSample(state.activeSound, null, function () {
+            engine.playSample(state.activeSound, function (prog) {
+              state.trimPlayProgress = prog;
+              drawTrimWaveform(state.activeSound, prog);
+            }, function () {
+              state.trimPlayProgress = 0;
+              drawTrimWaveform(state.activeSound, 0);
               playBtn.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
             });
           }
@@ -729,6 +759,18 @@ var extendedCatalog = whooshCatalog;
           loadAudioIntoTools(state.activeSound);
           toggleToolOverlay('audio');
         }
+      });
+    }
+
+    var trimCanvas = document.getElementById('sfx-trim-canvas');
+    if (trimCanvas) {
+      trimCanvas.style.cursor = 'pointer';
+      trimCanvas.addEventListener('click', function (e) {
+        if (!state.activeSound) return;
+        var rect = trimCanvas.getBoundingClientRect();
+        var pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / (rect.width || 1)));
+        state.trimPlayProgress = pct;
+        drawTrimWaveform(state.activeSound, pct);
       });
     }
 
@@ -827,41 +869,96 @@ var extendedCatalog = whooshCatalog;
 
     updateStatusClipInfo();
 
-    if (canvas) {
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      var cssW = canvas.clientWidth || 800;
-      var cssH = canvas.clientHeight || 52;
-      if (canvas.width !== cssW * dpr || canvas.height !== cssH * dpr) {
-        canvas.width = cssW * dpr;
-        canvas.height = cssH * dpr;
+    state.trimPlayProgress = 0;
+    drawTrimWaveform(sound, 0);
+  }
+
+  function drawTrimWaveform(sound, playProgress) {
+    var canvas = document.getElementById('sfx-trim-canvas');
+    if (!canvas || !sound) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var cssW = canvas.clientWidth || 800;
+    var cssH = canvas.clientHeight || 60;
+    if (canvas.width !== cssW * dpr || canvas.height !== cssH * dpr) {
+      canvas.width = cssW * dpr;
+      canvas.height = cssH * dpr;
+    }
+    var ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
+
+    // Deep black canvas with subtle hero-inspired blue radial ambient light
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, cssW, cssH);
+    var glow = ctx.createRadialGradient(cssW * 0.5, cssH * 0.5, 4, cssW * 0.5, cssH * 0.5, cssW * 0.55);
+    glow.addColorStop(0, 'rgba(10, 132, 255, 0.11)');
+    glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, cssW, cssH);
+
+    // Fine vertical grid lines & center zero-crossing hairline
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
+    ctx.lineWidth = 1;
+    for (var gx = 48; gx < cssW; gx += 48) {
+      ctx.beginPath();
+      ctx.moveTo(gx + 0.5, 0);
+      ctx.lineTo(gx + 0.5, cssH);
+      ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.15)';
+    ctx.fillRect(0, Math.floor(cssH / 2), cssW, 1);
+
+    var bars = 148;
+    var step = cssW / bars;
+    var barW = Math.max(1.6, step - 1.3);
+    var totalDur = Math.max(0.01, sound.duration || 4.431);
+    var inPct = (state.trimIn || 0) / totalDur;
+    var outPct = (state.trimOut != null ? state.trimOut : totalDur) / totalDur;
+    var progPos = typeof playProgress === 'number' ? playProgress : 0;
+    var hasPlayhead = progPos > 0.002;
+
+    var playedGrad = createBlueWaveGradient(ctx, 4, cssH - 4, true);
+    var unplayedGrad = ctx.createLinearGradient(0, 4, 0, cssH - 4);
+    unplayedGrad.addColorStop(0, hasPlayhead ? 'rgba(56, 189, 248, 0.36)' : 'rgba(56, 189, 248, 0.72)');
+    unplayedGrad.addColorStop(0.5, hasPlayhead ? 'rgba(10, 132, 255, 0.52)' : '#0a84ff');
+    unplayedGrad.addColorStop(1, hasPlayhead ? 'rgba(56, 189, 248, 0.36)' : 'rgba(56, 189, 248, 0.72)');
+
+    for (var i = 0; i < bars; i++) {
+      var prog = i / bars;
+      var amp = sampleEnvelope(sound, i, bars);
+      var bh = Math.max(3, amp * (cssH - 12));
+      var by = (cssH - bh) / 2;
+      var inSelection = prog >= inPct && prog <= outPct;
+      var isPlayed = hasPlayhead && prog <= progPos;
+
+      if (!inSelection) {
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(138, 155, 181, 0.18)';
+      } else if (isPlayed) {
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = 'rgba(10, 132, 255, 0.45)';
+        ctx.fillStyle = playedGrad;
+      } else {
+        ctx.shadowBlur = hasPlayhead ? 0 : 3;
+        ctx.shadowColor = 'rgba(10, 132, 255, 0.25)';
+        ctx.fillStyle = unplayedGrad;
       }
-      var ctx = canvas.getContext('2d');
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, cssW, cssH);
+      drawRoundedBar(ctx, i * step, by, barW, bh, 1.2);
+    }
+    ctx.shadowBlur = 0;
 
-      ctx.fillStyle = '#08080b';
-      ctx.fillRect(0, 0, cssW, cssH);
-
-      // Subtle center timeline axis
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.07)';
-      ctx.fillRect(0, Math.floor(cssH / 2), cssW, 1);
-
-      var bars = 140;
-      var step = cssW / bars;
-      var barW = Math.max(1.5, step - 1.2);
-      var totalDur = Math.max(0.01, sound.duration || 4.431);
-      var inPct = (state.trimIn || 0) / totalDur;
-      var outPct = (state.trimOut != null ? state.trimOut : totalDur) / totalDur;
-
-      for (var i = 0; i < bars; i++) {
-        var prog = i / bars;
-        var amp = sampleEnvelope(sound, i, bars);
-        var bh = Math.max(3, amp * (cssH - 10));
-        var by = (cssH - bh) / 2;
-        var inSelection = prog >= inPct && prog <= outPct;
-        ctx.fillStyle = inSelection ? '#4da3ff' : 'rgba(138, 155, 181, 0.28)';
-        ctx.fillRect(i * step, by, barW, bh);
-      }
+    if (hasPlayhead) {
+      var px = Math.max(1, Math.min(cssW - 2, progPos * cssW));
+      ctx.save();
+      ctx.strokeStyle = '#7ec8ff';
+      ctx.lineWidth = 1.5;
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = 'rgba(10, 132, 255, 0.85)';
+      ctx.beginPath();
+      ctx.moveTo(px, 2);
+      ctx.lineTo(px, cssH - 2);
+      ctx.stroke();
+      ctx.restore();
     }
   }
 
@@ -1208,39 +1305,60 @@ var extendedCatalog = whooshCatalog;
     });
   }
 
-  function renderAtWaveform() {
+  function renderAtWaveform(playProgress) {
     var canvas = document.getElementById('at-center-waveform');
     if (!canvas || !atState.sound) return;
 
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var w = canvas.clientWidth || parseInt(canvas.getAttribute('width'), 10) || 600;
+    var h = canvas.clientHeight || parseInt(canvas.getAttribute('height'), 10) || 200;
+    if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+    }
+
     var ctx = canvas.getContext('2d');
-    var w = canvas.width;
-    var h = canvas.height;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
 
-    ctx.fillStyle = '#0a0a0e';
+    // Pure deep black background + subtle center-weighted electric blue ambient glow
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, w, h);
+    var centerGlow = ctx.createRadialGradient(w * 0.5, h * 0.5, 8, w * 0.5, h * 0.5, w * 0.52);
+    centerGlow.addColorStop(0, 'rgba(10, 132, 255, 0.12)');
+    centerGlow.addColorStop(0.55, 'rgba(56, 189, 248, 0.04)');
+    centerGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = centerGlow;
     ctx.fillRect(0, 0, w, h);
 
-    // Draw grid lines
-    ctx.strokeStyle = '#181820';
+    // Fine vertical and horizontal studio grid lines
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
     ctx.lineWidth = 1;
-    for (var x = 0; x < w; x += 40) {
+    for (var x = 40; x < w; x += 40) {
       ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, h);
+      ctx.moveTo(x + 0.5, 0);
+      ctx.lineTo(x + 0.5, h);
       ctx.stroke();
     }
-    ctx.beginPath();
-    ctx.moveTo(0, h / 2);
-    ctx.lineTo(w, h / 2);
-    ctx.stroke();
+    for (var gy = Math.floor(h / 4); gy < h; gy += Math.floor(h / 4)) {
+      ctx.strokeStyle = Math.abs(gy - h / 2) < 2 ? 'rgba(56, 189, 248, 0.16)' : 'rgba(255, 255, 255, 0.025)';
+      ctx.beginPath();
+      ctx.moveTo(0, gy + 0.5);
+      ctx.lineTo(w, gy + 0.5);
+      ctx.stroke();
+    }
 
-    var bars = 100;
-    var barW = (w / bars) - 1.5;
-    var dur = atState.sound.duration;
+    var bars = 124;
+    var step = w / bars;
+    var barW = Math.max(1.8, step - 1.6);
+    var dur = atState.sound.duration || 2.67;
     var gainMult = Math.pow(10, (atState.gainDb || 0) / 20);
     var buf = atState.sound.buffer;
     var chData = buf && buf.numberOfChannels > 0 ? buf.getChannelData(0) : null;
     var totalFrames = buf ? buf.length : 0;
+    var progPos = typeof playProgress === 'number' ? playProgress : 0;
+    var hasPlayhead = progPos > 0.002;
+    var activeGrad = createBlueWaveGradient(ctx, 10, h - 10, true);
 
     for (var i = 0; i < bars; i++) {
       var prog = i / bars;
@@ -1252,24 +1370,47 @@ var extendedCatalog = whooshCatalog;
         var startFrame = Math.floor((i / bars) * totalFrames);
         var endFrame = Math.floor(((i + 1) / bars) * totalFrames);
         var pk = 0;
-        var step = Math.max(1, Math.floor((endFrame - startFrame) / 16));
-        for (var f = startFrame; f < endFrame; f += step) {
+        var fStep = Math.max(1, Math.floor((endFrame - startFrame) / 16));
+        for (var f = startFrame; f < endFrame; f += fStep) {
           var v = Math.abs(chData[f] || 0);
           if (v > pk) pk = v;
         }
         var scaled = Math.min(1.0, pk * gainMult);
-        bh = Math.max(3, scaled * (h - 16));
+        bh = Math.max(3, scaled * (h - 20));
       } else {
-        var env = Math.sin(prog * Math.PI);
-        if (atState.sound.id && (atState.sound.id.includes('impact') || atState.sound.id.includes('earthquake'))) env = Math.exp(-prog * 3.5);
-        if (atState.sound.id && atState.sound.id.includes('riser')) env = Math.pow(prog, 1.8);
-        var scaled = Math.min(1.0, env * (0.3 + 0.7 * Math.sin(i * 1.4)) * gainMult);
-        bh = Math.max(4, scaled * (h - 20));
+        var amp = sampleEnvelope(atState.sound, i, bars);
+        var scaledEnv = Math.min(1.0, amp * gainMult);
+        bh = Math.max(4, scaledEnv * (h - 24));
       }
 
       var by = (h - bh) / 2;
-      ctx.fillStyle = isTrimmed ? '#3b82f6' : '#334455';
-      ctx.fillRect(i * (barW + 1.5), by, barW, bh);
+      if (!isTrimmed) {
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(100, 116, 139, 0.22)';
+      } else if (hasPlayhead && prog > progPos) {
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.42)';
+      } else {
+        ctx.shadowBlur = 7;
+        ctx.shadowColor = 'rgba(10, 132, 255, 0.35)';
+        ctx.fillStyle = activeGrad;
+      }
+      drawRoundedBar(ctx, i * step, by, barW, bh, 1.5);
+    }
+    ctx.shadowBlur = 0;
+
+    if (hasPlayhead) {
+      var px = Math.max(1, Math.min(w - 2, progPos * w));
+      ctx.save();
+      ctx.strokeStyle = '#7ec8ff';
+      ctx.lineWidth = 1.5;
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = 'rgba(10, 132, 255, 0.85)';
+      ctx.beginPath();
+      ctx.moveTo(px, 4);
+      ctx.lineTo(px, h - 4);
+      ctx.stroke();
+      ctx.restore();
     }
   }
 
