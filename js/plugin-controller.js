@@ -87,7 +87,11 @@ var extendedCatalog = whooshCatalog;
     setupDualHostSwitcher();
     setupSettingsDrawer();
     setupModuleShowcaseTour();
-    setupGalleryLightbox();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupGalleryLightbox);
+    } else {
+      setupGalleryLightbox();
+    }
     setupCustomerDashboard();
 
     // Select default active sound
