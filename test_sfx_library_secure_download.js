@@ -73,7 +73,8 @@ async function run() {
   const revokedKey = revPayData.license_key;
 
   // Revoke via /api/refund
-  const SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5NTE3MzExNCwiZXhwIjoyMTEwNzQ5MTE0fQ.Y6GbsUSzkh4b-Uze1JiLSie6PEb8SfG6xg36P4SPrNA';
+  const SERVICE_KEY = (process.env.SUPABASE_SECRET_KEY || '').trim();
+if (!SERVICE_KEY || !SERVICE_KEY.startsWith('sb_secret_')) { console.error('Missing or invalid SUPABASE_SECRET_KEY (must start with sb_secret_)'); process.exit(1); }
   await fetch(`${SERVER_URL}/api/refund`, {
     method: 'POST',
     headers: {

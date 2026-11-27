@@ -3,8 +3,10 @@ const RAZORPAY_KEY_SECRET = 'wfUnt5UoJDivPBTWMoC55WFY';
 const assert = require('assert');
 
 const SUPABASE_URL = 'https://wyjazmiihwjlrkggeeez.supabase.co';
-const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxNzMxMTQsImV4cCI6MjExMDc0OTExNH0.FXKso4hkmUYcl_FfjG4GnHxwyCr09j5DkJ6ak1B2auY';
-const SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5NTE3MzExNCwiZXhwIjoyMTEwNzQ5MTE0fQ.Y6GbsUSzkh4b-Uze1JiLSie6PEb8SfG6xg36P4SPrNA';
+const ANON_KEY = (process.env.SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_UaQZtILaSTJgDudLnAdQ_w_xIe0-xYh').trim();
+if (!ANON_KEY.startsWith('sb_publishable_')) { console.error('Invalid SUPABASE_PUBLISHABLE_KEY: legacy JWTs are disabled'); process.exit(1); }
+const SERVICE_KEY = (process.env.SUPABASE_SECRET_KEY || '').trim();
+if (!SERVICE_KEY || !SERVICE_KEY.startsWith('sb_secret_')) { console.error('Missing or invalid SUPABASE_SECRET_KEY (must start with sb_secret_)'); process.exit(1); }
 
 async function runTests() {
   console.log('================================================================');
@@ -22,8 +24,7 @@ async function runTests() {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'apikey': ANON_KEY,
-      'Authorization': `Bearer ${ANON_KEY}`
+      'apikey': ANON_KEY
     },
     body: JSON.stringify({ email: testEmail, amount: 19900, currency: 'INR' })
   });
@@ -43,8 +44,7 @@ async function runTests() {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'apikey': ANON_KEY,
-      'Authorization': `Bearer ${ANON_KEY}`
+      'apikey': ANON_KEY
     },
     body: JSON.stringify({
       email: testEmail,
@@ -70,8 +70,7 @@ async function runTests() {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'apikey': ANON_KEY,
-      'Authorization': `Bearer ${ANON_KEY}`
+      'apikey': ANON_KEY
     },
     body: JSON.stringify({
       email: testEmail,
@@ -91,8 +90,7 @@ async function runTests() {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'apikey': ANON_KEY,
-      'Authorization': `Bearer ${ANON_KEY}`
+      'apikey': ANON_KEY
     },
     body: JSON.stringify({ p_email: testEmail })
   });
