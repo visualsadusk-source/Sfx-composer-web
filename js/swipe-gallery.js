@@ -258,14 +258,14 @@
     window.addEventListener('mouseup', endDrag);
     track.addEventListener('mouseleave', endDrag);
 
-    track.querySelectorAll('img').forEach(function (img, idx) {
-      img.setAttribute('draggable', 'false');
-      img.style.cursor = 'zoom-in';
-      img.addEventListener('click', function () {
+    slides.forEach(function (slide, idx) {
+      var img = slide.querySelector('img');
+      if (img) img.setAttribute('draggable', 'false');
+      var clickTarget = slide.querySelector('.sfx-swipe-frame') || slide;
+      clickTarget.style.cursor = 'zoom-in';
+      clickTarget.addEventListener('click', function () {
         if (movedPx > 6) return;
-        if (typeof window.openFullscreenView === 'function') {
-          window.openFullscreenView(idx);
-        }
+        openFullscreenView(idx);
       });
     });
 
