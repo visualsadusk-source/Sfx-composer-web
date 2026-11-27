@@ -1,3 +1,4 @@
+import { getSupabaseSecretKey } from '../_shared/supabase-admin.ts';
 /**
  * supabase/functions/admin-releases/index.ts
  *
@@ -39,7 +40,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+  const serviceKey = getSupabaseSecretKey();
   const supabase = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
   const adminEmail = auth.user?.email || 'admin';
 

@@ -1,3 +1,5 @@
+import { getSupabaseSecretKey } from './supabase-admin.ts';
+
 /**
  * Cryptographic helpers for SFX Composer licensing backend.
  * Provides:
@@ -47,8 +49,8 @@ function bytesToHex(bytes: Uint8Array): string {
 async function getEncryptionCryptoKey(customSecret?: string): Promise<CryptoKey> {
   let secretHex = (customSecret || Deno.env.get('LICENSE_ENCRYPTION_KEY') || '').trim();
   if (!secretHex) {
-    // Fallback to a deterministic hash of service role key if encryption key secret isn't configured
-    const sKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || 'sfx-default-secure-fallback-key-32';
+    // Fallback to a deterministic hash of secret key if encryption key secret isn't configured
+    const sKey = getSupabaseSecretKey() || 'sfx-default-secure-fallback-key-32';
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(sKey));
     secretHex = bytesToHex(new Uint8Array(buf));
   }
@@ -143,7 +145,7 @@ export function constantTimeEqual(a: string, b: string): boolean {
 function getSigningSecret(): string {
   const secret = (
     Deno.env.get('LICENSE_ENCRYPTION_KEY') ||
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ||
+    getSupabaseSecretKey() ||
     Deno.env.get('RAZORPAY_KEY_SECRET') ||
     ''
   ).trim();

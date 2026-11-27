@@ -8,7 +8,7 @@
 
   var CONFIG = {
     SUPABASE_URL: 'https://wyjazmiihwjlrkggeeez.supabase.co',
-    SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxNzMxMTQsImV4cCI6MjExMDc0OTExNH0.FXKso4hkmUYcl_FfjG4GnHxwyCr09j5DkJ6ak1B2auY'
+    SUPABASE_ANON_KEY: 'sb_publishable_UaQZtILaSTJgDudLnAdQ_w_xIe0-xYh'
   };
 
   // Curated fallback tutorials in case Supabase is unreachable or cold-starting
@@ -87,8 +87,7 @@
         var res = await fetch(query, {
           method: 'GET',
           headers: {
-            'apikey': CONFIG.SUPABASE_ANON_KEY,
-            'Authorization': 'Bearer ' + CONFIG.SUPABASE_ANON_KEY
+            'apikey': CONFIG.SUPABASE_ANON_KEY
           }
         });
 
@@ -111,8 +110,7 @@
         var res = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/sfx_section_content?section_key=eq.' + encodeURIComponent(sectionKey), {
           method: 'GET',
           headers: {
-            'apikey': CONFIG.SUPABASE_ANON_KEY,
-            'Authorization': 'Bearer ' + CONFIG.SUPABASE_ANON_KEY
+            'apikey': CONFIG.SUPABASE_ANON_KEY
           }
         });
 

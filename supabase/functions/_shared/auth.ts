@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getSupabaseSecretKey } from './supabase-admin.ts';
 
 export interface AdminAuthResult {
   authorized: boolean;
@@ -28,11 +29,12 @@ export async function verifyAdminRequest(req: Request): Promise<AdminAuthResult>
   }
 
   const token = authHeader.substring(7).trim();
-  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+  const serviceKey = getSupabaseSecretKey();
+  const legacyServiceKey = (Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '').trim();
   const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
 
   // 1. Service role key match (for internal CLI scripts or machine calls)
-  if (isServiceRoleToken(token, serviceKey)) {
+  if (isServiceRoleToken(token, serviceKey) || isServiceRoleToken(token, legacyServiceKey)) {
     return {
       authorized: true,
       user: { email: 'service_role@system.internal', role: 'service_role' }

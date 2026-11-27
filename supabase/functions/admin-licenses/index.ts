@@ -1,3 +1,4 @@
+import { getSupabaseSecretKey } from '../_shared/supabase-admin.ts';
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import { verifyAdminRequest } from '../_shared/auth.ts';
 import { decryptLicenseKey, encryptLicenseKey, generateLicenseKey, sha256 } from '../_shared/crypto.ts';
@@ -29,7 +30,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    const serviceKey = getSupabaseSecretKey();
     const supabase = createClient(supabaseUrl, serviceKey, {
       auth: { persistSession: false }
     });

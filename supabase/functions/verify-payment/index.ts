@@ -1,3 +1,4 @@
+import { getSupabaseSecretKey } from '../_shared/supabase-admin.ts';
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import {
   generateLicenseKey,
@@ -91,7 +92,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    const supabaseServiceKey = getSupabaseSecretKey();
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // 2. Amount and Currency Verification against database payment_orders

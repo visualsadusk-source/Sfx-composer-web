@@ -1,3 +1,4 @@
+import { getSupabaseSecretKey } from '../_shared/supabase-admin.ts';
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import { generateLicenseKey, sha256, encryptLicenseKey } from '../_shared/crypto.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -94,7 +95,7 @@ Deno.serve(async (req: Request) => {
         const encryptedKey = await encryptLicenseKey(rawKey);
 
         const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-        const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+        const supabaseServiceKey = getSupabaseSecretKey();
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
         const { data: compData, error: compError } = await supabase.rpc('sfx_complete_payment_order', {

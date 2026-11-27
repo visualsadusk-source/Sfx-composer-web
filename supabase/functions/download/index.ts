@@ -1,3 +1,4 @@
+import { getSupabaseSecretKey } from '../_shared/supabase-admin.ts';
 /**
  * supabase/functions/download/index.ts
  *
@@ -38,7 +39,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+  const serviceKey = getSupabaseSecretKey();
   if (!supabaseUrl || !serviceKey) {
     return json({ ok: false, message: 'Server configuration missing' }, 500);
   }

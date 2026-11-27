@@ -1,3 +1,4 @@
+import { getSupabaseSecretKey } from '../_shared/supabase-admin.ts';
 /**
  * supabase/functions/customer-portal/index.ts
  *
@@ -53,7 +54,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-  const serviceKey  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+  const serviceKey  = getSupabaseSecretKey();
   const anonKey     = Deno.env.get('SUPABASE_ANON_KEY') || '';
 
   const supabase = createClient(supabaseUrl, serviceKey, {

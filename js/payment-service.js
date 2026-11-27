@@ -8,7 +8,7 @@
 
   var CONFIG = {
     SUPABASE_URL: 'https://wyjazmiihwjlrkggeeez.supabase.co',
-    SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5amF6bWlpaHdqbHJrZ2dlZWV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxNzMxMTQsImV4cCI6MjExMDc0OTExNH0.FXKso4hkmUYcl_FfjG4GnHxwyCr09j5DkJ6ak1B2auY',
+    SUPABASE_ANON_KEY: 'sb_publishable_UaQZtILaSTJgDudLnAdQ_w_xIe0-xYh',
     FUNCTIONS_URL: 'https://wyjazmiihwjlrkggeeez.supabase.co/functions/v1',
     PRICE_INR: 199,
     PRICE_PAISE: 19900,
@@ -59,8 +59,7 @@
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'apikey': CONFIG.SUPABASE_ANON_KEY,
-              'Authorization': 'Bearer ' + CONFIG.SUPABASE_ANON_KEY
+              'apikey': CONFIG.SUPABASE_ANON_KEY
             },
             body: JSON.stringify({
               email: cleanEmail,
@@ -102,8 +101,7 @@
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'apikey': CONFIG.SUPABASE_ANON_KEY,
-              'Authorization': 'Bearer ' + CONFIG.SUPABASE_ANON_KEY
+              'apikey': CONFIG.SUPABASE_ANON_KEY
             },
             body: JSON.stringify(verificationPayload)
           });
